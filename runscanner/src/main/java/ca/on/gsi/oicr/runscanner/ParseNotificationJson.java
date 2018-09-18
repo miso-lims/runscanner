@@ -11,8 +11,6 @@ import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import uk.ac.bbsrc.tgac.miso.dto.NotificationDto;
-
 /**
  * Parses a notification DTO stored in a file and outputs it to the console, for debugging purposes.
  *
