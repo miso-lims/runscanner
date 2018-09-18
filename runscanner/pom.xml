@@ -39,14 +39,6 @@
   </properties>
   <dependencies>
     <dependency>
-      <groupId>${project.parent.groupId}</groupId>
-      <artifactId>core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>${project.parent.groupId}</groupId>
-      <artifactId>miso-dto</artifactId>
-    </dependency>
-    <dependency>
       <groupId>io.prometheus</groupId>
       <artifactId>simpleclient</artifactId>
     </dependency>

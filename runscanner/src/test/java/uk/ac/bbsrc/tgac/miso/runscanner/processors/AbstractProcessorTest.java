@@ -10,7 +10,8 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import uk.ac.bbsrc.tgac.miso.dto.NotificationDto;
-import uk.ac.bbsrc.tgac.miso.runscanner.RunProcessor;
+
+import ca.on.gsi.oicr.runscanner.RunProcessor;
 
 public abstract class AbstractProcessorTest {
   private final Class<? extends NotificationDto> clazz;

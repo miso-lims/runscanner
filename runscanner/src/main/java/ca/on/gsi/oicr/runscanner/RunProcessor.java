@@ -1,4 +1,4 @@
-package uk.ac.bbsrc.tgac.miso.runscanner;
+package ca.on.gsi.oicr.runscanner;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,9 +28,10 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import uk.ac.bbsrc.tgac.miso.core.data.type.PlatformType;
 import uk.ac.bbsrc.tgac.miso.dto.NotificationDto;
-import uk.ac.bbsrc.tgac.miso.runscanner.processors.DefaultIllumina;
-import uk.ac.bbsrc.tgac.miso.runscanner.processors.DefaultPacBio;
-import uk.ac.bbsrc.tgac.miso.runscanner.processors.Testing;
+
+import ca.on.gsi.oicr.runscanner.processors.DefaultIllumina;
+import ca.on.gsi.oicr.runscanner.processors.DefaultPacBio;
+import ca.on.gsi.oicr.runscanner.processors.Testing;
 
 /**
  * Class for a sequencer-specific implementation to transform a directory containing a sequencer's output into {@link NotificationDto}

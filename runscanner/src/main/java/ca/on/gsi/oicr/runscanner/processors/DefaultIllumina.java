@@ -1,4 +1,4 @@
-package uk.ac.bbsrc.tgac.miso.runscanner.processors;
+package ca.on.gsi.oicr.runscanner.processors;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -48,7 +48,8 @@ import uk.ac.bbsrc.tgac.miso.core.util.LimsUtils;
 import uk.ac.bbsrc.tgac.miso.core.util.WhineyFunction;
 import uk.ac.bbsrc.tgac.miso.dto.IlluminaNotificationDto;
 import uk.ac.bbsrc.tgac.miso.dto.NotificationDto;
-import uk.ac.bbsrc.tgac.miso.runscanner.RunProcessor;
+
+import ca.on.gsi.oicr.runscanner.RunProcessor;
 
 import io.prometheus.client.Counter;
 

@@ -1,4 +1,4 @@
-package uk.ac.bbsrc.tgac.miso.runscanner;
+package ca.on.gsi.oicr.runscanner;
 
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ApplicationContextEvent;

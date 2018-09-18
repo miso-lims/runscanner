@@ -1,4 +1,4 @@
-package uk.ac.bbsrc.tgac.miso.runscanner;
+package ca.on.gsi.oicr.runscanner;
 
 import java.io.File;
 import java.util.TimeZone;

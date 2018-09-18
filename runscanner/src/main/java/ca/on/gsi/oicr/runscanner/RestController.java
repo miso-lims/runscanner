@@ -1,4 +1,4 @@
-package uk.ac.bbsrc.tgac.miso.runscanner;
+package ca.on.gsi.oicr.runscanner;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
@@ -24,7 +24,8 @@ import uk.ac.bbsrc.tgac.miso.core.util.LatencyHistogram;
 import uk.ac.bbsrc.tgac.miso.dto.NotificationDto;
 import uk.ac.bbsrc.tgac.miso.dto.ProgressiveRequestDto;
 import uk.ac.bbsrc.tgac.miso.dto.ProgressiveResponseDto;
-import uk.ac.bbsrc.tgac.miso.runscanner.Scheduler.OutputSizeLimit;
+
+import ca.on.gsi.oicr.runscanner.Scheduler.OutputSizeLimit;
 
 /**
  * Provide information about the run scanner's current run cache via a REST interface.

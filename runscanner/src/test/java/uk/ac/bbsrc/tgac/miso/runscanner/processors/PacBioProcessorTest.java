@@ -13,7 +13,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import uk.ac.bbsrc.tgac.miso.core.data.type.PlatformType;
 import uk.ac.bbsrc.tgac.miso.dto.NotificationDto;
 import uk.ac.bbsrc.tgac.miso.dto.PacBioNotificationDto;
-import uk.ac.bbsrc.tgac.miso.runscanner.processors.DefaultPacBio.StatusResponse;
+
+import ca.on.gsi.oicr.runscanner.processors.DefaultPacBio;
+import ca.on.gsi.oicr.runscanner.processors.DefaultPacBio.StatusResponse;
 
 public class PacBioProcessorTest extends AbstractProcessorTest {
   private static class TestPacBio extends DefaultPacBio {

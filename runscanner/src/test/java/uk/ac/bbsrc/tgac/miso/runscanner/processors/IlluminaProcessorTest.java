@@ -9,7 +9,9 @@ import org.junit.Test;
 import uk.ac.bbsrc.tgac.miso.core.data.type.PlatformType;
 import uk.ac.bbsrc.tgac.miso.dto.IlluminaNotificationDto;
 import uk.ac.bbsrc.tgac.miso.dto.NotificationDto;
-import uk.ac.bbsrc.tgac.miso.runscanner.RunProcessor.Builder;
+
+import ca.on.gsi.oicr.runscanner.RunProcessor.Builder;
+import ca.on.gsi.oicr.runscanner.processors.DefaultIllumina;
 
 public class IlluminaProcessorTest extends AbstractProcessorTest {
   private final DefaultIllumina instance = new DefaultIllumina(new Builder(PlatformType.ILLUMINA, "unittest", null), true);

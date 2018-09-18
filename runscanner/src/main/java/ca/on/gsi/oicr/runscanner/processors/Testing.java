@@ -1,4 +1,4 @@
-package uk.ac.bbsrc.tgac.miso.runscanner.processors;
+package ca.on.gsi.oicr.runscanner.processors;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,7 +13,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import uk.ac.bbsrc.tgac.miso.dto.IlluminaNotificationDto;
 import uk.ac.bbsrc.tgac.miso.dto.NotificationDto;
 import uk.ac.bbsrc.tgac.miso.dto.PacBioNotificationDto;
-import uk.ac.bbsrc.tgac.miso.runscanner.RunProcessor;
+
+import ca.on.gsi.oicr.runscanner.RunProcessor;
 
 /**
  * This is a test run scanner for debugging an testing purposes.
