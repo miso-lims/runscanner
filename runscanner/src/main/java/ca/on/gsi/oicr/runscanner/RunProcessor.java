@@ -26,8 +26,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
-import uk.ac.bbsrc.tgac.miso.core.data.type.PlatformType;
-
 import ca.on.gsi.oicr.runscanner.processors.DefaultIllumina;
 import ca.on.gsi.oicr.runscanner.processors.DefaultPacBio;
 import ca.on.gsi.oicr.runscanner.processors.Testing;

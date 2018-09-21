@@ -10,10 +10,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 
+// TODO: Needed?
 import uk.ac.bbsrc.tgac.miso.core.data.GetLaneContents;
-import uk.ac.bbsrc.tgac.miso.core.data.SequencingParameters;
-import uk.ac.bbsrc.tgac.miso.core.data.type.HealthType;
-import uk.ac.bbsrc.tgac.miso.core.data.type.PlatformType;
 
 /**
  * A "run" as seen by Run Scanner

@@ -4,8 +4,6 @@ import java.io.File;
 import java.util.TimeZone;
 import java.util.stream.Stream;
 
-import uk.ac.bbsrc.tgac.miso.core.data.Pair;
-
 public class Configuration {
 
   private File path;

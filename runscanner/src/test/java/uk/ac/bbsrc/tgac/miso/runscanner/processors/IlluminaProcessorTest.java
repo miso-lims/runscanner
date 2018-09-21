@@ -7,9 +7,9 @@ import java.util.TimeZone;
 import org.junit.Test;
 
 import uk.ac.bbsrc.tgac.miso.core.data.type.PlatformType;
-import uk.ac.bbsrc.tgac.miso.dto.IlluminaNotificationDto;
-import uk.ac.bbsrc.tgac.miso.dto.NotificationDto;
 
+import ca.on.gsi.oicr.runscanner.IlluminaNotificationDto;
+import ca.on.gsi.oicr.runscanner.NotificationDto;
 import ca.on.gsi.oicr.runscanner.RunProcessor.Builder;
 import ca.on.gsi.oicr.runscanner.processors.DefaultIllumina;
 

@@ -9,8 +9,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import uk.ac.bbsrc.tgac.miso.dto.NotificationDto;
-
+import ca.on.gsi.oicr.runscanner.NotificationDto;
 import ca.on.gsi.oicr.runscanner.RunProcessor;
 
 public abstract class AbstractProcessorTest {

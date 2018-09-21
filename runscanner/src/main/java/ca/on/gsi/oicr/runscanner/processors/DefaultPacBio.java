@@ -35,11 +35,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import uk.ac.bbsrc.tgac.miso.core.data.type.HealthType;
 import uk.ac.bbsrc.tgac.miso.core.util.LimsUtils;
-import uk.ac.bbsrc.tgac.miso.dto.NotificationDto;
-import uk.ac.bbsrc.tgac.miso.dto.PacBioNotificationDto;
 
+import ca.on.gsi.oicr.runscanner.HealthType;
+import ca.on.gsi.oicr.runscanner.NotificationDto;
+import ca.on.gsi.oicr.runscanner.PacBioNotificationDto;
 import ca.on.gsi.oicr.runscanner.RunProcessor;
 
 /**

@@ -40,15 +40,14 @@ import org.w3c.dom.Document;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.Sets;
 
-import uk.ac.bbsrc.tgac.miso.core.data.IlluminaChemistry;
-import uk.ac.bbsrc.tgac.miso.core.data.Pair;
-import uk.ac.bbsrc.tgac.miso.core.data.type.HealthType;
 import uk.ac.bbsrc.tgac.miso.core.util.LatencyHistogram;
 import uk.ac.bbsrc.tgac.miso.core.util.LimsUtils;
 import uk.ac.bbsrc.tgac.miso.core.util.WhineyFunction;
-import uk.ac.bbsrc.tgac.miso.dto.IlluminaNotificationDto;
-import uk.ac.bbsrc.tgac.miso.dto.NotificationDto;
 
+import ca.on.gsi.oicr.runscanner.HealthType;
+import ca.on.gsi.oicr.runscanner.IlluminaChemistry;
+import ca.on.gsi.oicr.runscanner.IlluminaNotificationDto;
+import ca.on.gsi.oicr.runscanner.NotificationDto;
 import ca.on.gsi.oicr.runscanner.RunProcessor;
 
 import io.prometheus.client.Counter;

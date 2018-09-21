@@ -11,9 +11,9 @@ import org.junit.Test;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import uk.ac.bbsrc.tgac.miso.core.data.type.PlatformType;
-import uk.ac.bbsrc.tgac.miso.dto.NotificationDto;
-import uk.ac.bbsrc.tgac.miso.dto.PacBioNotificationDto;
 
+import ca.on.gsi.oicr.runscanner.NotificationDto;
+import ca.on.gsi.oicr.runscanner.PacBioNotificationDto;
 import ca.on.gsi.oicr.runscanner.processors.DefaultPacBio;
 import ca.on.gsi.oicr.runscanner.processors.DefaultPacBio.StatusResponse;
 

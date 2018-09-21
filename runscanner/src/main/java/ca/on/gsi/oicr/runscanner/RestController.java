@@ -21,8 +21,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import uk.ac.bbsrc.tgac.miso.core.util.LatencyHistogram;
-import uk.ac.bbsrc.tgac.miso.dto.ProgressiveRequestDto;
-import uk.ac.bbsrc.tgac.miso.dto.ProgressiveResponseDto;
 
 import ca.on.gsi.oicr.runscanner.Scheduler.OutputSizeLimit;
 

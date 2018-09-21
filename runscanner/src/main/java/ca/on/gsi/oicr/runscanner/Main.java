@@ -13,7 +13,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
-import uk.ac.bbsrc.tgac.miso.core.data.type.PlatformType;
 
 /**
  * Attempts to process run directories, provided on the command line, through a particular processor and display the results. This is for
