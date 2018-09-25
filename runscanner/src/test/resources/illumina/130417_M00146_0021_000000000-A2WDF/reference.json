@@ -2,7 +2,7 @@
   "bclCount": 28,
   "callCycle": 242,
   "chemistry": "UNKNOWN",
-  "class": "uk.ac.bbsrc.tgac.miso.dto.IlluminaNotificationDto",
+  "platform": "Illumina",
   "completionDate": [
     2013,
     4,

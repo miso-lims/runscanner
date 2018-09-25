@@ -12,8 +12,8 @@ public class LS454NotificationDto extends NotificationDto {
   }
 
   @Override
-  public PlatformType getPlatformType() {
-    return PlatformType.LS454;
+  public Platform getPlatformType() {
+    return Platform.LS454;
   }
 
   @Override

@@ -1,4 +1,4 @@
-package uk.ac.bbsrc.tgac.miso.runscanner.processors;
+package ca.on.gsi.oicr.runscanner.processors;
 
 import static org.junit.Assert.assertEquals;
 

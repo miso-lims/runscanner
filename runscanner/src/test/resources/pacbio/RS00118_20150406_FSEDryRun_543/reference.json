@@ -1,5 +1,5 @@
 {
-  "class": "uk.ac.bbsrc.tgac.miso.dto.PacBioNotificationDto",
+  "platform": "PacBio",
   "completionDate": [
     2015,
     4,

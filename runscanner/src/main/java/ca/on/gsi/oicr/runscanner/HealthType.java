@@ -28,21 +28,22 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 /**
  * This enum represents the health of a particular object, given some kind of underlying process
  * 
  * @author Rob Davey
  * @since 0.0.2
  */
-// TODO: Capitalize
+
 public enum HealthType {
-  Unknown("Unknown", false), //
-  Completed("Completed", true), //
-  Failed("Failed", true), //
-  Started("Started", false), //
-  Stopped("Stopped", true), //
-  Running("Running", false), //
-  Requested("Requested", false);
+  UNKNOWN("Unknown", false), //
+  COMPLETED("Completed", true), //
+  FAILED("Failed", true), //
+  STOPPED("Stopped", true), //
+  RUNNING("Running", false);
 
   public static final Comparator<HealthType> COMPARATOR = new Comparator<HealthType>() {
     @Override
@@ -70,6 +71,7 @@ public enum HealthType {
    *          of type String
    * @return HealthType
    */
+  @JsonCreator
   public static HealthType get(String key) {
     return lookup.get(key);
   }
@@ -95,6 +97,7 @@ public enum HealthType {
    * 
    * @return String key.
    */
+  @JsonValue
   public String getKey() {
     return key;
   }
@@ -102,5 +105,4 @@ public enum HealthType {
   public boolean isDone() {
     return isDone;
   }
-
 }

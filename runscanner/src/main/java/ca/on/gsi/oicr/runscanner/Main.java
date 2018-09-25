@@ -29,7 +29,7 @@ public final class Main {
     String platformName = System.getProperty("platformType");
     if (platformName == null) {
       System.err.println("Please set -DplatformType=X where X is one of:");
-      Arrays.stream(PlatformType.values()).map(PlatformType::name).forEach(System.err::println);
+      Arrays.stream(Platform.values()).map(Platform::name).forEach(System.err::println);
       System.exit(1);
     }
 
@@ -44,7 +44,7 @@ public final class Main {
     mapper.registerModule(new JavaTimeModule())
         .setDateFormat(new ISO8601DateFormat());
 
-    PlatformType pt = PlatformType.valueOf(platformName);
+    Platform pt = Platform.valueOf(platformName);
     String name = System.getProperty("name", "default");
     RunProcessor rp = RunProcessor.processorFor(pt, name, mapper.readValue(System.getProperty("parameters", "{}"), ObjectNode.class))
         .orElseGet(() -> {

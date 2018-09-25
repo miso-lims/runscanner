@@ -83,21 +83,21 @@ public class DefaultPacBio extends RunProcessor {
 
     public HealthType translateStatus() {
       if (status == null) {
-        return HealthType.Unknown;
+        return HealthType.UNKNOWN;
       }
       switch (status) {
-      case "Ready":
-        return HealthType.Started;
+      // case "Ready":
+      // return HealthType.Started;
       case "Running":
-        return HealthType.Running;
+        return HealthType.RUNNING;
       case "Aborted":
-        return HealthType.Stopped;
+        return HealthType.STOPPED;
       case "Failed":
-        return HealthType.Failed;
+        return HealthType.FAILED;
       case "Complete":
-        return HealthType.Completed;
+        return HealthType.COMPLETED;
       default:
-        return HealthType.Unknown;
+        return HealthType.UNKNOWN;
       }
     }
 

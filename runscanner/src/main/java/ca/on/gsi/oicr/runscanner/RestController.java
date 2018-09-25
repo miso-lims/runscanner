@@ -20,8 +20,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import uk.ac.bbsrc.tgac.miso.core.util.LatencyHistogram;
-
 import ca.on.gsi.oicr.runscanner.Scheduler.OutputSizeLimit;
 
 /**

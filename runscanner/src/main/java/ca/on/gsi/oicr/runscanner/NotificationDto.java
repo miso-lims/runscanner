@@ -6,12 +6,11 @@ import java.util.function.Predicate;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
-
-// TODO: Needed?
-import uk.ac.bbsrc.tgac.miso.core.data.GetLaneContents;
 
 /**
  * A "run" as seen by Run Scanner
@@ -23,9 +22,13 @@ import uk.ac.bbsrc.tgac.miso.core.data.GetLaneContents;
  * Finally, notifications contain best-effort information gleaned from the sequencer output, but it is not always possible to correctly
  * detect information; if a human changes certain properties of a run, it should not be overwritten by automation.
  */
-@JsonTypeInfo(use = Id.CLASS, include = As.PROPERTY, property = "class")
+@JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "platform")
+@JsonSubTypes({ //
+    @Type(value = PacBioNotificationDto.class, name = "PacBio"), //
+    @Type(value = IlluminaNotificationDto.class, name = "Illumina"), //
+    @Type(value = LS454NotificationDto.class, name = "LS454") }) //
 @JsonIgnoreProperties(ignoreUnknown = true)
-public abstract class NotificationDto implements Predicate<SequencingParameters>, GetLaneContents {
+public abstract class NotificationDto implements Predicate<SequencingParametersDto>, GetLaneContents {
 
   private String runAlias;
   private String sequencerFolderPath;
@@ -208,7 +211,7 @@ public abstract class NotificationDto implements Predicate<SequencingParameters>
   }
 
   @JsonIgnore
-  public abstract PlatformType getPlatformType();
+  public abstract Platform getPlatformType();
 
   @Override
   public String toString() {
@@ -293,7 +296,7 @@ public abstract class NotificationDto implements Predicate<SequencingParameters>
   /**
    * Check if the sequencing parameters provided match this run's output
    * 
-   * Some platforms have complicated programmable sequencing conditions, as defined in {@link SequencingParameters}. This function
+   * Some platforms have complicated programmable sequencing conditions, as defined in {@link SequencingParametersDto}. This function
    * determines if candidate sequencing parameters match the configuration of this notification.
    * 
    * This is a best-effort attempt and the safe behaviour is to return true if unsure. The parameters tested will be constrained by the
@@ -301,7 +304,7 @@ public abstract class NotificationDto implements Predicate<SequencingParameters>
    * candidates, it will not assign parameters automatically. If a human has changed the parameters, they will not be changed again.
    */
   @Override
-  public boolean test(SequencingParameters params) {
+  public boolean test(SequencingParametersDto params) {
     return params.getPlatform().getPlatformType() == getPlatformType();
   }
 }

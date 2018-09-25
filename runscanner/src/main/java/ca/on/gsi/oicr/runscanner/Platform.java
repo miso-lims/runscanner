@@ -12,151 +12,132 @@
  *
  * MISO is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MISO.  If not, see <http://www.gnu.org/licenses/>.
+ * along with MISO. If not, see <http://www.gnu.org/licenses/>.
  *
  * *********************************************************************
  */
 
 package ca.on.gsi.oicr.runscanner;
 
-import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
-
+import com.google.common.collect.Lists;
 /**
- * A Platform describes metadata about potentially any hardware item, but is usully linked to a sequencer implementation.
+ * Enum representing the different platform types available
  * 
  * @author Rob Davey
  * @since 0.0.2
  */
-@Entity
-@Table(name = "Platform")
+public enum Platform {
+  ILLUMINA("Illumina", "Flow Cell", "Lane", "Lanes", "ILLUMINA"), //
+  LS454("LS454", "Plate", "Lane", "Lanes", "LS454"), //
+  SOLID("Solid", "Slide", "Lane", "Lanes", "ABI_SOLID"), //
+  IONTORRENT("IonTorrent", "Chip", "Chip", "Chips", null), //
+  PACBIO("PacBio", "8Pac", "SMRT Cell", "SMRT Cells", null), //
+  OXFORDNANOPORE("Oxford Nanopore", "Flow Cell", "Flow Cell", "Flow Cells", null);
 
-public class Platform implements Comparable<Platform>, Serializable {
+  /**
+   * Field key
+   */
+  private final String key;
+  private final String containerName;
+  private final String partitionName;
+  private final String pluralPartitionName;
+  private final String sraName;
+  /**
+   * Field lookup
+   */
+  private static final Map<String, Platform> lookup = new HashMap<>();
 
-  private static final long serialVersionUID = 1L;
-
-  public static final Long UNSAVED_ID = 0L;
-
-  @Enumerated(EnumType.STRING)
-  @Column(name = "name")
-  private PlatformType platformType;
-
-  @Column(nullable = true)
-  private String description;
-
-  @Enumerated(EnumType.STRING)
-  private InstrumentType instrumentType;
-
-  @Column(nullable = false)
-  private String instrumentModel;
-
-  private int numContainers;
-
-  @Id
-  @GeneratedValue(strategy = GenerationType.AUTO)
-  private long platformId = Platform.UNSAVED_ID;
-
-  public Long getId() {
-    return platformId;
-  }
-
-  public void setId(Long platformId) {
-    this.platformId = platformId;
-  }
-
-  public PlatformType getPlatformType() {
-    return platformType;
-  }
-
-  public void setPlatformType(PlatformType platformType) {
-    this.platformType = platformType;
-  }
-
-  public String getDescription() {
-    return description;
-  }
-
-  public void setDescription(String description) {
-    this.description = description;
-  }
-
-  public String getInstrumentModel() {
-    return instrumentModel;
-  }
-
-  public void setInstrumentModel(String instrumentModel) {
-    this.instrumentModel = instrumentModel;
-  }
-
-  public String getNameAndModel() {
-    return platformType.getKey() + " - " + instrumentModel;
-  }
-
-  public int getNumContainers() {
-    return numContainers;
-  }
-
-  public void setNumContainers(int numContainers) {
-    this.numContainers = numContainers;
-  }
-
-  public InstrumentType getInstrumentType() {
-    return instrumentType;
-  }
-
-  public void setInstrumentType(InstrumentType instrumentType) {
-    this.instrumentType = instrumentType;
+  static {
+    for (Platform s : EnumSet.allOf(Platform.class))
+      lookup.put(s.getKey(), s);
   }
 
   /**
-   * Equivalency is based on id if set, otherwise on name, description and creation date.
+   * Constructs a PlatformType based on a given key
+   * 
+   * @param key
+   *          of type String
    */
-
-  @Override
-  public boolean equals(Object obj) {
-    if (obj == null) return false;
-    if (obj == this) return true;
-    if (!(obj instanceof Platform)) return false;
-    Platform them = (Platform) obj;
-    // If not saved, then compare resolved actual objects. Otherwise
-    // just compare IDs.
-    if (getId() == Platform.UNSAVED_ID || them.getId() == Platform.UNSAVED_ID) {
-      return getPlatformType().equals(them.getPlatformType()) && getDescription().equals(them.getDescription());
-    } else {
-      return getId().longValue() == them.getId().longValue();
-    }
+  Platform(String key, String containerName, String partitionName, String pluralPartitionName, String sraName) {
+    this.key = key;
+    this.containerName = containerName;
+    this.partitionName = partitionName;
+    this.pluralPartitionName = pluralPartitionName;
+    this.sraName = sraName;
   }
 
-  @Override
-  public int hashCode() {
-    if (getId() != Platform.UNSAVED_ID) {
-      return getId().intValue();
-    } else {
-      final int PRIME = 37;
-      int hashcode = -1;
-      if (getPlatformType() != null) hashcode = PRIME * hashcode + getPlatformType().hashCode();
-      if (getDescription() != null) hashcode = PRIME * hashcode + getDescription().hashCode();
-      return hashcode;
-    }
+  /**
+   * Returns a PlatformType given an enum key
+   * 
+   * @param key
+   *          of type String
+   * @return PlatformType
+   */
+  public static Platform get(String key) {
+    return lookup.get(key);
   }
 
-  @Override
-  public int compareTo(Platform t) {
-    if (getId() < t.getId()) return -1;
-    if (getId() > t.getId()) return 1;
-    return 0;
+  /**
+   * Returns the key of this PlatformType enum.
+   * 
+   * @return String key.
+   */
+  public String getKey() {
+    return key;
+  }
+
+  /**
+   * Returns the keys of this PlatformType enum.
+   * 
+   * @return ArrayList<String> keys.
+   */
+  public static ArrayList<String> getKeys() {
+    ArrayList<String> keys = new ArrayList<>();
+    for (Platform r : Platform.values()) {
+      keys.add(r.getKey());
+    }
+    return keys;
+  }
+
+  public static List<String> platformTypeNames(Collection<Platform> platformTypes) {
+    List<String> result = Lists.newArrayList();
+    for (Platform platformType : platformTypes) {
+      result.add(platformType.getKey());
+    }
+    return result;
+  }
+
+  public String getContainerName() {
+    return containerName;
+  }
+
+  public String getPartitionName() {
+    return partitionName;
+  }
+
+  public String getSraName() {
+    return sraName;
+  }
+  //
+  // public abstract Run createRun(User user);
+
+  // public SequencerPartitionContainer createContainer() {
+  // return new SequencerPartitionContainerImpl();
+  // }
+
+  public String getPluralPartitionName() {
+    return pluralPartitionName;
   }
 
 }

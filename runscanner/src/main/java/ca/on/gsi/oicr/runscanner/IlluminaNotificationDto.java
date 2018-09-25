@@ -88,8 +88,8 @@ public class IlluminaNotificationDto extends NotificationDto {
   }
 
   @Override
-  public PlatformType getPlatformType() {
-    return PlatformType.ILLUMINA;
+  public Platform getPlatformType() {
+    return Platform.ILLUMINA;
   }
 
   public Map<Integer, String> getPoolNames() {
@@ -167,8 +167,8 @@ public class IlluminaNotificationDto extends NotificationDto {
   }
 
   @Override
-  public boolean test(SequencingParameters params) {
-    return params.getPlatform().getPlatformType() == PlatformType.ILLUMINA &&
+  public boolean test(SequencingParametersDto params) {
+    return params.getPlatform().getPlatformType() == Platform.ILLUMINA &&
         Math.abs(params.getReadLength() - readLength) < 2 && params.isPaired() == isPairedEndRun() && params.getChemistry() == chemistry;
   }
 

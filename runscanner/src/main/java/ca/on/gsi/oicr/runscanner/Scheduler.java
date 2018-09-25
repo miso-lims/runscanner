@@ -31,9 +31,6 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import uk.ac.bbsrc.tgac.miso.core.util.LatencyHistogram;
-import uk.ac.bbsrc.tgac.miso.core.util.LimsUtils;
-
 import io.prometheus.client.Counter;
 import io.prometheus.client.Gauge;
 import io.prometheus.client.Histogram;
@@ -98,7 +95,7 @@ public class Scheduler {
     private String name;
     private ObjectNode parameters;
     private String path;
-    private PlatformType platformType;
+    private Platform platformType;
     private String timeZone;
 
     public String getName() {
@@ -113,7 +110,7 @@ public class Scheduler {
       return path;
     }
 
-    public PlatformType getPlatformType() {
+    public Platform getPlatformType() {
       return platformType;
     }
 
@@ -133,7 +130,7 @@ public class Scheduler {
       this.path = path;
     }
 
-    public void setPlatformType(PlatformType platformType) {
+    public void setPlatformType(Platform platformType) {
       this.platformType = platformType;
     }
 
@@ -316,7 +313,7 @@ public class Scheduler {
       String instrumentName = "unknown";
       try {
         NotificationDto dto = processor.process(directory, tz);
-        if (!LimsUtils.isStringBlankOrNull(dto.getSequencerName())) {
+        if (!isStringBlankOrNull(dto.getSequencerName())) {
           instrumentName = dto.getSequencerName();
         }
         FinishedWork work = new FinishedWork();
@@ -425,4 +422,14 @@ public class Scheduler {
     workPool.shutdownNow();
   }
 
+  /**
+   * Tests whether a String is blank (empty or just spaces) or null.
+   * Duplicated from MISO's LimsUtils.
+   * 
+   * @param s String to test for blank or null
+   * @return true if blank or null String provided
+   */
+  private static boolean isStringBlankOrNull(String s) {
+    return s == null || "".equals(s.trim());
+  }
 }

@@ -48,6 +48,7 @@ import ca.on.gsi.oicr.runscanner.HealthType;
 import ca.on.gsi.oicr.runscanner.IlluminaChemistry;
 import ca.on.gsi.oicr.runscanner.IlluminaNotificationDto;
 import ca.on.gsi.oicr.runscanner.NotificationDto;
+import ca.on.gsi.oicr.runscanner.Pair;
 import ca.on.gsi.oicr.runscanner.RunProcessor;
 
 import io.prometheus.client.Counter;
@@ -109,7 +110,7 @@ public final class DefaultIllumina extends RunProcessor {
       String status = (String) RUN_COMPLETION_STATUS_EXPRESSION.evaluate(document, XPathConstants.STRING);
       switch (status) {
       case "CompletedAsPlanned":
-        return Optional.of(HealthType.Completed);
+        return Optional.of(HealthType.COMPLETED);
       default:
         log.debug("New Illumina completion status found: %s", status);
       }
@@ -251,12 +252,12 @@ public final class DefaultIllumina extends RunProcessor {
         .orElse(null);
 
     if (failedDate != null) {
-      dto.setHealthType(HealthType.Failed);
+      dto.setHealthType(HealthType.FAILED);
       dto.setCompletionDate(failedDate);
     }
 
     // This run claims to be complete, but is it really?
-    if (dto.getHealthType() == HealthType.Completed) {
+    if (dto.getHealthType() == HealthType.COMPLETED) {
       // Maybe a NextSeq wrote a completion status, that we take as authoritative even though it's totally undocumented behaviour.
       Optional<HealthType> updatedHealth = Optional.of(new File(runDirectory, "RunCompletionStatus.xml"))//
           .filter(File::canRead)//
@@ -271,7 +272,7 @@ public final class DefaultIllumina extends RunProcessor {
       if (!updatedHealth.isPresent() && dto.getNumReads() > 0) {
         if (new File(runDirectory, "CopyComplete.txt").exists()) {
           // It's allegedly done.
-          updatedHealth = Optional.of(HealthType.Completed);
+          updatedHealth = Optional.of(HealthType.COMPLETED);
           completness_method_success.labels("complete.txt").inc();
           updateCompletionDateFromFile(runDirectory, "CopyComplete.txt", dto);
         } else {
@@ -286,9 +287,9 @@ public final class DefaultIllumina extends RunProcessor {
           } else {
             // If we see some net copy files, then it's still running; if they're all here, assume it's done.
             if (netCopyFiles < dto.getNumReads()) {
-              updatedHealth = Optional.of(HealthType.Running);
+              updatedHealth = Optional.of(HealthType.RUNNING);
             } else {
-              updatedHealth = Optional.of(HealthType.Completed);
+              updatedHealth = Optional.of(HealthType.COMPLETED);
               updateCompletionDateFromFile(runDirectory, String.format("Basecalling_Netcopy_complete_Read%d.txt", dto.getNumReads()), dto);
             }
             completness_method_success.labels("netcopy").inc();
@@ -306,7 +307,7 @@ public final class DefaultIllumina extends RunProcessor {
               .map(baseCallDirectory::resolve)//
               .allMatch(laneDir -> isLaneComplete(laneDir, dto));
           if (!dataCopied) {
-            updatedHealth = Optional.of(HealthType.Running);
+            updatedHealth = Optional.of(HealthType.RUNNING);
             completness_method_success.labels("dirscan").inc();
           }
         } catch (Exception e) {

@@ -1,4 +1,4 @@
-package uk.ac.bbsrc.tgac.miso.runscanner.processors;
+package ca.on.gsi.oicr.runscanner.processors;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,11 +10,9 @@ import org.junit.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import uk.ac.bbsrc.tgac.miso.core.data.type.PlatformType;
-
 import ca.on.gsi.oicr.runscanner.NotificationDto;
 import ca.on.gsi.oicr.runscanner.PacBioNotificationDto;
-import ca.on.gsi.oicr.runscanner.processors.DefaultPacBio;
+import ca.on.gsi.oicr.runscanner.Platform;
 import ca.on.gsi.oicr.runscanner.processors.DefaultPacBio.StatusResponse;
 
 public class PacBioProcessorTest extends AbstractProcessorTest {
@@ -23,7 +21,7 @@ public class PacBioProcessorTest extends AbstractProcessorTest {
     private final Map<String, String> sampleSheetResponses;
 
     private TestPacBio(Map<String, StatusResponse> statusResponses, Map<String, String> sampleSheetResponses) {
-      super(new Builder(PlatformType.PACBIO, "unittest", null), URL_PREFIX);
+      super(new Builder(Platform.PACBIO, "unittest", null), URL_PREFIX);
       this.statusResponses = statusResponses;
       this.sampleSheetResponses = sampleSheetResponses;
     }

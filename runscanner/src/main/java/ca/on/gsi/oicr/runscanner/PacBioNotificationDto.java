@@ -27,8 +27,8 @@ public class PacBioNotificationDto extends NotificationDto {
   }
 
   @Override
-  public PlatformType getPlatformType() {
-    return PlatformType.PACBIO;
+  public Platform getPlatformType() {
+    return Platform.PACBIO;
   }
 
   public Map<String, String> getPoolNames() {

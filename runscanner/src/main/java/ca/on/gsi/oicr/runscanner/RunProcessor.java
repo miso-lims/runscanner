@@ -49,9 +49,9 @@ public abstract class RunProcessor {
     private final BiFunction<Builder, ObjectNode, RunProcessor> create;
 
     private final String name;
-    private final PlatformType platformType;
+    private final Platform platformType;
 
-    public Builder(PlatformType platformType, String name, BiFunction<Builder, ObjectNode, RunProcessor> create) {
+    public Builder(Platform platformType, String name, BiFunction<Builder, ObjectNode, RunProcessor> create) {
       this.platformType = platformType;
       this.name = name;
       this.create = create;
@@ -66,7 +66,7 @@ public abstract class RunProcessor {
       return name;
     }
 
-    public PlatformType getPlatformType() {
+    public Platform getPlatformType() {
       return platformType;
     }
   }
@@ -80,7 +80,7 @@ public abstract class RunProcessor {
    * @param name the name of the processor
    * @return a builder if one exists
    */
-  public static Optional<Builder> builderFor(PlatformType pt, String name) {
+  public static Optional<Builder> builderFor(Platform pt, String name) {
     return builders().filter(builder -> builder.getPlatformType() == pt && builder.getName().equals(name)).findAny();
   }
 
@@ -88,10 +88,10 @@ public abstract class RunProcessor {
    * Produce a stream of all known builders of run processors.
    */
   public static Stream<Builder> builders() {
-    Stream<Builder> standard = Stream.of(new Builder(PlatformType.ILLUMINA, "default", DefaultIllumina::create),
-        new Builder(PlatformType.PACBIO, "default", DefaultPacBio::create));
+    Stream<Builder> standard = Stream.of(new Builder(Platform.ILLUMINA, "default", DefaultIllumina::create),
+        new Builder(Platform.PACBIO, "default", DefaultPacBio::create));
     return Stream.concat(standard,
-        Arrays.stream(PlatformType.values()).map(type -> new Builder(type, "testing", (builder, config) -> new Testing(builder))));
+        Arrays.stream(Platform.values()).map(type -> new Builder(type, "testing", (builder, config) -> new Testing(builder))));
   }
 
   /**
@@ -139,13 +139,13 @@ public abstract class RunProcessor {
    * @param parameters a JSON object containing any other configuration parameters
    * @return
    */
-  public static Optional<RunProcessor> processorFor(PlatformType pt, String name, ObjectNode parameters) {
+  public static Optional<RunProcessor> processorFor(Platform pt, String name, ObjectNode parameters) {
     return builderFor(pt, name).map(builder -> builder.apply(parameters));
   }
 
   private final String name;
 
-  private final PlatformType platformType;
+  private final Platform platformType;
 
   public RunProcessor(Builder builder) {
     super();
@@ -168,7 +168,7 @@ public abstract class RunProcessor {
    * It serves only to help the user match this processor with the configuration provided. No attempt is made to match the platform-type
    * with the returned DTO.
    */
-  public final PlatformType getPlatformType() {
+  public final Platform getPlatformType() {
     return platformType;
   }
 
@@ -188,7 +188,7 @@ public abstract class RunProcessor {
    * 
    * @param runDirectory the directory to scan (which will be output from {@link #getRunsFromRoot(File)}
    * @param tz the user-specified timezone that the sequencer exists in
-   * @return the DTO result for consumption by MISO; if {@link PlatformType#isDone} is false, this directory may be processed again.
+   * @return the DTO result for consumption by MISO; if {@link Platform#isDone} is false, this directory may be processed again.
    */
   public abstract NotificationDto process(File runDirectory, TimeZone tz) throws IOException;
 
