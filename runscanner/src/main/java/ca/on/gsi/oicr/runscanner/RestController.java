@@ -16,8 +16,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import ca.on.gsi.oicr.runscanner.Scheduler.OutputSizeLimit;
@@ -53,7 +51,7 @@ public class RestController {
    * If no run is found, null is returned. If there are multiple runs with the same name that are from different sequencers, one is randomly
    * selected.
    */
-  @RequestMapping(value = "/run/{name}/metrics", method = RequestMethod.GET)
+  @GetMapping(value = "/run/{name}/metrics")
   public HttpEntity<byte[]> getMetricsByName(@PathVariable("name") String id) {
     return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON_UTF8).body(
         scheduler.finished().filter(dto -> dto.getRunAlias().equals(id)).findAny().map(NotificationDto::getMetrics).orElse("[]")

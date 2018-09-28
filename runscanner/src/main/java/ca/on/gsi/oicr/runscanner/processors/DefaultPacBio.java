@@ -35,8 +35,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import uk.ac.bbsrc.tgac.miso.core.util.LimsUtils;
-
 import ca.on.gsi.oicr.runscanner.HealthType;
 import ca.on.gsi.oicr.runscanner.NotificationDto;
 import ca.on.gsi.oicr.runscanner.PacBioNotificationDto;
@@ -183,7 +181,7 @@ public class DefaultPacBio extends RunProcessor {
     return (document, dto) -> {
       String well = (String) expr[0].evaluate(document, XPathConstants.STRING);
       String name = (String) expr[1].evaluate(document, XPathConstants.STRING);
-      if (LimsUtils.isStringBlankOrNull(name) || LimsUtils.isStringBlankOrNull(well)) {
+      if (isStringBlankOrNull(name) || isStringBlankOrNull(well)) {
         return;
       }
       Map<String, String> poolInfo = dto.getPoolNames();
@@ -307,4 +305,14 @@ public class DefaultPacBio extends RunProcessor {
     }
   }
 
+  /**
+   * Tests whether a String is blank (empty or just spaces) or null.
+   * Duplicated from MISO's LimsUtils.
+   * 
+   * @param s String to test for blank or null
+   * @return true if blank or null String provided
+   */
+  private static boolean isStringBlankOrNull(String s) {
+    return s == null || "".equals(s.trim());
+  }
 }

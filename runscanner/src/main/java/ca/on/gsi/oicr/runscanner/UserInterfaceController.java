@@ -5,18 +5,17 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.util.Map;
 import java.util.Collections;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.google.common.collect.ImmutableSortedMap;
@@ -41,7 +40,7 @@ public class UserInterfaceController {
   /**
    * List a collection of files
    */
-  @RequestMapping(value = "/list/{collection}", method = RequestMethod.GET)
+  @GetMapping(value = "/list/{collection}")
   public ModelAndView listPaths(@PathVariable String collection, ModelMap model) throws IOException {
     model.put("runs", COLLECTIONS.containsKey(collection) ? COLLECTIONS.get(collection).apply(scheduler) : Collections.emptyList());
     model.put("collection", collection);
@@ -79,7 +78,7 @@ public class UserInterfaceController {
   /**
    * Show the main status page
    */
-  @RequestMapping(value = "/", method = RequestMethod.GET)
+  @GetMapping(value = "/")
   public ModelAndView showStatus(ModelMap model) throws IOException {
     model.put("finished", scheduler.getFinishedDirectories().size());
     model.put("scheduled", scheduler.getScheduledWork().size());

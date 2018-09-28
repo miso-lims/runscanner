@@ -32,9 +32,7 @@
                       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd"
   default-autowire="byName">
 
-  <context:component-scan annotation-config="true" base-package="uk.ac.bbsrc.tgac.miso.runscanner" />
+  <context:component-scan annotation-config="true" base-package="ca.on.gsi.oicr.runscanner" />
   <mvc:resources mapping="/resources/**" location="/resources/" cache-period="31556926"/>
   <mvc:annotation-driven />
-
-
 </beans>

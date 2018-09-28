@@ -40,16 +40,14 @@ import org.w3c.dom.Document;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.Sets;
 
-import uk.ac.bbsrc.tgac.miso.core.util.LatencyHistogram;
-import uk.ac.bbsrc.tgac.miso.core.util.LimsUtils;
-import uk.ac.bbsrc.tgac.miso.core.util.WhineyFunction;
-
 import ca.on.gsi.oicr.runscanner.HealthType;
 import ca.on.gsi.oicr.runscanner.IlluminaChemistry;
 import ca.on.gsi.oicr.runscanner.IlluminaNotificationDto;
+import ca.on.gsi.oicr.runscanner.LatencyHistogram;
 import ca.on.gsi.oicr.runscanner.NotificationDto;
 import ca.on.gsi.oicr.runscanner.Pair;
 import ca.on.gsi.oicr.runscanner.RunProcessor;
+import ca.on.gsi.oicr.runscanner.WhineyFunction;
 
 import io.prometheus.client.Counter;
 
@@ -216,7 +214,7 @@ public final class DefaultIllumina extends RunProcessor {
         .map(File::toPath)
         .map(WhineyFunction.rethrow(path -> {
           try (Stream<String> lines = Files.lines(path)) {
-            return lines.filter(LimsUtils.rejectUntil(line -> line.startsWith("Sample_ID,")))//
+            return lines.filter(rejectUntil(line -> line.startsWith("Sample_ID,")))//
                 .map(COMMA::split)//
                 .map(Pair.number(1))
                 .filter(pair -> pair.getValue().length > 0)//
@@ -338,19 +336,19 @@ public final class DefaultIllumina extends RunProcessor {
             return null;
           }
         })
-        .filter(model -> !LimsUtils.isStringEmptyOrNull(model))
+        .filter(model -> !isStringEmptyOrNull(model))
         .findAny().orElse(null);
     if (partNum != null) {
       return partNum;
     }
     try {
       String flowcell = FLOWCELL.evaluate(runParams);
-      if (LimsUtils.isStringEmptyOrNull(flowcell)) {
+      if (isStringEmptyOrNull(flowcell)) {
         return null;
       }
       String paired = FLOWCELL_PAIRED.evaluate(runParams);
       Matcher m = FLOWCELL_PATTERN.matcher(flowcell);
-      if (!LimsUtils.isStringEmptyOrNull(paired) && m.matches()) {
+      if (!isStringEmptyOrNull(paired) && m.matches()) {
         return m.group(1) + (Boolean.parseBoolean(paired) ? " PE " : " SR ") + m.group(2);
       } else {
         return flowcell;
@@ -361,4 +359,30 @@ public final class DefaultIllumina extends RunProcessor {
     }
   }
 
+  /**
+   * Checks if String is empty or null.
+   * Borrowed from LimsUtils
+   * 
+   * @param s String to check
+   * @return true if String is empty or null
+   */
+  public static boolean isStringEmptyOrNull(String s) {
+    return "".equals(s) || s == null;
+  }
+
+  public static <T> Predicate<T> rejectUntil(Predicate<T> check) {
+    return new Predicate<T>() {
+      private boolean state = false;
+
+      @Override
+      public boolean test(T t) {
+        if (state) {
+          return true;
+        }
+        state = check.test(t);
+        return false;
+      }
+
+    };
+  }
 }

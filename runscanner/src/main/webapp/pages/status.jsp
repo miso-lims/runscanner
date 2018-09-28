@@ -34,6 +34,10 @@
       <a href="<c:url value="/"/>">Status</a>
       <c:forEach items="${collections}" var="collection"><a href="<c:url value="/list/${collection}"/>">${collection}</a></c:forEach>
     </nav>
+    
+    <div>
+    <h1>Welcome to the New Standalone Runscanner!</h1>
+    </div>
 
     <div>
       <h1>Status</h1>
