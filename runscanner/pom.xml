@@ -27,10 +27,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <artifactId>runscanner</artifactId>
-  <packaging>war</packaging>
+  <packaging>pom</packaging>
   <groupId>ca.on.gsi.oicr.runscanner</groupId>
   <name>MISO Run Scanner</name>
   <version>0.0.1-SNAPSHOT</version>
+  <modules>
+  	<module>scanner</module>
+  	<module>rs-dto</module>
+  </modules>
   <properties>
     <skipIllumina>true</skipIllumina>
     <maven.compiler.source>1.8</maven.compiler.source>

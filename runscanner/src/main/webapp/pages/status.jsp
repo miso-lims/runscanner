@@ -25,6 +25,7 @@
 <html lang="en">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <!-- <meta http-equiv="refresh" content="3"/> -->
     <title>MISO Run Scanning Server</title>
     <link type="text/css" rel="stylesheet" href="<c:url value="/resources/runscanner.css"/>">
   </head>
