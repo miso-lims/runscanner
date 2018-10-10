@@ -9,8 +9,9 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import dto.NotificationDto;
-import processor.RunProcessor;
+import ca.on.oicr.gsi.runscanner.rs.dto.NotificationDto;
+import ca.on.oicr.gsi.runscanner.scanner.processor.RunProcessor;
+
 
 public abstract class AbstractProcessorTest {
   private final Class<? extends NotificationDto> clazz;

@@ -6,11 +6,12 @@ import java.util.TimeZone;
 
 import org.junit.Test;
 
-import dto.IlluminaNotificationDto;
-import dto.NotificationDto;
-import processor.DefaultIllumina;
-import processor.RunProcessor.Builder;
-import type.Platform;
+import ca.on.oicr.gsi.runscanner.rs.dto.IlluminaNotificationDto;
+import ca.on.oicr.gsi.runscanner.rs.dto.NotificationDto;
+import ca.on.oicr.gsi.runscanner.rs.dto.type.Platform;
+import ca.on.oicr.gsi.runscanner.scanner.processor.DefaultIllumina;
+import ca.on.oicr.gsi.runscanner.scanner.processor.RunProcessor.Builder;
+
 
 public class IlluminaProcessorTest extends AbstractProcessorTest {
   private final DefaultIllumina instance = new DefaultIllumina(new Builder(Platform.ILLUMINA, "unittest", null), true);

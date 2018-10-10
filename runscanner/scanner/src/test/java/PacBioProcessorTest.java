@@ -10,11 +10,11 @@ import org.junit.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import dto.NotificationDto;
-import dto.PacBioNotificationDto;
-import processor.DefaultPacBio;
-import processor.DefaultPacBio.StatusResponse;
-import type.Platform;
+import ca.on.oicr.gsi.runscanner.rs.dto.NotificationDto;
+import ca.on.oicr.gsi.runscanner.rs.dto.PacBioNotificationDto;
+import ca.on.oicr.gsi.runscanner.rs.dto.type.Platform;
+import ca.on.oicr.gsi.runscanner.scanner.processor.DefaultPacBio;
+import ca.on.oicr.gsi.runscanner.scanner.processor.DefaultPacBio.StatusResponse;
 
 public class PacBioProcessorTest extends AbstractProcessorTest {
   private static class TestPacBio extends DefaultPacBio {
