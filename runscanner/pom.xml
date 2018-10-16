@@ -28,7 +28,7 @@
   <modelVersion>4.0.0</modelVersion>
   <artifactId>runscanner</artifactId>
   <packaging>pom</packaging>
-  <groupId>ca.on.gsi.oicr.runscanner</groupId>
+  <groupId>ca.on.oicr.gsi.runscanner</groupId>
   <name>MISO Run Scanner</name>
   <version>0.0.1-SNAPSHOT</version>
   <modules>

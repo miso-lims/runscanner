@@ -458,7 +458,7 @@ int main(int argc, const char **argv) {
 
   /* Jackson expects the class to be embedded as an attribute, so we provided it
    * here. */
-  result["class"] = "uk.ac.bbsrc.tgac.miso.dto.IlluminaNotificationDto";
+  result["platform"] = "Illumina";
 
   auto is_complete = true;
 
