@@ -236,8 +236,8 @@ public class Scheduler {
     return finishedWork.values().stream().filter(x -> x.epoch >= epoch).sorted((a, b) -> a.epoch - b.epoch).filter(filter).map(x -> x.dto);
   }
 
-  public Iterable<Configuration> getConfiguration() {
-    return roots;
+  public Stream<Configuration> getConfiguration() {
+    return roots.stream();
   }
 
   public Instant getConfigurationLastRead() {
