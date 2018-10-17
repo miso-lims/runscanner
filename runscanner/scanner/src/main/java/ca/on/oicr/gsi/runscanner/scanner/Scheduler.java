@@ -34,6 +34,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.prometheus.client.Counter;
 import io.prometheus.client.Gauge;
 import io.prometheus.client.Histogram;
+import ca.on.oicr.gsi.Pair;
 import ca.on.oicr.gsi.runscanner.rs.dto.NotificationDto;
 import ca.on.oicr.gsi.runscanner.rs.dto.type.Platform;
 import ca.on.oicr.gsi.runscanner.scanner.processor.RunProcessor;
@@ -406,12 +407,12 @@ public class Scheduler {
               .filter(Configuration::isValid)//
               .flatMap(Configuration::getRuns)//
               .peek(attempted)//
-              .filter(entry -> newUnreadableDirectories.test(entry.getKey()))//
+              .filter(entry -> newUnreadableDirectories.test(entry.first()))//
               .peek(accepted)//
-              .filter(entry -> isUnprocessed(entry.getKey()))//
+              .filter(entry -> isUnprocessed(entry.first()))//
               .peek(newRuns)//
               .forEach(entry -> {
-                queueDirectory(entry.getKey(), entry.getValue().getProcessor(), entry.getValue().getTimeZone());
+                queueDirectory(entry.first(), entry.second().getProcessor(), entry.second().getTimeZone());
               });
         } catch (Exception e) {
           log.error("Error scanning directory.", e);

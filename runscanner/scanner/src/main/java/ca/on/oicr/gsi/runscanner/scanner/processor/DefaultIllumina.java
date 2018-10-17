@@ -14,7 +14,6 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Scanner;
@@ -40,12 +39,12 @@ import org.w3c.dom.Document;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.Sets;
 
+import ca.on.oicr.gsi.Pair;
 import ca.on.oicr.gsi.runscanner.rs.dto.IlluminaNotificationDto;
 import ca.on.oicr.gsi.runscanner.rs.dto.NotificationDto;
 import ca.on.oicr.gsi.runscanner.rs.dto.type.HealthType;
 import ca.on.oicr.gsi.runscanner.rs.dto.type.IlluminaChemistry;
 import ca.on.oicr.gsi.runscanner.scanner.LatencyHistogram;
-import ca.on.oicr.gsi.runscanner.scanner.Pair;
 import ca.on.oicr.gsi.runscanner.scanner.WhineyFunction;
 import io.prometheus.client.Counter;
 
@@ -215,8 +214,8 @@ public final class DefaultIllumina extends RunProcessor {
             return lines.filter(rejectUntil(line -> line.startsWith("Sample_ID,")))//
                 .map(COMMA::split)//
                 .map(Pair.number(1))
-                .filter(pair -> pair.getValue().length > 0)//
-                .collect(Collectors.toMap(Entry::getKey, e -> e.getValue()[0]));
+                .filter(pair -> pair.second().length > 0)//
+                .collect(Collectors.toMap(Pair::first, e -> e.second()[0]));
           }
         }))//
         .orElse(Collections.emptyMap()));
