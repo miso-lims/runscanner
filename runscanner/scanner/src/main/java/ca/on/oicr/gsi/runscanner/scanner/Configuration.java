@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.TimeZone;
 import java.util.stream.Stream;
 
+import ca.on.oicr.gsi.Pair;
 import ca.on.oicr.gsi.runscanner.scanner.processor.RunProcessor;
 
 public class Configuration {

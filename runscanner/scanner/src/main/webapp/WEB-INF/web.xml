@@ -90,4 +90,8 @@
     <param-name>runscanner.configFile</param-name>
     <param-value></param-value>
   </context-param>
+  <context-param>
+    <param-name>webAppRootKey</param-name>
+    <param-value>runscanner.root</param-value>
+  </context-param>
 </web-app>
