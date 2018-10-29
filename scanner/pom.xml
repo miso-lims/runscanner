@@ -10,7 +10,7 @@
     <dependencies>
     <dependency>
     	<groupId>ca.on.oicr.gsi.runscanner</groupId>
-    	<artifactId>dto</artifactId>
+    	<artifactId>runscanner-dto</artifactId>
     	<version>0.0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
