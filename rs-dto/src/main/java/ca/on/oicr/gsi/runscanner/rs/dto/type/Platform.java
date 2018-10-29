@@ -23,121 +23,21 @@
 
 package ca.on.oicr.gsi.runscanner.rs.dto.type;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import com.google.common.collect.Lists;
 /**
  * Enum representing the different platform types available
- * 
- * @author Rob Davey
- * @since 0.0.2
  */
 public enum Platform {
-  ILLUMINA("Illumina", "Flow Cell", "Lane", "Lanes", "ILLUMINA"), //
-  LS454("LS454", "Plate", "Lane", "Lanes", "LS454"), //
-  SOLID("Solid", "Slide", "Lane", "Lanes", "ABI_SOLID"), //
-  IONTORRENT("IonTorrent", "Chip", "Chip", "Chips", null), //
-  PACBIO("PacBio", "8Pac", "SMRT Cell", "SMRT Cells", null), //
-  OXFORDNANOPORE("Oxford Nanopore", "Flow Cell", "Flow Cell", "Flow Cells", null);
-
-  /**
-   * Field key
-   */
-  private final String key;
-  private final String containerName;
-  private final String partitionName;
-  private final String pluralPartitionName;
-  private final String sraName;
-  /**
-   * Field lookup
-   */
-  private static final Map<String, Platform> lookup = new HashMap<>();
-
-  static {
-    for (Platform s : EnumSet.allOf(Platform.class))
-      lookup.put(s.getKey(), s);
-  }
-
-  /**
-   * Constructs a PlatformType based on a given key
-   * 
-   * @param key
-   *          of type String
-   */
-  Platform(String key, String containerName, String partitionName, String pluralPartitionName, String sraName) {
-    this.key = key;
-    this.containerName = containerName;
-    this.partitionName = partitionName;
-    this.pluralPartitionName = pluralPartitionName;
-    this.sraName = sraName;
-  }
-
-  /**
-   * Returns a PlatformType given an enum key
-   * 
-   * @param key
-   *          of type String
-   * @return PlatformType
-   */
-  public static Platform get(String key) {
-    return lookup.get(key);
-  }
-
-  /**
-   * Returns the key of this PlatformType enum.
-   * 
-   * @return String key.
-   */
-  public String getKey() {
-    return key;
-  }
-
-  /**
-   * Returns the keys of this PlatformType enum.
-   * 
-   * @return ArrayList<String> keys.
-   */
-  public static ArrayList<String> getKeys() {
-    ArrayList<String> keys = new ArrayList<>();
-    for (Platform r : Platform.values()) {
-      keys.add(r.getKey());
-    }
-    return keys;
-  }
-
-  public static List<String> platformTypeNames(Collection<Platform> platformTypes) {
-    List<String> result = Lists.newArrayList();
-    for (Platform platformType : platformTypes) {
-      result.add(platformType.getKey());
-    }
-    return result;
-  }
-
-  public String getContainerName() {
-    return containerName;
-  }
-
-  public String getPartitionName() {
-    return partitionName;
-  }
-
-  public String getSraName() {
-    return sraName;
-  }
-  //
-  // public abstract Run createRun(User user);
-
-  // public SequencerPartitionContainer createContainer() {
-  // return new SequencerPartitionContainerImpl();
-  // }
-
-  public String getPluralPartitionName() {
-    return pluralPartitionName;
-  }
+  ILLUMINA, //
+  LS454, //
+  SOLID, //
+  IONTORRENT, //
+  PACBIO, //
+  OXFORDNANOPORE;
+	
+  public String toMisoFormat() {
+	    String name = this.name();
+	    String formattedName = name.substring(0, 1) + name.substring(1).toLowerCase();
+	    return formattedName;
+	    }
 
 }

@@ -23,14 +23,6 @@
 
 package ca.on.oicr.gsi.runscanner.rs.dto.type;
 
-import java.util.Comparator;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.Map;
-
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
-
 /**
  * This enum represents the health of a particular object, given some kind of underlying process
  * 
@@ -39,70 +31,25 @@ import com.fasterxml.jackson.annotation.JsonValue;
  */
 
 public enum HealthType {
-  UNKNOWN("Unknown", false), //
-  COMPLETED("Completed", true), //
-  FAILED("Failed", true), //
-  STOPPED("Stopped", true), //
-  RUNNING("Running", false);
-
-  public static final Comparator<HealthType> COMPARATOR = new Comparator<HealthType>() {
-    @Override
-    public int compare(HealthType o1, HealthType o2) {
-      int p1 = o1 == null ? -1 : o1.ordinal();
-      int p2 = o2 == null ? -1 : o2.ordinal();
-      return p1 - p2;
-    }
-  };
-
-  /**
-   * Field lookup
-   */
-  private static final Map<String, HealthType> lookup = new HashMap<>();
-
-  static {
-    for (HealthType s : EnumSet.allOf(HealthType.class))
-      lookup.put(s.getKey(), s);
-  }
-
-  /**
-   * Returns a HealthType given an enum key
-   * 
-   * @param key
-   *          of type String
-   * @return HealthType
-   */
-  @JsonCreator
-  public static HealthType get(String key) {
-    return lookup.get(key);
-  }
-
-  /** Field key */
-  private final String key;
+  UNKNOWN(false), //
+  COMPLETED(true), //
+  FAILED(true), //
+  STOPPED(true), //
+  RUNNING(false);
 
   private final boolean isDone;
 
-  /**
-   * Constructs a HealthType based on a given key
-   * 
-   * @param key
-   *          of type String
-   */
-  HealthType(String key, boolean isDone) {
-    this.key = key;
+  HealthType(boolean isDone) {
     this.isDone = isDone;
-  }
-
-  /**
-   * Returns the key of this HealthType enum.
-   * 
-   * @return String key.
-   */
-  @JsonValue
-  public String getKey() {
-    return key;
   }
 
   public boolean isDone() {
     return isDone;
+  }
+  
+  public String toMisoFormat() {
+	  String name = this.name();
+	  String formattedName = name.substring(0,1) + name.substring(1).toLowerCase();
+	  return formattedName;
   }
 }
