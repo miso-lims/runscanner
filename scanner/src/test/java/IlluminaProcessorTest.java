@@ -6,9 +6,9 @@ import java.util.TimeZone;
 
 import org.junit.Test;
 
-import ca.on.oicr.gsi.runscanner.rs.dto.IlluminaNotificationDto;
-import ca.on.oicr.gsi.runscanner.rs.dto.NotificationDto;
-import ca.on.oicr.gsi.runscanner.rs.dto.type.Platform;
+import ca.on.oicr.gsi.runscanner.dto.IlluminaNotificationDto;
+import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
+import ca.on.oicr.gsi.runscanner.dto.type.Platform;
 import ca.on.oicr.gsi.runscanner.scanner.processor.DefaultIllumina;
 import ca.on.oicr.gsi.runscanner.scanner.processor.RunProcessor.Builder;
 

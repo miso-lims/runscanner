@@ -9,7 +9,7 @@
     42
   ],
   "containerSerialNumber": "RS00118_20170706_FSETest",
-  "healthType": "Completed",
+  "healthType": "COMPLETED",
   "laneCount": 2,
   "pairedEndRun": false,
   "poolNames": {

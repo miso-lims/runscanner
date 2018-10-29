@@ -5,14 +5,10 @@
     <artifactId>runscanner</artifactId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
-  <artifactId>scanner</artifactId>
-  <packaging>war</packaging>
+  <artifactId>dto</artifactId>
+  <name>dto</name>
+  <packaging>jar</packaging>
     <dependencies>
-    <dependency>
-    	<groupId>ca.on.oicr.gsi.runscanner</groupId>
-    	<artifactId>dto</artifactId>
-    	<version>0.0.1-SNAPSHOT</version>
-    </dependency>
     <dependency>
       <groupId>io.prometheus</groupId>
       <artifactId>simpleclient</artifactId>
@@ -54,10 +50,6 @@
     <dependency>
       <groupId>javax.ws.rs</groupId>
       <artifactId>jsr311-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>ca.on.oicr.gsi</groupId>
-      <artifactId>server-utils</artifactId>
     </dependency>
     <dependency>
       <groupId>log4j</groupId>
@@ -127,7 +119,7 @@
       <groupId>xml-apis</groupId>
       <artifactId>xml-apis</artifactId>
     </dependency>
-    <dependency>
+      <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
         <version>22.0</version>

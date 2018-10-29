@@ -10,9 +10,9 @@ import java.util.stream.Stream;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import ca.on.oicr.gsi.runscanner.rs.dto.IlluminaNotificationDto;
-import ca.on.oicr.gsi.runscanner.rs.dto.NotificationDto;
-import ca.on.oicr.gsi.runscanner.rs.dto.PacBioNotificationDto;
+import ca.on.oicr.gsi.runscanner.dto.IlluminaNotificationDto;
+import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
+import ca.on.oicr.gsi.runscanner.dto.PacBioNotificationDto;
 
 
 /**

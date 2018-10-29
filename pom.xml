@@ -33,7 +33,7 @@
   <version>0.0.1-SNAPSHOT</version>
   <modules>
   	<module>scanner</module>
-  	<module>rs-dto</module>
+  	<module>dto</module>
   </modules>
   <properties>
     <skipIllumina>true</skipIllumina>

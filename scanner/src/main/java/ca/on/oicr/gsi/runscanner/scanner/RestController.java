@@ -18,9 +18,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import ca.on.oicr.gsi.runscanner.rs.dto.NotificationDto;
-import ca.on.oicr.gsi.runscanner.rs.dto.ProgressiveRequestDto;
-import ca.on.oicr.gsi.runscanner.rs.dto.ProgressiveResponseDto;
+import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
+import ca.on.oicr.gsi.runscanner.dto.ProgressiveRequestDto;
+import ca.on.oicr.gsi.runscanner.dto.ProgressiveResponseDto;
 import ca.on.oicr.gsi.runscanner.scanner.Scheduler.OutputSizeLimit;
 
 /**

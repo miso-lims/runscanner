@@ -9,7 +9,7 @@
     17
   ],
   "containerSerialNumber": "RS00118_20150406_FSEDryRun",
-  "healthType": "Completed",
+  "healthType": "COMPLETED",
   "laneCount": 1,
   "pairedEndRun": false,
   "poolNames": {
