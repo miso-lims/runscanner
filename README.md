@@ -21,20 +21,11 @@ Extract the `.zip` or `.tar.gz` file.
 
 ## Setting Up Run Scanner
 
-The Run Scanner server requires [Tomcat 8](https://tomcat.apache.org/download-80.cgi).
-
 Create a file called `ROOT.xml` in `$CATALINA_HOME/conf/Catalina/localhost`, creating the directory if necessary, and populate it with the following information:
 
     <Context>
        <Parameter name="runscanner.configFile" value="/etc/runscanner.json" override="false"/>
     </Context>
-    
-If your Tomcat install has the `autoDeploy="true"` flag set in `server.xml`, if
-you delete the `webapps/ROOT` directory and the `ROOT.war` file, Tomcat will
-delete the context `ROOT.xml` file. Either set autoDeploy to false, and
-manually deploy your webapp, or make the `ROOT.xml` file undeletable by using
-`chattr +i` (`chattr -i` will undo this operation). [Upstream
-bug](https://issues.apache.org/bugzilla/show_bug.cgi?id=40050)
 
 In `/etc/runscanner.json`, or another path of your choosing, put JSON data describing your instruments. You will need one record for each instrument:
 
@@ -90,7 +81,7 @@ There will be an important build artefact: `scanner/target/scanner-$VERSION.war`
 
 ## Enabling Illumina scanning
 
-If you would like to scan for Illumina output, please see runscanner-illumina/README.
+If you would like to scan for Illumina output, please see [runscanner-illumina/README.md](runscanner/runscanner-illumina/README.md).
 
 <a id="release" />
 
