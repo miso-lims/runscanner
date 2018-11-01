@@ -2,7 +2,7 @@
 This is a web service that monitors directories on the file system containing
 the output from sequencing instruments and provides them to MISO.
 
-##Prerequisites
+## Prerequisites
 
 * JDK 8
 * Tomcat 8
@@ -81,7 +81,7 @@ There will be an important build artefact: `scanner/target/scanner-$VERSION.war`
 
 ## Enabling Illumina scanning
 
-If you would like to scan for Illumina output, please see [runscanner-illumina/README.md](runscanner/runscanner-illumina/README.md).
+If you would like to scan for Illumina output, please see [runscanner-illumina/README.md](runscanner-illumina/README.md).
 
 <a id="release" />
 
