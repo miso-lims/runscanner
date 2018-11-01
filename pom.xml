@@ -200,6 +200,7 @@
             <propertyName>skipIllumina</propertyName>
             <buildDirectory>${skipIllumina}</buildDirectory>
           </systemPropertyVariables>
+          <useSystemClassLoader>false</useSystemClassLoader>
         </configuration>
       </plugin>
     </plugins>
