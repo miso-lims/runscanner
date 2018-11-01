@@ -563,7 +563,7 @@ int main(int argc, const char **argv) {
 
   /* We can't tell the difference between the stopped or running states, so we
    * just assume running if it isn't finished. */
-  result["healthType"] = is_complete ? "Completed" : "Running";
+  result["healthType"] = is_complete ? "COMPLETED" : "RUNNING";
 
   /* Collect all the metrics. */
   Json::Value metrics_results(Json::arrayValue);
