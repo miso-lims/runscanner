@@ -18,6 +18,7 @@ public enum IlluminaChemistry implements Predicate<Document> {
   NS_MID("//Chemistry=\"NextSeq Mid\""), //
   NS_HIGH("//Chemistry=\"NextSeq High\""), //
   HISEQ_X("//Flowcell=\"HiSeq X\""), //
+  NOVASEQ("contains(//Application, 'NovaSeq')"), //
   UNKNOWN("false");
   private XPathExpression expr;
 
