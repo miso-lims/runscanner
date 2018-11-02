@@ -35,8 +35,6 @@ before_script:
   gcc-5 g++-5 google-chrome-stable
 script: 
   - mvn clean install
-  - echo ${TRAVIS_PULL_REQUEST_SLUG}
-  - echo ${TRAVIS_REPO_SLUG}
   - 'if [[ ${TRAVIS_PULL_REQUEST_SLUG} == ${TRAVIS_REPO_SLUG} ]] ; then
         mvn org.jacoco:jacoco-maven-plugin:prepare-agent sonar:sonar ;
      else
