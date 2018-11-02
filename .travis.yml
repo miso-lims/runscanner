@@ -9,7 +9,6 @@ env:
   - MAVEN_OPTS="-Xms1g -Xmx2g"
   - secure: RqX4u57Pf1t0BngnPpmpYlYSe6n9kIrg+GKVIWc4CjtbIKv0nB+Sx6OAc/DC6RtGxF2jsEvM52LwOLSvaxQAhOcVoFKFzRmwI+qGTMYyPzOdK2OK+X5RmZEgL/4skdawYNixrC25tunStCIGr7/buwr6osEyfuBvqRJipS5xtEjF6BcdcckaYmLlOjScwI10V0zwrEEcfQZLP0OLPnsRLMhY7RJ8bK82Jgp8Cl4ePY1u0AOy7RghGwiq0g8GlICnSswpyekAeu6KD5jGw7Fo8aNBp5f+yweQY3+7CxQ56kEPRK0PNHBBHdizZn3Ql+9IAbf52sEm10rbXRrZBJH9dGBXkPLoZjnxQ7LQhOf/qthBIm2Vqf92qLP5+xK6dsqkPV/buAMfOmZd4CmKv+e/D5jR+btCaOs3c/Xlto5RqIdy9MhdxdHB0svnptj3lgr9yV6tEFLQSZWWQaZ4546An+CMmK0k3t+ptLxs+OE5qd9SDyPECSptp1jTAMKSFcqXI0eVGsIdgu9K+RGFa65WRKf3Azm9L8Ro/zzWqJmbOmZA7u1apc74ZmoESjEMB6gEJwIp1UmqiKmBcUFz6aX0PQIEwRQI3N9YgT33k6IcYDw67/d2mwUeNuyilGQiuj0PqtpzvkwwXcxKR/epWGE3dmXB5PIwbgl9hF7d7x7DfyY=
   matrix:
-  - JOB=SONAR_AND_UNIT_TESTS
   - JOB=RUNSCANNER_TEST
 git:
   depth: 3
@@ -34,7 +33,8 @@ before_script:
 - sudo apt-get install -y pkg-config cmake libjsoncpp-dev autoconf libtool build-essential
   gcc-5 g++-5 google-chrome-stable
 script: 
-  - mvn clean install
+  - export CXX=$(which clang++-5.0 clang++) && pushd runscanner-illumina && ./build-illumina-interop && autoreconf -i && ./configure && make && popd;
+  - PATH=$PATH:$(pwd)/runscanner-illumina mvn clean test -DskipIllumina=false
   - 'if [[ ${TRAVIS_PULL_REQUEST_SLUG} == ${TRAVIS_REPO_SLUG} ]] ; then
         mvn org.jacoco:jacoco-maven-plugin:prepare-agent sonar:sonar ;
      else
