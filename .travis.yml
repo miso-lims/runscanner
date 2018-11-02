@@ -1,53 +1,49 @@
-dist : trusty
+dist: trusty
 language: java
 jdk:
-  - oraclejdk8
+- oraclejdk8
 sudo: required
-env:  
+env:
   global:
-    - MAVEN_SETTINGS="${TRAVIS_BUILD_DIR}/gsi-config"
-    - MAVEN_OPTS="-Xms1g -Xmx2g" 
-  matrix: 
-    - JOB=SONAR_AND_UNIT_TESTS
-    - JOB=RUNSCANNER_TEST
-
+  - MAVEN_SETTINGS="${TRAVIS_BUILD_DIR}/gsi-config"
+  - MAVEN_OPTS="-Xms1g -Xmx2g"
+  - secure: RqX4u57Pf1t0BngnPpmpYlYSe6n9kIrg+GKVIWc4CjtbIKv0nB+Sx6OAc/DC6RtGxF2jsEvM52LwOLSvaxQAhOcVoFKFzRmwI+qGTMYyPzOdK2OK+X5RmZEgL/4skdawYNixrC25tunStCIGr7/buwr6osEyfuBvqRJipS5xtEjF6BcdcckaYmLlOjScwI10V0zwrEEcfQZLP0OLPnsRLMhY7RJ8bK82Jgp8Cl4ePY1u0AOy7RghGwiq0g8GlICnSswpyekAeu6KD5jGw7Fo8aNBp5f+yweQY3+7CxQ56kEPRK0PNHBBHdizZn3Ql+9IAbf52sEm10rbXRrZBJH9dGBXkPLoZjnxQ7LQhOf/qthBIm2Vqf92qLP5+xK6dsqkPV/buAMfOmZd4CmKv+e/D5jR+btCaOs3c/Xlto5RqIdy9MhdxdHB0svnptj3lgr9yV6tEFLQSZWWQaZ4546An+CMmK0k3t+ptLxs+OE5qd9SDyPECSptp1jTAMKSFcqXI0eVGsIdgu9K+RGFa65WRKf3Azm9L8Ro/zzWqJmbOmZA7u1apc74ZmoESjEMB6gEJwIp1UmqiKmBcUFz6aX0PQIEwRQI3N9YgT33k6IcYDw67/d2mwUeNuyilGQiuj0PqtpzvkwwXcxKR/epWGE3dmXB5PIwbgl9hF7d7x7DfyY=
+  matrix:
+  - JOB=SONAR_AND_UNIT_TESTS
+  - JOB=RUNSCANNER_TEST
 git:
   depth: 3
-
 addons:
-    sonarcloud:
-        organization: "miso-lims"
-        token:
-            secure: "CuaZUL0SJiRQR3Z+zvSTKAJc+/SOC+2g5a9gG08NYYSkwN8Ujwoyd9e14DLuyFaY2xZppQb5OIcQWQH+lmZqZbycRuAlBsTy1iIooUFB9v80g5eW8RDaJu3609Y7emSV7sZ3wuTJx3sTDeITAbkhRz0FQ2FyyoFMgD1jI+lxPXA="
-        github_token:
-            secure: "PsRH/x31KHGk/l0QlwMLDj437bKnWxJF45o2AiYZofVQZRVXzhhhpVxMqMl3QZ25K8wq5Qr7F2a2MYdMHtUpl0RBL5TWMDTmP9T1hyjA8IuqYx8Lq2ZklOvB4HJa/HgZEGVRWDyl4XE3giVDsYxPNogFTD1ieE6rs3XC0KkhQWY="
-        branches:
-            - develop
-
+  sonarcloud:
+    organization: miso-lims
+    token:
+      secure: "myIWThaIaO9JuWGIquh/ze6r33Ajx+KRKgUixWWgwJiY5wXPYsAg0y5wkB4jnADi7HyVuAt3OhHu5n5YjylEMitVnQeblpESEcPMbGnfcj/TPUIm6iRuHBYcZaWrPfFCFY5Hd6DSlA3bdFQUD5knJWXWT1ehapDUbimnVkeBJGeauPHpyWlgZcYu7FgTSeRjXd44I1+KRBj1PrGuAQvRpVDHsZASpxcou94rHU8lOFvXO8HqiXMc2jmJKmbnRds9QHB/BfFbLxGF4kt7ndBVWt9q6UDrpfkxqnKhuS2TU0I8ThaEUcWCMeWmnIcBO4C9ElVRKdg8bE8P9ZAJvvG9De48yPlSjlweXiRiWZyPzfJ2JNF0X9yDESvU/5i/XIGTbYrKhBolE1s4E1YaKSWEp/n5Qur+yQBy4qPnsMASjs+8dfFjqMciX1bun6RCEZDDA7g14nnqh1xZkLoFpUfGUZyr8iusHmEWC0CbM7WSirP5UsqN9pqBRifPTFOrBmyYCiEAAQRKvq4aqMswAW8jgISJavQoBfIXLme4knWtEkzaD2C7sMjPwqc+JUG/ix/clU8NPyc1c4e37gqO9Gmp0x/7FAKX8utNoq4a5VEsWtY4sydPCNyaJX/HSXBxX2YvXOXnJ3oArFhVKQJwn8RQT9W5/JYKthZEWABZg8irUA8="
+    github_token:
+      secure: PsRH/x31KHGk/l0QlwMLDj437bKnWxJF45o2AiYZofVQZRVXzhhhpVxMqMl3QZ25K8wq5Qr7F2a2MYdMHtUpl0RBL5TWMDTmP9T1hyjA8IuqYx8Lq2ZklOvB4HJa/HgZEGVRWDyl4XE3giVDsYxPNogFTD1ieE6rs3XC0KkhQWY=
+    branches:
+    - develop
 before_install:
-    - git clone https://github.com/oicr-gsi/gsi-config.git "${MAVEN_SETTINGS}"
-    - cp "${MAVEN_SETTINGS}/settings.xml" "${HOME}/.m2/settings.xml"
-    - 'echo pr slug ${TRAVIS_PULL_REQUEST_SLUG} && echo repo slug ${TRAVIS_REPO_SLUG}'
-
+- git clone https://github.com/oicr-gsi/gsi-config.git "${MAVEN_SETTINGS}"
+- cp "${MAVEN_SETTINGS}/settings.xml" "${HOME}/.m2/settings.xml"
+- echo pr slug ${TRAVIS_PULL_REQUEST_SLUG} && echo repo slug ${TRAVIS_REPO_SLUG}
 before_script:
-  - export MAVEN_OPTS='-Xms1g -Xmx2g' CXX=g++-5
-  - sudo apt-add-repository -y ppa:likemartinma/devel
-  - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
-  - sudo apt-get update
-  - sudo apt-get install -y pkg-config cmake libjsoncpp-dev autoconf libtool build-essential gcc-5 g++-5 google-chrome-stable
-
-script: ./travis_jobs.sh
-
+- export MAVEN_OPTS='-Xms1g -Xmx2g' CXX=g++-5
+- sudo apt-add-repository -y ppa:likemartinma/devel
+- sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+- sudo apt-get update
+- sudo apt-get install -y pkg-config cmake libjsoncpp-dev autoconf libtool build-essential
+  gcc-5 g++-5 google-chrome-stable
+script: 
+  - mvn clean install
+  - 'if [[ ${TRAVIS_PULL_REQUEST_SLUG} == ${TRAVIS_REPO_SLUG} ]] ; then
+        mvn org.jacoco:jacoco-maven-plugin:prepare-agent sonar:sonar ;
+     else
+        echo "[WARN] SonarCloud cannot run on pull requests from forks." ;
+     fi' 
+  -  "./travis_jobs.sh"
 cache:
   directories:
-    - "$HOME/.sonar/cache"
-    - "$HOME/.m2"
-
-      #notifications:
-      #  email: false
-      #  slack:
-      #    rooms:
-      #      secure: Op3cFjj8lw8y5I+Bh4Hq0yt4G9Rx2GNOuwo6onjHGRrlODIPvFE0GCD+aEWmB76qcH/Lq/9NRf86Ik2tWnQbBRrwkH7bcJjmK05DvRFP3gvqIMiReHKugdYcthMnI+ep2PX+tiUMt3OwLAT9F2tpmOjEm2oG6DRsJ45oN/iUpVo=
-      #    on_success: change
-      #    on_failure: always
-
+  - "$HOME/.sonar/cache"
+  - "$HOME/.m2"
+db5dbc971502b5e3bdf5f58ad591339ff6ec0b52:
+  secure: be9/8UI6yksT0Ch/oH48Rp5nldPcNY6G45XXsDx6h2kvG37fHtTngJA5nX7k+YGB6CqcV/Pz/RNQu4AqBXVQ/v2wwlWinm8bVkb5wXahtrBYRt7qBdwB/+YX4l/Z1C3mvYuygOuUgfURxRDqjnugjMX38UJ0gLy0zQmpQdwhE4Ijp7JLG7DN0/RVg+BL6ZInMuvUdj+hX/m9Oovk55e7R0dGrA+RvpmF0hVbec1dPozUPhG4FvqTEdfRvyUPt7KYghCvw+OgGUNEntLWk3zf/3LDwL6xpkH/yE2dmHfq2x1ZLgzu5yOVDOXmIir251m4kaDONYazL2bMh1foE9kPx+NJid0YvIn5tcMCQ15ivD7sxuHMkjWOKxvzDAUBEt6SFvNam8PY6+Ztt1YCRrmz80hUTi1KS+YtjRUe+4X8hLoPsCcyRg+pRdcpfNKZLTlsKjXfalUnxGFclSWZGaHYGcivpZzeS3SC6HqN8N0tLpQIhJ3HM3wqlB3aMt0mh0kMPAEgp++z7xQ2/SUeuBQxqiKOM/+dyTQYiPgSs12BoQxYknrwgG4+BpUZmEmMYzVcWBTDJBFI5NxOHMajGbD9pI0bNzW9zZOWiU0VPNINUH8rzaovy4YgIhZUch9vSSQWfLfa5rlDsps9ZRsnSvaFVmxx7NYxY0obV1n6/e+Jx8Q=
