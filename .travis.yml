@@ -40,7 +40,6 @@ script:
      else
         echo "[WARN] SonarCloud cannot run on pull requests from forks." ;
      fi' 
-  -  "./travis_jobs.sh"
 cache:
   directories:
   - "$HOME/.sonar/cache"
