@@ -48,7 +48,8 @@ public enum HealthType {
   }
   
   //TODO remove me after sonarcloud does its thing
-  public void junkMethodIsJunk(String unusedParam) throws Exception {
+  //TODO get sonarqube to recognize this method for what it is
+  public void sameOldJunkMethodBrandNewName(String unusedParam) throws Exception {
 	  if (true) {
 		  throw new Exception("this is garbage");
 	  }
