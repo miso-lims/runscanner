@@ -14,7 +14,7 @@ git:
   depth: 3
 addons:
   sonarcloud:
-    organization: miso-lims
+    organization: oicr-gsi
     token:
       secure: "GqCAh7zkWHoTXoWrOJQ57JS95/s9YZYBHyVRG9Hn0+sr+mAcPxWBXAHsEf4LKwSkP5Spa8AGoX+7LIzlO9ZKxZYA307wzkL1dsxyczVVmNcqueWy6Lv8K4K9FN/XObZApvo7qA83jNbVAZdNo/C97xW//PXQWs8cbkXj59KnC3UUKOB7QGdUrNs9IRZokPK6UG+fv0lWv9QpD+8FIZFRfnsBAaIsqXHkX+Ab4uCKV6Svox9GZJMpnUw5ERKC1Tf40X+ryUwW2/fsLOdy59GMWm1uutKCzOcXiJZo+lXomDWmq4i/iyt/J2VfGNFEXfpzsOHTQ/TeCo5YwZv5yf3DqaBZyDRsPLhX/v+3B5pFiovayDY0uaPcQ5PjG8XyO3CnmdYuhD+HM5+/wTe2z+duMo5n28dI5neXYOvmniBdu3Cs7pt6DbKXBPptIf5qW3Zpyh6rVukKCLbTyamlS9maJ8aimPKWMZETul4lKfz8fjp6ki+LoHua3Q7xttCByurdJv2OT4/tbXdRYQjdBWIXsfjeEaBQl1dV6oJOAA6wSpToKWf0vBVTRLAGL/U1KBau2sLRan1IcS43/LNDI7Ufv4maa+L5IrXe+brTnMLMEtm8+IyUD0b2Zp4H5ELz56k+zxW4fp7u5UP0XUedY+J1mokhiXmBbej4n9TH/msS9uo="
     github_token:
