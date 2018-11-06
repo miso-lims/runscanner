@@ -1,51 +1,47 @@
 dist: trusty
 language: java
 jdk:
-- oraclejdk8
+  - oraclejdk8
 sudo: required
 env:
   global:
-  - MAVEN_SETTINGS="${TRAVIS_BUILD_DIR}/gsi-config"
   - MAVEN_OPTS="-Xms1g -Xmx2g"
-  - secure: RqX4u57Pf1t0BngnPpmpYlYSe6n9kIrg+GKVIWc4CjtbIKv0nB+Sx6OAc/DC6RtGxF2jsEvM52LwOLSvaxQAhOcVoFKFzRmwI+qGTMYyPzOdK2OK+X5RmZEgL/4skdawYNixrC25tunStCIGr7/buwr6osEyfuBvqRJipS5xtEjF6BcdcckaYmLlOjScwI10V0zwrEEcfQZLP0OLPnsRLMhY7RJ8bK82Jgp8Cl4ePY1u0AOy7RghGwiq0g8GlICnSswpyekAeu6KD5jGw7Fo8aNBp5f+yweQY3+7CxQ56kEPRK0PNHBBHdizZn3Ql+9IAbf52sEm10rbXRrZBJH9dGBXkPLoZjnxQ7LQhOf/qthBIm2Vqf92qLP5+xK6dsqkPV/buAMfOmZd4CmKv+e/D5jR+btCaOs3c/Xlto5RqIdy9MhdxdHB0svnptj3lgr9yV6tEFLQSZWWQaZ4546An+CMmK0k3t+ptLxs+OE5qd9SDyPECSptp1jTAMKSFcqXI0eVGsIdgu9K+RGFa65WRKf3Azm9L8Ro/zzWqJmbOmZA7u1apc74ZmoESjEMB6gEJwIp1UmqiKmBcUFz6aX0PQIEwRQI3N9YgT33k6IcYDw67/d2mwUeNuyilGQiuj0PqtpzvkwwXcxKR/epWGE3dmXB5PIwbgl9hF7d7x7DfyY=
-  matrix:
-  - JOB=RUNSCANNER_TEST
+
 git:
   depth: 3
+
 addons:
   sonarcloud:
     organization: oicr-gsi
     token:
-      secure: "GqCAh7zkWHoTXoWrOJQ57JS95/s9YZYBHyVRG9Hn0+sr+mAcPxWBXAHsEf4LKwSkP5Spa8AGoX+7LIzlO9ZKxZYA307wzkL1dsxyczVVmNcqueWy6Lv8K4K9FN/XObZApvo7qA83jNbVAZdNo/C97xW//PXQWs8cbkXj59KnC3UUKOB7QGdUrNs9IRZokPK6UG+fv0lWv9QpD+8FIZFRfnsBAaIsqXHkX+Ab4uCKV6Svox9GZJMpnUw5ERKC1Tf40X+ryUwW2/fsLOdy59GMWm1uutKCzOcXiJZo+lXomDWmq4i/iyt/J2VfGNFEXfpzsOHTQ/TeCo5YwZv5yf3DqaBZyDRsPLhX/v+3B5pFiovayDY0uaPcQ5PjG8XyO3CnmdYuhD+HM5+/wTe2z+duMo5n28dI5neXYOvmniBdu3Cs7pt6DbKXBPptIf5qW3Zpyh6rVukKCLbTyamlS9maJ8aimPKWMZETul4lKfz8fjp6ki+LoHua3Q7xttCByurdJv2OT4/tbXdRYQjdBWIXsfjeEaBQl1dV6oJOAA6wSpToKWf0vBVTRLAGL/U1KBau2sLRan1IcS43/LNDI7Ufv4maa+L5IrXe+brTnMLMEtm8+IyUD0b2Zp4H5ELz56k+zxW4fp7u5UP0XUedY+J1mokhiXmBbej4n9TH/msS9uo="
-    github_token:
-      secure: "cUpMuKzqk4YCMuDVEZ1Mc84bzarf4bFArAdV18qB21y54wie9If5EAW9le//vVeO3Ss8HRWHg7XFzxT0szhwF8iGh3spYc1dMavQGGHmVc1HhBcYmwCuPm2mAJc8ZFgtfJj5UFl3NfY9UzQGz1SbuhdCNqObYArUZc1zgpHTDsoR7ojJPttOZ4NH2WEAyvkSphYn/7MfMqs2+k/bDn2zBonICH2niBLZd+8l2WoGhnYISzA7g7bm4J90+TyVidNvgkvU4k73tWJcOR51nMq/ePkzWl6qTgjquuhYI2L4gzxjp1ve7MzAzB/rWK5hv4gdEDoMeG4wLZ+cm7eVgDbFWZWcHgDBrlggOUlm80bDY1PclBBP0o8mRVxo/YRiCLCNwdSf7vdoABNdysrNryagq3fm3FrL0u4M51RBMF/FqZZqYYQPtsyaQPiU+MnKrb5FGyZPuKT+tgVmEA5E/CGLLhdvw/fmJ+sDPyqrB24u9AS5Wx02CT6ce421HPCqO2QynY7+ApyDW2o82+jqFk37A7U/AiEHSHPn/zUiwweZZAVguyWb2ZanqXgdTu74a3ypWh94x+tf27VW8g5sGXsPYlYItqXvMU6il8nSB2M+jX74WZoAcx1rsHl+OBPPWaTdBGO3zxkL+mg6W8osEWMsPmr+W7Zte/Fdrl//I91Cu/Q="
+      secure: "ir0+0HskebO/EBd4Zb/OFmm65wmYzi1ipu95zXk7LX9Bu1z6HrLkLjb1DRFBwZWha9aLMFtfBomu9SLzNOjxNzmSwkZIc9Dheb+tXPAFIFv54CNW57bcx6Ka+Bpsk4f8aQgkBwz125AXXm6i4E5o7w7E1w3EgJ2SBul76ivr65lQ2uaXvjiiiu3V+cTGqCGBe/MEhP2dMN4d1QqqvY/oJGSf8nKlbiHvciLfPrC56POnzhpGXKATQ1dhcPrxVMG5ki2eWG6KLA0t0Oxhkl4+1Uhu+6qv4ggR2qwLhM9Xla2Ilu/61uLiKFzVR6QG5CGWj+SJatE2HMvKkJ1Ecr69BfSUY7/MJvQarwbdkekuth7+yvESwe3WnBGZu51X9KMZOiChzvWb93ECEuJ02uy5Vzv5xEJkpe49QkvzULzxLpIsT6ytdyA4EQNwtRKzE8umu1uuTFRs4hSOQz8UmQMZq8TW68h18cJaxUY5z27bc579O0KiE4TrJV0/eI/hAlyxNFRHrboPa57YKow3sdIQltZs2xHYLp6nmhBR0fL2Rx/m8PaBtStORHhkx6US59Bt+tHhTQf49dncmRJy2OIR9xiJW9pt7n8xD/hz940Y9VLFz0WtmuZiOYyShs4d5KJpSMTbs3n9BytDtGAzPCW8MNfJXoxvmm3YIuob+PJAvIA="
     branches:
-    - master
-    - develop
+      - master
+
 before_install:
-- git clone https://github.com/oicr-gsi/gsi-config.git "${MAVEN_SETTINGS}"
-- cp "${MAVEN_SETTINGS}/settings.xml" "${HOME}/.m2/settings.xml"
-- echo pr slug ${TRAVIS_PULL_REQUEST_SLUG} && echo repo slug ${TRAVIS_REPO_SLUG}
+  - echo pr slug ${TRAVIS_PULL_REQUEST_SLUG} && echo repo slug ${TRAVIS_REPO_SLUG}
+
 before_script:
-- export MAVEN_OPTS='-Xms1g -Xmx2g' CXX=g++-5
-- sudo apt-add-repository -y ppa:likemartinma/devel
-- sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
-- sudo apt-get update
-- sudo apt-get install -y pkg-config cmake libjsoncpp-dev autoconf libtool build-essential
-  gcc-5 g++-5 google-chrome-stable
+  - export MAVEN_OPTS='-Xms1g -Xmx2g' CXX=g++-5
+  - sudo apt-add-repository -y ppa:likemartinma/devel
+  - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+  - sudo apt-get update
+  - sudo apt-get install -y pkg-config cmake libjsoncpp-dev autoconf libtool build-essential gcc-5 g++-5 google-chrome-stable
+
 script: 
   - pushd runscanner-illumina && ./build-illumina-interop && autoreconf -i && ./configure && make && popd;
   - PATH=$PATH:$(pwd)/runscanner-illumina mvn clean test -DskipIllumina=false
-  - echo ${TRAVIS_PULL_REQUEST_SLUG}
-  - echo ${TRAVIS_REPO_SLUG}
   - 'if [[ ${TRAVIS_PULL_REQUEST_SLUG} == ${TRAVIS_REPO_SLUG} ]] ; then
         mvn org.jacoco:jacoco-maven-plugin:prepare-agent sonar:sonar ;
      else
         echo "[WARN] SonarCloud cannot run on pull requests from forks." ;
      fi' 
+
 cache:
   directories:
-  - "$HOME/.sonar/cache"
-  - "$HOME/.m2"
+    - "$HOME/.sonar/cache"
+    - "$HOME/.m2"
+
 notifications:
   email: true
+
