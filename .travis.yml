@@ -18,9 +18,6 @@ addons:
     branches:
       - master
 
-before_install:
-  - echo pr slug ${TRAVIS_PULL_REQUEST_SLUG} && echo repo slug ${TRAVIS_REPO_SLUG}
-
 before_script:
   - export MAVEN_OPTS='-Xms1g -Xmx2g' CXX=g++-5
   - sudo apt-add-repository -y ppa:likemartinma/devel
@@ -31,11 +28,7 @@ before_script:
 script: 
   - pushd runscanner-illumina && ./build-illumina-interop && autoreconf -i && ./configure && make && popd;
   - PATH=$PATH:$(pwd)/runscanner-illumina mvn clean test -DskipIllumina=false
-  - 'if [[ ${TRAVIS_PULL_REQUEST_SLUG} == ${TRAVIS_REPO_SLUG} ]] ; then
-        mvn org.jacoco:jacoco-maven-plugin:prepare-agent sonar:sonar ;
-     else
-        echo "[WARN] SonarCloud cannot run on pull requests from forks." ;
-     fi' 
+  - mvn org.jacoco:jacoco-maven-plugin:prepare-agent sonar:sonar
 
 cache:
   directories:
