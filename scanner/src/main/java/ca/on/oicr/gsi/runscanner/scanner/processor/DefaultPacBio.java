@@ -190,7 +190,7 @@ public class DefaultPacBio extends RunProcessor {
       } else if (poolInfo.containsKey(well)) {
         // If there are multiple things assigned to this well in the sample sheet, then MISO will not be able to figure out a single pool to
         // assign to this well. In this case, we set the pool to be the empty string so that nothing will be automatically assigned.
-        log.error(String.format("Multiple pools in well %s on run %s; abandoing automatic pool assignment", well, dto.getRunAlias()));
+        log.warn(String.format("Multiple pools in well %s on run %s; abandoing automatic pool assignment", well, dto.getRunAlias()));
         name = "";
       }
       poolInfo.put(well, name);
