@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/oicr-gsi/runscanner.svg)](https://travis-ci.org/Ooicr-gsi/runscanner)https://sonarcloud.io/api/project_badges/measure?project=ca.on.oicr.gsi.runscanner%3Arunscanner&metric=alert_status
+[![Build Status](https://travis-ci.org/oicr-gsi/runscanner.svg)](https://travis-ci.org/oicr-gsi/runscanner)https://sonarcloud.io/api/project_badges/measure?project=ca.on.oicr.gsi.runscanner%3Arunscanner&metric=alert_status
 
 # Run Scanner
 This is a web service that monitors directories on the file system containing
