@@ -368,7 +368,7 @@ public class Scheduler {
         return destination;
       }).collect(Collectors.toList());
       configurationEntries.set(roots.size());
-      isConfigurationGood = roots.size() > 0;
+      isConfigurationGood = !roots.isEmpty();
     } catch (IOException e) {
       log.error("Confguration is bad.", e);
       isConfigurationGood = false;
@@ -411,9 +411,9 @@ public class Scheduler {
               .peek(accepted)//
               .filter(entry -> isUnprocessed(entry.first()))//
               .peek(newRuns)//
-              .forEach(entry -> {
+              .forEach(entry -> 
                 queueDirectory(entry.first(), entry.second().getProcessor(), entry.second().getTimeZone());
-              });
+               );
         } catch (Exception e) {
           log.error("Error scanning directory.", e);
         }

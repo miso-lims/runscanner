@@ -17,7 +17,7 @@ public class ScannerAppListener implements ApplicationListener<ApplicationContex
     if (event instanceof ContextStartedEvent || event instanceof ContextRefreshedEvent) {
       DefaultExports.initialize();
       event.getApplicationContext().getBean(Scheduler.class).start();
-    } else if (event instanceof ContextStoppedEvent || event instanceof ContextStoppedEvent) {
+    } else if (event instanceof ContextStoppedEvent) {
       event.getApplicationContext().getBean(Scheduler.class).stop();
     }
 
