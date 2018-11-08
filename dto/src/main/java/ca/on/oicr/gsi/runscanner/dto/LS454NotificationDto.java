@@ -1,6 +1,5 @@
 package ca.on.oicr.gsi.runscanner.dto;
 
-import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.type.Platform;
 
 public class LS454NotificationDto extends NotificationDto {

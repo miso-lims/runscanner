@@ -103,10 +103,9 @@ public final class DefaultIllumina extends RunProcessor {
   private static Optional<HealthType> getHealth(Document document) {
     try {
       String status = (String) RUN_COMPLETION_STATUS_EXPRESSION.evaluate(document, XPathConstants.STRING);
-      switch (status) {
-      case "CompletedAsPlanned":
+      if(status.equals("CompletedAsPlanned")) {
         return Optional.of(HealthType.COMPLETED);
-      default:
+      } else {
         log.debug("New Illumina completion status found: %s", status);
       }
     } catch (XPathExpressionException e) {
