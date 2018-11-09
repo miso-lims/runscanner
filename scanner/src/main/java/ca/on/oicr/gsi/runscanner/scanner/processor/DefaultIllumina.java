@@ -97,7 +97,27 @@ public final class DefaultIllumina extends RunProcessor {
 
   public static DefaultIllumina create(Builder builder, ObjectNode parameters) {
     return new DefaultIllumina(builder,
-        parameters.hasNonNull("checkOutput") ? parameters.get("checkOutput").asBoolean() : true);
+        calculateCheckOutput(parameters));
+  }
+  
+  /**
+   * Calculates whether or not to check output based on parameter.
+   * 
+   * If checkOutput is not specified (i.e., is null), check output.
+   * (If checkOutput is not non-null, return true)
+   * If checkOutput is specified, use its value.
+   * 
+   * checkOutput | return
+   * ====================
+   * null        | T
+   * T           | T
+   * F           | F
+   * 
+   * @param parameters ObjectNode possibly containing checkOutput parameter
+   * @return true if checkOutput is true or null, false if checkOutput is explicitly false.
+   */
+  private static boolean calculateCheckOutput(ObjectNode parameters) {
+	  return !parameters.hasNonNull("checkOutput") || parameters.get("checkOutput").asBoolean();
   }
 
   private static Optional<HealthType> getHealth(Document document) {
@@ -106,7 +126,7 @@ public final class DefaultIllumina extends RunProcessor {
       if(status.equals("CompletedAsPlanned")) {
         return Optional.of(HealthType.COMPLETED);
       } else {
-        log.debug("New Illumina completion status found: %s", status);
+        log.debug("New Illumina completion status found: " + status);
       }
     } catch (XPathExpressionException e) {
       log.error("Failed to evaluate completion status", e);
