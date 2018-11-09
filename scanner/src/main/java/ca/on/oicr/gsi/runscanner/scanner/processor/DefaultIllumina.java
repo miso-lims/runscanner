@@ -126,7 +126,7 @@ public final class DefaultIllumina extends RunProcessor {
       if(status.equals("CompletedAsPlanned")) {
         return Optional.of(HealthType.COMPLETED);
       } else {
-        log.debug("New Illumina completion status found: " + status);
+        log.debug("New Illumina completion status found: {}", status);
       }
     } catch (XPathExpressionException e) {
       log.error("Failed to evaluate completion status", e);
