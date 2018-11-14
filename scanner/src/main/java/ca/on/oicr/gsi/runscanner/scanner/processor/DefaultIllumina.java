@@ -87,7 +87,7 @@ public final class DefaultIllumina extends RunProcessor {
       FLOWCELL_PAIRED = xpath.compile("//Setup/PairEndFC/text()");
 
       XPathExpression miSeqPartNumber = xpath.compile("//FlowcellRFIDTag/PartNumber/text()");
-      XPathExpression novaSeqPartNum = xpath.compile("//FlowCellRfidTag/PartNumber/text()");
+      XPathExpression novaSeqPartNum = xpath.compile("//RfidsInfo/FlowCellMode/text()");
 
       CONTAINER_PARTNUMBER_XPATHS = Collections.unmodifiableSet(Sets.newHashSet(miSeqPartNumber, novaSeqPartNum));
     } catch (XPathExpressionException e) {
