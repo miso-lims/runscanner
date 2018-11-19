@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
@@ -75,6 +76,7 @@ public final class DefaultIllumina extends RunProcessor {
   private static final Predicate<String> BCL_BGZF_FILENAME = Pattern.compile("^[0-9]*\\.(bcl\\.bgzf|cbcl)").asPredicate();
 
   private static final Set<XPathExpression> CONTAINER_PARTNUMBER_XPATHS;
+  private static final Set<XPathExpression> POSITION_XPATHS;
 
   private static final XPathExpression FLOWCELL;
   private static final Pattern FLOWCELL_PATTERN = Pattern.compile("^([a-zA-Z]+(?: Rapid)?) (Flow Cell v\\d)$");
@@ -89,8 +91,12 @@ public final class DefaultIllumina extends RunProcessor {
       XPathExpression miSeqPartNumber = xpath.compile("//FlowcellRFIDTag/PartNumber/text()");
       XPathExpression nextSeqPartNumber = xpath.compile("//FlowCellRfidTag/PartNumber/text()");
       XPathExpression novaSeqPartNum = xpath.compile("//RfidsInfo/FlowCellMode/text()");
-
       CONTAINER_PARTNUMBER_XPATHS = Collections.unmodifiableSet(Sets.newHashSet(miSeqPartNumber, nextSeqPartNumber, novaSeqPartNum));
+      
+      XPathExpression hiSeqPosition = xpath.compile("//Setup/FCPosition/text()");
+      XPathExpression novaSeqPosition = xpath.compile("//Side/text()");
+      POSITION_XPATHS = Collections.unmodifiableSet(Sets.newHashSet(hiSeqPosition, novaSeqPosition));
+      
     } catch (XPathExpressionException e) {
       throw new IllegalStateException("Failed to compile xpaths", e);
     }
@@ -203,6 +209,7 @@ public final class DefaultIllumina extends RunProcessor {
           dto.setChemistry(Arrays.stream(IlluminaChemistry.values()).filter(chemistry -> chemistry.test(runParams)).findFirst()
               .orElse(IlluminaChemistry.UNKNOWN));
           dto.setContainerModel(findContainerModel(runParams));
+          dto.setSequencerPosition(findSequencerPosition(runParams));
         });
 
     // See if we can figure out a sample sheet
@@ -324,17 +331,7 @@ public final class DefaultIllumina extends RunProcessor {
 
   private String findContainerModel(Document runParams) {
     // See if we can figure out the container model
-    String partNum = CONTAINER_PARTNUMBER_XPATHS.stream()
-        .map(expr -> {
-          try {
-            return expr.evaluate(runParams);
-          } catch (XPathExpressionException e) {
-            // ignore
-            return null;
-          }
-        })
-        .filter(model -> !isStringEmptyOrNull(model))
-        .findAny().orElse(null);
+    String partNum = getValueFromXml(runParams, CONTAINER_PARTNUMBER_XPATHS);
     if (partNum != null) {
       return partNum;
     }
@@ -354,6 +351,24 @@ public final class DefaultIllumina extends RunProcessor {
       // ignore
       return null;
     }
+  }
+  
+  private String findSequencerPosition(Document runParams) {
+    return getValueFromXml(runParams, POSITION_XPATHS);
+  }
+  
+  private static String getValueFromXml(Document xml, Collection<XPathExpression> xpaths) {
+    return xpaths.stream()
+        .map(expr -> {
+          try {
+            return expr.evaluate(xml);
+          } catch (XPathExpressionException e) {
+            // ignore
+            return null;
+          }
+        })
+        .filter(model -> !isStringEmptyOrNull(model))
+        .findAny().orElse(null);
   }
 
   /**
