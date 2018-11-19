@@ -35,6 +35,7 @@ public abstract class NotificationDto{
   private String runAlias;
   private String sequencerFolderPath;
   private String sequencerName;
+  private String sequencerPosition;
   private String containerSerialNumber;
   private String containerModel;
   private int laneCount;
@@ -71,6 +72,14 @@ public abstract class NotificationDto{
 
   public void setSequencerName(String sequencerName) {
     this.sequencerName = sequencerName;
+  }
+
+  public String getSequencerPosition() {
+    return sequencerPosition;
+  }
+
+  public void setSequencerPosition(String sequencerPosition) {
+    this.sequencerPosition = sequencerPosition;
   }
 
   /**
