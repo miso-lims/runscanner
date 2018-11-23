@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/oicr-gsi/runscanner.svg)](https://travis-ci.org/oicr-gsi/runscanner)![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=ca.on.oicr.gsi.runscanner%3Arunscanner&metric=alert_status)(https://sonarcloud.io/dashboard?id=ca.on.oicr.gsi.runscanner:runscanner)
+[![Build Status](https://travis-ci.org/oicr-gsi/runscanner.svg)](https://travis-ci.org/oicr-gsi/runscanner)[![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=ca.on.oicr.gsi.runscanner%3Arunscanner&metric=alert_status)](https://sonarcloud.io/dashboard?id=ca.on.oicr.gsi.runscanner:runscanner)
 
 # Run Scanner
 This is a web service that monitors directories on the file system containing
