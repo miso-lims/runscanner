@@ -55,7 +55,7 @@ public class Testing extends RunProcessor {
     Matcher m = INTEGER_TAIL.matcher(runDirectory.getName());
     if (m.matches()) {
       try {
-        wait(Integer.parseInt(m.group(1)) * 1000);
+        wait(Integer.parseInt(m.group(1)) * 1_000L);
       } catch (NumberFormatException | InterruptedException e) {
         // We really don't care if either of these happen.
       }

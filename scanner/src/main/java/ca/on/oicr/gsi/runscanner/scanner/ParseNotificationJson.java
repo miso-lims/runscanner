@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.core.JsonGenerationException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
@@ -20,7 +18,7 @@ import ca.on.oicr.gsi.runscanner.scanner.processor.RunProcessor;
  */
 public class ParseNotificationJson {
 
-  public static void main(String[] args) throws JsonGenerationException, JsonMappingException, IOException {
+  public static void main(String[] args) throws IOException {
     ObjectMapper mapper = RunProcessor.createObjectMapper();
 
     List<NotificationDto> dtos = Arrays.stream(args).map(File::new).map(f -> {

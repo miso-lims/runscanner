@@ -44,6 +44,8 @@ import ca.on.oicr.gsi.runscanner.scanner.processor.RunProcessor;
  */
 @Service
 public class Scheduler {
+	private static final String PLATFORM_LABEL = "platform";
+	
   /**
    * Holder for a run that has been scanned.
    */
@@ -175,17 +177,17 @@ public class Scheduler {
       .help("The current round of processing done for keeping the client in sync when progressively scanning.").register();
 
   private static final Counter errors = Counter.build().name("miso_runscanner_errors").help("The number of bad directories encountered.")
-      .labelNames("platform").register();
+      .labelNames(PLATFORM_LABEL).register();
   private static Logger log = LoggerFactory.getLogger(Scheduler.class);
   private static final Gauge newRunsScanned = Gauge.build().name("miso_runscanner_new_runs_scanned")
       .help("The number of runs discovered in the last pass.").register();
 
-  private static final Gauge processingRuns = Gauge.build().name("miso_runscanner_processing_runs").labelNames("platform").help(
+  private static final Gauge processingRuns = Gauge.build().name("miso_runscanner_processing_runs").labelNames(PLATFORM_LABEL).help(
       "The number of runs currently being processed.").register();
 
   private static final Histogram processTime = Histogram.build().buckets(1, 5, 10, 30, 60, 300, 600, 3600)
       .name("miso_runscanner_directory_process_time").help("Time to process a run directories in seconds.")
-      .labelNames("platform", "instrument").register();
+      .labelNames(PLATFORM_LABEL, "instrument").register();
 
   private static final Counter reentered = Counter.build().name("miso_runscanner_reentered")
       .help("The number of times the scanner was already running while scheduled to run again.").register();
@@ -193,7 +195,7 @@ public class Scheduler {
   private static final LatencyHistogram scanTime = new LatencyHistogram("miso_runscanner_directory_scan_time",
       "Time to scan the run directories in seconds.");
   private static final Gauge waitingRuns = Gauge.build().name("miso_runscanner_waiting_runs").help(
-      "The number of runs waiting to be processed.").labelNames("platform").register();
+      "The number of runs waiting to be processed.").labelNames(PLATFORM_LABEL).register();
 
   private File configurationFile;
 
