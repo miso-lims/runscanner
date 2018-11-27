@@ -1,0 +1,24 @@
+#!/bin/sh
+
+set -eux
+
+git checkout master
+git pull
+xmlstarlet sel -t -v /_:project/_:version pom.xml | sed -e s/-SNAPSHOT//g > version.temp
+${EDITOR:-editor} version.temp
+RUNSCANNER_VERSION=$(cat version.temp)
+RUNSCANNER_VERSION_NEXT=$(awk -F. '{print $1 "." $2 "." ($3 + 1) "-SNAPSHOT"}' version.temp)
+rm version.temp
+git checkout -b v${RUNSCANNER_VERSION_NEXT}_pr
+mvn clean install
+mvn versions:set -DnewVersion=${RUNSCANNER_VERSION} -DgenerateBackupPoms=false
+git commit -a -m "Run Scanner ${RUNSCANNER_VERSION} release"
+git tag -a v${RUNSCANNER_VERSION} -m "Run Scanner ${RUNSCANNER_VERSION} release"
+mvn deploy
+mvn versions:set -DnewVersion=${RUNSCANNER_VERSION_NEXT} -DgenerateBackupPoms=false
+git commit -a -m "prepared for next development iteration"
+git push origin v${RUNSCANNER_VERSION}
+git push -u origin v${RUNSCANNER_VERSION_NEXT}_pr
+set +x
+
+echo RUNSCANNER_VERSION=${RUNSCANNER_VERSION}
