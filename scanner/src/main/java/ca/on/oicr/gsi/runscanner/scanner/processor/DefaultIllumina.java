@@ -374,7 +374,22 @@ public final class DefaultIllumina extends RunProcessor {
   }
   
   private String findSequencerPosition(Document runParams) {
-    return getValueFromXml(runParams, POSITION_XPATHS);
+    String position = getValueFromXml(runParams, POSITION_XPATHS);
+    position = fixIfHasBadNovaSeqPosition(position);
+    return position;
+  }
+
+  /**
+  * Some earlier NovaSeqs had software which wrote the sides as "Left"/"Right" instead of Illumina's usual "A"/"B". 
+  * Later versions of the software corrected this, so this standardizes the runscanner position for all NovaSeqs.
+  * @param position 
+  * @return String position
+  */
+  private String fixIfHasBadNovaSeqPosition(String position) {
+    if (position == null) return position;
+    if ("Left".equals(position)) return "A";
+    if ("Right".equals(position)) return "B";
+    return position;
   }
   
   private static String getValueFromXml(Document xml, Collection<XPathExpression> xpaths) {
