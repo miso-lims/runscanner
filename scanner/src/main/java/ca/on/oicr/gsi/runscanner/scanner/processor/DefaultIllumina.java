@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.ProcessBuilder.Redirect;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -237,7 +238,7 @@ public final class DefaultIllumina extends RunProcessor {
         .filter(File::canRead)//
         .map(File::toPath)
         .map(WhineyFunction.rethrow(path -> {
-          try (Stream<String> lines = Files.lines(path)) {
+          try (Stream<String> lines = Files.lines(path, StandardCharsets.ISO_8859_1)) {
             return lines.filter(rejectUntil(line -> line.startsWith("Sample_ID,")))//
                 .map(COMMA::split)//
                 .map(Pair.number(1))
