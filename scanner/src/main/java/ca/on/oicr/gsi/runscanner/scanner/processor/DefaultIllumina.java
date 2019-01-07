@@ -72,7 +72,7 @@ public final class DefaultIllumina extends RunProcessor {
 
   private static final Pattern COMMA = Pattern.compile(",");
 
-  private static final Predicate<String> BCL_FILENAME = Pattern.compile("^s_[0-9]*_[0-9]*\\.bcl(\\.gz)?").asPredicate();
+  private static final Predicate<String> BCL_FILENAME = Pattern.compile("^(s_[0-9]*_[0-9]*\\.bcl(\\.gz)?|L\\d*_\\d*.cbcl)").asPredicate();
 
   private static final Predicate<String> BCL_BGZF_FILENAME = Pattern.compile("^[0-9]*\\.(bcl\\.bgzf|cbcl)").asPredicate();
 
