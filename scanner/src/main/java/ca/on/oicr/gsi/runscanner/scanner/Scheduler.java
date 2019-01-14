@@ -165,7 +165,8 @@ public class Scheduler {
 
   private static final Gauge attemptedDirectories = Gauge.build().name("miso_runscanner_directories_attempted")
       .help("The number of directories that were considered in the last pass.").register();
-
+  private static final Gauge badRuns = Gauge.build().name("miso_runscanner_bad_runs").help(
+	      "The number of runs that failed to process.").register();
   private static final Gauge configurationEntries = Gauge.build().name("miso_runscanner_configuration_entries")
       .help("The number of entries from the last configuration.").register();
   private static final Gauge configurationTimestamp = Gauge.build().name("miso_runscanner_configuration_timestamp")
@@ -341,6 +342,7 @@ public class Scheduler {
         errors.labels(processor.getPlatformType().name()).inc();
         failed.put(directory, Instant.now());
       }
+      badRuns.set(failed.size());
       processTime.labels(processor.getPlatformType().name(), instrumentName).observe((System.nanoTime() - runStartTime) / 1e9);
       processing.remove(directory);
       processingRuns.labels(processor.getPlatformType().name()).dec();
