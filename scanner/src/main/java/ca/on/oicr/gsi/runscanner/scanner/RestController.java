@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -44,9 +45,12 @@ public class RestController {
    * selected.
    */
   @GetMapping(value = "/run/{name}", produces = { "application/json" })
-  @ResponseBody
-  public NotificationDto getByName(@PathVariable("name") String id) {
-    return scheduler.finished().filter(dto -> dto.getRunAlias().equals(id)).findAny().orElse(null);
+  public ResponseEntity<NotificationDto> getByName(@PathVariable("name") String id) {
+    return scheduler.finished()
+            .filter(dto -> dto.getRunAlias().equals(id))
+            .findAny()
+            .map(dto -> new ResponseEntity<>(dto, HttpStatus.OK))
+            .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
   }
 
   /**
