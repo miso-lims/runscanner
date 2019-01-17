@@ -1,5 +1,9 @@
 package ca.on.oicr.gsi.runscanner.scanner.processor;
 
+import ca.on.oicr.gsi.runscanner.dto.IlluminaNotificationDto;
+import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
+import ca.on.oicr.gsi.runscanner.dto.PacBioNotificationDto;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -8,19 +12,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import ca.on.oicr.gsi.runscanner.dto.IlluminaNotificationDto;
-import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
-import ca.on.oicr.gsi.runscanner.dto.PacBioNotificationDto;
-
-
 /**
  * This is a test run scanner for debugging an testing purposes.
- * 
- * It scans a directory containing folders with a file named <code>notification.json</code> containing an appropriate subtype of
- * {@link NotificationDto} and returns it.
- * If the directory name ends in "-Xs", then the scanner will wait X seconds pretending to process the run.
+ *
+ * <p>It scans a directory containing folders with a file named <code>notification.json</code>
+ * containing an appropriate subtype of {@link NotificationDto} and returns it. If the directory
+ * name ends in "-Xs", then the scanner will wait X seconds pretending to process the run.
  */
 public class Testing extends RunProcessor {
   private static final Pattern INTEGER_TAIL = Pattern.compile("-(\\d+)s$");
@@ -29,17 +26,15 @@ public class Testing extends RunProcessor {
     super(builder);
   }
 
-  /**
-   * Determine the right DTO class to parse as based on the platform type.
-   */
+  /** Determine the right DTO class to parse as based on the platform type. */
   private Class<? extends NotificationDto> classForPlatform() {
     switch (getPlatformType()) {
-    case ILLUMINA:
-      return IlluminaNotificationDto.class;
-    case PACBIO:
-      return PacBioNotificationDto.class;
-    default:
-      return NotificationDto.class;
+      case ILLUMINA:
+        return IlluminaNotificationDto.class;
+      case PACBIO:
+        return PacBioNotificationDto.class;
+      default:
+        return NotificationDto.class;
     }
   }
 
@@ -62,5 +57,4 @@ public class Testing extends RunProcessor {
     }
     return mapper.readValue(new File(runDirectory, "notification.json"), classForPlatform());
   }
-
 }

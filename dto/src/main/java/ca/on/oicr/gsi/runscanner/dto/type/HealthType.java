@@ -25,11 +25,10 @@ package ca.on.oicr.gsi.runscanner.dto.type;
 
 /**
  * This enum represents the health of a particular object, given some kind of underlying process
- * 
+ *
  * @author Rob Davey
  * @since 0.0.2
  */
-
 public enum HealthType {
   UNKNOWN(false), //
   COMPLETED(true), //
@@ -47,4 +46,3 @@ public enum HealthType {
     return isDone;
   }
 }
-

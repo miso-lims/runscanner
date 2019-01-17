@@ -1,10 +1,8 @@
 package ca.on.oicr.gsi.runscanner.dto;
 
+import ca.on.oicr.gsi.runscanner.dto.type.Platform;
 import java.util.Map;
 import java.util.Optional;
-
-import ca.on.oicr.gsi.runscanner.dto.type.Platform;
-
 
 public class PacBioNotificationDto extends NotificationDto {
 
@@ -25,7 +23,9 @@ public class PacBioNotificationDto extends NotificationDto {
   @Override
   public Optional<String> getLaneContents(int lane) {
     String wellName = String.format("%c%2d", 'A' + (lane % 8), lane / 8);
-    return poolNames.containsKey(wellName) ? Optional.of(poolNames.get(wellName)) : Optional.empty();
+    return poolNames.containsKey(wellName)
+        ? Optional.of(poolNames.get(wellName))
+        : Optional.empty();
   }
 
   @Override
@@ -51,11 +51,28 @@ public class PacBioNotificationDto extends NotificationDto {
 
   @Override
   public String toString() {
-    return "PacBioNotificationDto [poolNames=" + poolNames + ", getRunAlias()=" + getRunAlias() + ", getSequencerName()="
-        + getSequencerName() + ", getContainerSerialNumber()=" + getContainerSerialNumber() + ", getLaneCount()=" + getLaneCount()
-        + ", getHealthType()=" + getHealthType() + ", getSequencerFolderPath()=" + getSequencerFolderPath() + ", isPairedEndRun()="
-        + isPairedEndRun() + ", getSoftware()=" + getSoftware() + ", getStartDate()=" + getStartDate() + ", getCompletionDate()="
-        + getCompletionDate() + "]";
+    return "PacBioNotificationDto [poolNames="
+        + poolNames
+        + ", getRunAlias()="
+        + getRunAlias()
+        + ", getSequencerName()="
+        + getSequencerName()
+        + ", getContainerSerialNumber()="
+        + getContainerSerialNumber()
+        + ", getLaneCount()="
+        + getLaneCount()
+        + ", getHealthType()="
+        + getHealthType()
+        + ", getSequencerFolderPath()="
+        + getSequencerFolderPath()
+        + ", isPairedEndRun()="
+        + isPairedEndRun()
+        + ", getSoftware()="
+        + getSoftware()
+        + ", getStartDate()="
+        + getStartDate()
+        + ", getCompletionDate()="
+        + getCompletionDate()
+        + "]";
   }
-
 }

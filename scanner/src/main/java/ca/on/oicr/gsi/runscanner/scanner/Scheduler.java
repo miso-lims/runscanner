@@ -1,5 +1,14 @@
 package ca.on.oicr.gsi.runscanner.scanner;
 
+import ca.on.oicr.gsi.Pair;
+import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
+import ca.on.oicr.gsi.runscanner.dto.type.Platform;
+import ca.on.oicr.gsi.runscanner.scanner.processor.RunProcessor;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.prometheus.client.Counter;
+import io.prometheus.client.Gauge;
+import io.prometheus.client.Histogram;
 import java.io.File;
 import java.io.IOException;
 import java.time.Duration;
@@ -22,33 +31,17 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import io.prometheus.client.Counter;
-import io.prometheus.client.Gauge;
-import io.prometheus.client.Histogram;
-import ca.on.oicr.gsi.Pair;
-import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
-import ca.on.oicr.gsi.runscanner.dto.type.Platform;
-import ca.on.oicr.gsi.runscanner.scanner.processor.RunProcessor;
-
-/**
- * Periodically scan the run directories and cache the results.
- */
+/** Periodically scan the run directories and cache the results. */
 @Service
 public class Scheduler {
-	private static final String PLATFORM_LABEL = "platform";
-	
-  /**
-   * Holder for a run that has been scanned.
-   */
+  private static final String PLATFORM_LABEL = "platform";
+
+  /** Holder for a run that has been scanned. */
   private static class FinishedWork {
     Instant created = Instant.now();
     NotificationDto dto;
@@ -56,13 +49,15 @@ public class Scheduler {
 
     /**
      * Determine if the run should be scanned again.
-     * 
-     * This only happens if the run is not marked as done by the processor and 10 minutes have past since the last process. The automatic
-     * rerunning done by scheduler is not sufficient to determine if the run needs to be reprocessed since it isn't clear how long the run
-     * waited in the processing queue.
+     *
+     * <p>This only happens if the run is not marked as done by the processor and 10 minutes have
+     * past since the last process. The automatic rerunning done by scheduler is not sufficient to
+     * determine if the run needs to be reprocessed since it isn't clear how long the run waited in
+     * the processing queue.
      */
     public boolean shouldRerun() {
-      return !dto.getHealthType().isDone() && Duration.between(created, Instant.now()).toMinutes() > 10;
+      return !dto.getHealthType().isDone()
+          && Duration.between(created, Instant.now()).toMinutes() > 10;
     }
   }
 
@@ -93,7 +88,6 @@ public class Scheduler {
       }
       return work.epoch == highestEpoch;
     }
-
   }
 
   public static class SuppliedDirectoryConfig {
@@ -160,43 +154,89 @@ public class Scheduler {
     }
   }
 
-  private static final Gauge acceptedDirectories = Gauge.build().name("miso_runscanner_directories_accepted")
-      .help("The number of directories that were readable and sent for processing in the last pass.").register();
+  private static final Gauge acceptedDirectories =
+      Gauge.build()
+          .name("miso_runscanner_directories_accepted")
+          .help(
+              "The number of directories that were readable and sent for processing in the last pass.")
+          .register();
 
-  private static final Gauge attemptedDirectories = Gauge.build().name("miso_runscanner_directories_attempted")
-      .help("The number of directories that were considered in the last pass.").register();
-  private static final Gauge badRuns = Gauge.build().name("miso_runscanner_bad_runs").help(
-	      "The number of runs that failed to process.").register();
-  private static final Gauge configurationEntries = Gauge.build().name("miso_runscanner_configuration_entries")
-      .help("The number of entries from the last configuration.").register();
-  private static final Gauge configurationTimestamp = Gauge.build().name("miso_runscanner_configuration_timestamp")
-      .help("The epoch time when the configuration was last read.").register();
-  private static final Gauge configurationValid = Gauge.build().name("miso_runscanner_configuration_valid")
-      .help("Whether the configuration loaded from disk is valid.").register();
+  private static final Gauge attemptedDirectories =
+      Gauge.build()
+          .name("miso_runscanner_directories_attempted")
+          .help("The number of directories that were considered in the last pass.")
+          .register();
+  private static final Gauge badRuns =
+      Gauge.build()
+          .name("miso_runscanner_bad_runs")
+          .help("The number of runs that failed to process.")
+          .register();
+  private static final Gauge configurationEntries =
+      Gauge.build()
+          .name("miso_runscanner_configuration_entries")
+          .help("The number of entries from the last configuration.")
+          .register();
+  private static final Gauge configurationTimestamp =
+      Gauge.build()
+          .name("miso_runscanner_configuration_timestamp")
+          .help("The epoch time when the configuration was last read.")
+          .register();
+  private static final Gauge configurationValid =
+      Gauge.build()
+          .name("miso_runscanner_configuration_valid")
+          .help("Whether the configuration loaded from disk is valid.")
+          .register();
 
-  private static final Gauge epochGauge = Gauge.build().name("miso_runscanner_epoch")
-      .help("The current round of processing done for keeping the client in sync when progressively scanning.").register();
+  private static final Gauge epochGauge =
+      Gauge.build()
+          .name("miso_runscanner_epoch")
+          .help(
+              "The current round of processing done for keeping the client in sync when progressively scanning.")
+          .register();
 
-  private static final Counter errors = Counter.build().name("miso_runscanner_errors").help("The number of bad directories encountered.")
-      .labelNames(PLATFORM_LABEL).register();
+  private static final Counter errors =
+      Counter.build()
+          .name("miso_runscanner_errors")
+          .help("The number of bad directories encountered.")
+          .labelNames(PLATFORM_LABEL)
+          .register();
   private static Logger log = LoggerFactory.getLogger(Scheduler.class);
-  private static final Gauge newRunsScanned = Gauge.build().name("miso_runscanner_new_runs_scanned")
-      .help("The number of runs discovered in the last pass.").register();
+  private static final Gauge newRunsScanned =
+      Gauge.build()
+          .name("miso_runscanner_new_runs_scanned")
+          .help("The number of runs discovered in the last pass.")
+          .register();
 
-  private static final Gauge processingRuns = Gauge.build().name("miso_runscanner_processing_runs").labelNames(PLATFORM_LABEL).help(
-      "The number of runs currently being processed.").register();
+  private static final Gauge processingRuns =
+      Gauge.build()
+          .name("miso_runscanner_processing_runs")
+          .labelNames(PLATFORM_LABEL)
+          .help("The number of runs currently being processed.")
+          .register();
 
-  private static final Histogram processTime = Histogram.build().buckets(1, 5, 10, 30, 60, 300, 600, 3600)
-      .name("miso_runscanner_directory_process_time").help("Time to process a run directories in seconds.")
-      .labelNames(PLATFORM_LABEL, "instrument").register();
+  private static final Histogram processTime =
+      Histogram.build()
+          .buckets(1, 5, 10, 30, 60, 300, 600, 3600)
+          .name("miso_runscanner_directory_process_time")
+          .help("Time to process a run directories in seconds.")
+          .labelNames(PLATFORM_LABEL, "instrument")
+          .register();
 
-  private static final Counter reentered = Counter.build().name("miso_runscanner_reentered")
-      .help("The number of times the scanner was already running while scheduled to run again.").register();
+  private static final Counter reentered =
+      Counter.build()
+          .name("miso_runscanner_reentered")
+          .help("The number of times the scanner was already running while scheduled to run again.")
+          .register();
 
-  private static final LatencyHistogram scanTime = new LatencyHistogram("miso_runscanner_directory_scan_time",
-      "Time to scan the run directories in seconds.");
-  private static final Gauge waitingRuns = Gauge.build().name("miso_runscanner_waiting_runs").help(
-      "The number of runs waiting to be processed.").labelNames(PLATFORM_LABEL).register();
+  private static final LatencyHistogram scanTime =
+      new LatencyHistogram(
+          "miso_runscanner_directory_scan_time", "Time to scan the run directories in seconds.");
+  private static final Gauge waitingRuns =
+      Gauge.build()
+          .name("miso_runscanner_waiting_runs")
+          .help("The number of runs waiting to be processed.")
+          .labelNames(PLATFORM_LABEL)
+          .register();
 
   private File configurationFile;
 
@@ -215,7 +255,8 @@ public class Scheduler {
   // The paths that are current being processed (and the corresponding processor).
   private final Set<File> processing = new ConcurrentSkipListSet<>();
 
-  // The directories that contain run directories that need to be scanned and the processors for those runs.
+  // The directories that contain run directories that need to be scanned and the processors for
+  // those runs.
   private List<Configuration> roots = Collections.emptyList();
 
   private ScheduledFuture<?> scanDirectoriesFuture = null;
@@ -236,7 +277,13 @@ public class Scheduler {
   }
 
   public Stream<NotificationDto> finished(long epoch, Predicate<FinishedWork> filter) {
-    return finishedWork.values().stream().filter(x -> x.epoch >= epoch).sorted((a, b) -> a.epoch - b.epoch).filter(filter).map(x -> x.dto);
+    return finishedWork
+        .values()
+        .stream()
+        .filter(x -> x.epoch >= epoch)
+        .sorted((a, b) -> a.epoch - b.epoch)
+        .filter(filter)
+        .map(x -> x.dto);
   }
 
   public Stream<Configuration> getConfiguration() {
@@ -301,76 +348,88 @@ public class Scheduler {
 
   /**
    * Determine if a run directory is in need of processing.
-   * 
-   * This means that is is not in a processing queue, failed processing last time, nor needs reprocessing (for runs still active on the
-   * sequencer)
+   *
+   * <p>This means that is is not in a processing queue, failed processing last time, nor needs
+   * reprocessing (for runs still active on the sequencer)
    */
   private boolean isUnprocessed(File directory) {
-    return !workToDo.contains(directory) && !processing.contains(directory)
-        && (!failed.containsKey(directory) || Duration.between(failed.get(directory), Instant.now()).toMinutes() > 20)
+    return !workToDo.contains(directory)
+        && !processing.contains(directory)
+        && (!failed.containsKey(directory)
+            || Duration.between(failed.get(directory), Instant.now()).toMinutes() > 20)
         && (!finishedWork.containsKey(directory) || finishedWork.get(directory).shouldRerun());
   }
 
-  /**
-   * Push a run directory into the processing queue.
-   */
-  private void queueDirectory(final File directory, final RunProcessor processor, final TimeZone tz) {
+  /** Push a run directory into the processing queue. */
+  private void queueDirectory(
+      final File directory, final RunProcessor processor, final TimeZone tz) {
     workToDo.add(directory);
     waitingRuns.labels(processor.getPlatformType().name()).inc();
-    workPool.submit(() -> {
-      Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
-      processing.add(directory);
-      processingRuns.labels(processor.getPlatformType().name()).inc();
-      workToDo.remove(directory);
-      waitingRuns.labels(processor.getPlatformType().name()).dec();
+    workPool.submit(
+        () -> {
+          Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
+          processing.add(directory);
+          processingRuns.labels(processor.getPlatformType().name()).inc();
+          workToDo.remove(directory);
+          waitingRuns.labels(processor.getPlatformType().name()).dec();
 
-      long runStartTime = System.nanoTime();
-      String instrumentName = "unknown";
-      try {
-        NotificationDto dto = processor.process(directory, tz);
-        if (!isStringBlankOrNull(dto.getSequencerName())) {
-          instrumentName = dto.getSequencerName();
-        }
-        FinishedWork work = new FinishedWork();
-        work.dto = dto;
-        work.epoch = epoch.incrementAndGet();
-        finishedWork.put(directory, work);
-        failed.remove(directory);
-        epochGauge.set(work.epoch);
-      } catch (Exception e) {
-        log.error("Failed to process run: " + directory.getPath(), e);
-        errors.labels(processor.getPlatformType().name()).inc();
-        failed.put(directory, Instant.now());
-      }
-      badRuns.set(failed.size());
-      processTime.labels(processor.getPlatformType().name(), instrumentName).observe((System.nanoTime() - runStartTime) / 1e9);
-      processing.remove(directory);
-      processingRuns.labels(processor.getPlatformType().name()).dec();
-    });
+          long runStartTime = System.nanoTime();
+          String instrumentName = "unknown";
+          try {
+            NotificationDto dto = processor.process(directory, tz);
+            if (!isStringBlankOrNull(dto.getSequencerName())) {
+              instrumentName = dto.getSequencerName();
+            }
+            FinishedWork work = new FinishedWork();
+            work.dto = dto;
+            work.epoch = epoch.incrementAndGet();
+            finishedWork.put(directory, work);
+            failed.remove(directory);
+            epochGauge.set(work.epoch);
+          } catch (Exception e) {
+            log.error("Failed to process run: " + directory.getPath(), e);
+            errors.labels(processor.getPlatformType().name()).inc();
+            failed.put(directory, Instant.now());
+          }
+          badRuns.set(failed.size());
+          processTime
+              .labels(processor.getPlatformType().name(), instrumentName)
+              .observe((System.nanoTime() - runStartTime) / 1e9);
+          processing.remove(directory);
+          processingRuns.labels(processor.getPlatformType().name()).dec();
+        });
   }
 
   /**
    * Rebuild the set of sequencer directories to scan from the configuration file.
-   * 
-   * If the configuration file is unreadable or contains no entries, the configuration is bad. The configuration file may still contain
-   * defective/invalid entries and those directories will not be scanned.
-   * 
-   * Changing the configuration does not clear the cache. So if a sequencer's configuration is changed from valid to invalid to valid again,
-   * it will not trigger re-processing of the previous output, even if the timezone or processor is changed.
+   *
+   * <p>If the configuration file is unreadable or contains no entries, the configuration is bad.
+   * The configuration file may still contain defective/invalid entries and those directories will
+   * not be scanned.
+   *
+   * <p>Changing the configuration does not clear the cache. So if a sequencer's configuration is
+   * changed from valid to invalid to valid again, it will not trigger re-processing of the previous
+   * output, even if the timezone or processor is changed.
    */
   private void readConfiguration() {
     ObjectMapper mapper = new ObjectMapper();
     configurationLastRead = Instant.now();
     configurationTimestamp.set(configurationLastRead.getEpochSecond());
     try {
-      roots = Arrays.stream(mapper.readValue(configurationFile, SuppliedDirectoryConfig[].class)).map(source -> {
-        Configuration destination = new Configuration();
-        destination.setPath(new File(source.getPath()));
-        destination.setTimeZone(TimeZone.getTimeZone(source.getTimeZone()));
-        destination.setProcessor(RunProcessor.processorFor(source.getPlatformType(), source.getName(), source.getParameters())
-            .orElse(null));
-        return destination;
-      }).collect(Collectors.toList());
+      roots =
+          Arrays.stream(mapper.readValue(configurationFile, SuppliedDirectoryConfig[].class))
+              .map(
+                  source -> {
+                    Configuration destination = new Configuration();
+                    destination.setPath(new File(source.getPath()));
+                    destination.setTimeZone(TimeZone.getTimeZone(source.getTimeZone()));
+                    destination.setProcessor(
+                        RunProcessor.processorFor(
+                                source.getPlatformType(), source.getName(), source.getParameters())
+                            .orElse(null));
+                    return destination;
+                  })
+              .collect(Collectors.toList());
       configurationEntries.set(roots.size());
       isConfigurationGood = !roots.isEmpty();
     } catch (IOException e) {
@@ -386,49 +445,59 @@ public class Scheduler {
     readConfiguration();
   }
 
-  /**
-   * Initiate scanning every 15 minutes until stopped.
-   */
+  /** Initiate scanning every 15 minutes until stopped. */
   public synchronized void start() {
     if (scanDirectoriesFuture == null) {
-      scanDirectoriesFuture = scheduler.scheduleAtFixedRate(() -> {
-        if (scanningNow) {
-          reentered.inc();
-          return;
-        }
-        scanningNow = true;
-        if (configurationFile != null && configurationFile.exists()
-            && configurationFile.lastModified() > configurationLastRead.getEpochSecond()) {
-          readConfiguration();
-        }
-        scanLastStarted = Instant.now();
-        UnreadableDirectories newUnreadableDirectories = new UnreadableDirectories();
-        try (StreamCountSpy<Pair<File, Configuration>> newRuns = new StreamCountSpy<>(newRunsScanned);
-            StreamCountSpy<Pair<File, Configuration>> attempted = new StreamCountSpy<>(attemptedDirectories);
-            StreamCountSpy<Pair<File, Configuration>> accepted = new StreamCountSpy<>(acceptedDirectories);
-            AutoCloseable timer = scanTime.start()) {
-          roots.stream()//
-              .filter(Configuration::isValid)//
-              .flatMap(Configuration::getRuns)//
-              .peek(attempted)//
-              .filter(entry -> newUnreadableDirectories.test(entry.first()))//
-              .peek(accepted)//
-              .filter(entry -> isUnprocessed(entry.first()))//
-              .peek(newRuns)//
-              .forEach(entry -> 
-                queueDirectory(entry.first(), entry.second().getProcessor(), entry.second().getTimeZone()));
-        } catch (Exception e) {
-          log.error("Error scanning directory.", e);
-        }
-        unreadableDirectories = newUnreadableDirectories;
-        scanningNow = false;
-      }, 1, 15, TimeUnit.MINUTES);
+      scanDirectoriesFuture =
+          scheduler.scheduleAtFixedRate(
+              () -> {
+                if (scanningNow) {
+                  reentered.inc();
+                  return;
+                }
+                scanningNow = true;
+                if (configurationFile != null
+                    && configurationFile.exists()
+                    && configurationFile.lastModified() > configurationLastRead.getEpochSecond()) {
+                  readConfiguration();
+                }
+                scanLastStarted = Instant.now();
+                UnreadableDirectories newUnreadableDirectories = new UnreadableDirectories();
+                try (StreamCountSpy<Pair<File, Configuration>> newRuns =
+                        new StreamCountSpy<>(newRunsScanned);
+                    StreamCountSpy<Pair<File, Configuration>> attempted =
+                        new StreamCountSpy<>(attemptedDirectories);
+                    StreamCountSpy<Pair<File, Configuration>> accepted =
+                        new StreamCountSpy<>(acceptedDirectories);
+                    AutoCloseable timer = scanTime.start()) {
+                  roots
+                      .stream() //
+                      .filter(Configuration::isValid) //
+                      .flatMap(Configuration::getRuns) //
+                      .peek(attempted) //
+                      .filter(entry -> newUnreadableDirectories.test(entry.first())) //
+                      .peek(accepted) //
+                      .filter(entry -> isUnprocessed(entry.first())) //
+                      .peek(newRuns) //
+                      .forEach(
+                          entry ->
+                              queueDirectory(
+                                  entry.first(),
+                                  entry.second().getProcessor(),
+                                  entry.second().getTimeZone()));
+                } catch (Exception e) {
+                  log.error("Error scanning directory.", e);
+                }
+                unreadableDirectories = newUnreadableDirectories;
+                scanningNow = false;
+              },
+              1,
+              15,
+              TimeUnit.MINUTES);
     }
   }
 
-  /**
-   * Stop scanning. Queued run directories will still be processed.
-   */
+  /** Stop scanning. Queued run directories will still be processed. */
   public synchronized void stop() {
     if (scanDirectoriesFuture != null) {
       scanDirectoriesFuture.cancel(false);
@@ -438,9 +507,9 @@ public class Scheduler {
   }
 
   /**
-   * Tests whether a String is blank (empty or just spaces) or null.
-   * Duplicated from MISO's LimsUtils.
-   * 
+   * Tests whether a String is blank (empty or just spaces) or null. Duplicated from MISO's
+   * LimsUtils.
+   *
    * @param s String to test for blank or null
    * @return true if blank or null String provided
    */

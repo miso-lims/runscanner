@@ -10,10 +10,26 @@ public class SolidNotificationDto extends NotificationDto {
 
   @Override
   public String toString() {
-    return "SolidNotificationDto [getRunAlias()=" + getRunAlias() + ", getSequencerName()=" + getSequencerName()
-        + ", getContainerSerialNumber()=" + getContainerSerialNumber() + ", getLaneCount()=" + getLaneCount() + ", getHealthType()="
-        + getHealthType() + ", getSequencerFolderPath()=" + getSequencerFolderPath() + ", isPairedEndRun()=" + isPairedEndRun()
-        + ", getSoftware()=" + getSoftware() + ", getStartDate()=" + getStartDate() + ", getCompletionDate()=" + getCompletionDate() + "]";
+    return "SolidNotificationDto [getRunAlias()="
+        + getRunAlias()
+        + ", getSequencerName()="
+        + getSequencerName()
+        + ", getContainerSerialNumber()="
+        + getContainerSerialNumber()
+        + ", getLaneCount()="
+        + getLaneCount()
+        + ", getHealthType()="
+        + getHealthType()
+        + ", getSequencerFolderPath()="
+        + getSequencerFolderPath()
+        + ", isPairedEndRun()="
+        + isPairedEndRun()
+        + ", getSoftware()="
+        + getSoftware()
+        + ", getStartDate()="
+        + getStartDate()
+        + ", getCompletionDate()="
+        + getCompletionDate()
+        + "]";
   }
-
 }

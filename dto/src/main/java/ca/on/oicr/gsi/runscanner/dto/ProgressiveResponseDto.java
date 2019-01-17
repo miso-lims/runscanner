@@ -22,12 +22,13 @@ public class ProgressiveResponseDto {
 
   /**
    * This recent DTOs found by the run scanner.
-   * 
-   * The run scanner is designed to over-deliver, so runs previously seen maybe delivered. Additionally, the run scanner will re-probe
-   * unfinished runs, resulting in runs with the same run name but different content.
    *
-   * There may also be multiple runs with the same name that are from different sequencers depending on the user configuration of run
-   * scanner.
+   * <p>The run scanner is designed to over-deliver, so runs previously seen maybe delivered.
+   * Additionally, the run scanner will re-probe unfinished runs, resulting in runs with the same
+   * run name but different content.
+   *
+   * <p>There may also be multiple runs with the same name that are from different sequencers
+   * depending on the user configuration of run scanner.
    */
   public List<NotificationDto> getUpdates() {
     return updates;

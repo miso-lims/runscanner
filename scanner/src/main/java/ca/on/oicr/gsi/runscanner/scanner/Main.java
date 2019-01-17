@@ -1,5 +1,13 @@
 package ca.on.oicr.gsi.runscanner.scanner;
 
+import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
+import ca.on.oicr.gsi.runscanner.dto.type.Platform;
+import ca.on.oicr.gsi.runscanner.scanner.processor.RunProcessor;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -7,20 +15,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.TimeZone;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
-import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
-import ca.on.oicr.gsi.runscanner.dto.type.Platform;
-import ca.on.oicr.gsi.runscanner.scanner.processor.RunProcessor;
-
 /**
- * Attempts to process run directories, provided on the command line, through a particular processor and display the results. This is for
- * debugging purposes.
- *
+ * Attempts to process run directories, provided on the command line, through a particular processor
+ * and display the results. This is for debugging purposes.
  */
 public final class Main {
 
@@ -44,17 +41,21 @@ public final class Main {
       tz = TimeZone.getTimeZone(tzId);
     }
     ObjectMapper mapper = new ObjectMapper();
-    mapper.registerModule(new JavaTimeModule())
-        .setDateFormat(new ISO8601DateFormat());
+    mapper.registerModule(new JavaTimeModule()).setDateFormat(new ISO8601DateFormat());
 
     Platform pt = Platform.valueOf(platformName);
     String name = System.getProperty("name", "default");
-    RunProcessor rp = RunProcessor.processorFor(pt, name, mapper.readValue(System.getProperty("parameters", "{}"), ObjectNode.class))
-        .orElseGet(() -> {
-          System.err.println("Cannot find a run processor that matches.");
-          System.exit(1);
-          return null;
-        });
+    RunProcessor rp =
+        RunProcessor.processorFor(
+                pt,
+                name,
+                mapper.readValue(System.getProperty("parameters", "{}"), ObjectNode.class))
+            .orElseGet(
+                () -> {
+                  System.err.println("Cannot find a run processor that matches.");
+                  System.exit(1);
+                  return null;
+                });
     List<NotificationDto> results = new ArrayList<>();
     boolean success = true;
     for (String path : args) {

@@ -1,5 +1,14 @@
 package ca.on.oicr.gsi.runscanner.scanner.processor;
 
+import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
+import ca.on.oicr.gsi.runscanner.dto.PacBioNotificationDto;
+import ca.on.oicr.gsi.runscanner.dto.type.HealthType;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -16,11 +25,9 @@ import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
-
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathException;
 import javax.xml.xpath.XPathExpression;
-
 import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,31 +35,16 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 import org.w3c.dom.Document;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
-import ca.on.oicr.gsi.runscanner.dto.PacBioNotificationDto;
-import ca.on.oicr.gsi.runscanner.dto.type.HealthType;
-
-/**
- * Scan PacBio runs from a directory. The address
- *
- */
+/** Scan PacBio runs from a directory. The address */
 public class DefaultPacBio extends RunProcessor {
-  /**
-   * Extract data from an XML metadata file and put it in the DTO.
-   */
+  /** Extract data from an XML metadata file and put it in the DTO. */
   interface ProcessMetadata {
     public void accept(Document document, PacBioNotificationDto dto) throws XPathException;
   }
 
   /**
-   * This is the response object provided by the PacBio web service when queries about the state of a plate.
+   * This is the response object provided by the PacBio web service when queries about the state of
+   * a plate.
    */
   @JsonIgnoreProperties(ignoreUnknown = true)
   public static class StatusResponse {
@@ -83,50 +75,57 @@ public class DefaultPacBio extends RunProcessor {
         return HealthType.UNKNOWN;
       }
       switch (status) {
-      case "Running":
-        return HealthType.RUNNING;
-      case "Aborted":
-        return HealthType.STOPPED;
-      case "Failed":
-        return HealthType.FAILED;
-      case "Complete":
-        return HealthType.COMPLETED;
-      default:
-        return HealthType.UNKNOWN;
+        case "Running":
+          return HealthType.RUNNING;
+        case "Aborted":
+          return HealthType.STOPPED;
+        case "Failed":
+          return HealthType.FAILED;
+        case "Complete":
+          return HealthType.COMPLETED;
+        default:
+          return HealthType.UNKNOWN;
       }
     }
-
   }
 
-  private static final Predicate<String> CELL_DIRECTORY = Pattern.compile("[A-Z]{1}[0-9]{2}_[0-9]{1}").asPredicate();
+  private static final Predicate<String> CELL_DIRECTORY =
+      Pattern.compile("[A-Z]{1}[0-9]{2}_[0-9]{1}").asPredicate();
 
-  private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+  private static final DateTimeFormatter DATE_FORMAT =
+      DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
-  private static final HttpComponentsClientHttpRequestFactory HTTP_REQUEST_FACTORY = new HttpComponentsClientHttpRequestFactory();
+  private static final HttpComponentsClientHttpRequestFactory HTTP_REQUEST_FACTORY =
+      new HttpComponentsClientHttpRequestFactory();
 
   private static final Pattern LINES = Pattern.compile("\\r?\\n");
 
   private static final Logger log = LoggerFactory.getLogger(DefaultPacBio.class);
 
-  /**
-   * These are all the things that can be extracted from the PacBio metadata XML file.
-   */
-  private static final ProcessMetadata[] METADATA_PROCESSORS = new ProcessMetadata[] {
-      processString("//Run/Name", PacBioNotificationDto::setRunAlias),
-      processString("//InstrumentName", PacBioNotificationDto::setSequencerName),
-      processString("//InstCtrlVer", PacBioNotificationDto::setSoftware),
-      processString("//Sample/PlateId", PacBioNotificationDto::setContainerSerialNumber),
-      processDate("//Run/WhenStarted", PacBioNotificationDto::setStartDate), processNumber("//Movie/DurationInSec", (dto, duration) -> {
-        LocalDateTime start = dto.getStartDate();
-        if (start == null) {
-          return;
-        }
-        dto.setCompletionDate(start.plusSeconds(duration.longValue()));
-      }), processSampleInformation() };
+  /** These are all the things that can be extracted from the PacBio metadata XML file. */
+  private static final ProcessMetadata[] METADATA_PROCESSORS =
+      new ProcessMetadata[] {
+        processString("//Run/Name", PacBioNotificationDto::setRunAlias),
+        processString("//InstrumentName", PacBioNotificationDto::setSequencerName),
+        processString("//InstCtrlVer", PacBioNotificationDto::setSoftware),
+        processString("//Sample/PlateId", PacBioNotificationDto::setContainerSerialNumber),
+        processDate("//Run/WhenStarted", PacBioNotificationDto::setStartDate),
+        processNumber(
+            "//Movie/DurationInSec",
+            (dto, duration) -> {
+              LocalDateTime start = dto.getStartDate();
+              if (start == null) {
+                return;
+              }
+              dto.setCompletionDate(start.plusSeconds(duration.longValue()));
+            }),
+        processSampleInformation()
+      };
 
   private static final Pattern RUN_DIRECTORY = Pattern.compile("^.+_\\d+$");
 
-  private static final DateTimeFormatter URL_DATE_FORMAT = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
+  private static final DateTimeFormatter URL_DATE_FORMAT =
+      DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
 
   private static final Pattern WELL_LINE = Pattern.compile("^([A-Z]\\d+),.*$");
 
@@ -138,27 +137,33 @@ public class DefaultPacBio extends RunProcessor {
 
   public static DefaultPacBio create(Builder builder, ObjectNode parameters) {
     JsonNode address = parameters.get("address");
-    return address.isTextual() ? new DefaultPacBio(builder, address.textValue().replaceAll("/+$", "")) : null;
+    return address.isTextual()
+        ? new DefaultPacBio(builder, address.textValue().replaceAll("/+$", ""))
+        : null;
   }
 
   /**
-   * Extract a PacBio-formatted string from the metadata file and put the parsed result into the DTO.
-   * 
+   * Extract a PacBio-formatted string from the metadata file and put the parsed result into the
+   * DTO.
+   *
    * @param expression the XPath expression yielding the date
    * @param setter the writer for the date
    */
-  private static ProcessMetadata processDate(String expression, BiConsumer<PacBioNotificationDto, LocalDateTime> setter) {
-    return processString(expression, (dto, result) -> setter.accept(dto, LocalDateTime.parse(result, DATE_FORMAT)));
+  private static ProcessMetadata processDate(
+      String expression, BiConsumer<PacBioNotificationDto, LocalDateTime> setter) {
+    return processString(
+        expression, (dto, result) -> setter.accept(dto, LocalDateTime.parse(result, DATE_FORMAT)));
   }
 
   /**
    * Extract a number from the metadata file and put the result into the DTO.
-   * 
+   *
    * @param expression the XPath expression yielding the number
    * @param setterthe writer for the number
    * @return
    */
-  private static ProcessMetadata processNumber(String expression, BiConsumer<PacBioNotificationDto, Double> setter) {
+  private static ProcessMetadata processNumber(
+      String expression, BiConsumer<PacBioNotificationDto, Double> setter) {
     XPathExpression expr = RunProcessor.compileXPath(expression)[0];
     return (document, dto) -> {
       Double result = (Double) expr.evaluate(document, XPathConstants.NUMBER);
@@ -170,7 +175,7 @@ public class DefaultPacBio extends RunProcessor {
 
   /**
    * Create a metadata processor to populate the map of wellname → poolbarcodes in the DTO.
-   * 
+   *
    * @return
    */
   private static ProcessMetadata processSampleInformation() {
@@ -186,9 +191,14 @@ public class DefaultPacBio extends RunProcessor {
         poolInfo = new HashMap<>();
         dto.setPoolNames(poolInfo);
       } else if (poolInfo.containsKey(well)) {
-        // If there are multiple things assigned to this well in the sample sheet, then MISO will not be able to figure out a single pool to
-        // assign to this well. In this case, we set the pool to be the empty string so that nothing will be automatically assigned.
-        log.warn(String.format("Multiple pools in well %s on run %s; abandoing automatic pool assignment", well, dto.getRunAlias()));
+        // If there are multiple things assigned to this well in the sample sheet, then MISO will
+        // not be able to figure out a single pool to
+        // assign to this well. In this case, we set the pool to be the empty string so that nothing
+        // will be automatically assigned.
+        log.warn(
+            String.format(
+                "Multiple pools in well %s on run %s; abandoing automatic pool assignment",
+                well, dto.getRunAlias()));
         name = "";
       }
       poolInfo.put(well, name);
@@ -197,12 +207,13 @@ public class DefaultPacBio extends RunProcessor {
 
   /**
    * Extract a string expression from the metadata file and write it into the DTO.
-   * 
+   *
    * @param expression the XPath expression yielding the string
    * @param setter writer for the string
    * @return
    */
-  private static ProcessMetadata processString(String expression, BiConsumer<PacBioNotificationDto, String> setter) {
+  private static ProcessMetadata processString(
+      String expression, BiConsumer<PacBioNotificationDto, String> setter) {
     XPathExpression expr = RunProcessor.compileXPath(expression)[0];
     return (document, dto) -> {
       String result = (String) expr.evaluate(document, XPathConstants.STRING);
@@ -213,6 +224,7 @@ public class DefaultPacBio extends RunProcessor {
   }
 
   private final String address;
+
   public DefaultPacBio(Builder builder, String address) {
     super(builder);
     this.address = address;
@@ -220,7 +232,8 @@ public class DefaultPacBio extends RunProcessor {
 
   @Override
   public Stream<File> getRunsFromRoot(File root) {
-    return Arrays.stream(root.listFiles(f -> f.isDirectory() && RUN_DIRECTORY.matcher(f.getName()).matches()));
+    return Arrays.stream(
+        root.listFiles(f -> f.isDirectory() && RUN_DIRECTORY.matcher(f.getName()).matches()));
   }
 
   protected String getSampleSheet(String url) {
@@ -233,7 +246,8 @@ public class DefaultPacBio extends RunProcessor {
 
   @Override
   public NotificationDto process(File runDirectory, TimeZone tz) throws IOException {
-    // We create one DTO for a run, but there are going to be many wells with independent and duplicate metadata that will will simply
+    // We create one DTO for a run, but there are going to be many wells with independent and
+    // duplicate metadata that will will simply
     // overwrite in the shared DTO. If the data differs, the last well wins.
     PacBioNotificationDto dto = new PacBioNotificationDto();
     dto.setPairedEndRun(false);
@@ -241,22 +255,39 @@ public class DefaultPacBio extends RunProcessor {
     // This will be incremented during the metadata scan
     dto.setLaneCount(0);
     // Read all the metadata files and write their results into the DTO.
-    Arrays.stream(runDirectory.listFiles(cellDirectory -> cellDirectory.isDirectory() && CELL_DIRECTORY.test(cellDirectory.getName())))
-        .flatMap(cellDirectory -> Arrays.stream(cellDirectory.listFiles(file -> file.getName().endsWith(".metadata.xml"))))
-        .map(RunProcessor::parseXml).filter(Optional::isPresent)
+    Arrays.stream(
+            runDirectory.listFiles(
+                cellDirectory ->
+                    cellDirectory.isDirectory() && CELL_DIRECTORY.test(cellDirectory.getName())))
+        .flatMap(
+            cellDirectory ->
+                Arrays.stream(
+                    cellDirectory.listFiles(file -> file.getName().endsWith(".metadata.xml"))))
+        .map(RunProcessor::parseXml)
+        .filter(Optional::isPresent)
         .forEach(metadata -> processMetadata(metadata.get(), dto));
 
-    // The current job state is not available from the metadata files, so contact the PacBio instrument's web service.
+    // The current job state is not available from the metadata files, so contact the PacBio
+    // instrument's web service.
     String plateUrl = dto.getContainerSerialNumber();
-    dto.setHealthType(getStatus(String.format("%s/Jobs/Plate/%s/Status", address, plateUrl)).translateStatus());
-    // If the metadata gave us a completion date, but the web service told us the run isn't complete, delete the completion date of lies.
+    dto.setHealthType(
+        getStatus(String.format("%s/Jobs/Plate/%s/Status", address, plateUrl)).translateStatus());
+    // If the metadata gave us a completion date, but the web service told us the run isn't
+    // complete, delete the completion date of lies.
     if (!dto.getHealthType().isDone()) {
       dto.setCompletionDate(null);
     }
 
     String sampleSheet = getSampleSheet(String.format("%s/SampleSheet/%s", address, plateUrl));
     dto.setLaneCount(
-        (int) LINES.splitAsStream(sampleSheet).map(WELL_LINE::matcher).filter(Matcher::matches).map(m -> m.group(1)).distinct().count());
+        (int)
+            LINES
+                .splitAsStream(sampleSheet)
+                .map(WELL_LINE::matcher)
+                .filter(Matcher::matches)
+                .map(m -> m.group(1))
+                .distinct()
+                .count());
 
     ObjectMapper mapper = createObjectMapper();
     ArrayNode metrics = mapper.createArrayNode();
@@ -268,13 +299,23 @@ public class DefaultPacBio extends RunProcessor {
       URIBuilder builder = new URIBuilder(address + "/Metrics/RSRunReport");
       builder.addParameter("instrument", dto.getSequencerName());
       builder.addParameter("run", dto.getRunAlias());
-      builder.addParameter("from", dto.getStartDate().truncatedTo(ChronoUnit.DAYS).format(URL_DATE_FORMAT));
+      builder.addParameter(
+          "from", dto.getStartDate().truncatedTo(ChronoUnit.DAYS).format(URL_DATE_FORMAT));
       if (dto.getHealthType().isDone()) {
-        builder.addParameter("to", dto.getCompletionDate().plusDays(1).truncatedTo(ChronoUnit.DAYS).format(URL_DATE_FORMAT));
+        builder.addParameter(
+            "to",
+            dto.getCompletionDate()
+                .plusDays(1)
+                .truncatedTo(ChronoUnit.DAYS)
+                .format(URL_DATE_FORMAT));
       } else {
         LocalDateTime today = LocalDateTime.now();
         LocalDateTime maxRunTime = dto.getStartDate().plusDays(7);
-        builder.addParameter("to", (today.isBefore(maxRunTime) ? today : maxRunTime).truncatedTo(ChronoUnit.DAYS).format(URL_DATE_FORMAT));
+        builder.addParameter(
+            "to",
+            (today.isBefore(maxRunTime) ? today : maxRunTime)
+                .truncatedTo(ChronoUnit.DAYS)
+                .format(URL_DATE_FORMAT));
       }
       dashboardMetric.put("href", builder.build().toASCIIString());
     } catch (URISyntaxException e) {
@@ -288,7 +329,7 @@ public class DefaultPacBio extends RunProcessor {
 
   /**
    * Parse a metadata XML file and put all the relevant data into the DTO.
-   * 
+   *
    * @param metadataFile the path to the XML file
    * @param dto the DTO to update
    */
@@ -303,9 +344,9 @@ public class DefaultPacBio extends RunProcessor {
   }
 
   /**
-   * Tests whether a String is blank (empty or just spaces) or null.
-   * Duplicated from MISO's LimsUtils.
-   * 
+   * Tests whether a String is blank (empty or just spaces) or null. Duplicated from MISO's
+   * LimsUtils.
+   *
    * @param s String to test for blank or null
    * @return true if blank or null String provided
    */
