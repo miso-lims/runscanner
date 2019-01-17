@@ -6,7 +6,8 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 public interface WhineyFunction<T, R> {
-  public static <T, R> Function<T, Stream<R>> flatRethrow(WhineyFunction<? super T, Collection<R>> function) {
+  public static <T, R> Function<T, Stream<R>> flatRethrow(
+      WhineyFunction<? super T, Collection<R>> function) {
     return input -> {
       try {
         return function.apply(input).stream();

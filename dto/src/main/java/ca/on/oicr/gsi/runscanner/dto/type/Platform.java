@@ -23,9 +23,7 @@
 
 package ca.on.oicr.gsi.runscanner.dto.type;
 
-/**
- * Enum representing the different platform types available
- */
+/** Enum representing the different platform types available */
 public enum Platform {
   ILLUMINA, //
   LS454, //

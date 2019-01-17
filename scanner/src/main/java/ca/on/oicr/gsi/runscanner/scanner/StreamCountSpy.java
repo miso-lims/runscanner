@@ -1,14 +1,13 @@
 package ca.on.oicr.gsi.runscanner.scanner;
 
+import io.prometheus.client.Gauge;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import io.prometheus.client.Gauge;
-
 /**
  * Count the number of items in a stream and report the result to Prometheus.
- * 
- * This is meant to be used with {@link Stream#peek}
+ *
+ * <p>This is meant to be used with {@link Stream#peek}
  */
 public class StreamCountSpy<T> implements Consumer<T>, AutoCloseable {
   private long count = 0;
@@ -27,5 +26,4 @@ public class StreamCountSpy<T> implements Consumer<T>, AutoCloseable {
   public void close() throws Exception {
     destination.set(count);
   }
-
 }

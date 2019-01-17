@@ -1,11 +1,10 @@
 package ca.on.oicr.gsi.runscanner.scanner;
 
+import ca.on.oicr.gsi.Pair;
+import ca.on.oicr.gsi.runscanner.scanner.processor.RunProcessor;
 import java.io.File;
 import java.util.TimeZone;
 import java.util.stream.Stream;
-
-import ca.on.oicr.gsi.Pair;
-import ca.on.oicr.gsi.runscanner.scanner.processor.RunProcessor;
 
 public class Configuration {
 
@@ -32,7 +31,12 @@ public class Configuration {
   }
 
   public boolean isValid() {
-    return path != null && path.isDirectory() && path.canRead() && path.canExecute() && processor != null && timeZone != null;
+    return path != null
+        && path.isDirectory()
+        && path.canRead()
+        && path.canExecute()
+        && processor != null
+        && timeZone != null;
   }
 
   public void setPath(File path) {

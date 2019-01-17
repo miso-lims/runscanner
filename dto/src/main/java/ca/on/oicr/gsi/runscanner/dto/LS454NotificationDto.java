@@ -20,10 +20,29 @@ public class LS454NotificationDto extends NotificationDto {
 
   @Override
   public String toString() {
-    return "LS454NotificationDto [cycles=" + cycles + ", getRunAlias()=" + getRunAlias() + ", getSequencerName()=" + getSequencerName()
-        + ", getContainerSerialNumber()=" + getContainerSerialNumber() + ", getLaneCount()=" + getLaneCount() + ", getHealthType()="
-        + getHealthType() + ", getSequencerFolderPath()=" + getSequencerFolderPath() + ", isPairedEndRun()=" + isPairedEndRun()
-        + ", getSoftware()=" + getSoftware() + ", getStartDate()=" + getStartDate() + ", getCompletionDate()=" + getCompletionDate() + "]";
+    return "LS454NotificationDto [cycles="
+        + cycles
+        + ", getRunAlias()="
+        + getRunAlias()
+        + ", getSequencerName()="
+        + getSequencerName()
+        + ", getContainerSerialNumber()="
+        + getContainerSerialNumber()
+        + ", getLaneCount()="
+        + getLaneCount()
+        + ", getHealthType()="
+        + getHealthType()
+        + ", getSequencerFolderPath()="
+        + getSequencerFolderPath()
+        + ", isPairedEndRun()="
+        + isPairedEndRun()
+        + ", getSoftware()="
+        + getSoftware()
+        + ", getStartDate()="
+        + getStartDate()
+        + ", getCompletionDate()="
+        + getCompletionDate()
+        + "]";
   }
 
   @Override
@@ -43,5 +62,4 @@ public class LS454NotificationDto extends NotificationDto {
     if (cycles != other.cycles) return false;
     return true;
   }
-
 }

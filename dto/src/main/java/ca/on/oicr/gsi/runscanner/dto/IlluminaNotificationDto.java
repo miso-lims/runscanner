@@ -1,11 +1,10 @@
 package ca.on.oicr.gsi.runscanner.dto;
 
+import ca.on.oicr.gsi.runscanner.dto.type.IlluminaChemistry;
+import ca.on.oicr.gsi.runscanner.dto.type.Platform;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
-import ca.on.oicr.gsi.runscanner.dto.type.IlluminaChemistry;
-import ca.on.oicr.gsi.runscanner.dto.type.Platform;
 
 public class IlluminaNotificationDto extends NotificationDto {
 
@@ -69,9 +68,10 @@ public class IlluminaNotificationDto extends NotificationDto {
 
   /**
    * Get the lengths of the index reads in this run
-   * 
-   * This is the number of nucleotides in the index reads of this run. A single-index 6bp run would be encoded as [6], while a dual-index
-   * 8bp run would be [8,8]. If no index was done, this would be an empty list.
+   *
+   * <p>This is the number of nucleotides in the index reads of this run. A single-index 6bp run
+   * would be encoded as [6], while a dual-index 8bp run would be [8,8]. If no index was done, this
+   * would be an empty list.
    */
   public List<Integer> getIndexLengths() {
     return indexLengths;
@@ -79,7 +79,9 @@ public class IlluminaNotificationDto extends NotificationDto {
 
   @Override
   public Optional<String> getLaneContents(int lane) {
-    return poolNames != null && poolNames.containsKey(lane) ? Optional.of(poolNames.get(lane)) : Optional.empty();
+    return poolNames != null && poolNames.containsKey(lane)
+        ? Optional.of(poolNames.get(lane))
+        : Optional.empty();
   }
 
   public int getNumCycles() {
@@ -171,9 +173,29 @@ public class IlluminaNotificationDto extends NotificationDto {
 
   @Override
   public String toString() {
-    return super.toString() + ", IlluminaNotificationDto [callCycle=" + callCycle + ", chemistry=" + chemistry + ", imgCycle=" + imgCycle
-        + ", indexLengths=" + indexLengths + ", numCycles=" + numCycles + ", poolNames=" + poolNames + ", readLength=" + readLength
-        + ", scoreCycle=" + scoreCycle + ", bclCount=" + bclCount + ", runBasesMask=" + runBasesMask + ", numReads=" + numReads + "]";
+    return super.toString()
+        + ", IlluminaNotificationDto [callCycle="
+        + callCycle
+        + ", chemistry="
+        + chemistry
+        + ", imgCycle="
+        + imgCycle
+        + ", indexLengths="
+        + indexLengths
+        + ", numCycles="
+        + numCycles
+        + ", poolNames="
+        + poolNames
+        + ", readLength="
+        + readLength
+        + ", scoreCycle="
+        + scoreCycle
+        + ", bclCount="
+        + bclCount
+        + ", runBasesMask="
+        + runBasesMask
+        + ", numReads="
+        + numReads
+        + "]";
   }
-
 }

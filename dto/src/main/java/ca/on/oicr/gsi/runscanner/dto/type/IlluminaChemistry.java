@@ -1,18 +1,17 @@
 package ca.on.oicr.gsi.runscanner.dto.type;
 
 import java.util.function.Predicate;
-
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
-
 import org.w3c.dom.Document;
 
 public enum IlluminaChemistry implements Predicate<Document> {
   V2("//ReagentKitVersion=Version2"), //
-  V3("//ReagentKitVersion=Version3 or //Flowcell=\"HiSeq Flow Cell v3\" or //Flowcell=\"HiSeq Flow Cell\""), //
+  V3(
+      "//ReagentKitVersion=Version3 or //Flowcell=\"HiSeq Flow Cell v3\" or //Flowcell=\"HiSeq Flow Cell\""), //
   V4("//Flowcell=\"HiSeq Flow Cell v4\""), //
   RAPID_RUN("starts-with(//Flowcell, \"HiSeq Rapid Flow Cell\")"), //
   NS_MID("//Chemistry=\"NextSeq Mid\""), //
@@ -40,5 +39,4 @@ public enum IlluminaChemistry implements Predicate<Document> {
       return false;
     }
   }
-
 }
