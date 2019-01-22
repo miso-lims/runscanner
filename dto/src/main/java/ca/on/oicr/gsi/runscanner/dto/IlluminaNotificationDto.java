@@ -19,6 +19,7 @@ public class IlluminaNotificationDto extends NotificationDto {
   private Map<Integer, String> poolNames;
   private int readLength;
   private int scoreCycle;
+  private String workflowType;
 
   @Override
   public boolean equals(Object obj) {
@@ -43,6 +44,9 @@ public class IlluminaNotificationDto extends NotificationDto {
     } else if (!poolNames.equals(other.poolNames)) return false;
     if (readLength != other.readLength) return false;
     if (scoreCycle != other.scoreCycle) return false;
+    if (workflowType == null) {
+      if (other.workflowType != null) return false;
+    } else if (!workflowType.equals(other.workflowType)) return false;
     return true;
   }
 
@@ -109,6 +113,10 @@ public class IlluminaNotificationDto extends NotificationDto {
     return scoreCycle;
   }
 
+  public String getWorkflowType() {
+    return workflowType;
+  }
+
   @Override
   public int hashCode() {
     final int prime = 31;
@@ -124,6 +132,7 @@ public class IlluminaNotificationDto extends NotificationDto {
     result = prime * result + ((poolNames == null) ? 0 : poolNames.hashCode());
     result = prime * result + readLength;
     result = prime * result + scoreCycle;
+    result = prime * result + ((workflowType == null) ? 0 : workflowType.hashCode());
     return result;
   }
 
@@ -171,6 +180,10 @@ public class IlluminaNotificationDto extends NotificationDto {
     this.scoreCycle = scoreCycle;
   }
 
+  public void setWorkflowType(String workflowType) {
+    this.workflowType = workflowType;
+  }
+
   @Override
   public String toString() {
     return super.toString()
@@ -196,6 +209,8 @@ public class IlluminaNotificationDto extends NotificationDto {
         + runBasesMask
         + ", numReads="
         + numReads
+        + ", workflowType="
+        + workflowType
         + "]";
   }
 }
