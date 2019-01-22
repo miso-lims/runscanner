@@ -90,10 +90,12 @@ public final class DefaultIllumina extends RunProcessor {
   private static final Pattern FLOWCELL_PATTERN =
       Pattern.compile("^([a-zA-Z]+(?: Rapid)?) (Flow Cell v\\d)$");
   private static final XPathExpression FLOWCELL_PAIRED;
+  private static final XPathExpression WORKFLOW_TYPE;
 
   static {
     XPath xpath = XPathFactory.newInstance().newXPath();
     try {
+      WORKFLOW_TYPE = xpath.compile("//WorkflowType/text()");
       FLOWCELL = xpath.compile("//Setup/Flowcell/text()");
       FLOWCELL_PAIRED = xpath.compile("//Setup/PairEndFC/text()");
 
@@ -251,6 +253,9 @@ public final class DefaultIllumina extends RunProcessor {
                       .orElse(IlluminaChemistry.UNKNOWN));
               dto.setContainerModel(findContainerModel(runParams));
               dto.setSequencerPosition(findSequencerPosition(runParams));
+              // See if we can figure out the workflow type (NovaSeq only, at the time of this
+              // writing)
+              dto.setWorkflowType(findWorkflowType(runParams));
             });
 
     // See if we can figure out a sample sheet
@@ -425,6 +430,16 @@ public final class DefaultIllumina extends RunProcessor {
     String position = getValueFromXml(runParams, POSITION_XPATHS);
     position = fixIfHasBadNovaSeqPosition(position);
     return position;
+  }
+
+  private String findWorkflowType(Document runParams) {
+    String workflowType;
+    try {
+      workflowType = WORKFLOW_TYPE.evaluate(runParams);
+    } catch (XPathExpressionException e) {
+      workflowType = null;
+    }
+    return isStringEmptyOrNull(workflowType) ? null : workflowType;
   }
 
   /**
