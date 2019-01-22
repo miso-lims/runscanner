@@ -439,7 +439,7 @@ public final class DefaultIllumina extends RunProcessor {
     } catch (XPathExpressionException e) {
       workflowType = null;
     }
-    return workflowType;
+    return isStringEmptyOrNull(workflowType) ? null : workflowType;
   }
 
   /**

@@ -64,6 +64,7 @@ public class IlluminaNotificationDtoTest {
     notificationDto.setImgCycle(19);
     notificationDto.setScoreCycle(18);
     notificationDto.setCallCycle(17);
+    notificationDto.setWorkflowType(null);
     return notificationDto;
   }
 }
