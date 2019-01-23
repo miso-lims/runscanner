@@ -24,7 +24,7 @@ public final class Main {
   public static void main(String[] args) throws IOException {
     if (args.length == 0) {
       System.err.println(
-          "Usage: java -DplatformType=ILLUMINA -Dname=default -Dtz=America/Toronto -Dparameters={} ca.on.oicr.gsi.runscanner.Main /path/to/run/folder");
+          "Usage: java -DplatformType=ILLUMINA -Dname=default -Dtz=America/Toronto -Dparameters={} ca.on.oicr.gsi.runscanner.scanner.Main /path/to/run/folder");
     }
     String platformName = System.getProperty("platformType");
     if (platformName == null) {
