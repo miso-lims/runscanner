@@ -28,8 +28,7 @@ import java.util.Optional;
 @JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "platform")
 @JsonSubTypes({ //
   @Type(value = PacBioNotificationDto.class, name = "PacBio"), //
-  @Type(value = IlluminaNotificationDto.class, name = "Illumina"), //
-  @Type(value = LS454NotificationDto.class, name = "LS454")
+  @Type(value = IlluminaNotificationDto.class, name = "Illumina") //
 }) //
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class NotificationDto {
