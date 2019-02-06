@@ -11,13 +11,15 @@ import ca.on.oicr.gsi.status.ServerConfig;
 import ca.on.oicr.gsi.status.StatusPage;
 import ca.on.oicr.gsi.status.TablePage;
 import ca.on.oicr.gsi.status.TableRowWriter;
-import com.google.common.collect.ImmutableSortedMap;
+import com.google.common.collect.ImmutableMap;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -39,7 +41,6 @@ public class UserInterfaceController {
           return COLLECTIONS
               .keySet()
               .stream() //
-              .sorted() //
               .map(collectionName -> NavigationMenu.item("list" + collectionName, collectionName));
         }
 
@@ -50,18 +51,28 @@ public class UserInterfaceController {
 
         @Override
         public Stream<Header> headers() {
-          return Stream.empty();
+          return Stream.of(
+              Header.css(
+                  ".link td:first-child { cursor: pointer; color: #4169E1; text-decoration: underline; }"));
         }
       };
-  /** These are all the collections of files that the scheduler can report.s */
+
+  private static final String SCANNED = "Scanned";
+  private static final String SCHEDULED = "Scheduled";
+  private static final String PROCESSING = "Processing";
+  private static final String UNREADABLE = "Unreadable";
+  private static final String FS_ERROR = "File System Error";
+  private static final String INSTRUMENTS = "Instruments";
+
+  /** These are all the collections of files that the scheduler can report. */
   private static final Map<String, Function<Scheduler, Iterable<File>>> COLLECTIONS =
-      ImmutableSortedMap.<String, Function<Scheduler, Iterable<File>>>naturalOrder() //
-          .put("Finished", Scheduler::getFinishedDirectories) //
-          .put("Scheduled", Scheduler::getScheduledWork) //
-          .put("Processing", Scheduler::getCurrentWork) //
-          .put("Instruments", Scheduler::getRoots) //
-          .put("Failed", Scheduler::getFailedDirectories) //
-          .put("Unreadable", Scheduler::getUnreadableDirectories) //
+      new ImmutableMap.Builder<String, Function<Scheduler, Iterable<File>>>() //
+          .put(SCANNED, Scheduler::getFinishedDirectories) //
+          .put(SCHEDULED, Scheduler::getScheduledWork) //
+          .put(PROCESSING, Scheduler::getCurrentWork) //
+          .put(UNREADABLE, Scheduler::getFailedDirectories) //
+          .put(FS_ERROR, Scheduler::getFSUnreadableDirectories) //
+          .put(INSTRUMENTS, Scheduler::getRoots) //
           .build();
 
   @Autowired private Scheduler scheduler;
@@ -80,7 +91,13 @@ public class UserInterfaceController {
           boolean empty = true;
           for (File file :
               COLLECTIONS.getOrDefault(collection, s -> Collections.emptySet()).apply(scheduler)) {
-            writer.write(false, file.getName(), file.getPath());
+            List<Pair<String, String>> lineAttributes = new ArrayList<>();
+            if (SCANNED.equals(collection)) {
+              lineAttributes.add(
+                  new Pair<>("onclick", String.format("window.location='run/%s'", file.getName())));
+              lineAttributes.add(new Pair<>("class", "link"));
+            }
+            writer.write(lineAttributes, file.getName(), file.getPath());
             empty = false;
           }
           if (empty) {
@@ -143,7 +160,12 @@ public class UserInterfaceController {
           renderer.line("Last Configuration Read", scheduler.getConfigurationLastRead());
           renderer.line("Scanning Enabled", scheduler.isScanningEnabled() ? "Yes" : "No");
           renderer.line("Currently Scanning", scheduler.isScanningNow() ? "Yes" : "No");
-          renderer.lineSpan("Time Since Last Scan", scheduler.getScanLastStarted());
+          if (scheduler.getScanLastStarted() == null) {
+            renderer.line(
+                "Time Since Last Scan", "Starting up... (may take up to 15 minutes to begin scan)");
+          } else {
+            renderer.lineSpan("Time Since Last Scan", scheduler.getScanLastStarted());
+          }
           renderer.line("Processed Runs", scheduler.getFinishedDirectories().size());
           renderer.line("Waiting Runs", scheduler.getScheduledWork().size());
         }
