@@ -322,7 +322,7 @@ public class Scheduler {
     return workToDo;
   }
 
-  public Set<File> getUnreadableDirectories() {
+  public Set<File> getFSUnreadableDirectories() {
     Set<File> unreadables;
 
     if (getScanLastStarted() != null) {

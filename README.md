@@ -2,7 +2,7 @@
 
 # Run Scanner
 This is a web service that monitors directories on the file system containing
-the output from sequencing instruments and provides them to MISO.
+the output from sequencing instruments and serves metadata for runs.
 
 ## Prerequisites
 
