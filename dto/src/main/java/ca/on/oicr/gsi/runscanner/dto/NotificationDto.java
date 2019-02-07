@@ -28,8 +28,7 @@ import java.util.Optional;
 @JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "platform")
 @JsonSubTypes({ //
   @Type(value = PacBioNotificationDto.class, name = "PacBio"), //
-  @Type(value = IlluminaNotificationDto.class, name = "Illumina"), //
-  @Type(value = LS454NotificationDto.class, name = "LS454")
+  @Type(value = IlluminaNotificationDto.class, name = "Illumina") //
 }) //
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class NotificationDto {
@@ -51,8 +50,7 @@ public abstract class NotificationDto {
   /**
    * Get the alias of the run.
    *
-   * <p>This is usually a derivative of the directory name the run output is stored in. Alias must
-   * be unique in MISO and notifications will be matched to runs by alias.
+   * <p>This is usually a derivative of the directory name the run output is stored in.
    */
   public String getRunAlias() {
     return runAlias;
@@ -65,9 +63,9 @@ public abstract class NotificationDto {
   /**
    * Get the name of the sequencer/instrument
    *
-   * <p>This must match to the names of sequencer as input in MISO. If a notification has no
-   * matching sequencer, it will be discarded during processing. How the name of the sequencer is
-   * detected varies by the instrument/platform used in Run Scanner.
+   * <p>This must match to the names of sequencer. If a notification has no matching sequencer, it
+   * will be discarded during processing. How the name of the sequencer is detected varies by the
+   * instrument/platform used in Run Scanner.
    */
   public String getSequencerName() {
     return sequencerName;
@@ -88,9 +86,9 @@ public abstract class NotificationDto {
   /**
    * Get the unique name of the container.
    *
-   * <p>This is usually the unique barcode of the container. Although MISO can handle multiple
-   * containers per run, Run Scanner currently does not. If there is no logical definition of
-   * container for the platform, this should be the same as the run's alias.
+   * <p>This is usually the unique barcode of the container. Run Scanner currently does not handle
+   * multiple containers per run. If there is no logical definition of container for the platform,
+   * this should be the same as the run's alias.
    */
   public String getContainerSerialNumber() {
     return containerSerialNumber;
@@ -110,10 +108,7 @@ public abstract class NotificationDto {
   }
 
   /**
-   * If container model is not provided, the lane count will be used to determine an appropriate
-   * container model in MISO. If MISO has to create a new container for this run, it will be
-   * pre-sized to this number of lanes. If, at a later time, the run scanner reports a different
-   * container size, any update from Run Scanner will be ignored by MISO.
+   * Gets the number of partitions in the run.
    *
    * @return the number of partitions in this run.
    */
@@ -129,9 +124,7 @@ public abstract class NotificationDto {
    * Get the status of the run.
    *
    * <p>This the current status of the run. This may be impossible to correctly detect depending on
-   * the platform. MISO will not record the completion date if the health is not a type that is
-   * "done". If the status has been changed by a human, any updates provided in notifications are
-   * ignored.
+   * the platform.
    *
    * @see HealthType#isDone()
    */
@@ -143,12 +136,7 @@ public abstract class NotificationDto {
     this.healthType = healthType;
   }
 
-  /**
-   * Get the file path to the sequencing output
-   *
-   * <p>MISO only presents this data to the user and possibly to a downstream analysis pipeline. It
-   * will never attempt to read from this directory.
-   */
+  /** Get the file path to the sequencing output */
   public String getSequencerFolderPath() {
     return sequencerFolderPath;
   }
@@ -209,15 +197,10 @@ public abstract class NotificationDto {
   /**
    * Gets a JSON-encoded array of objects containing information for display purposes.
    *
-   * <p>This provides the data used to generate metrics on the front end. Each metric object has a
-   * "type" property that determines how the front end will display the information, if at all. The
-   * rest of the object's properties are determined on a "type" by "type" basis and the format
-   * expected is determined by the JavaScript front-end. Other than checking for valid JSON, MISO
-   * only proxies this data.
-   *
-   * <p>The metrics do not overwrite the existing metrics in the MISO database. They are merged
-   * where new metrics of the same "type" as an existing metrics will overwrite it, but an existing
-   * metric will not be deleted.
+   * <p>This provides the data that can be used to generate metrics on the front end. Each metric
+   * object has a "type" property that determines how the front end will display the information, if
+   * at all. The rest of the object's properties are determined on a "type" by "type" basis and the
+   * format expected is determined by the consumer, which is assumed to be a JavaScript front-end.
    */
   public String getMetrics() {
     return metrics;
@@ -319,8 +302,7 @@ public abstract class NotificationDto {
   /**
    * Determine the identification barcode of a pool in a lane
    *
-   * <p>For some instruments, a sample sheet is provided. This data can be provided to MISO to
-   * automatically populate the pools in the partitions. If multiple pools can be provided for a
+   * <p>For some instruments, a sample sheet is provided. If multiple pools can be provided for a
    * single partition, the correct behaviour is to return empty.
    *
    * @param lane, the lane of interest, [0, {{@link #getLaneCount()}
