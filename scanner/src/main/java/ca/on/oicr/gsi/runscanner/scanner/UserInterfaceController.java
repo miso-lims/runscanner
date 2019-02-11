@@ -52,8 +52,8 @@ public class UserInterfaceController {
         @Override
         public Stream<Header> headers() {
           return Stream.of(
-              Header.css(
-                  ".link td:first-child { cursor: pointer; color: #4169E1; text-decoration: underline; }"));
+              Header.cssFile("resources/styles/style.css"),
+              Header.favicon("resources/favicon.ico", 32, "image/x-icon"));
         }
       };
 
