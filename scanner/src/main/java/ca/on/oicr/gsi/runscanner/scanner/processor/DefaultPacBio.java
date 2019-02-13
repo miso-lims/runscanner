@@ -159,7 +159,7 @@ public class DefaultPacBio extends RunProcessor {
    * Extract a number from the metadata file and put the result into the DTO.
    *
    * @param expression the XPath expression yielding the number
-   * @param setterthe writer for the number
+   * @param setter the writer for the number
    * @return
    */
   private static ProcessMetadata processNumber(
