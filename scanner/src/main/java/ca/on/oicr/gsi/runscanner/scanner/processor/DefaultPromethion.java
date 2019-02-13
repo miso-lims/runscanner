@@ -9,9 +9,9 @@ import java.util.stream.Stream;
 import ncsa.hdf.object.HObject;
 import ncsa.hdf.object.h5.*;
 
-public class DefaultNanopore extends RunProcessor {
+public class DefaultPromethion extends RunProcessor {
 
-  public DefaultNanopore(Builder builder) {
+  public DefaultPromethion(Builder builder) {
     super(builder);
   }
 
@@ -34,6 +34,6 @@ public class DefaultNanopore extends RunProcessor {
   }
 
   public static RunProcessor create(Builder builder, ObjectNode jsonNodes) {
-    return new DefaultNanopore(builder);
+    return new DefaultPromethion(builder);
   }
 }
