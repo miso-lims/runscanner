@@ -60,7 +60,7 @@ public final class Main {
     boolean success = true;
     for (String path : args) {
       File directory = new File(path);
-      if (!directory.isDirectory() || !directory.canExecute() || !directory.canRead()) {
+      if (!validPath(pt, directory)) {
         System.err.println("Target is not a useable directory: " + path);
         success = false;
         continue;
@@ -82,5 +82,17 @@ public final class Main {
       System.exit(1);
     }
     System.exit(success ? 0 : 2);
+  }
+
+  private static boolean validPath(Platform platform, File fs_obj) {
+    switch (platform) {
+      case PACBIO:
+      case ILLUMINA:
+        return fs_obj.isDirectory() && fs_obj.canExecute() && fs_obj.canRead();
+      case OXFORDNANOPORE:
+        return fs_obj.isFile() && fs_obj.canExecute() && fs_obj.canRead();
+      default:
+        return false;
+    }
   }
 }

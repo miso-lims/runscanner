@@ -140,6 +140,11 @@
       <artifactId>spring-webmvc</artifactId>
       <version>4.3.18.RELEASE</version>
     </dependency>
+      <dependency>
+        <groupId>org.hdfgroup</groupId>
+        <artifactId>hdf-java</artifactId>
+        <version>2.6.1</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
   <distributionManagement>

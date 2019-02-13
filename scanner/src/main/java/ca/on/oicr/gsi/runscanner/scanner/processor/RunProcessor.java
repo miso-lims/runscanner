@@ -87,8 +87,8 @@ public abstract class RunProcessor {
     Stream<Builder> standard =
         Stream.of(
             new Builder(Platform.ILLUMINA, "default", DefaultIllumina::create),
-            new Builder(Platform.PACBIO, "default", DefaultPacBio::create));
-    		// TODO Add nanopore builder
+            new Builder(Platform.PACBIO, "default", DefaultPacBio::create),
+            new Builder(Platform.OXFORDNANOPORE, "default", DefaultNanopore::create));
     return Stream.concat(
         standard,
         Arrays.stream(Platform.values())

@@ -1,6 +1,7 @@
 package ca.on.oicr.gsi.runscanner.scanner.processor;
 
 import ca.on.oicr.gsi.runscanner.dto.IlluminaNotificationDto;
+import ca.on.oicr.gsi.runscanner.dto.NanoporeNotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.PacBioNotificationDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -33,6 +34,8 @@ public class Testing extends RunProcessor {
         return IlluminaNotificationDto.class;
       case PACBIO:
         return PacBioNotificationDto.class;
+      case OXFORDNANOPORE:
+        return NanoporeNotificationDto.class;
       default:
         return NotificationDto.class;
     }
