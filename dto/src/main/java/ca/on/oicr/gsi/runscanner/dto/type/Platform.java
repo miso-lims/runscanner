@@ -27,5 +27,6 @@ package ca.on.oicr.gsi.runscanner.dto.type;
 public enum Platform {
   ILLUMINA, //
   PACBIO, //
-  OXFORDNANOPORE;
+  PROMETHION,
+  MINION;
 }

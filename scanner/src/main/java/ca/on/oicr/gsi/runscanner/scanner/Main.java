@@ -101,7 +101,8 @@ public final class Main {
       case PACBIO:
       case ILLUMINA:
         return fs_obj.isDirectory() && fs_obj.canExecute() && fs_obj.canRead();
-      case OXFORDNANOPORE:
+      case PROMETHION:
+      case MINION:
         return fs_obj.isFile() && fs_obj.canExecute() && fs_obj.canRead();
       default:
         return false;
