@@ -9,9 +9,12 @@ import javax.xml.xpath.XPathFactory;
 import org.w3c.dom.Document;
 
 public enum IlluminaChemistry implements Predicate<Document> {
-  V2("//ReagentKitVersion=Version2"), //
+  V2_NANO("contains(//FlowcellRFIDTag/SerialNumber, '-D')"), //
+  V2_MICRO("contains(//FlowcellRFIDTag/SerialNumber, '-G')"), //
+  V2(
+      "contains(//FlowcellRFIDTag/SerialNumber, '-A') or contains(//FlowcellRFIDTag/SerialNumber, '-B') or //ReagentKitVersion=\"Version2\""), //
   V3(
-      "//ReagentKitVersion=Version3 or //Flowcell=\"HiSeq Flow Cell v3\" or //Flowcell=\"HiSeq Flow Cell\""), //
+      "//ReagentKitVersion=\"Version3\" or //Flowcell=\"HiSeq Flow Cell v3\" or //Flowcell=\"HiSeq Flow Cell\""), //
   V4("//Flowcell=\"HiSeq Flow Cell v4\""), //
   RAPID_RUN("starts-with(//Flowcell, \"HiSeq Rapid Flow Cell\")"), //
   NS_MID("//Chemistry=\"NextSeq Mid\""), //
