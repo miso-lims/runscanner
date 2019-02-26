@@ -61,7 +61,7 @@ public final class Main {
     for (String path : args) {
       File directory = new File(path);
       if (!validPathForPlatform(pt, directory)) {
-        System.err.println("Target is not a useable directory: " + path);
+        System.err.println("Target is not of usable type: " + path);
         success = false;
         continue;
       }

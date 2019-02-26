@@ -28,5 +28,5 @@ public enum Platform {
   ILLUMINA, //
   PACBIO, //
   PROMETHION, //
-  MINION;
+  MINION
 }
