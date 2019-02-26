@@ -15,7 +15,7 @@ public class DefaultMinion extends RunProcessor {
 
   @Override
   public Stream<File> getRunsFromRoot(File root) {
-    return null;
+    return Stream.empty();
   }
 
   @Override
