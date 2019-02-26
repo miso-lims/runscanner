@@ -141,9 +141,9 @@
       <version>4.3.18.RELEASE</version>
     </dependency>
       <dependency>
-        <groupId>org.hdfgroup</groupId>
-        <artifactId>hdf-java</artifactId>
-        <version>2.6.1</version>
+        <groupId>cisd</groupId>
+        <artifactId>jhdf5</artifactId>
+        <version>14.12.6</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -167,6 +167,10 @@
       <id>releases.gsi</id>
       <name>OICR GSI Releases repository</name>
       <url>https://artifacts.oicr.on.ca/artifactory/gsi-release</url>
+    </repository>
+    <repository>
+      <id>ImageJ Public</id>
+      <url>http://maven.imagej.net/content/repositories/public/</url>
     </repository>
   </repositories>
   <build>
