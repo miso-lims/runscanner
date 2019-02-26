@@ -449,7 +449,7 @@ public class Scheduler {
   public synchronized void start() {
     if (scanDirectoriesFuture == null) {
       scanDirectoriesFuture =
-          scheduler.scheduleAtFixedRate(
+          scheduler.scheduleWithFixedDelay(
               () -> {
                 if (scanningNow) {
                   reentered.inc();
