@@ -31,10 +31,8 @@ public class Testing extends RunProcessor {
         return IlluminaNotificationDto.class;
       case PACBIO:
         return PacBioNotificationDto.class;
-      case PROMETHION:
+      case OXFORDNANOPORE:
         return PromethionNotificationDto.class;
-      case MINION:
-        return MinionNotificationDto.class;
       default:
         return NotificationDto.class;
     }
@@ -58,5 +56,10 @@ public class Testing extends RunProcessor {
       }
     }
     return mapper.readValue(new File(runDirectory, "notification.json"), classForPlatform());
+  }
+
+  @Override
+  public boolean isFilePathValid(File fs_obj) {
+    return fs_obj.isDirectory() && fs_obj.canExecute() && fs_obj.canRead();
   }
 }
