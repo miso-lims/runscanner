@@ -19,9 +19,11 @@ public class DefaultPromethion extends RunProcessor {
   private final String TRACKING_ID = "UniqueGlobalKey/tracking_id";
   private final String CONTEXT_TAGS = "UniqueGlobalKey/context_tags";
   private final int LANE_COUNT = 1;
+  private final String SEQUENCER_NAME;
 
-  public DefaultPromethion(Builder builder) {
+  public DefaultPromethion(Builder builder, String seqName) {
     super(builder);
+    SEQUENCER_NAME = seqName;
   }
 
   @Override
@@ -54,6 +56,7 @@ public class DefaultPromethion extends RunProcessor {
 
     pnd.setRunAlias(reader.getAttr(TRACKING_ID, "run_id"));
     pnd.setSequencerFolderPath(runDirectory.getParent());
+    pnd.setSequencerName(SEQUENCER_NAME);
     pnd.setSequencerPosition(reader.getAttr(TRACKING_ID, "device_id"));
     pnd.setContainerSerialNumber(reader.getAttr(TRACKING_ID, "flow_cell_id"));
     pnd.setContainerModel(
@@ -62,11 +65,15 @@ public class DefaultPromethion extends RunProcessor {
     pnd.setHealthType(HealthType.UNKNOWN);
     pnd.setStartDate(
         ZonedDateTime.parse(reader.getAttr(TRACKING_ID, "exp_start_time")).toLocalDateTime());
+    pnd.setSoftware(
+        reader.getAttr(TRACKING_ID, "version")
+            + " + "
+            + reader.getAttr(TRACKING_ID, "protocols_version"));
 
     return pnd;
   }
 
   public static RunProcessor create(Builder builder, ObjectNode jsonNodes) {
-    return new DefaultPromethion(builder);
+    return new DefaultPromethion(builder, jsonNodes.get("name").asText());
   }
 }
