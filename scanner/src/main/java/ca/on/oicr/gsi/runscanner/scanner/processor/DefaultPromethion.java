@@ -34,12 +34,11 @@ public class DefaultPromethion extends RunProcessor {
       for (File f : root.listFiles()) {
         str.addAll(getRunsFromRoot(f).collect(Collectors.toList()));
       }
+    } else { // root is a file
+      if (isFileFast5(root)) {
+        str.add(root);
+      }
     }
-    // else root is file
-    if (isFileFast5(root)) {
-      str.add(root);
-    }
-
     return str.stream();
   }
 
