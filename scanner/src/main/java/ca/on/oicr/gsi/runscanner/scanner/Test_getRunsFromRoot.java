@@ -16,8 +16,8 @@ import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 /**
- * Attempts to process run directories, provided on the command line, through a particular processor
- * and display the results. This is for debugging purposes.
+ * Attempts to process run directories, provided on the command line, through getRunsFromRoot() and
+ * display the results. This is for debugging purposes.
  */
 public final class Test_getRunsFromRoot {
 
