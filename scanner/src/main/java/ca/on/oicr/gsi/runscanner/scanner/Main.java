@@ -60,7 +60,7 @@ public final class Main {
     boolean success = true;
     for (String path : args) {
       File directory = new File(path);
-      if (!validPathForPlatform(pt, directory)) {
+      if (!rp.isFilePathValid(directory)) {
         System.err.println("Target is not of usable type: " + path);
         success = false;
         continue;
@@ -82,30 +82,5 @@ public final class Main {
       System.exit(1);
     }
     System.exit(success ? 0 : 2);
-  }
-
-  /**
-   * Check whether a given File represents a useable path for the given Platform.
-   *
-   * <p>This check is necessary because Oxford Nanopore output has many files per directory, so
-   * individual files are passed as runs rather than directories. PacBio and Illumina output is
-   * taken as a path to a directory.
-   *
-   * @param platform Platform type of the sequencer we are testing.
-   * @param fs_obj File object representing the location of the sequencer output.
-   * @return true if file/directory is accessible and of the correct type (directory for
-   *     PacBio/Illumina, file for Oxford Nanopore)
-   */
-  private static boolean validPathForPlatform(Platform platform, File fs_obj) {
-    switch (platform) {
-      case PACBIO:
-      case ILLUMINA:
-        return fs_obj.isDirectory() && fs_obj.canExecute() && fs_obj.canRead();
-      case PROMETHION:
-      case MINION:
-        return fs_obj.isFile() && fs_obj.canExecute() && fs_obj.canRead();
-      default:
-        return false;
-    }
   }
 }

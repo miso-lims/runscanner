@@ -353,4 +353,9 @@ public class DefaultPacBio extends RunProcessor {
   private static boolean isStringBlankOrNull(String s) {
     return s == null || "".equals(s.trim());
   }
+
+  @Override
+  public boolean isFilePathValid(File fs_obj) {
+    return fs_obj.isDirectory() && fs_obj.canExecute() && fs_obj.canRead();
+  }
 }
