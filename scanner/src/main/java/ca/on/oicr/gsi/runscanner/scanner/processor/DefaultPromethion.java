@@ -9,7 +9,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.File;
 import java.io.IOException;
 import java.time.ZonedDateTime;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.TimeZone;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class DefaultPromethion extends RunProcessor {
@@ -23,8 +26,25 @@ public class DefaultPromethion extends RunProcessor {
 
   @Override
   public Stream<File> getRunsFromRoot(File root) {
-    // TODO Implement this for real
-    return Stream.empty();
+    List<File> str = new LinkedList<>();
+
+    if (root.isDirectory()) {
+      for (File f : root.listFiles()) {
+        str.addAll(getRunsFromRoot(f).collect(Collectors.toList()));
+      }
+    }
+    // else root is file
+    if (isFileFast5(root)) {
+      str.add(root);
+    }
+
+    return str.stream();
+  }
+
+  private boolean isFileFast5(File file) {
+    String fileName = file.getName();
+    int i = fileName.lastIndexOf('.');
+    return (i > 0) && fileName.substring(i + 1).equals("fast5");
   }
 
   @Override
