@@ -498,4 +498,9 @@ public final class DefaultIllumina extends RunProcessor {
       }
     };
   }
+
+  @Override
+  public boolean isFilePathValid(File fs_obj) {
+    return fs_obj.isDirectory() && fs_obj.canExecute() && fs_obj.canRead();
+  }
 }

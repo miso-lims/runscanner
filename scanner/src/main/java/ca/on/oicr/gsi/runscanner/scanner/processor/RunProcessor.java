@@ -192,4 +192,12 @@ public abstract class RunProcessor {
    *     directory may be processed again.
    */
   public abstract NotificationDto process(File runDirectory, TimeZone tz) throws IOException;
+
+  /**
+   * Determine whether a File is readable by the processor.
+   *
+   * @param fs_obj File object which may represent a directory or file.
+   * @return true if processor can process filesystem object, false otherwise.
+   */
+  public abstract boolean isFilePathValid(File fs_obj);
 }

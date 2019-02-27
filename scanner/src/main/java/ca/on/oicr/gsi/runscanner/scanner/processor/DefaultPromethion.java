@@ -75,4 +75,9 @@ public class DefaultPromethion extends RunProcessor {
   public static RunProcessor create(Builder builder, ObjectNode jsonNodes) {
     return new DefaultPromethion(builder, jsonNodes.get("name").asText());
   }
+
+  @Override
+  public boolean isFilePathValid(File fs_obj) {
+    return fs_obj.isFile() && fs_obj.canExecute() && fs_obj.canRead();
+  }
 }
