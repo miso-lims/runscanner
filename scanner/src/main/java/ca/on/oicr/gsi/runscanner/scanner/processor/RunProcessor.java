@@ -88,8 +88,8 @@ public abstract class RunProcessor {
         Stream.of(
             new Builder(Platform.ILLUMINA, "default", DefaultIllumina::create),
             new Builder(Platform.PACBIO, "default", DefaultPacBio::create),
-            new Builder(Platform.PROMETHION, "default", DefaultPromethion::create),
-            new Builder(Platform.MINION, "default", DefaultMinion::create));
+            new Builder(Platform.OXFORDNANOPORE, "promethion", DefaultPromethion::create) /*,
+            new Builder(Platform.OXFORDNANOPORE, "minion", DefaultMinion::create)*/);
     return Stream.concat(
         standard,
         Arrays.stream(Platform.values())
