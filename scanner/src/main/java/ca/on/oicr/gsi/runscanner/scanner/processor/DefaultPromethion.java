@@ -43,9 +43,7 @@ public class DefaultPromethion extends RunProcessor {
   }
 
   private boolean isFileFast5(File file) {
-    String fileName = file.getName();
-    int i = fileName.lastIndexOf('.');
-    return (i > 0) && fileName.substring(i + 1).equals("fast5");
+    return file.getName().endsWith(".fast5");
   }
 
   @Override
