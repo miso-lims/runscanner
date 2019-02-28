@@ -15,15 +15,11 @@ import java.util.TimeZone;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class DefaultPromethion extends RunProcessor {
-  private final String TRACKING_ID = "UniqueGlobalKey/tracking_id";
-  private final String CONTEXT_TAGS = "UniqueGlobalKey/context_tags";
+public class PromethionProcessor extends BaseNanoporeProcessor {
   private final int LANE_COUNT = 1;
-  private final String SEQUENCER_NAME;
 
-  public DefaultPromethion(Builder builder, String seqName) {
-    super(builder);
-    SEQUENCER_NAME = seqName;
+  public PromethionProcessor(Builder builder, String seqName) {
+    super(builder, seqName);
   }
 
   @Override
@@ -40,10 +36,6 @@ public class DefaultPromethion extends RunProcessor {
       }
     }
     return str.stream();
-  }
-
-  private boolean isFileFast5(File file) {
-    return file.getName().endsWith(".fast5");
   }
 
   @Override
@@ -71,11 +63,6 @@ public class DefaultPromethion extends RunProcessor {
   }
 
   public static RunProcessor create(Builder builder, ObjectNode jsonNodes) {
-    return new DefaultPromethion(builder, jsonNodes.get("name").asText());
-  }
-
-  @Override
-  public boolean isFilePathValid(File fs_obj) {
-    return fs_obj.isFile() && fs_obj.canExecute() && fs_obj.canRead();
+    return new PromethionProcessor(builder, jsonNodes.get("name").asText());
   }
 }

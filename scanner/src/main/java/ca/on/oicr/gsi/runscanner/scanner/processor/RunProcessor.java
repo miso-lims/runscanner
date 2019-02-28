@@ -88,7 +88,7 @@ public abstract class RunProcessor {
         Stream.of(
             new Builder(Platform.ILLUMINA, "default", DefaultIllumina::create),
             new Builder(Platform.PACBIO, "default", DefaultPacBio::create),
-            new Builder(Platform.OXFORDNANOPORE, "promethion", DefaultPromethion::create) /*,
+            new Builder(Platform.OXFORDNANOPORE, "promethion", PromethionProcessor::create) /*,
             new Builder(Platform.OXFORDNANOPORE, "minion", DefaultMinion::create)*/);
     return Stream.concat(
         standard,
@@ -196,8 +196,8 @@ public abstract class RunProcessor {
   /**
    * Determine whether a File is readable by the processor.
    *
-   * @param fs_obj File object which may represent a directory or file.
+   * @param filesystemObject File object which may represent a directory or file.
    * @return true if processor can process filesystem object, false otherwise.
    */
-  public abstract boolean isFilePathValid(File fs_obj);
+  public abstract boolean isFilePathValid(File filesystemObject);
 }

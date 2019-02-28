@@ -355,7 +355,9 @@ public class DefaultPacBio extends RunProcessor {
   }
 
   @Override
-  public boolean isFilePathValid(File fs_obj) {
-    return fs_obj.isDirectory() && fs_obj.canExecute() && fs_obj.canRead();
+  public boolean isFilePathValid(File filesystemObject) {
+    return filesystemObject.isDirectory()
+        && filesystemObject.canExecute()
+        && filesystemObject.canRead();
   }
 }
