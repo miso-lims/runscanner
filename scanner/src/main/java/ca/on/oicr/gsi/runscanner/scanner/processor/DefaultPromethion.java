@@ -1,7 +1,7 @@
 package ca.on.oicr.gsi.runscanner.scanner.processor;
 
+import ca.on.oicr.gsi.runscanner.dto.NanoporeNotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
-import ca.on.oicr.gsi.runscanner.dto.PromethionNotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.type.HealthType;
 import ch.systemsx.cisd.hdf5.HDF5FactoryProvider;
 import ch.systemsx.cisd.hdf5.IHDF5StringReader;
@@ -48,7 +48,7 @@ public class DefaultPromethion extends RunProcessor {
 
   @Override
   public NotificationDto process(File runDirectory, TimeZone tz) throws IOException {
-    PromethionNotificationDto pnd = new PromethionNotificationDto();
+    NanoporeNotificationDto pnd = new NanoporeNotificationDto();
     IHDF5StringReader reader = HDF5FactoryProvider.get().openForReading(runDirectory).string();
 
     pnd.setRunAlias(reader.getAttr(TRACKING_ID, "run_id"));
