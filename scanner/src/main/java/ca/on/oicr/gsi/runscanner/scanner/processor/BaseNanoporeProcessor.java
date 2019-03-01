@@ -17,7 +17,7 @@ public abstract class BaseNanoporeProcessor extends RunProcessor {
   }
 
   @Override
-  public boolean isFilePathValid(File filesystemObject) {
-    return filesystemObject.isFile() && filesystemObject.canExecute() && filesystemObject.canRead();
+  public PathType getPathType() {
+    return PathType.FILE;
   }
 }

@@ -500,9 +500,7 @@ public final class DefaultIllumina extends RunProcessor {
   }
 
   @Override
-  public boolean isFilePathValid(File filesystemObject) {
-    return filesystemObject.isDirectory()
-        && filesystemObject.canExecute()
-        && filesystemObject.canRead();
+  public PathType getPathType() {
+    return PathType.DIRECTORY;
   }
 }
