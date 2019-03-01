@@ -58,10 +58,13 @@ public class Testing extends RunProcessor {
     return mapper.readValue(new File(runDirectory, "notification.json"), classForPlatform());
   }
 
+  /**
+   * Get the type of path (File, Directory) this processor requires for runs.
+   *
+   * @return PathType File or Directory
+   */
   @Override
-  public boolean isFilePathValid(File filesystemObject) {
-    return filesystemObject.isDirectory()
-        && filesystemObject.canExecute()
-        && filesystemObject.canRead();
+  public PathType getPathType() {
+    return PathType.DIRECTORY;
   }
 }
