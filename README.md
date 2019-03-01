@@ -106,7 +106,7 @@ For troublesome runs, you can see the output for a particular run directory usin
 It will display instructions on how to use it. You will have to set the `RUN_SCANNER_HOME` to the path containing an unpacked version of the WAR.
 
 ### List observable runs
-To troubleshoot whether a processor can observe a run file, you can see a list of all the files a processor will accept from a directory using:
+To troubleshoot whether a processor can observe a run, you can see a list of all the runs a processor will accept from the filesystem using:
 
     java -cp $RUN_SCANNER_HOME/WEB-INF/classes:$RUN_SCANNER_HOME/WEB-INF/lib/'*' ca.on.oicr.gsi.runscanner.scanner.FindRuns
     
