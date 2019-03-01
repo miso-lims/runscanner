@@ -193,10 +193,32 @@ public abstract class RunProcessor {
   public abstract NotificationDto process(File runDirectory, TimeZone tz) throws IOException;
 
   /**
+   * Get the type of path (File, Directory) this processor requires for runs.
+   *
+   * @return PathType File or Directory
+   */
+  public abstract PathType getPathType();
+
+  /**
    * Determine whether a File is readable by the processor.
    *
    * @param filesystemObject File object which may represent a directory or file.
    * @return true if processor can process filesystem object, false otherwise.
    */
-  public abstract boolean isFilePathValid(File filesystemObject);
+  public boolean isFilePathValid(File filesystemObject) {
+    boolean valid = false;
+
+    switch (getPathType()) {
+      case FILE:
+        valid = filesystemObject.isFile();
+        break;
+      case DIRECTORY:
+        valid = filesystemObject.isDirectory();
+        break;
+    }
+
+    valid = valid && filesystemObject.canExecute() && filesystemObject.canRead();
+
+    return valid;
+  }
 }
