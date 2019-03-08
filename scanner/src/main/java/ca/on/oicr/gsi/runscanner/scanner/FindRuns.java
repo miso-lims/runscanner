@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.TimeZone;
-import java.util.stream.Collectors;
 
 /**
  * Attempts to process run directories, provided on the command line, through getRunsFromRoot() and
@@ -66,7 +65,7 @@ public final class FindRuns {
         continue;
       }
       try {
-        results.addAll(rp.getRunsFromRoot(directory).collect(Collectors.toList()));
+        rp.getRunsFromRoot(directory).forEach(results::add);
       } catch (Exception e) {
         System.err.println("Cannot process directory: " + path);
         e.printStackTrace();

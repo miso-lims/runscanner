@@ -8,11 +8,13 @@ import ch.systemsx.cisd.hdf5.IHDF5StringReader;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.time.ZonedDateTime;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
-import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class PromethionProcessor extends BaseNanoporeProcessor {
@@ -24,27 +26,76 @@ public class PromethionProcessor extends BaseNanoporeProcessor {
 
   @Override
   public Stream<File> getRunsFromRoot(File root) {
-    List<File> str = new LinkedList<>();
+    final List<File> runDirectories = new ArrayList<>();
+    try {
+      Files.walkFileTree(
+          root.toPath(),
+          new FileVisitor<Path>() {
+            @Override
+            public FileVisitResult preVisitDirectory(
+                Path path, BasicFileAttributes basicFileAttributes) throws IOException {
+              if (readsDirectoryForRun(path).anyMatch(Files::isDirectory)) {
+                runDirectories.add(path.toFile());
+                return FileVisitResult.SKIP_SUBTREE;
+              }
+              return FileVisitResult.CONTINUE;
+            }
 
-    if (root.isDirectory()) {
-      for (File f : root.listFiles()) {
-        str.addAll(getRunsFromRoot(f).collect(Collectors.toList()));
-      }
-    } else { // root is a file
-      if (isFileFast5(root)) {
-        str.add(root);
-      }
+            @Override
+            public FileVisitResult visitFile(Path path, BasicFileAttributes basicFileAttributes)
+                throws IOException {
+              return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult visitFileFailed(Path path, IOException e) throws IOException {
+              e.printStackTrace();
+              return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult postVisitDirectory(Path path, IOException e) throws IOException {
+              return FileVisitResult.CONTINUE;
+            }
+          });
+    } catch (IOException e) {
+      e.printStackTrace();
     }
-    return str.stream();
+    return runDirectories.stream();
+  }
+
+  private Stream<Path> readsDirectoryForRun(Path path) {
+    return IntStream.of(0, 1).mapToObj(i -> path.resolve(Paths.get("reads", Integer.toString(i))));
   }
 
   @Override
   public NotificationDto process(File runDirectory, TimeZone tz) throws IOException {
+    final File firstFile =
+        readsDirectoryForRun(runDirectory.toPath())
+            .filter(Files::isDirectory)
+            .flatMap(
+                p -> {
+                  try (Stream<Path> files = Files.list(p)) {
+                    return files
+                        .filter(BaseNanoporeProcessor::isFileFast5)
+                        .map(Path::toFile)
+                        .findFirst()
+                        .map(Stream::of)
+                        .orElseGet(Stream::empty);
+                  } catch (IOException e) {
+                    e.printStackTrace();
+                    return Stream.empty();
+                  }
+                })
+            .findFirst()
+            .orElseThrow(
+                () -> new IOException("Cannot find FAST5 file in run directory: " + runDirectory));
+
     NanoporeNotificationDto pnd = new NanoporeNotificationDto();
-    IHDF5StringReader reader = HDF5FactoryProvider.get().openForReading(runDirectory).string();
+    IHDF5StringReader reader = HDF5FactoryProvider.get().openForReading(firstFile).string();
 
     pnd.setRunAlias(reader.getAttr(TRACKING_ID, "run_id"));
-    pnd.setSequencerFolderPath(runDirectory.getParent());
+    pnd.setSequencerFolderPath(runDirectory.toString());
     pnd.setSequencerName(SEQUENCER_NAME);
     pnd.setSequencerPosition(reader.getAttr(TRACKING_ID, "device_id"));
     pnd.setContainerSerialNumber(reader.getAttr(TRACKING_ID, "flow_cell_id"));
