@@ -504,7 +504,6 @@ int main(int argc, const char **argv) {
   illumina::interop::logic::summary::summarize_run_metrics(run, run_summary,
                                                            true);
 
-  result["numReads"] = (Json::Value::Int)run.run_info().reads().size();
   result["bclCount"] =
       (Json::Value::Int)(run.run_info().flowcell().tiles_per_lane() *
                          run.run_info().flowcell().swath_count() *
@@ -548,15 +547,18 @@ int main(int argc, const char **argv) {
 
   int readLength = 0;
   Json::Value indexLengths(Json::arrayValue);
+  Json::Value::Int numReads = 0;
 
   for (const auto &read : run.run_info().reads()) {
     if (read.is_index()) {
       indexLengths.append(length(read));
     } else {
       readLength = std::max(readLength, length(read));
+      numReads++;
     }
   }
 
+  result["numReads"] = numReads;
   result["readLength"] = readLength;
   result["runBasesMask"] = getRunBasesMask(run);
   result["indexLengths"] = std::move(indexLengths);
