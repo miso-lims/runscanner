@@ -19,10 +19,10 @@ import java.util.TimeZone;
 import java.util.stream.Stream;
 
 public abstract class BaseNanoporeProcessor extends RunProcessor {
-  protected final String TRACKING_ID = "UniqueGlobalKey/tracking_id";
-  protected final String CONTEXT_TAGS = "UniqueGlobalKey/context_tags";
+  protected static final String TRACKING_ID = "UniqueGlobalKey/tracking_id";
+  protected static final String CONTEXT_TAGS = "UniqueGlobalKey/context_tags";
   protected final String SEQUENCER_NAME;
-  protected final int LANE_COUNT = 1;
+  protected static final int LANE_COUNT = 1;
 
   protected static boolean isFileFast5(String fileName) {
     return fileName.endsWith(".fast5");
