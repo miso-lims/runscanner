@@ -20,10 +20,8 @@ public class PromethionProcessor extends BaseNanoporeProcessor {
   }
 
   @Override
-  protected NanoporeNotificationDto processUnique(
-      NanoporeNotificationDto nnd, IHDF5StringReader reader) {
+  protected void additionalProcess(NanoporeNotificationDto nnd, IHDF5StringReader reader) {
     nnd.setSequencerPosition(reader.getAttr(TRACKING_ID, "device_id"));
-    return nnd;
   }
 
   public static RunProcessor create(Builder builder, ObjectNode jsonNodes) {

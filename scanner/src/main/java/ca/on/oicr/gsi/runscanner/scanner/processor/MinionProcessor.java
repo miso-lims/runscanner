@@ -18,9 +18,8 @@ public class MinionProcessor extends BaseNanoporeProcessor {
   }
 
   @Override
-  protected NanoporeNotificationDto processUnique(
-      NanoporeNotificationDto nnd, IHDF5StringReader reader) {
-    return nnd;
+  protected void additionalProcess(NanoporeNotificationDto nnd, IHDF5StringReader reader) {
+    return;
   }
 
   public static RunProcessor create(Builder builder, ObjectNode jsonNodes) {

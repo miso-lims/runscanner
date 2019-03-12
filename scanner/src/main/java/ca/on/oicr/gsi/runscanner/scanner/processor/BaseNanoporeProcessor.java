@@ -126,9 +126,9 @@ public abstract class BaseNanoporeProcessor extends RunProcessor {
             + " + "
             + reader.getAttr(TRACKING_ID, "protocols_version"));
 
-    return processUnique(nnd, reader);
+    additionalProcess(nnd, reader);
+    return nnd;
   }
 
-  protected abstract NanoporeNotificationDto processUnique(
-      NanoporeNotificationDto nnd, IHDF5StringReader reader);
+  protected abstract void additionalProcess(NanoporeNotificationDto nnd, IHDF5StringReader reader);
 }
