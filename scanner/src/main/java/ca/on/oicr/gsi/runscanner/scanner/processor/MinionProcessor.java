@@ -5,7 +5,6 @@ import ch.systemsx.cisd.hdf5.IHDF5StringReader;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class MinionProcessor extends BaseNanoporeProcessor {
@@ -15,7 +14,7 @@ public class MinionProcessor extends BaseNanoporeProcessor {
 
   @Override
   protected Stream<Path> readsDirectoryForRun(Path path) {
-    return IntStream.of(0).mapToObj(i -> path.resolve(Paths.get("fast5", Integer.toString(i))));
+    return Stream.of(path.resolve(Paths.get("fast5", "0")));
   }
 
   @Override
