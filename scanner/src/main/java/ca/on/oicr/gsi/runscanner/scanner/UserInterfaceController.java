@@ -1,6 +1,7 @@
 package ca.on.oicr.gsi.runscanner.scanner;
 
 import ca.on.oicr.gsi.Pair;
+import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
 import ca.on.oicr.gsi.runscanner.scanner.processor.RunProcessor;
 import ca.on.oicr.gsi.runscanner.scanner.processor.RunProcessor.Builder;
 import ca.on.oicr.gsi.status.ConfigurationSection;
@@ -21,6 +22,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Stream;
 import javax.servlet.http.HttpServletResponse;
@@ -77,6 +79,38 @@ public class UserInterfaceController {
 
   @Autowired private Scheduler scheduler;
 
+  @GetMapping(value = "/listScanned")
+  public void listScannedRuns(@PathVariable String collection, HttpServletResponse response)
+      throws IOException {
+    response.setContentType("text/html;charset=utf-8");
+    response.setStatus(HttpServletResponse.SC_OK);
+    try (OutputStream output = response.getOutputStream()) {
+      new TablePage(SERVER_CONFIG) {
+
+        @Override
+        protected void writeRows(TableRowWriter writer) {
+          AtomicReference<Boolean> empty = new AtomicReference<>(true);
+          scheduler
+              .finished()
+              .sorted(Comparator.comparing(NotificationDto::getRunAlias))
+              .forEach(
+                  run -> {
+                    List<Pair<String, String>> lineAttributes = new ArrayList<>();
+                    lineAttributes.add(
+                        new Pair<>(
+                            "onclick",
+                            String.format("window.location='run/%s'", run.getRunAlias())));
+                    lineAttributes.add(new Pair<>("class", "link"));
+                    writer.write(lineAttributes, run.getRunAlias(), run.getSequencerFolderPath());
+                    empty.set(false);
+                  });
+          if (empty.get()) {
+            writer.write(Arrays.asList(new Pair<>("colspan", "2")), "No items.");
+          }
+        }
+      }.renderPage(output);
+    }
+  }
   /** List a collection of files */
   @GetMapping(value = "/list{collection}")
   public void listPaths(@PathVariable String collection, HttpServletResponse response)
@@ -91,13 +125,7 @@ public class UserInterfaceController {
           boolean empty = true;
           for (File file :
               COLLECTIONS.getOrDefault(collection, s -> Collections.emptySet()).apply(scheduler)) {
-            List<Pair<String, String>> lineAttributes = new ArrayList<>();
-            if (SCANNED.equals(collection)) {
-              lineAttributes.add(
-                  new Pair<>("onclick", String.format("window.location='run/%s'", file.getName())));
-              lineAttributes.add(new Pair<>("class", "link"));
-            }
-            writer.write(lineAttributes, file.getName(), file.getPath());
+            writer.write(false, file.getName(), file.getPath());
             empty = false;
           }
           if (empty) {
