@@ -3,7 +3,7 @@
 Changes:
 
   * Add basic processor for MinION
-  * Read number sare non-indexed reads
+  * Read numbers are non-indexed reads
   * Upgrade interop version
   * Improve PromethION directory scanning performance
 
