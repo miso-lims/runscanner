@@ -80,8 +80,7 @@ public class UserInterfaceController {
   @Autowired private Scheduler scheduler;
 
   @GetMapping(value = "/listScanned")
-  public void listScannedRuns(@PathVariable String collection, HttpServletResponse response)
-      throws IOException {
+  public void listScannedRuns(HttpServletResponse response) throws IOException {
     response.setContentType("text/html;charset=utf-8");
     response.setStatus(HttpServletResponse.SC_OK);
     try (OutputStream output = response.getOutputStream()) {
