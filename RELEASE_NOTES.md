@@ -1,3 +1,10 @@
+# 1.4.1
+
+Changes:
+
+  * Fixed deserialization of NanoporeNotificationDto
+  * Use run alias instead of file name in Scanned list
+
 # 1.4.0
 
 Changes:
