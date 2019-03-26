@@ -15,20 +15,14 @@ import java.util.Optional;
 /**
  * A "run" as seen by Run Scanner
  *
- * <p>Run Scanner collects information about runs and reports them to MISO for incorporation. This
- * class is distinct from {@link RunDto} because there is not a direct mapping between runs in MISO
- * and runs as they can be detected on disk ("notifications"). First, runs have added information
- * such as change logs, security profiles, and notes that notifications should never include.
- * Second, the notification is actually a composite of run, container, and partition information and
- * this has to be expanded when written to MISO in a non-trivial way. Finally, notifications contain
- * best-effort information gleaned from the sequencer output, but it is not always possible to
- * correctly detect information; if a human changes certain properties of a run, it should not be
- * overwritten by automation.
+ * <p>Run Scanner collects information about runs and reports them to other tools for use for
+ * incorporation.
  */
 @JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "platform")
 @JsonSubTypes({ //
   @Type(value = PacBioNotificationDto.class, name = "PacBio"), //
-  @Type(value = IlluminaNotificationDto.class, name = "Illumina") //
+  @Type(value = IlluminaNotificationDto.class, name = "Illumina"), //
+  @Type(value = NanoporeNotificationDto.class, name = "Nanopore") //
 }) //
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class NotificationDto {
