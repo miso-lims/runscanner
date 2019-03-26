@@ -27,7 +27,7 @@ Changes:
 Changes:
 
   * Expose NovaSeq WorkflowType
-  * Return 404 when run does not exit
+  * Return 404 (Not Found) when run does not exist
   * Export number of runs in a failed state
 
 # 1.2.2
