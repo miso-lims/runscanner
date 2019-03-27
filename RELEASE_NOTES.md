@@ -1,3 +1,9 @@
+# 1.4.2
+
+Changes:
+
+  * Fixed error loading Scanned runs list page
+
 # 1.4.1
 
 Changes:
