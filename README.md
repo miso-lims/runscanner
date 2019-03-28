@@ -92,11 +92,12 @@ If you would like to scan for Illumina output, please see [runscanner-illumina/R
 
 <a id="release" />
 
-## Releasing 
+## Deploying
 
 1. Stop Run Scanner's Tomcat.
-1. Remove `$CATALINA_HOME/webapps/ROOT` directory and `$CATALINA_HOME/webapps/ROOT.war` file.
-1. Copy the `scanner-$VERSION.war` from the build to `$CATALINA_HOME/webapps/ROOT.war`.
+1. Remove `${CATALINA_HOME}/webapps/${CONTEXT}` directory and `${CATALINA_HOME}/webapps/${CONTEXT}.war` file
+   (See note about `${CONTEXT}` in "Setting Up Run Scanner" above).
+1. Copy the `scanner-${VERSION}.war` from the build to `${CATALINA_HOME}/webapps/${CONTEXT}.war`.
 1. Start Run Scanner's Tomcat.
 
 <a id="debugging" />
