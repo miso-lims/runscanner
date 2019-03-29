@@ -1,6 +1,6 @@
 package ca.on.oicr.gsi.runscanner.scanner.processor;
 
-import ca.on.oicr.gsi.runscanner.dto.NanoporeNotificationDto;
+import ca.on.oicr.gsi.runscanner.dto.OxfordNanoporeNotificationDto;
 import ch.systemsx.cisd.hdf5.IHDF5StringReader;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.nio.file.Path;
@@ -8,7 +8,7 @@ import java.nio.file.Paths;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public class PromethionProcessor extends BaseNanoporeProcessor {
+public class PromethionProcessor extends BaseOxfordNanoporeProcessor {
 
   public PromethionProcessor(Builder builder, String seqName) {
     super(builder, seqName);
@@ -20,7 +20,7 @@ public class PromethionProcessor extends BaseNanoporeProcessor {
   }
 
   @Override
-  protected void additionalProcess(NanoporeNotificationDto nnd, IHDF5StringReader reader) {
+  protected void additionalProcess(OxfordNanoporeNotificationDto nnd, IHDF5StringReader reader) {
     nnd.setSequencerPosition(reader.getAttr(TRACKING_ID, "device_id"));
   }
 

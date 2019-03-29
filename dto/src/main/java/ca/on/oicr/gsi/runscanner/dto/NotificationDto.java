@@ -22,7 +22,7 @@ import java.util.Optional;
 @JsonSubTypes({ //
   @Type(value = PacBioNotificationDto.class, name = "PacBio"), //
   @Type(value = IlluminaNotificationDto.class, name = "Illumina"), //
-  @Type(value = NanoporeNotificationDto.class, name = "Nanopore") //
+  @Type(value = OxfordNanoporeNotificationDto.class, name = "OxfordNanopore") //
 }) //
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class NotificationDto {
