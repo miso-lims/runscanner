@@ -20,8 +20,8 @@ public class PromethionProcessor extends BaseOxfordNanoporeProcessor {
   }
 
   @Override
-  protected void additionalProcess(OxfordNanoporeNotificationDto nnd, IHDF5StringReader reader) {
-    nnd.setSequencerPosition(reader.getAttr(TRACKING_ID, "device_id"));
+  protected void additionalProcess(OxfordNanoporeNotificationDto onnd, IHDF5StringReader reader) {
+    onnd.setSequencerPosition(reader.getAttr(TRACKING_ID, "device_id"));
   }
 
   public static RunProcessor create(Builder builder, ObjectNode jsonNodes) {

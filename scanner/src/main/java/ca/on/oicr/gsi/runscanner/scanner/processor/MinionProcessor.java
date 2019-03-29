@@ -18,7 +18,7 @@ public class MinionProcessor extends BaseOxfordNanoporeProcessor {
   }
 
   @Override
-  protected void additionalProcess(OxfordNanoporeNotificationDto nnd, IHDF5StringReader reader) {
+  protected void additionalProcess(OxfordNanoporeNotificationDto onnd, IHDF5StringReader reader) {
     return;
   }
 
