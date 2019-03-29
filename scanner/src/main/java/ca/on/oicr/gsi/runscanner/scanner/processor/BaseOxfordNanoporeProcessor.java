@@ -1,7 +1,7 @@
 package ca.on.oicr.gsi.runscanner.scanner.processor;
 
-import ca.on.oicr.gsi.runscanner.dto.NanoporeNotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
+import ca.on.oicr.gsi.runscanner.dto.OxfordNanoporeNotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.type.HealthType;
 import ch.systemsx.cisd.hdf5.HDF5FactoryProvider;
 import ch.systemsx.cisd.hdf5.IHDF5StringReader;
@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.TimeZone;
 import java.util.stream.Stream;
 
-public abstract class BaseNanoporeProcessor extends RunProcessor {
+public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
   protected static final String TRACKING_ID = "UniqueGlobalKey/tracking_id";
   protected static final String CONTEXT_TAGS = "UniqueGlobalKey/context_tags";
   protected final String SEQUENCER_NAME;
@@ -36,7 +36,7 @@ public abstract class BaseNanoporeProcessor extends RunProcessor {
     return isFileFast5(file.getFileName().toString());
   }
 
-  public BaseNanoporeProcessor(Builder builder, String seqName) {
+  public BaseOxfordNanoporeProcessor(Builder builder, String seqName) {
     super(builder);
     SEQUENCER_NAME = seqName;
   }
@@ -96,7 +96,7 @@ public abstract class BaseNanoporeProcessor extends RunProcessor {
                 p -> {
                   try (Stream<Path> files = Files.list(p)) {
                     return files
-                        .filter(BaseNanoporeProcessor::isFileFast5)
+                        .filter(BaseOxfordNanoporeProcessor::isFileFast5)
                         .map(Path::toFile)
                         .findFirst()
                         .map(Stream::of)
@@ -110,25 +110,26 @@ public abstract class BaseNanoporeProcessor extends RunProcessor {
             .orElseThrow(
                 () -> new IOException("Cannot find FAST5 file in run directory: " + runDirectory));
 
-    NanoporeNotificationDto nnd = new NanoporeNotificationDto();
+    OxfordNanoporeNotificationDto onnd = new OxfordNanoporeNotificationDto();
     IHDF5StringReader reader = HDF5FactoryProvider.get().openForReading(firstFile).string();
-    nnd.setRunAlias(reader.getAttr(TRACKING_ID, "run_id"));
-    nnd.setSequencerFolderPath(runDirectory.toString());
-    nnd.setSequencerName(SEQUENCER_NAME);
-    nnd.setContainerSerialNumber(reader.getAttr(TRACKING_ID, "flow_cell_id"));
-    nnd.setContainerModel(reader.getAttr(CONTEXT_TAGS, "flowcell_type"));
-    nnd.setLaneCount(LANE_COUNT);
-    nnd.setHealthType(HealthType.UNKNOWN);
-    nnd.setStartDate(
+    onnd.setRunAlias(reader.getAttr(TRACKING_ID, "run_id"));
+    onnd.setSequencerFolderPath(runDirectory.toString());
+    onnd.setSequencerName(SEQUENCER_NAME);
+    onnd.setContainerSerialNumber(reader.getAttr(TRACKING_ID, "flow_cell_id"));
+    onnd.setContainerModel(reader.getAttr(CONTEXT_TAGS, "flowcell_type").toUpperCase());
+    onnd.setLaneCount(LANE_COUNT);
+    onnd.setHealthType(HealthType.UNKNOWN);
+    onnd.setStartDate(
         ZonedDateTime.parse(reader.getAttr(TRACKING_ID, "exp_start_time")).toLocalDateTime());
-    nnd.setSoftware(
+    onnd.setSoftware(
         reader.getAttr(TRACKING_ID, "version")
             + " + "
             + reader.getAttr(TRACKING_ID, "protocols_version"));
 
-    additionalProcess(nnd, reader);
-    return nnd;
+    additionalProcess(onnd, reader);
+    return onnd;
   }
 
-  protected abstract void additionalProcess(NanoporeNotificationDto nnd, IHDF5StringReader reader);
+  protected abstract void additionalProcess(
+      OxfordNanoporeNotificationDto nnd, IHDF5StringReader reader);
 }
