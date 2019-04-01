@@ -23,7 +23,12 @@ Extract the `.zip` or `.tar.gz` file.
 
 ## Setting Up Run Scanner
 
-Create a file called `ROOT.xml` in `$CATALINA_HOME/conf/Catalina/localhost`, creating the directory if necessary, and populate it with the following information:
+In the below instructions, `${CATALINA_HOME}` is the directory where Tomcat is installed.
+`${CONTEXT}` is the context URL you wish to use for Run Scanner. This can be `ROOT` if you wish to
+deploy Run Scanner to the root context (e.g. www.myrunscanner.org) or something else to deploy to
+a subdirectory (e.g. 'runscanner' for www.myserver.org/runscanner/).
+
+Create a file called `${CONTEXT}.xml` in `${CATALINA_HOME}/conf/Catalina/localhost`, creating the directory if necessary, and populate it with the following information:
 
     <Context>
        <Parameter name="runscanner.configFile" value="/etc/runscanner.json" override="false"/>
@@ -87,11 +92,12 @@ If you would like to scan for Illumina output, please see [runscanner-illumina/R
 
 <a id="release" />
 
-## Releasing 
+## Deploying
 
 1. Stop Run Scanner's Tomcat.
-1. Remove `$CATALINA_HOME/webapps/ROOT` directory and `$CATALINA_HOME/webapps/ROOT.war` file.
-1. Copy the `scanner-$VERSION.war` from the build to `$CATALINA_HOME/webapps/ROOT.war`.
+1. Remove `${CATALINA_HOME}/webapps/${CONTEXT}` directory and `${CATALINA_HOME}/webapps/${CONTEXT}.war` file
+   (See note about `${CONTEXT}` in "Setting Up Run Scanner" above).
+1. Copy the `scanner-${VERSION}.war` from the build to `${CATALINA_HOME}/webapps/${CONTEXT}.war`.
 1. Start Run Scanner's Tomcat.
 
 <a id="debugging" />
