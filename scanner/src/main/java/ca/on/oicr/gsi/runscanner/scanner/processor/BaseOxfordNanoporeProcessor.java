@@ -23,6 +23,7 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
   protected static final String CONTEXT_TAGS = "UniqueGlobalKey/context_tags";
   protected final String SEQUENCER_NAME;
   protected static final int LANE_COUNT = 1;
+  protected final int PATH_OFFSET;
 
   protected static boolean isFileFast5(String fileName) {
     return fileName.endsWith(".fast5");
@@ -36,9 +37,10 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
     return isFileFast5(file.getFileName().toString());
   }
 
-  public BaseOxfordNanoporeProcessor(Builder builder, String seqName) {
+  public BaseOxfordNanoporeProcessor(Builder builder, String seqName, int offset) {
     super(builder);
     SEQUENCER_NAME = seqName;
+    PATH_OFFSET = offset;
   }
 
   @Override
@@ -112,7 +114,10 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
 
     OxfordNanoporeNotificationDto onnd = new OxfordNanoporeNotificationDto();
     IHDF5StringReader reader = HDF5FactoryProvider.get().openForReading(firstFile).string();
-    onnd.setRunAlias(reader.getAttr(TRACKING_ID, "run_id"));
+
+    Path path = firstFile.toPath();
+    onnd.setRunAlias(path.getName(PATH_OFFSET).toString());
+
     onnd.setSequencerFolderPath(runDirectory.toString());
     onnd.setSequencerName(SEQUENCER_NAME);
     onnd.setContainerSerialNumber(reader.getAttr(TRACKING_ID, "flow_cell_id"));
