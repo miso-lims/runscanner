@@ -1,7 +1,7 @@
 package ca.on.oicr.gsi.runscanner.scanner.processor;
 
 import ca.on.oicr.gsi.runscanner.dto.OxfordNanoporeNotificationDto;
-import ch.systemsx.cisd.hdf5.IHDF5StringReader;
+import ch.systemsx.cisd.hdf5.IHDF5Reader;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -18,7 +18,7 @@ public class MinionProcessor extends BaseOxfordNanoporeProcessor {
   }
 
   @Override
-  protected void additionalProcess(OxfordNanoporeNotificationDto onnd, IHDF5StringReader reader) {
+  protected void additionalProcess(OxfordNanoporeNotificationDto onnd, IHDF5Reader reader) {
     return;
   }
 

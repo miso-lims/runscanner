@@ -1,3 +1,9 @@
+# 1.4.5
+
+Changes:
+
+ * Detects PromethION runs under directory format used at PromethION version 19.01.1: in directory structure project/sample/run/[fast5_pass|fast5_fail|etc], 'run' will be used as Run Alias
+
 # 1.4.4
 
 Changes:

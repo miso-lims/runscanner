@@ -61,6 +61,9 @@ public final class FindRuns {
       File directory = new File(path);
       if (!(directory.isDirectory() && directory.canExecute() && directory.canRead())) {
         System.err.println("Target is not of usable type: " + path);
+        System.err.println("!isDirectory: " + !directory.isDirectory());
+        System.err.println("canExecute: " + directory.canExecute());
+        System.err.println("canRead: " + directory.canRead());
         success = false;
         continue;
       }
