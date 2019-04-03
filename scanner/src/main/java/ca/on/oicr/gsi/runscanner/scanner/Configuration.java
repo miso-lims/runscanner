@@ -39,6 +39,18 @@ public class Configuration {
         && timeZone != null;
   }
 
+  public String validitySummary() {
+    String summary = "";
+    if (path == null) summary += "Path is null! ";
+    if (!path.isDirectory()) summary += "Path is not a directory! ";
+    if (!path.canRead()) summary += "Path cannot be read! ";
+    if (!path.canExecute()) summary += "Path cannot be executed! ";
+    if (processor == null) summary += "Processor is null! ";
+    if (timeZone == null) summary += "TimeZone is null!";
+
+    return summary;
+  }
+
   public void setPath(File path) {
     this.path = path;
   }

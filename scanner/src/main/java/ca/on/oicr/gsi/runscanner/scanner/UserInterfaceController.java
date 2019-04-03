@@ -176,7 +176,11 @@ public class UserInterfaceController {
                               renderer.line("Processor", configuration.getProcessor().getName());
                               renderer.line(
                                   "Time Zone", configuration.getTimeZone().getDisplayName());
-                              renderer.line("Valid?", configuration.isValid() ? "Yes" : "No");
+                              renderer.line(
+                                  "Valid?",
+                                  configuration.isValid()
+                                      ? "Yes"
+                                      : "No: " + configuration.validitySummary());
                             }
                           }));
         }
