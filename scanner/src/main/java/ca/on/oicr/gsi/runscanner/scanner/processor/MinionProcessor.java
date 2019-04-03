@@ -9,7 +9,7 @@ import java.util.stream.Stream;
 
 public class MinionProcessor extends BaseOxfordNanoporeProcessor {
   public MinionProcessor(Builder builder, String seqName) {
-    super(builder, seqName, 5);
+    super(builder, seqName);
   }
 
   @Override
