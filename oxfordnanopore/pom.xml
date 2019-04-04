@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>runscanner</artifactId>
+        <groupId>ca.on.oicr.gsi.runscanner</groupId>
+        <version>1.4.4-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>runscanner-oxfordnanopore</artifactId>
+    <dependencies>
+        <dependency>
+            <groupId>ca.on.oicr.gsi.runscanner</groupId>
+            <artifactId>runscanner-processor-api</artifactId>
+            <version>1.4.4-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+            <dependency>
+              <groupId>cisd</groupId>
+              <artifactId>jhdf5</artifactId>
+            </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+      </dependency>    </dependencies>
+
+
+</project>

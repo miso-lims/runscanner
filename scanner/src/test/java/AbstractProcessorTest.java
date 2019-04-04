@@ -1,7 +1,7 @@
 import static org.junit.Assert.assertEquals;
 
 import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
-import ca.on.oicr.gsi.runscanner.scanner.processor.RunProcessor;
+import ca.on.oicr.gsi.runscanner.processor.RunProcessor;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

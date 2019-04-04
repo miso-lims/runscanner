@@ -1,11 +1,11 @@
 package ca.on.oicr.gsi.runscanner.dto;
 
 /**
- * Request incremental results from a run scanner.
+ * Request incremental results from a run server.
  *
- * <p>The goal of the progressive requests is to avoid sending unchanged data from a run scanner to
- * a client. That being said, the run scanner has no qualms about sending duplicate information to
- * the client and the client must deal with that.
+ * <p>The goal of the progressive requests is to avoid sending unchanged data from a run server to a
+ * client. That being said, the run server has no qualms about sending duplicate information to the
+ * client and the client must deal with that.
  *
  * <p>After a request is made, the next request should use the {@link
  * #update(ProgressiveResponseDto)} method to request only the subsequent data.

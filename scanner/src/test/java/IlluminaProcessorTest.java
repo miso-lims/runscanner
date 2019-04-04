@@ -1,8 +1,8 @@
 import ca.on.oicr.gsi.runscanner.dto.IlluminaNotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.type.Platform;
-import ca.on.oicr.gsi.runscanner.scanner.processor.DefaultIllumina;
-import ca.on.oicr.gsi.runscanner.scanner.processor.RunProcessor.Builder;
+import ca.on.oicr.gsi.runscanner.processor.RunProcessor.Builder;
+import ca.on.oicr.gsi.runscanner.server.defaultprocessors.DefaultIllumina;
 import java.io.File;
 import java.io.IOException;
 import java.util.TimeZone;
