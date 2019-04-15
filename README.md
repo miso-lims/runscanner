@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/oicr-gsi/runscanner.svg)](https://travis-ci.org/oicr-gsi/runscanner)[![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=ca.on.oicr.gsi.runscanner%3Arunscanner&metric=alert_status)](https://sonarcloud.io/dashboard?id=ca.on.oicr.gsi.runscanner:runscanner)
+[![Build Status](https://travis-ci.org/miso-lims/runscanner.svg)](https://travis-ci.org/miso-lims/runscanner)[![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=ca.on.oicr.gsi.runscanner%3Arunscanner&metric=alert_status)](https://sonarcloud.io/dashboard?id=ca.on.oicr.gsi.runscanner:runscanner)
 
 # Run Scanner
 This is a web service that monitors directories on the file system containing
@@ -16,7 +16,7 @@ the output from sequencing instruments and serves metadata for runs.
 <a id="latest-release" />
 
 ## Downloading the latest release
-Use the GitHub interface to download the [latest release](https://github.com/oicr-gsi/runscanner/releases/latest).
+Use the GitHub interface to download the [latest release](https://github.com/miso-lims/runscanner/releases/latest).
 Extract the `.zip` or `.tar.gz` file.
 
 <a id="setup" />
