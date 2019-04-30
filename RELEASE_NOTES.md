@@ -1,3 +1,16 @@
+# 1.4.4
+
+Changes:
+
+  * Display info about why configuration is invalid
+
+# 1.4.3
+
+Changes:
+
+  * Updated Oxford Nanopore DTOs
+  * Added instructions for deploying to non-root context
+
 # 1.4.2
 
 Changes:
