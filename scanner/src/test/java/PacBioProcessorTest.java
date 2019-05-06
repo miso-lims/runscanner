@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
-import org.junit.Test;
 
 public class PacBioProcessorTest extends AbstractProcessorTest {
   private static class TestPacBio extends DefaultPacBio {
@@ -59,7 +58,7 @@ public class PacBioProcessorTest extends AbstractProcessorTest {
         .process(directory, TimeZone.getDefault());
   }
 
-  @Test
+  @Override
   public void testGoldens() throws IOException {
     checkDirectory("/pacbio");
   }
