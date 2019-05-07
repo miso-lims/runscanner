@@ -145,7 +145,7 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
 
     // Get the name of a read so we can access the metadata. getAllGroupMembers() doesn't return
     // names in any
-    // particular order so this is random.
+    // particular order so this is arbitrary.
     String read_name = genericReader.object().getAllGroupMembers("/").get(0);
     log.debug("Randomly selected read " + read_name + "from " + firstFile);
 
