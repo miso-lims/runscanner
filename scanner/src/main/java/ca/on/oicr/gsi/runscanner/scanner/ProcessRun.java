@@ -19,12 +19,12 @@ import java.util.TimeZone;
  * Attempts to process run directories, provided on the command line, through a particular processor
  * and display the results. This is for debugging purposes.
  */
-public final class Main {
+public final class ProcessRun {
 
   public static void main(String[] args) throws IOException {
     if (args.length == 0) {
       System.err.println(
-          "Usage: java -DplatformType=ILLUMINA -Dname=default -Dtz=America/Toronto -Dparameters={} ca.on.oicr.gsi.runscanner.scanner.Main /path/to/run/folder");
+          "Usage: java -DplatformType=ILLUMINA -Dname=default -Dtz=America/Toronto -Dparameters={} ca.on.oicr.gsi.runscanner.scanner.ProcessRun /path/to/run/folder");
     }
     String platformName = System.getProperty("platformType");
     if (platformName == null) {
