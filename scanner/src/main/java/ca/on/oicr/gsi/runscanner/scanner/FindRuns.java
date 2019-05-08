@@ -7,12 +7,12 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.TimeZone;
 
 /**
  * Attempts to process run directories, provided on the command line, through getRunsFromRoot() and
@@ -32,13 +32,6 @@ public final class FindRuns {
       System.exit(1);
     }
 
-    String tzId = System.getProperty("tz");
-    TimeZone tz;
-    if (tzId == null) {
-      tz = TimeZone.getDefault();
-    } else {
-      tz = TimeZone.getTimeZone(tzId);
-    }
     ObjectMapper mapper = new ObjectMapper();
     mapper.registerModule(new JavaTimeModule()).setDateFormat(new ISO8601DateFormat());
 
