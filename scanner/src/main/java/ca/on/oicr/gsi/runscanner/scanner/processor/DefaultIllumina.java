@@ -165,10 +165,12 @@ public final class DefaultIllumina extends RunProcessor {
   private boolean isLaneComplete(Path laneDir, IlluminaNotificationDto dto) {
     // For MiSeq and HiSeq, check for a complete set of BCL files per each cycle
     boolean completeCycleData =
-        IntStream.rangeClosed(1, dto.getNumCycles()) //
-            .mapToObj(cycle -> String.format("C%d.1", cycle)) //
-            .map(laneDir::resolve) //
-            .filter(Files::exists) //
+        IntStream.rangeClosed(1, dto.getNumCycles())
+            .mapToObj(cycle -> String.format("C%d.1", cycle))
+            .map(laneDir::resolve)
+                .map(Path::toFile)
+            .filter(File::exists)
+                .map(File::toPath)
             .allMatch(
                 cycleDir -> {
                   try (Stream<Path> cycleWalk = Files.walk(cycleDir, 1)) {
