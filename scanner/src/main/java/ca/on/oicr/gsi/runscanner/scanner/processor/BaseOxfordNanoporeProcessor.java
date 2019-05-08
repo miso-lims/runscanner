@@ -56,7 +56,7 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
             @Override
             public FileVisitResult preVisitDirectory(
                 Path path, BasicFileAttributes basicFileAttributes) throws IOException {
-              if (readsDirectoryForRun(path).anyMatch(Files::isDirectory)) {
+              if (readsDirectoryForRun(path).map(p -> p.toFile()).anyMatch(File::isDirectory)) {
                 runDirectories.add(path.toFile());
                 return FileVisitResult.SKIP_SUBTREE;
               }
@@ -91,7 +91,9 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
   public NotificationDto process(File runDirectory, TimeZone tz) throws IOException {
     final File firstFile =
         readsDirectoryForRun(runDirectory.toPath())
-            .filter(Files::isDirectory)
+                .map(p -> p.toFile())
+            .filter(File::isDirectory)
+                .map(f -> f.toPath())
             .flatMap(
                 p -> {
                   try (Stream<Path> files = Files.list(p)) {
