@@ -141,44 +141,45 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
 
     log.debug("For runDirectory = " + runDirectory + " we will be considering file: " + firstFile);
     OxfordNanoporeNotificationDto onnd = new OxfordNanoporeNotificationDto();
-    IHDF5Reader genericReader = HDF5FactoryProvider.get().openForReading(firstFile);
+    try(IHDF5Reader genericReader = HDF5FactoryProvider.get().openForReading(firstFile)) {
 
-    // Get the name of a read so we can access the metadata. getAllGroupMembers() doesn't return
-    // names in any
-    // particular order so this is arbitrary.
-    String read_name = genericReader.object().getAllGroupMembers("/").get(0);
-    log.debug("Randomly selected read " + read_name + "from " + firstFile);
+      // Get the name of a read so we can access the metadata. getAllGroupMembers() doesn't return
+      // names in any
+      // particular order so this is arbitrary.
+      String read_name = genericReader.object().getAllGroupMembers("/").get(0);
+      log.debug("Randomly selected read " + read_name + "from " + firstFile);
 
-    Path p = runDirectory.toPath();
-    // nameCount - 1 is the position of the name furthest from the root
-    onnd.setRunAlias(p.getName(p.getNameCount() - 1).toString());
+      Path p = runDirectory.toPath();
+      // nameCount - 1 is the position of the name furthest from the root
+      onnd.setRunAlias(p.getName(p.getNameCount() - 1).toString());
 
-    onnd.setSequencerFolderPath(runDirectory.toString());
-    onnd.setSequencerName(SEQUENCER_NAME);
+      onnd.setSequencerFolderPath(runDirectory.toString());
+      onnd.setSequencerName(SEQUENCER_NAME);
 
-    trackingId = read_name + "/tracking_id";
-    contextTags = read_name + "/context_tags";
+      trackingId = read_name + "/tracking_id";
+      contextTags = read_name + "/context_tags";
 
-    onnd.setContainerSerialNumber(genericReader.string().getAttr(trackingId, "flow_cell_id"));
+      onnd.setContainerSerialNumber(genericReader.string().getAttr(trackingId, "flow_cell_id"));
 
-    onnd.setContainerModel(genericReader.string().getAttr(contextTags, "flowcell_type"));
+      onnd.setContainerModel(genericReader.string().getAttr(contextTags, "flowcell_type"));
 
-    onnd.setLaneCount(LANE_COUNT);
-    onnd.setHealthType(HealthType.UNKNOWN);
+      onnd.setLaneCount(LANE_COUNT);
+      onnd.setHealthType(HealthType.UNKNOWN);
 
-    onnd.setStartDate(
-        ZonedDateTime.parse(genericReader.string().getAttr(trackingId, "exp_start_time"))
-            .toLocalDateTime());
+      onnd.setStartDate(
+              ZonedDateTime.parse(genericReader.string().getAttr(trackingId, "exp_start_time"))
+                      .toLocalDateTime());
 
-    onnd.setSoftware(
-        genericReader.string().getAttr(trackingId, "version")
-            + " + "
-            + genericReader.string().getAttr(trackingId, "protocols_version"));
+      onnd.setSoftware(
+              genericReader.string().getAttr(trackingId, "version")
+                      + " + "
+                      + genericReader.string().getAttr(trackingId, "protocols_version"));
 
-    onnd.setRunType(genericReader.string().getAttr(trackingId, "exp_script_purpose"));
+      onnd.setRunType(genericReader.string().getAttr(trackingId, "exp_script_purpose"));
 
-    additionalProcess(onnd, genericReader);
-    return onnd;
+      additionalProcess(onnd, genericReader);
+      return onnd;
+    }
   }
 
   protected abstract void additionalProcess(OxfordNanoporeNotificationDto nnd, IHDF5Reader reader);
