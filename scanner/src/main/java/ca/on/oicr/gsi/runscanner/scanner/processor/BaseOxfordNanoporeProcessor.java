@@ -5,6 +5,9 @@ import ca.on.oicr.gsi.runscanner.dto.OxfordNanoporeNotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.type.HealthType;
 import ch.systemsx.cisd.hdf5.HDF5FactoryProvider;
 import ch.systemsx.cisd.hdf5.IHDF5StringReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
@@ -23,6 +26,8 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
   protected static final String CONTEXT_TAGS = "UniqueGlobalKey/context_tags";
   protected final String SEQUENCER_NAME;
   protected static final int LANE_COUNT = 1;
+
+    private static final Logger log = LoggerFactory.getLogger(BaseOxfordNanoporeProcessor.class);
 
   protected static boolean isFileFast5(String fileName) {
     return fileName.endsWith(".fast5");
@@ -81,7 +86,7 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
             }
           });
     } catch (IOException e) {
-      e.printStackTrace();
+      log.error("Failed getting runs from: " + root, e);
     }
     return runDirectories.stream();
   }
@@ -104,7 +109,7 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
                         .map(Stream::of)
                         .orElseGet(Stream::empty);
                   } catch (IOException e) {
-                    e.printStackTrace();
+                    log.error("Failed to process run at: " + runDirectory.getAbsolutePath(), e);
                     return Stream.empty();
                   }
                 })
