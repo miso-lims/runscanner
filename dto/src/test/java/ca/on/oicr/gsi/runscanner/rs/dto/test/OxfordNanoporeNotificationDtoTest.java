@@ -1,12 +1,15 @@
 package ca.on.oicr.gsi.runscanner.rs.dto.test;
 
+import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.OxfordNanoporeNotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.type.HealthType;
 import java.time.LocalDateTime;
 
 public class OxfordNanoporeNotificationDtoTest extends AbstractNotificationDtoTest {
+  private OxfordNanoporeNotificationDto notificationDto;
+
   @Override
-  public void setUp() {
+  public void specializedSetUp() {
     notificationDto = new OxfordNanoporeNotificationDto();
   }
 
@@ -22,6 +25,11 @@ public class OxfordNanoporeNotificationDtoTest extends AbstractNotificationDtoTe
     notificationDto.setCompletionDate(LocalDateTime.of(2017, 2, 27, 0, 0));
     notificationDto.setPairedEndRun(true);
     notificationDto.setSoftware("Fido Opus SEAdog Standard Interface Layer");
-    ((OxfordNanoporeNotificationDto) notificationDto).setRunType("sequencing_run");
+    notificationDto.setRunType("sequencing_run");
+  }
+
+  @Override
+  public NotificationDto getSpecializedNotificationDto() {
+    return notificationDto;
   }
 }

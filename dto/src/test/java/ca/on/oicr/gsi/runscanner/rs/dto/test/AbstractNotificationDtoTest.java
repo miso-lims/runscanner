@@ -14,10 +14,15 @@ import org.junit.Before;
 import org.junit.Test;
 
 public abstract class AbstractNotificationDtoTest {
-  NotificationDto notificationDto;
+  private NotificationDto notificationDto;
 
   @Before
-  public abstract void setUp();
+  public void setUp() {
+    specializedSetUp();
+    notificationDto = getSpecializedNotificationDto();
+  }
+
+  public abstract void specializedSetUp();
 
   @Test
   public void testPartiallyPopulatedNotificationRoundTrip() throws Exception {
@@ -51,4 +56,6 @@ public abstract class AbstractNotificationDtoTest {
   }
 
   public abstract void fullyPopulatedNotificationDto(String sequencerName);
+
+  public abstract NotificationDto getSpecializedNotificationDto();
 }
