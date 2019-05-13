@@ -6,7 +6,6 @@ import ca.on.oicr.gsi.runscanner.scanner.processor.RunProcessor.Builder;
 import java.io.File;
 import java.io.IOException;
 import java.util.TimeZone;
-import org.junit.Test;
 
 public class IlluminaProcessorTest extends AbstractProcessorTest {
   private final DefaultIllumina instance =
@@ -21,7 +20,7 @@ public class IlluminaProcessorTest extends AbstractProcessorTest {
     return instance.process(directory, TimeZone.getTimeZone("America/Toronto"));
   }
 
-  @Test
+  @Override
   public void testGoldens() throws IOException {
     if (!System.getProperty("skipIllumina", "true").equals("true")) {
       checkDirectory("/illumina");

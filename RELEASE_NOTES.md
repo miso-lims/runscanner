@@ -1,3 +1,10 @@
+# 1.4.5
+
+Changes:
+
+ * Detects PromethION runs under directory format used at PromethION version 19.01.1: in directory structure project/sample/run/[fast5_pass|fast5_fail|etc], 'run' will be used as Run Alias
+ * Introduces src/test/resources/fast5cleaner.py, which creates a new fast5 containing only the metadata needed for a test, reducing file size dramatically and protecting sequenced data. Use this to create new 'goldens' for ONT runs.
+
 # 1.4.4
 
 Changes:

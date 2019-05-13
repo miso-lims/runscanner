@@ -433,7 +433,7 @@ public class Scheduler {
       configurationEntries.set(roots.size());
       isConfigurationGood = !roots.isEmpty();
     } catch (IOException e) {
-      log.error("Confguration is bad.", e);
+      log.error("Configuration is bad.", e);
       isConfigurationGood = false;
     }
     configurationValid.set(isConfigurationGood ? 1 : 0);

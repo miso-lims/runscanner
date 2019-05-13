@@ -66,6 +66,7 @@ public final class ProcessRun {
         continue;
       }
       try {
+
         results.add(rp.process(directory, tz));
       } catch (Exception e) {
         System.err.println("Cannot process directory: " + path);
