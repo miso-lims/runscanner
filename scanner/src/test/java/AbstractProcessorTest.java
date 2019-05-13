@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public abstract class AbstractProcessorTest {
@@ -36,6 +35,5 @@ public abstract class AbstractProcessorTest {
   protected abstract NotificationDto process(File directory) throws IOException;
 
   @Test
-  @Ignore
   public abstract void testGoldens() throws IOException;
 }
