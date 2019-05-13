@@ -1,13 +1,12 @@
 ## A Utility for cleaning fast5s of data that we don't need for our test cases
 import sys
-import numpy
 import h5py
 
 # Fail early if wrong number of arguments
 # Length is 2 because sys.argv is always at least 1
 if len(sys.argv) != 2:
-    put("Please specify the fast5 file you wish to clean.")
-    put("eg. 'python fast5cleaner test_run.fast5'")
+    print("Please specify the fast5 file you wish to clean.")
+    print("eg. 'python fast5cleaner test_run.fast5'")
     sys.exit(1)
 
 # Open the specified file with h5py, read-only
