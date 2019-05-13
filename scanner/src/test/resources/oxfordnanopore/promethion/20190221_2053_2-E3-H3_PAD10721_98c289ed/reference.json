@@ -1,1 +1,23 @@
-{"platform":"OxfordNanopore","runAlias":"20190221_2053_2-E3-H3_PAD10721_98c289ed","sequencerFolderPath":null,"sequencerName":"unittest","sequencerPosition":"2-E3-H3","containerSerialNumber":"PAD10721","containerModel":"flo-pro002","laneCount":1,"healthType":"UNKNOWN","startDate":[2019,2,21,20,54],"completionDate":null,"pairedEndRun":false,"software":null,"metrics":null,"runType":"sequencing_run"}
+{
+  "completionDate": null,
+  "containerModel": "flo-pro002",
+  "containerSerialNumber": "PAD10721",
+  "healthType": "UNKNOWN",
+  "laneCount": 1,
+  "metrics": null,
+  "pairedEndRun": false,
+  "platform": "OxfordNanopore",
+  "runAlias": "20190221_2053_2-E3-H3_PAD10721_98c289ed",
+  "runType": "sequencing_run",
+  "sequencerFolderPath": null,
+  "sequencerName": "unittest",
+  "sequencerPosition": "2-E3-H3",
+  "software": null,
+  "startDate": [
+    2019,
+    2,
+    21,
+    20,
+    54
+  ]
+}
