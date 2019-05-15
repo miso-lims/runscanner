@@ -60,6 +60,13 @@ The JSON file then contains a list of instruments:
         "name": "default",
         "timeZone": "America/Toronto",
         "parameters": {}
+      },
+      {
+        "path": "/srv/sequencer/promethion",
+        "platformType": "OXFORDNANOPORE",
+        "name": "promethion",
+        "timeZone": "America/Toronto",
+        "parameters": {"name": "promethion_001"}
       }
     ]
 
@@ -70,8 +77,8 @@ The parameters are set based on the processor.
 - PACBIO/default requires `address` to be set to the URL of the PacBio machine.
 - ILLUMINA/default optionally allows `checkOutput`. If true, the scanner will
   try to look for BCL files to verify a run is complete if no logs are present.
-  If false, it will assume the run is complete if ambiguous. The default is true.
-  This can be very slow on certain network file systems.
+  If false, it will assume the run is complete if ambiguous. The default is true. This can be very slow on certain network file systems.
+- OXFORDNANOPORE processors require "name" to be set to either "minion" or "promethion" based on model. Additionally, a unique "name" for the sequencer must be specified in the "parameters". 
   
 <a id="building" />
 
