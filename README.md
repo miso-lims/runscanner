@@ -78,7 +78,7 @@ The parameters are set based on the processor.
 - ILLUMINA/default optionally allows `checkOutput`. If true, the scanner will
   try to look for BCL files to verify a run is complete if no logs are present.
   If false, it will assume the run is complete if ambiguous. The default is true. This can be very slow on certain network file systems.
-- OXFORDNANOPORE processors require "name" to be set to either "minion" or "promethion" based on model. Additionally, a unique "name" for the sequencer must be specified in the "parameters". 
+- OXFORDNANOPORE processors require `name` to be set to either `minion` or `promethion` based on model. Additionally, a unique `name` for the sequencer must be specified in the `parameters`. 
   
 <a id="building" />
 
