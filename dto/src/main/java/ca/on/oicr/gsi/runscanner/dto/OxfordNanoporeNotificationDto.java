@@ -4,6 +4,7 @@ import ca.on.oicr.gsi.runscanner.dto.type.Platform;
 
 public class OxfordNanoporeNotificationDto extends NotificationDto {
   private String runType;
+  private String protocolVersion;
 
   @Override
   public Platform getPlatformType() {
@@ -16,5 +17,13 @@ public class OxfordNanoporeNotificationDto extends NotificationDto {
 
   public void setRunType(String newType) {
     runType = newType;
+  }
+
+  public String getProtocolVersion() {
+    return protocolVersion;
+  }
+
+  public void setProtocolVersion(String protocolVersion) {
+    this.protocolVersion = protocolVersion;
   }
 }
