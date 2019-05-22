@@ -141,7 +141,7 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
 
     log.debug("For runDirectory = " + runDirectory + " we will be considering file: " + firstFile);
     OxfordNanoporeNotificationDto onnd = new OxfordNanoporeNotificationDto();
-    try(IHDF5Reader genericReader = HDF5FactoryProvider.get().openForReading(firstFile)) {
+    try (IHDF5Reader genericReader = HDF5FactoryProvider.get().openForReading(firstFile)) {
 
       // Get the name of a read so we can access the metadata. getAllGroupMembers() doesn't return
       // names in any
@@ -167,13 +167,11 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
       onnd.setHealthType(HealthType.UNKNOWN);
 
       onnd.setStartDate(
-              ZonedDateTime.parse(genericReader.string().getAttr(trackingId, "exp_start_time"))
-                      .toLocalDateTime());
+          ZonedDateTime.parse(genericReader.string().getAttr(trackingId, "exp_start_time"))
+              .toLocalDateTime());
 
-      onnd.setSoftware(
-              genericReader.string().getAttr(trackingId, "version")
-                      + " + "
-                      + genericReader.string().getAttr(trackingId, "protocols_version"));
+      onnd.setSoftware(genericReader.string().getAttr(trackingId, "version"));
+      onnd.setProtocolVersion(genericReader.string().getAttr(trackingId, "protocols_version"));
 
       onnd.setRunType(genericReader.string().getAttr(trackingId, "exp_script_purpose"));
 
