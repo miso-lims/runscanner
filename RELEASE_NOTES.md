@@ -1,10 +1,3 @@
-# Unreleased
-
-Changes:
-
- * Split MinKNOW and Protocol versions in ONT DTO
- * Update Jackson versions all to 2.9.9 for security
-
 # 1.4.5
 
 Changes:
