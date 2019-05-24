@@ -55,7 +55,7 @@ In `/etc/runscanner.json`, or another path of your choosing, put JSON data descr
       }
     ]
 
-The name/platform-type combination decide what scanner is used to interpret the sequencer's results. A full list of JSON data can be found in <a href="appendices.html#A">Appendix A: Processor Definitions</a>.
+The name/platform-type combination is used to define how to interpret the sequencer's results. A full list of instrument options can be found in <a href="appendices.html#A">Appendix A: Processor Definitions</a>.
  
 <a id="building" />
 
