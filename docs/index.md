@@ -1,8 +1,7 @@
 ---
 title: Home Page
 layout: default
+order: 0
 ---
-
-# {{ page.title }}
 
 This is the homepage for the Run Scanner documentation.

@@ -2,7 +2,7 @@ title: Run Scanner Documentation
 email: alexis.varsava@oicr.on.ca
 description: >- # this means to ignore newlines until "baseurl:"
         Run Scanner is a tool for monitoring output data from sequencing equipment.
-baseurl: "/runscanner" # the subpath of your site, e.g. /blog
+baseurl: "/" # the subpath of your site, e.g. /blog
 
 markdown: kramdown
 theme: minima
