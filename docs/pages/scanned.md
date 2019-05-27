@@ -4,7 +4,7 @@ title: Scanned Page
 categories: ['User Manual']
 order: 3
 ---
-
+<!-- TODO: image -->
 The Scanned page of Run Scanner can be accessed by clicking the 'Scanned' link on the header bar of the Run Scanner interface. This page outlines the runs detected and successfully processed by Run Scanner.
 
 <a id="scanned-list" />
