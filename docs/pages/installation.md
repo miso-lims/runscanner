@@ -4,7 +4,7 @@ title: Installation & Setup
 categories: ['User Manual']
 order: 1
 ---
-
+<a id="prerequisites" />
 ## Prerequisites
 
 * JDK 8
@@ -29,8 +29,8 @@ Extract the `.zip` or `.tar.gz` file to a temporary location.
 ## Setting Up Run Scanner
 
 In the following instructions:
-* `${CATALINA_HOME}` is the directory where Tomcat is installed.
-* `${CONTEXT}` is the context URL you wish to use for Run Scanner. 
+* Let `${CATALINA_HOME}` be the directory where Tomcat is installed.
+* Let `${CONTEXT}` be the context URL you wish to use for Run Scanner. 
   * To deploy to the root context (e.g., https://www.myrunscanner.org), let `${CONTEXT}` be `ROOT`
   * To deploy to a subdirectory (e.g., https://www.myserver.org/runscanner/), let `${CONTEXT}` be the name of the subdirectory (e.g., `runscanner`)
 
@@ -59,7 +59,7 @@ Create a file called `${CONTEXT}.xml` in `${CATALINA_HOME}/conf/Catalina/localho
       }
     ]
 
-The name/platform-type combination is used to define how to interpret the sequencer's results. A full list of instrument options can be found in <a href="appendices.html#A">Appendix A: Processor Definitions</a>.
+The name/platformType combination is used to define how to interpret the sequencer's results. A full list of instrument options can be found in <a href="appendices.html#A">Appendix A: Processor Definitions</a>. For more information on how Run Scanner uses this information, please refer to <a href="internal.html#configurations">Configurations</a>.
  
 <a id="building" />
 
@@ -78,7 +78,7 @@ There will be an important build artefact: `scanner/target/scanner-$VERSION.war`
 
 If you would like to scan for Illumina output, please follow <a href="illuminasetup.html">Illumina Setup</a> before deploying.
 
-<a id="release" />
+<a id="deploying" />
 
 ## Deploying
 
