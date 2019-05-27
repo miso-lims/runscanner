@@ -5,7 +5,7 @@ categories: ['User Manual']
 order: 1
 ---
 <a id="prerequisites" />
-## Prerequisites
+### Prerequisites
 
 * JDK 8
 * Tomcat 8
@@ -19,14 +19,14 @@ For Illumina support:
 
 <a id="latest-release" />
 
-## Downloading the latest release
+### Downloading the latest release
 <!-- This will change when we have docker images -->
 Use the GitHub interface to download the [latest release](https://github.com/miso-lims/runscanner/releases/latest).
 Extract the `.zip` or `.tar.gz` file to a temporary location.
 
 <a id="setup" />
 
-## Setting Up Run Scanner
+### Setting Up Run Scanner
 
 In the following instructions:
 * Let `${CATALINA_HOME}` be the directory where Tomcat is installed.
@@ -63,7 +63,7 @@ The name/platformType combination is used to define how to interpret the sequenc
  
 <a id="building" />
 
-## Building Run Scanner
+### Building Run Scanner
 
 Navigate to `$RUNSCANNER_SRC`.
 Build the application using:
@@ -74,13 +74,13 @@ There will be an important build artefact: `scanner/target/scanner-$VERSION.war`
 
 <a id="illumina" />
 
-### Enabling Illumina scanning
+#### Enabling Illumina scanning
 
 If you would like to scan for Illumina output, please follow <a href="illuminasetup.html">Illumina Setup</a> before deploying.
 
 <a id="deploying" />
 
-## Deploying
+### Deploying
 
 1. Stop Run Scanner's Tomcat.
 1. Remove `${CATALINA_HOME}/webapps/${CONTEXT}` directory and `${CATALINA_HOME}/webapps/${CONTEXT}.war` file
