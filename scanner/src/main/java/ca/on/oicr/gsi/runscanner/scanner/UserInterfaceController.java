@@ -64,7 +64,6 @@ public class UserInterfaceController {
   private static final String PROCESSING = "Processing";
   private static final String UNREADABLE = "Unreadable";
   private static final String FS_ERROR = "File System Error";
-  private static final String INSTRUMENTS = "Instruments";
 
   /** These are all the collections of files that the scheduler can report. */
   private static final Map<String, Function<Scheduler, Iterable<File>>> COLLECTIONS =
@@ -74,7 +73,6 @@ public class UserInterfaceController {
           .put(PROCESSING, Scheduler::getCurrentWork) //
           .put(UNREADABLE, Scheduler::getFailedDirectories) //
           .put(FS_ERROR, Scheduler::getFSUnreadableDirectories) //
-          .put(INSTRUMENTS, Scheduler::getRoots) //
           .build();
 
   @Autowired private Scheduler scheduler;
