@@ -17,5 +17,5 @@ These runs may have failed due to:
 
 Runs will **not** appear in the Unreadable list if they are within a sequencing output directory for which Run Scanner lacks permission to access entirely. The <a href="main.html#sequencers">Sequencing Output Directories section of the Main Page</a> will indicate when this is the case.
 
-For more information on fixing runs which have failed to read, please refer to <a href="troubleshooting.html">Troubleshooting</a>.
+For more information on fixing runs which have failed to read, please refer to <a href="troubleshooting.html#Unreadable">Troubleshooting</a>.
 For more information on processing, please refer to <a href="internal.html">Internal Operation</a>.

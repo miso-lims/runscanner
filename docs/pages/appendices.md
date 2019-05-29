@@ -40,7 +40,7 @@ order: 11
 	</tr>
 	<tr>
 		<td>timeZone</td>
-		<td>Valid String ID for Java TimeZone</td>
+		<td>Valid String ID for Java TimeZone, which is a TZ Database name. <a href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List">List of TZ Database names on Wikipedia</a></td>
 	</tr>
 	<tr>
 		<td>parameters</td>
@@ -81,4 +81,6 @@ order: 11
 
 <a id="B" />
 ### Appendix B: Run JSON Fields
-<!-- TODO: Write this -->
+
+<a id="C" />
+### Appendix C: Software Versions Supported by Run Scanner
