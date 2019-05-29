@@ -4,7 +4,7 @@ layout: default
 order: 0
 ---
 
-Welcome to the Run Scanner documentation.
+Run Scanner is a web service which monitors output directories for sequencing instruments and serves metadata for runs. 
 
 {% for cat in site.category-list %}
 ### {{ cat }}
