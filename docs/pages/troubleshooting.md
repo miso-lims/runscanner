@@ -28,7 +28,7 @@ To access a sequencing output directory, Run Scanner needs to be provided a vali
 
 For more information on the configuration JSON file, please refer to <a href="installation.html#setup">Setting Up Run Scanner</a>.
 
-<!-- TODO: This messages really could be more user-friendly in Run Scanner itself -->
+<!-- TODO: These messages really could be more user-friendly in Run Scanner itself -->
 #### 'Path is null!'
 This message appears if Run Scanner is not provided a valid absolute path to a sequencing output directory. This message will also appear if no path is specified. Check your configuration JSON for a valid absolute path to the sequencing output directory.
 
