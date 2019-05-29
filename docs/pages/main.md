@@ -23,7 +23,7 @@ For more information on Configurations, how often scanning will occur, and the d
 ### Sequencing Output Directories
 Underneath the <a href="#core">Core</a> section, Run Scanner displays one section per sequencing output directory, as defined in the configuration JSON (for more information, please refer to <a href="installation.html#setup">Setting Up Run Scanner</a>). Each section is headed by the directory path, and outlines the platform, processor type, and time zone defined in the JSON file. 
 
-The 'Valid?' line in each section details whether Run Scanner can access the directory. If the directory has been defined correctly in the JSON, this line should read 'Yes'. If it does not, Run Scanner will outline the issues it is facing in accessing the directory. The issue may be that the target of the provided path does not exist, or that Run Scanner does not have the necessary permissions to read or write to the directory. For more information, please refer to <a href="troubleshooting.html#SequencerInvalid">Sequencer 'Valid?' reads 'No'</a>.
+The 'Valid?' line in each section details whether Run Scanner can access the directory. If the directory has been defined correctly in the JSON, this line will read 'Yes'. If it does not, Run Scanner will outline the issues it is facing in accessing the directory. The issue may be that the target of the provided path does not exist, or that Run Scanner does not have the necessary permissions to read or write to the directory. For more information, please refer to <a href="troubleshooting.html#SequencerInvalid">Sequencing Output Directory 'Valid?' reads 'No'</a>.
 
 <a id="processors" />
 ### Processors

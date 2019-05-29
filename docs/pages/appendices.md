@@ -81,6 +81,7 @@ order: 11
 
 <a id="B" />
 ### Appendix B: Run JSON Fields
-
+<!-- TODO: oh god huge table -->
 <a id="C" />
 ### Appendix C: Software Versions Supported by Run Scanner
+<!-- TODO: oh god huger table -->
