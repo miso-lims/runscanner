@@ -312,9 +312,8 @@ void add_lane_charts(
   add_table_column(columns, "Lane", "lane");
   add_table_column(columns, "Pool", "pool");
   add_table_column(columns, "Density %", "densityPct");
-  add_table_column(columns, "Density", "density");
+  add_table_column(columns, "Density (K clusters/mm²)", "density");
   add_table_column(columns, "Density PF", "densityPf");
-  add_table_column(columns, "% > Q30", "q30");
   auto index = 0;
   for (auto read = 0; read < run_summary.size(); read++) {
     auto is_index = run.run_info().read(read + 1).is_index();
@@ -326,7 +325,7 @@ void add_lane_charts(
       buffer << " (Read " << read + 1 - index << ")";
     }
     auto suffix = buffer.str();
-    add_table_column(columns, "Errors" + suffix,
+    add_table_column(columns, "% > Q30" + suffix,
                      "errors" + std::to_string(read));
     if (!is_index) {
       add_table_column(columns, "Aligned" + suffix,
