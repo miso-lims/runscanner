@@ -312,7 +312,7 @@ void add_lane_charts(
   add_table_column(columns, "Lane", "lane");
   add_table_column(columns, "Pool", "pool");
   add_table_column(columns, "Density %", "densityPct");
-  add_table_column(columns, "Density (K clusters/mm²)", "density");
+  add_table_column(columns, u8"Density (K clusters/mm²)", "density");
   add_table_column(columns, "Density PF", "densityPf");
   auto index = 0;
   for (auto read = 0; read < run_summary.size(); read++) {
