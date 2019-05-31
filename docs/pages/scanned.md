@@ -16,7 +16,7 @@ Each run which has been successfully scanned and processed by Run Scanner will b
 Clicking the Run Alias will load the Run <a href="https://en.wikipedia.org/wiki/JSON">JSON</a> for the selected run. This file is a summary of all of the information Run Scanner has retrieved from the sequencing run output. 
 
 This file contains the same information which will be returned when accessed via the REST API.
-<!-- right? --> For more information, please refer to <a href="api.html">API Docs</a>.
+<!-- right? --> <!-- For more information, please refer to <a href="api.html">API Docs</a>. -->
 
 The fields within this file vary based on the model of sequencer which has produced the run. (For more information, please refer to <a href="appendices.html#B">Appendix B: Run JSON Fields</a>)
 
