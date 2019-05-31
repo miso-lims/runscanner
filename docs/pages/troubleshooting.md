@@ -79,7 +79,9 @@ List of TZ Database names on Wikipedia</a>.
 ### Runs appear in Unreadable list
 #### Check that directory contains run data
 Directories will appear in the Unreadable list if they do not contain files 
-which Run Scanner recognizes as run data. <!-- Vague --> Ensure that the 
+which Run Scanner expects to find for a run. (For example, Illumina runs are 
+expected to contain _runParameters.xml_, and PromethION runs are expected to 
+contain a <i>fast5_pass</i> directory.) Ensure that the 
 directory contains run data.
 
 #### Verify format of run data

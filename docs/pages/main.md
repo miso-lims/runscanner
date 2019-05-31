@@ -20,10 +20,10 @@ information.
 
 Upon first starting Run Scanner, the 'Time Since Last Scan' item will read 
 'Starting up...'. Run Scanner may take some time to start up before scanning. 
-This wait time is a function of the number of sequencing output directories
- defined in the configuration JSON, whether certain parameters are enabled, 
-and whether the sequencing output directories must be accessed over a network.
- <!-- Is this accurate? -->
+This wait time is a fixed delay, plus a function of the number of sequencing 
+output directories defined in the configuration JSON, whether certain parameters 
+are enabled, and whether the sequencing output directories must be accessed over 
+a network.
 
 Run Scanner will scan for new runs every 15 minutes. 'Currently Scanning' 
 may read 'No' while 'Waiting Runs' is still greater than zero. This is normal,
