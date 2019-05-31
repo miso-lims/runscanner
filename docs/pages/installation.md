@@ -59,7 +59,7 @@ Create a file called `${CONTEXT}.xml` in `${CATALINA_HOME}/conf/Catalina/localho
       }
     ]
 
-The name/platformType combination is used to define how to interpret the sequencer's results. A full list of instrument options can be found in <a href="appendices.html#A">Appendix A: Processor Definitions</a>. For more information on how Run Scanner uses this information, please refer to <a href="internal.html#configurations">Configurations</a>.
+The name/platformType combination is used to define how to interpret the sequencer's results. A full list of instrument options can be found in <a href="appendices.html#A">Appendix A: Processor Definitions</a>. 
  
 <a id="building" />
 
