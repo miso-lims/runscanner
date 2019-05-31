@@ -81,6 +81,7 @@ order: 11
 
 <a id="B" />
 ### Appendix B: Run JSON Fields
+<!-- TODO: Convert this to explanations rather than checkmarks, esp bc they might vary in meaning b/w PromION and MinION -->
 <table>
 	<tr>
 		<th>Field Name</th>
@@ -90,165 +91,177 @@ order: 11
 	</tr>
 	<tr>
 		<td>platform</td>
-		<td></td>
-		<td></td>
-		<td></td>
+		<td>✓</td>
+		<td>✓</td>
+		<td>✓</td>
 	</tr>
 	<tr>
 		<td>runAlias</td>
-		<td></td>
-		<td></td>
-		<td></td>
+		<td>✓</td>
+		<td>✓</td>
+		<td>✓</td>
 	</tr>
 	<tr>
 		<td>sequencerFolderPath</td>
-		<td></td>
-		<td></td>
-		<td></td>
+		<td>✓</td>
+		<td>✓</td>
+		<td>✓</td>
 	</tr>
 	<tr>
 		<td>sequencerName</td>
-		<td></td>
-		<td></td>
-		<td></td>
+		<td>✓</td>
+		<td>✓</td>
+		<td>✓</td>
 	</tr>
 	<tr>
 		<td>sequencerPosition</td>
-		<td></td>
-		<td></td>
-		<td></td>
+		<td>✓</td>
+		<td>✓</td>
+		<td>✓</td>
 	</tr>
 	<tr>
 		<td>containerSerialNumber</td>
-		<td></td>
-		<td></td>
-		<td></td>
+		<td>✓</td>
+		<td>✓</td>
+		<td>✓</td>
 	</tr>
 	<tr>
 		<td>containerModel</td>
-		<td></td>
-		<td></td>
-		<td></td>
+		<td>✓</td>
+		<td>✓</td>
+		<td>✓</td>
 	</tr>
 	<tr>
 		<td>laneCount</td>
-		<td></td>
-		<td></td>
-		<td></td>
+		<td>✓</td>
+		<td>✓</td>
+		<td>✓</td>
 	</tr>
 	<tr>
 		<td>healthType</td>
-		<td></td>
-		<td></td>
-		<td></td>
+		<td>✓</td>
+		<td>✓</td>
+		<td>✓</td>
 	</tr>
 	<tr>
 		<td>startDate</td>
-		<td></td>
-		<td></td>
-		<td></td>
+		<td>✓</td>
+		<td>✓</td>
+		<td>✓</td>
 	</tr>
 	<tr>
 		<td>completedDate</td>
-		<td></td>
-		<td></td>
-		<td></td>
+		<td>✓</td>
+		<td>✓</td>
+		<td>✓</td>
 	</tr>
 	<tr>
 		<td>pairedEndRun</td>
-		<td></td>
-		<td></td>
-		<td></td>
+		<td>✓</td>
+		<td>✓</td>
+		<td>✓</td>
 	</tr>
 	<tr>
 		<td>software</td>
-		<td></td>
-		<td></td>
-		<td></td>
+		<td>✓</td>
+		<td>✓</td>
+		<td>✓</td>
 	</tr>
 	<tr>
 		<td>metrics</td>
-		<td></td>
-		<td></td>
-		<td></td>
+		<td>✓</td>
+		<td>✓</td>
+		<td>✓</td>
 	</tr>
 	<tr>
 		<td>poolNames</td>
-		<td></td>
+		<td>✓</td>
 		<td></td>
 		<td></td>
 	</tr>
 	<tr>
 		<td>runBasesMask</td>
 		<td></td>
-		<td></td>
+		<td>✓</td>
 		<td></td>
 	</tr>
 	<tr>
 		<td>bclCount</td>
 		<td></td>
-		<td></td>
+		<td>✓</td>
 		<td></td>
 	</tr>
 	<tr>
 		<td>callCycle</td>
 		<td></td>
-		<td></td>
+		<td>✓</td>
 		<td></td>
 	</tr>
 	<tr>
 		<td>chemistry</td>
 		<td></td>
-		<td></td>
+		<td>✓</td>
 		<td></td>
 	</tr>
 	<tr>
 		<td>imgCycle</td>
 		<td></td>
-		<td></td>
+		<td>✓</td>
 		<td></td>
 	</tr>
 	<tr>
 		<td>indexLengths</td>
 		<td></td>
-		<td></td>
+		<td>✓</td>
 		<td></td>
 	</tr>
 	<tr>
 		<td>numCycles</td>
 		<td></td>
-		<td></td>
+		<td>✓</td>
 		<td></td>
 	</tr>
 	<tr>
 		<td>numReads</td>
 		<td></td>
-		<td></td>
+		<td>✓</td>
 		<td></td>
 	</tr>
 	<tr>
 		<td>poolNames</td>
 		<td></td>
-		<td></td>
+		<td>✓</td>
 		<td></td>
 	</tr>
 	<tr>
 		<td>readLength</td>
 		<td></td>
-		<td></td>
+		<td>✓</td>
 		<td></td>
 	</tr>
 	<tr>
 		<td>scoreCycle</td>
 		<td></td>
-		<td></td>
+		<td>✓</td>
 		<td></td>
 	</tr>
 	<tr>
 		<td>workflowType</td>
 		<td></td>
+		<td>✓</td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>runType</td>
 		<td></td>
 		<td></td>
+		<td>✓</td>
+	</tr>
+	<tr>
+		<td>protocolVersion</td>
+		<td></td>
+		<td></td>
+		<td>✓</td>
 	</tr>
 </table>
 
@@ -256,5 +269,27 @@ order: 11
 
 
 <a id="C" />
-### Appendix C: Software Versions Supported by Run Scanner
-<!-- TODO: oh god huger table -->
+### Appendix C: Sequencers Supported by Run Scanner
+This is a list of sequencers for which Run Scanner is capable of processing output. 
+**Bold** values are verified to work with Run Scanner. Other values should work through having equivalent output, however they have not been tested. 
+If a sequencer is not included in this list, it should be assumed to be unsupported.
+
+#### PacBio
+* **RS**
+* **RS II**
+
+#### Illumina
+* **HiSeq 1000**
+* **HiSeq 2000**
+* **HiSeq 2500**
+* **HiSeq X**
+* **MiSeq**
+* **NextSeq 500**
+* **NextSeq 550**
+* **NextSeq 6000**
+
+#### Oxford Nanopore
+
+* **PromethION** - as of Release 19.01.1
+* MinION - as of Release 18.12
+<!-- TODO: make minion bold when the RunProcessor for that is done -->

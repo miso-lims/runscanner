@@ -17,6 +17,8 @@ For Illumina support:
 * C++ build environment
 * jsoncpp
 
+Please ensure that your sequencer(s) are supported by Run Scanner. Please refer to <a href="appendices.html#C">Appendix C: Sequencers Supported by Run Scanner</a> for more information.
+
 <a id="latest-release" />
 
 ### Downloading the latest release
@@ -59,7 +61,7 @@ Create a file called `${CONTEXT}.xml` in `${CATALINA_HOME}/conf/Catalina/localho
       }
     ]
 
-The name/platformType combination is used to define how to interpret the sequencer's results. A full list of instrument options can be found in <a href="appendices.html#A">Appendix A: Processor Definitions</a>. 
+The name/platformType combination is used to define how to interpret the sequencer's results. A full list of instrument options can be found in <a href="appendices.html#A">Appendix A: Processor Definitions</a> and a full list of supported sequencers can be found in <a href="appendices.html#C">Appendix C: Sequencers Supported by Run Scanner</a>. 
  
 <a id="building" />
 

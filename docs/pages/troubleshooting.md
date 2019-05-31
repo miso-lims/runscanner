@@ -53,7 +53,7 @@ This message appears if the 'timeZone' field in the configuration JSON is blank 
 Directories will appear in the Unreadable list if they do not contain files which Run Scanner recognizes as run data. <!-- Vague --> Ensure that the directory contains run data.
 
 #### Verify format of run data
-Run Scanner expects run data to be in certain formats per sequencer. Please refer to <a href="appendices.html#C">Appendix C: Software Versions Supported by Run Scanner</a> for more information.
+Run Scanner expects run data to be in certain formats per sequencer. Please ensure your sequencer is supported and running a supported software version. Please refer to <a href="appendices.html#C">Appendix C: Sequencers Supported by Run Scanner</a> for more information.
 
 It is also possible that the run data contains invalid information. Try inspecting the run files with a tool appropriate for the file type (such as _h5dump_ for Oxford Nanopore output) to ensure all data is of the appropriate data type.
 
