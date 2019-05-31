@@ -271,7 +271,7 @@ order: 11
 <a id="C" />
 ### Appendix C: Sequencers Supported by Run Scanner
 This is a list of sequencers for which Run Scanner is capable of processing output. 
-**Bold** values are verified to work with Run Scanner. Other values should work through having equivalent output, however they have not been tested. 
+**Bold** items are verified to work with Run Scanner. Other items should work through having equivalent output, however they have not been tested. 
 If a sequencer is not included in this list, it should be assumed to be unsupported.
 
 #### PacBio
@@ -286,7 +286,9 @@ If a sequencer is not included in this list, it should be assumed to be unsuppor
 * **MiSeq**
 * **NextSeq 500**
 * **NextSeq 550**
-* **NextSeq 6000**
+* **NovaSeq 6000**
+* iSeq
+* MiniSeq
 
 #### Oxford Nanopore
 
