@@ -271,12 +271,13 @@ order: 11
 <a id="C" />
 ### Appendix C: Sequencers Supported by Run Scanner
 This is a list of sequencers for which Run Scanner is capable of processing output. 
-**Bold** items are verified to work with Run Scanner. Other items should work through having equivalent output, however they have not been tested. 
+**Bold** items are verified to work with Run Scanner. _Italic_ items are under development. Other items should work through having equivalent output, however they have not been tested. 
 If a sequencer is not included in this list, it should be assumed to be unsupported.
 
 #### PacBio
 * **RS**
 * **RS II**
+* _Sequel - Under development_
 
 #### Illumina
 * **HiSeq 1000**
@@ -293,5 +294,5 @@ If a sequencer is not included in this list, it should be assumed to be unsuppor
 #### Oxford Nanopore
 
 * **PromethION** - as of Release 19.01.1
-* MinION - as of Release 18.12
+* _MinION - as of Release 18.12_
 <!-- TODO: make minion bold when the RunProcessor for that is done -->
