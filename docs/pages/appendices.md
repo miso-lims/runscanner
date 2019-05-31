@@ -81,7 +81,8 @@ order: 11
 
 <a id="B" />
 ### Appendix B: Run JSON Fields
-<!-- TODO: Convert this to explanations rather than checkmarks, esp bc they might vary in meaning b/w PromION and MinION -->
+<!-- TODO: Convert this to explanations rather than checkmarks, 
+esp bc they might vary in meaning b/w PromION and MinION -->
 <table>
 	<tr>
 		<th>Field Name</th>
@@ -270,9 +271,13 @@ order: 11
 
 <a id="C" />
 ### Appendix C: Sequencers Supported by Run Scanner
-This is a list of sequencers for which Run Scanner is capable of processing output. 
-**Bold** items are verified to work with Run Scanner. _Italic_ items are under development. Other items should work through having equivalent output, however they have not been tested. 
-If a sequencer is not included in this list, it should be assumed to be unsupported.
+This is a list of sequencers for which Run Scanner is capable of processing 
+output. 
+**Bold** items are verified to work with Run Scanner. 
+_Italic_ items are under development. Other items should work through having 
+equivalent output, however they have not been tested. 
+If a sequencer is not included in this list, it should be assumed to be 
+unsupported.
 
 #### PacBio
 * **RS**

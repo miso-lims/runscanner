@@ -17,13 +17,16 @@ For Illumina support:
 * C++ build environment
 * jsoncpp
 
-Please ensure that your sequencer(s) are supported by Run Scanner. Please refer to <a href="appendices.html#C">Appendix C: Sequencers Supported by Run Scanner</a> for more information.
+Please ensure that your sequencer(s) are supported by Run Scanner. 
+Please refer to <a href="appendices.html#C">Appendix C: Sequencers Supported 
+by Run Scanner</a> for more information.
 
 <a id="latest-release" />
 
 ### Downloading the latest release
 <!-- This will change when we have docker images -->
-Use the GitHub interface to download the [latest release](https://github.com/miso-lims/runscanner/releases/latest).
+Use the GitHub interface to download the 
+[latest release](https://github.com/miso-lims/runscanner/releases/latest).
 Extract the `.zip` or `.tar.gz` file to a temporary location.
 
 <a id="setup" />
@@ -36,13 +39,19 @@ In the following instructions:
   * To deploy to the root context (e.g., https://www.myrunscanner.org), let `${CONTEXT}` be `ROOT`
   * To deploy to a subdirectory (e.g., https://www.myserver.org/runscanner/), let `${CONTEXT}` be the name of the subdirectory (e.g., `runscanner`)
 
-Create a file called `${CONTEXT}.xml` in `${CATALINA_HOME}/conf/Catalina/localhost`, creating the directory if necessary, and populate it with the following information:
+Create a file called `${CONTEXT}.xml` in 
+`${CATALINA_HOME}/conf/Catalina/localhost`, creating the directory if 
+necessary, and populate it with the following information:
 
     <Context>
        <Parameter name="runscanner.configFile" value="/etc/runscanner.json" override="false"/>
     </Context>
 
-`/etc/runscanner.json` is the default location of the instrument descriptions, however this can be changed if necessary. Create this file, and within, write JSON data describing your instruments. Run Scanner requires one record per instrument, therefore the file will contain a list of instruments:
+`/etc/runscanner.json` is the default location of the instrument 
+descriptions, however this can be changed if necessary. Create this file, 
+and within, write JSON data describing your instruments. Run Scanner 
+requires one record per instrument, therefore the file will contain a 
+list of instruments:
 
     [
       {
@@ -61,7 +70,11 @@ Create a file called `${CONTEXT}.xml` in `${CATALINA_HOME}/conf/Catalina/localho
       }
     ]
 
-The name/platformType combination is used to define how to interpret the sequencer's results. A full list of instrument options can be found in <a href="appendices.html#A">Appendix A: Processor Definitions</a> and a full list of supported sequencers can be found in <a href="appendices.html#C">Appendix C: Sequencers Supported by Run Scanner</a>. 
+The name/platformType combination is used to define how to interpret the 
+sequencer's results. A full list of instrument options can be found in 
+<a href="appendices.html#A">Appendix A: Processor Definitions</a> and a 
+full list of supported sequencers can be found in 
+<a href="appendices.html#C">Appendix C: Sequencers Supported by Run Scanner</a>. 
  
 <a id="building" />
 
@@ -72,13 +85,15 @@ Build the application using:
 
 	mvn clean package
 	
-There will be an important build artefact: `scanner/target/scanner-$VERSION.war`
+There will be an important build artefact: 
+`scanner/target/scanner-$VERSION.war`
 
 <a id="illumina" />
 
 #### Enabling Illumina scanning
 
-If you would like to scan for Illumina output, please follow <a href="illuminasetup.html">Illumina Setup</a> before deploying.
+If you would like to scan for Illumina output, please follow 
+<a href="illuminasetup.html">Illumina Setup</a> before deploying.
 
 <a id="deploying" />
 
