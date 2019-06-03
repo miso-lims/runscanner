@@ -303,6 +303,6 @@ unsupported.
 
 #### Oxford Nanopore
 
-* **PromethION** - as of Release 19.01.1
-* _MinION - as of Release 18.12_
+* **PromethION** - as of PromethION Release 19.01.1
+* _MinION - as of MinION Release 18.12_
 <!-- TODO: make minion bold when the RunProcessor for that is done -->
