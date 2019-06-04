@@ -13,7 +13,7 @@ Run Scanner is a web service which monitors output directories for sequencing in
 	{% for page in sorted_pages %}
 		{% for pc in page.categories %}
 			{% if pc == cat %}
-				<li><a href="{{ page.url }}">{{ page.title }}</a></li>
+				<li><a href="{{ site.baseurl }}{{ page.url }}">{{ page.title }}</a></li>
 			{% endif %} <!-- pc == cat -->
 		{% endfor %} <!-- page.categories -->
 	{% endfor %} <!-- sorted_pages -->
