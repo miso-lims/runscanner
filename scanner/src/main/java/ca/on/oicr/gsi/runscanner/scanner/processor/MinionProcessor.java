@@ -19,7 +19,7 @@ public class MinionProcessor extends BaseOxfordNanoporeProcessor {
 
   @Override
   protected void additionalProcess(OxfordNanoporeNotificationDto onnd, IHDF5Reader reader) {
-    return;
+    onnd.setContainerModel(reader.string().getAttr(contextTags, "sequencing_kit"));
   }
 
   public static RunProcessor create(Builder builder, ObjectNode jsonNodes) {

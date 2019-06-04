@@ -161,8 +161,6 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
 
       onnd.setContainerSerialNumber(genericReader.string().getAttr(trackingId, "flow_cell_id"));
 
-      onnd.setContainerModel(genericReader.string().getAttr(contextTags, "flowcell_type"));
-
       onnd.setLaneCount(LANE_COUNT);
       onnd.setHealthType(HealthType.UNKNOWN);
 
@@ -173,7 +171,11 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
       onnd.setSoftware(genericReader.string().getAttr(trackingId, "version"));
       onnd.setProtocolVersion(genericReader.string().getAttr(trackingId, "protocols_version"));
 
-      onnd.setRunType(genericReader.string().getAttr(trackingId, "exp_script_purpose"));
+      onnd.setRunType(
+          genericReader
+              .string()
+              .getAttr(
+                  trackingId, "exp_script_purpose")); // I believe this will break for minion reads
 
       additionalProcess(onnd, genericReader);
       return onnd;
