@@ -57,6 +57,11 @@ public class UserInterfaceController {
               Header.cssFile("resources/styles/style.css"),
               Header.favicon("resources/favicon.ico", 32, "image/x-icon"));
         }
+
+        @Override
+        public String documentationUrl() {
+          return "swagger-ui.html";
+        }
       };
 
   private static final String SCANNED = "Scanned";
