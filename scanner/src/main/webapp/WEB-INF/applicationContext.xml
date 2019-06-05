@@ -33,4 +33,6 @@
                       http://www.springframework.org/schema/context/spring-context.xsd"
   default-autowire="byName">
 
+    <context:property-placeholder location="classpath:runscanner.properties" ignore-unresolvable="true"/>
+
 </beans>
