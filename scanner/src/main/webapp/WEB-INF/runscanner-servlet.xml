@@ -61,5 +61,6 @@
 
   <!-- static mapping for swagger ui -->
   <mvc:resources location="classpath:/META-INF/resources/" mapping="swagger-ui.html"/>
+  <mvc:resources mapping="/webjars/**" location="classpath:/META-INF/resources/webjars/"/>
   <bean class="ca.on.oicr.gsi.runscanner.scanner.SwaggerConfig"/>
 </beans>

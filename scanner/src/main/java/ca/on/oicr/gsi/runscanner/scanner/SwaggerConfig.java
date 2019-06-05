@@ -3,22 +3,22 @@ package ca.on.oicr.gsi.runscanner.scanner;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
+import springfox.documentation.swagger.web.*;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @Configuration
 @EnableSwagger2
-public class SwaggerConfig extends WebMvcConfigurerAdapter {
-  @Value("${project.name}")
+public class SwaggerConfig {
+  @Value("${name}")
   String projectName;
 
-  @Value("${project.version}")
+  @Value("${version}")
   String projectVersion;
 
   @Bean
@@ -29,6 +29,25 @@ public class SwaggerConfig extends WebMvcConfigurerAdapter {
         .paths(PathSelectors.any())
         .build()
         .apiInfo(metaData());
+  }
+
+  @Bean
+  public UiConfiguration uiConfig() {
+    return UiConfigurationBuilder.builder()
+        .deepLinking(true)
+        .displayOperationId(false)
+        .defaultModelExpandDepth(1)
+        .defaultModelsExpandDepth(1)
+        .displayRequestDuration(false)
+        .docExpansion(DocExpansion.NONE)
+        .filter(false)
+        .maxDisplayedTags(null)
+        .operationsSorter(OperationsSorter.ALPHA)
+        .showExtensions(false)
+        .tagsSorter(TagsSorter.ALPHA)
+        .supportedSubmitMethods(UiConfiguration.Constants.DEFAULT_SUBMIT_METHODS)
+        .validatorUrl(null)
+        .build();
   }
 
   private ApiInfo metaData() {
