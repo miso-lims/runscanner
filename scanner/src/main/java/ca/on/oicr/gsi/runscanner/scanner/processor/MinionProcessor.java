@@ -14,7 +14,7 @@ public class MinionProcessor extends BaseOxfordNanoporeProcessor {
 
   @Override
   protected Stream<Path> readsDirectoryForRun(Path path) {
-    return Stream.of(path.resolve(Paths.get("fast5", "0")));
+    return Stream.of(path.resolve(Paths.get("fast5")));
   }
 
   @Override
