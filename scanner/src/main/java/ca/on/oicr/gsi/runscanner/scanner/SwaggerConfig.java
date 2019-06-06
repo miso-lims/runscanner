@@ -15,9 +15,10 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @Configuration
 @EnableSwagger2
 public class SwaggerConfig {
-  String projectName = "Run Scanner";
+  @Value("${project.name}")
+  String projectName;
 
-  @Value("${rs.version}")
+  @Value("${project.version}")
   String projectVersion;
 
   @Bean
