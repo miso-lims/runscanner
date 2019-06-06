@@ -1,11 +1,14 @@
 package ca.on.oicr.gsi.runscanner.scanner;
 
+import com.google.common.collect.ImmutableList;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.bind.annotation.RequestMethod;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
+import springfox.documentation.builders.ResponseMessageBuilder;
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
@@ -27,7 +30,13 @@ public class SwaggerConfig {
         .apis(RequestHandlerSelectors.any())
         .paths(PathSelectors.any())
         .build()
-        .apiInfo(metaData());
+        .apiInfo(metaData())
+        .globalResponseMessage(
+            RequestMethod.GET,
+            ImmutableList.of(new ResponseMessageBuilder().code(200).message("OK").build()))
+        .globalResponseMessage(
+            RequestMethod.POST,
+            ImmutableList.of(new ResponseMessageBuilder().code(200).message("OK").build()));
   }
 
   @Bean
