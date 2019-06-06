@@ -45,8 +45,8 @@ public class RestResponseController {
       response = ca.on.oicr.gsi.runscanner.dto.NotificationDto.class,
       responseContainer = "ResponseEntity")
   @ApiResponses({
-    @ApiResponse(code = 200, message = "dto"),
-    @ApiResponse(code = 404, message = "null")
+    @ApiResponse(code = 200, message = "Success"),
+    @ApiResponse(code = 404, message = "Run not found")
   }) // TODO: How do I use the HttpStatus naming instead of manually using the value?
   public ResponseEntity<NotificationDto> getByName(
       @PathVariable("name") @ApiParam(value = "Run name") String id) {
@@ -67,7 +67,7 @@ public class RestResponseController {
       value = "Get metrics by run name",
       response = byte[].class,
       responseContainer = "HttpEntity")
-  @ApiResponses({@ApiResponse(code = 200, message = "dto")})
+  @ApiResponses({@ApiResponse(code = 200, message = "Success")})
   public HttpEntity<byte[]> getMetricsByName(
       @PathVariable("name") @ApiParam(value = "Run name") String id) {
     return ResponseEntity.ok()
@@ -121,7 +121,7 @@ public class RestResponseController {
       response = ca.on.oicr.gsi.runscanner.dto.ProgressiveResponseDto.class)
   @ResponseBody
   public ProgressiveResponseDto progressive(
-      @ApiParam(value = "ProgressiveRequestDto object created by requesting client") @RequestBody
+      @ApiParam(value = "ProgressiveRequestDto object containing request options") @RequestBody
           ProgressiveRequestDto request) {
     ProgressiveResponseDto response = new ProgressiveResponseDto();
     response.setToken(token);
