@@ -68,19 +68,23 @@ public class RestResponseController {
       value = "Get metrics by run name",
       response = Json[].class,
       responseContainer = "HttpEntity")
-  @ApiResponses({@ApiResponse(code = 200, message = "Success")})
+  @ApiResponses({
+    @ApiResponse(code = 200, message = "Success"),
+    @ApiResponse(code = 404, message = "Run not found")
+  })
   public HttpEntity<byte[]> getMetricsByName(
       @PathVariable("name") @ApiParam(value = "Run name") String id) {
-    return ResponseEntity.ok()
-        .contentType(MediaType.APPLICATION_JSON_UTF8)
-        .body(
-            scheduler
-                .finished()
-                .filter(dto -> dto.getRunAlias().equals(id))
-                .findAny()
-                .map(NotificationDto::getMetrics)
-                .orElse("[]")
-                .getBytes(StandardCharsets.UTF_8));
+    byte[] response =
+        scheduler
+            .finished()
+            .filter(dto -> dto.getRunAlias().equals(id))
+            .findAny()
+            .map(NotificationDto::getMetrics)
+            .orElse("[]")
+            .getBytes(StandardCharsets.UTF_8);
+    return (response.length > 0
+        ? ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON_UTF8).body(response)
+        : ResponseEntity.notFound().build());
   }
 
   /**
