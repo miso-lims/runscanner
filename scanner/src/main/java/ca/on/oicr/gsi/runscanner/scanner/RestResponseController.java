@@ -48,7 +48,7 @@ public class RestResponseController {
   @ApiResponses({
     @ApiResponse(code = 200, message = "Success"),
     @ApiResponse(code = 404, message = "Run not found")
-  }) // TODO: How do I use the HttpStatus naming instead of manually using the value?
+  })
   public ResponseEntity<NotificationDto> getByName(
       @PathVariable("name") @ApiParam(value = "Run name") String id) {
     return scheduler
