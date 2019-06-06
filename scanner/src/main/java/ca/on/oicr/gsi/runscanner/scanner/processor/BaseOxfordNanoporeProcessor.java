@@ -16,7 +16,6 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
-import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,11 +27,6 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
   protected static String contextTags;
   protected final String SEQUENCER_NAME;
   protected static final int LANE_COUNT = 1;
-  /**
-   * Used for filtering out directories named after sequencer positions, a hallmark of the old
-   * directory format which we need to ignore for performance.
-   */
-  protected static final Pattern POSITION = Pattern.compile("/[0-9]-[A-Z][0-9]+-[A-Z][0-9]+");
 
   protected static boolean isFileFast5(String fileName) {
     return fileName.endsWith(".fast5");
@@ -66,9 +60,8 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
             @Override
             public FileVisitResult preVisitDirectory(
                 Path path, BasicFileAttributes basicFileAttributes) throws IOException {
-              // Immediately check if we're dealing with the old format, move on if so.
-              if (POSITION.matcher(path.toString()).find()) {
-                log.debug("Skipping " + path + " because we found a Sequencer Position in it.");
+              if (excludedDirectoryFormat(path)) {
+                log.debug("Skipping " + path + " because we found an excluded directory in it.");
                 return FileVisitResult.SKIP_SUBTREE;
               }
               if (readsDirectoryForRun(path).anyMatch(Files::isDirectory)) {
@@ -104,6 +97,15 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
     }
     return runDirectories.stream();
   }
+
+  /**
+   * Returns true if provided Path points to a directory in a format we are skipping for
+   * compatibility reasons.
+   *
+   * @param path
+   * @return
+   */
+  protected abstract boolean excludedDirectoryFormat(Path path);
 
   protected abstract Stream<Path> readsDirectoryForRun(Path path);
 
