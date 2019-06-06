@@ -80,9 +80,9 @@ public class RestResponseController {
             .filter(dto -> dto.getRunAlias().equals(id))
             .findAny()
             .map(NotificationDto::getMetrics)
-            .orElse("[]")
+            .orElse(null)
             .getBytes(StandardCharsets.UTF_8);
-    return (response.length > 0
+    return (response == null
         ? ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON_UTF8).body(response)
         : ResponseEntity.notFound().build());
   }
