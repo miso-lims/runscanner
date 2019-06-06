@@ -4,10 +4,7 @@ import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.ProgressiveRequestDto;
 import ca.on.oicr.gsi.runscanner.dto.ProgressiveResponseDto;
 import ca.on.oicr.gsi.runscanner.scanner.Scheduler.OutputSizeLimit;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
@@ -51,7 +48,8 @@ public class RestResponseController {
     @ApiResponse(code = 200, message = "dto"),
     @ApiResponse(code = 404, message = "null")
   }) // TODO: How do I use the HttpStatus naming instead of manually using the value?
-  public ResponseEntity<NotificationDto> getByName(@PathVariable("name") String id) {
+  public ResponseEntity<NotificationDto> getByName(
+      @PathVariable("name") @ApiParam(value = "Run name") String id) {
     return scheduler
         .finished()
         .filter(dto -> dto.getRunAlias().equals(id))
@@ -70,7 +68,8 @@ public class RestResponseController {
       response = byte[].class,
       responseContainer = "HttpEntity")
   @ApiResponses({@ApiResponse(code = 200, message = "dto")})
-  public HttpEntity<byte[]> getMetricsByName(@PathVariable("name") String id) {
+  public HttpEntity<byte[]> getMetricsByName(
+      @PathVariable("name") @ApiParam(value = "Run name") String id) {
     return ResponseEntity.ok()
         .contentType(MediaType.APPLICATION_JSON_UTF8)
         .body(
@@ -121,7 +120,9 @@ public class RestResponseController {
       value = "Progressive scan of runs",
       response = ca.on.oicr.gsi.runscanner.dto.ProgressiveResponseDto.class)
   @ResponseBody
-  public ProgressiveResponseDto progressive(@RequestBody ProgressiveRequestDto request) {
+  public ProgressiveResponseDto progressive(
+      @ApiParam(value = "ProgressiveRequestDto object created by requesting client") @RequestBody
+          ProgressiveRequestDto request) {
     ProgressiveResponseDto response = new ProgressiveResponseDto();
     response.setToken(token);
     int requestedEpoch = request.getToken() == token ? request.getEpoch() : 0;
