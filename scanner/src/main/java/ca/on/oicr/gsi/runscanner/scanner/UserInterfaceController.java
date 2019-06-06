@@ -31,9 +31,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import springfox.documentation.annotations.ApiIgnore;
 
 /** Front-end status monitoring for run scanner */
 @Controller
+@ApiIgnore
 public class UserInterfaceController {
   public static final ServerConfig SERVER_CONFIG =
       new ServerConfig() {
