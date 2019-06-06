@@ -4,6 +4,7 @@ import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.ProgressiveRequestDto;
 import ca.on.oicr.gsi.runscanner.dto.ProgressiveResponseDto;
 import ca.on.oicr.gsi.runscanner.scanner.Scheduler.OutputSizeLimit;
+import io.swagger.annotations.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
@@ -15,17 +16,15 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
+import springfox.documentation.spring.web.json.Json;
 
 /** Provide information about the run scanner's current run cache via a REST interface. */
-@Controller
-public class RestController {
-  private static final Logger log = LoggerFactory.getLogger(RestController.class);
+@RestController
+@RequestMapping(produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+@Api(tags = {"Runs"})
+public class RestResponseController {
+  private static final Logger log = LoggerFactory.getLogger(RestResponseController.class);
   private static final LatencyHistogram progressiveLatency =
       new LatencyHistogram(
           "miso_runscanner_progressive_latency",
@@ -41,10 +40,17 @@ public class RestController {
    * Given a known run name. If no run is found, null is returned. If there are multiple runs with
    * the same name that are from different sequencers, one is randomly selected.
    */
-  @GetMapping(
-      value = "/run/{name}",
-      produces = {"application/json"})
-  public ResponseEntity<NotificationDto> getByName(@PathVariable("name") String id) {
+  @GetMapping("/run/{name}")
+  @ApiOperation(
+      value = "Get run by name",
+      response = ca.on.oicr.gsi.runscanner.dto.NotificationDto.class,
+      responseContainer = "ResponseEntity")
+  @ApiResponses({
+    @ApiResponse(code = 200, message = "Success"),
+    @ApiResponse(code = 404, message = "Run not found")
+  })
+  public ResponseEntity<NotificationDto> getByName(
+      @PathVariable("name") @ApiParam(value = "Run name") String id) {
     return scheduler
         .finished()
         .filter(dto -> dto.getRunAlias().equals(id))
@@ -57,18 +63,28 @@ public class RestController {
    * Given a known run name. get its metrics. If no run is found, null is returned. If there are
    * multiple runs with the same name that are from different sequencers, one is randomly selected.
    */
-  @GetMapping(value = "/run/{name}/metrics")
-  public HttpEntity<byte[]> getMetricsByName(@PathVariable("name") String id) {
-    return ResponseEntity.ok()
-        .contentType(MediaType.APPLICATION_JSON_UTF8)
-        .body(
-            scheduler
-                .finished()
-                .filter(dto -> dto.getRunAlias().equals(id))
-                .findAny()
-                .map(NotificationDto::getMetrics)
-                .orElse("[]")
-                .getBytes(StandardCharsets.UTF_8));
+  @GetMapping("/run/{name}/metrics")
+  @ApiOperation(
+      value = "Get metrics by run name",
+      response = Json[].class,
+      responseContainer = "HttpEntity")
+  @ApiResponses({
+    @ApiResponse(code = 200, message = "Success"),
+    @ApiResponse(code = 404, message = "Run not found")
+  })
+  public HttpEntity<byte[]> getMetricsByName(
+      @PathVariable("name") @ApiParam(value = "Run name") String id) {
+    byte[] response =
+        scheduler
+            .finished()
+            .filter(dto -> dto.getRunAlias().equals(id))
+            .findAny()
+            .map(NotificationDto::getMetrics)
+            .orElse(null)
+            .getBytes(StandardCharsets.UTF_8);
+    return (response == null
+        ? ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON_UTF8).body(response)
+        : ResponseEntity.notFound().build());
   }
 
   /**
@@ -76,9 +92,11 @@ public class RestController {
    *
    * <p>Runs are not guaranteed to have unique names.
    */
-  @GetMapping(
-      value = "/runs/all",
-      produces = {"application/json"})
+  @GetMapping("/runs/all")
+  @ApiOperation(
+      value = "Get all runs",
+      response = ca.on.oicr.gsi.runscanner.dto.NotificationDto.class,
+      responseContainer = "List")
   @ResponseBody
   public List<NotificationDto> list() {
     return scheduler.finished().collect(Collectors.toList());
@@ -102,11 +120,14 @@ public class RestController {
    * @param request
    * @return
    */
-  @PostMapping(
-      value = "/runs/progressive",
-      produces = {"application/json"})
+  @PostMapping("/runs/progressive")
+  @ApiOperation(
+      value = "Progressive scan of runs",
+      response = ca.on.oicr.gsi.runscanner.dto.ProgressiveResponseDto.class)
   @ResponseBody
-  public ProgressiveResponseDto progressive(@RequestBody ProgressiveRequestDto request) {
+  public ProgressiveResponseDto progressive(
+      @ApiParam(value = "ProgressiveRequestDto object containing request options") @RequestBody
+          ProgressiveRequestDto request) {
     ProgressiveResponseDto response = new ProgressiveResponseDto();
     response.setToken(token);
     int requestedEpoch = request.getToken() == token ? request.getEpoch() : 0;
