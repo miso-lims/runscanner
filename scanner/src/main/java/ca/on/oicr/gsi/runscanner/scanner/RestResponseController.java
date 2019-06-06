@@ -17,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.spring.web.json.Json;
 
 /** Provide information about the run scanner's current run cache via a REST interface. */
 @RestController
@@ -65,7 +66,7 @@ public class RestResponseController {
   @GetMapping("/run/{name}/metrics")
   @ApiOperation(
       value = "Get metrics by run name",
-      response = byte[].class,
+      response = Json[].class,
       responseContainer = "HttpEntity")
   @ApiResponses({@ApiResponse(code = 200, message = "Success")})
   public HttpEntity<byte[]> getMetricsByName(
