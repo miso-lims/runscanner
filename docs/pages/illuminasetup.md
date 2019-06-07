@@ -1,7 +1,7 @@
 ---
 layout: default
 title: "Illumina Setup"
-order: 1.5
+order: 2
 categories: ["User Manual"]
 ---
 

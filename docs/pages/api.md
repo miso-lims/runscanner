@@ -2,7 +2,7 @@
 layout: default
 title: API Documentation Page
 categories: ['User Manual']
-order: 7.5
+order: 8
 ---
 
 The API Documentation Page of Run Scanner can be accessed by clicking the 'API Docs' link on the header bar of the Run Scanner interface. This page provides an interactive description of the REST API provided by Run Scanner for retrieving information about runs.

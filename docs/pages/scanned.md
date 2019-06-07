@@ -2,7 +2,7 @@
 layout: default
 title: Scanned Page
 categories: ['User Manual']
-order: 3
+order: 4
 ---
 <!-- TODO: image -->
 The Scanned page of Run Scanner can be accessed by clicking the 'Scanned' 
