@@ -2,7 +2,7 @@
 layout: default
 title: Processing Page
 categories: ['User Manual']
-order: 5
+order: 6
 ---
 <!-- TODO: image -->
 The Processing page of Run Scanner can be accessed by clicking the 

@@ -2,7 +2,7 @@
 layout: default
 title: Scheduled Page
 categories: ['User Manual']
-order: 4
+order: 5
 ---
 <!-- TODO: image -->
 The Scheduled page of Run Scanner can be accessed by clicking the 'Scheduled'

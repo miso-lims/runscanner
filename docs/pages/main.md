@@ -2,7 +2,7 @@
 layout: default
 title: Main Page
 categories: ['User Manual']
-order: 2
+order: 3
 ---
 
 <!-- TODO: Add image without any identifiable info in it -->

@@ -2,7 +2,7 @@
 layout: default
 title: Monitoring with Prometheus
 categories: ['User Manual']
-order: 7.5
+order: 9
 ---
 Run Scanner was built to be monitored by [Prometheus](https://prometheus.io/).
 Add Run Scanner as a target of your Prometheus server.

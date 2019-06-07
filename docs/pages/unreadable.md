@@ -2,7 +2,7 @@
 layout: default
 title: Unreadable Page
 categories: ['User Manual']
-order: 6
+order: 7
 ---
 
 <!-- Update this as you update what the Unreadables page looks like -->
