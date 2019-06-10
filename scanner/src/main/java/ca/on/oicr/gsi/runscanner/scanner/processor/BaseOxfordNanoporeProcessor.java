@@ -60,6 +60,12 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
             @Override
             public FileVisitResult preVisitDirectory(
                 Path path, BasicFileAttributes basicFileAttributes) throws IOException {
+              log.debug("Pre-visit: " + path);
+              if (path.toFile().isFile()) {
+                log.debug("Continuing at " + path + " because that's a file");
+                return FileVisitResult.CONTINUE;
+              }
+
               if (excludedDirectoryFormat(path)) {
                 log.debug("Skipping " + path + " because we found an excluded directory in it.");
                 return FileVisitResult.SKIP_SUBTREE;
