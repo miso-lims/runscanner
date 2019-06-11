@@ -61,10 +61,6 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
             public FileVisitResult preVisitDirectory(
                 Path path, BasicFileAttributes basicFileAttributes) throws IOException {
               log.debug("Pre-visit: " + path);
-              if (path.toFile().isFile()) {
-                log.debug("Continuing at " + path + " because that's a file");
-                return FileVisitResult.CONTINUE;
-              }
 
               if (excludedDirectoryFormat(path)) {
                 log.debug("Skipping " + path + " because we found an excluded directory in it.");
@@ -159,6 +155,8 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
 
       Path p = runDirectory.toPath();
       // nameCount - 1 is the position of the name furthest from the root
+      // TODO: Lars would like the run alias to be 3 directory levels, not just one, eg
+      // 190228_MMinden/161305_run3/20190228_1936_2-A11-D11_PAD12654_b4798e0e
       onnd.setRunAlias(p.getName(p.getNameCount() - 1).toString());
 
       onnd.setSequencerFolderPath(runDirectory.toString());
