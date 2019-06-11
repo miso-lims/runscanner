@@ -120,6 +120,8 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
    * Unlike the other process() implementations, this one is 'synchronized'. This is because JHDF5
    * is *NOT THREADSAFE* and will start using read names from other files if not controlled
    *
+   * <p>TODO: This doesn't work right for MinION reads
+   *
    * @param runDirectory the directory to scan (which will be output from {@link
    *     #getRunsFromRoot(File)}
    * @param tz the user-specified timezone that the sequencer exists in

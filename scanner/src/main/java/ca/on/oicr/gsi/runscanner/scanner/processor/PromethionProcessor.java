@@ -24,26 +24,12 @@ public class PromethionProcessor extends BaseOxfordNanoporeProcessor {
 
   @Override
   protected Stream<Path> readsDirectoryForRun(Path path) {
-    log.debug(
-        "Going to visit the following: "
-            + path.resolve("fast5_pass")
-            + ", "
-            + path.resolve("fastq_pass")
-            + ", "
-            + path.resolve("fast5_fail")
-            + ", "
-            + path.resolve("fastq_fail")
-            + ", "
-            + path.resolve("fast5_skip")
-            + ", "
-            + path.resolve("sequencing_summary"));
     return Stream.of(
         path.resolve("fast5_pass"),
         path.resolve("fastq_pass"),
         path.resolve("fast5_fail"),
         path.resolve("fastq_fail"),
-        path.resolve("fast5_skip"),
-        path.resolve("sequencing_summary"));
+        path.resolve("fast5_skip"));
   }
 
   @Override

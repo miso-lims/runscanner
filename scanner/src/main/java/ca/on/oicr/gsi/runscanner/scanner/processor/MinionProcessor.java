@@ -9,12 +9,15 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 public class MinionProcessor extends BaseOxfordNanoporeProcessor {
+  // TODO: This is too strict. Some of these are good.
   private static final Pattern READS_DIR = Pattern.compile("/reads$");
   private static final Pattern PASS_DIR = Pattern.compile("/pass$");
   private static final Pattern FAIL_DIR = Pattern.compile("/fail$");
   private static final Pattern TMP_DIR = Pattern.compile("/tmp$");
   private static final Pattern ENDS_WITH_NUM = Pattern.compile("/[0-9]+$");
   private static final Pattern FAST5_DIR = Pattern.compile("/fast5/[0-9]+$");
+  private static final Pattern COMPLETE_READ = Pattern.compile("complete_read");
+  private static final Pattern RAW_DATA = Pattern.compile("raw_data");
 
   public MinionProcessor(Builder builder, String seqName) {
     super(builder, seqName);
