@@ -21,7 +21,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
-  private static final Logger log = LoggerFactory.getLogger(BaseOxfordNanoporeProcessor.class);
+  private final Logger log = LoggerFactory.getLogger(BaseOxfordNanoporeProcessor.class);
+  private final Logger mysteryFiles = LoggerFactory.getLogger("mysteryLogger");
 
   protected static String trackingId;
   protected static String contextTags;
@@ -77,7 +78,11 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
             @Override
             public FileVisitResult visitFile(Path path, BasicFileAttributes basicFileAttributes)
                 throws IOException {
-              log.debug("Visiting " + path + " and moving on");
+              if (isFileFast5(path)) {
+                runDirectories.add(path.subpath(0, path.getNameCount() - 1).toFile());
+                return FileVisitResult.SKIP_SIBLINGS;
+              }
+              mysteryFiles.debug(path.toString());
               return FileVisitResult.CONTINUE;
             }
 
