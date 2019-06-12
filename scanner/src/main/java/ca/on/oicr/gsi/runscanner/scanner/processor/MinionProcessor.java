@@ -9,7 +9,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 public class MinionProcessor extends BaseOxfordNanoporeProcessor {
-  // TODO: This is too strict. Some of these are good.
   private static final Pattern FAIL_DIR = Pattern.compile("/fail$");
   private static final Pattern TMP_DIR = Pattern.compile("/tmp$");
   private static final Pattern COMPLETE_READ = Pattern.compile("complete_read");

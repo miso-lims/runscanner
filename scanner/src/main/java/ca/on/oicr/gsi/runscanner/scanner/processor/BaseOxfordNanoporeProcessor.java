@@ -141,7 +141,7 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
             .filter(Files::isDirectory)
             .flatMap(
                 p -> {
-                  try (Stream<Path> files = Files.list(p)) {
+                  try (Stream<Path> files = Files.walk(p)) {
                     return files
                         .filter(BaseOxfordNanoporeProcessor::isFileFast5)
                         .map(Path::toFile)
@@ -169,7 +169,7 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
               ? "UniqueGlobalKey"
               : genericReader.object().getAllGroupMembers("/").get(0);
 
-      log.debug("Randomly selected read " + read_name + "from " + firstFile);
+      log.debug("Selected read name " + read_name + " from " + firstFile);
 
       Path p = runDirectory.toPath();
       // nameCount - 1 is the position of the name furthest from the root
