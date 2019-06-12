@@ -4,7 +4,6 @@ import ca.on.oicr.gsi.runscanner.dto.OxfordNanoporeNotificationDto;
 import ch.systemsx.cisd.hdf5.IHDF5Reader;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -40,9 +39,8 @@ public class MinionProcessor extends BaseOxfordNanoporeProcessor {
         path.resolve("fastq_fail"),
         path.resolve("fast5_skip"),
         path.resolve("sequencing_summary"),
-        path.resolve(Paths.get("fast5", "0")),
-        path.resolve(Paths.get("fast5", "pass", "0")),
-        path.resolve(Paths.get("0")));
+        path.resolve("fast5"),
+        path.resolve("0"));
   }
 
   @Override

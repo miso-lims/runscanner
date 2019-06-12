@@ -4,7 +4,6 @@ import ca.on.oicr.gsi.runscanner.dto.OxfordNanoporeNotificationDto;
 import ch.systemsx.cisd.hdf5.IHDF5Reader;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import org.slf4j.Logger;
@@ -32,7 +31,7 @@ public class PromethionProcessor extends BaseOxfordNanoporeProcessor {
         path.resolve("fastq_fail"),
         path.resolve("fast5_skip"),
         path.resolve("fast5"),
-        path.resolve(Paths.get("reads", "0")));
+        path.resolve("reads"));
   }
 
   @Override

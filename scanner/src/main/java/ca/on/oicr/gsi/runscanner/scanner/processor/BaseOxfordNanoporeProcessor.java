@@ -144,8 +144,8 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
                   try (Stream<Path> files = Files.walk(p)) {
                     return files
                         .filter(BaseOxfordNanoporeProcessor::isFileFast5)
-                        .map(Path::toFile)
                         .findFirst()
+                        .map(Path::toFile)
                         .map(Stream::of)
                         .orElseGet(Stream::empty);
                   } catch (IOException e) {
@@ -161,6 +161,7 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
     OxfordNanoporeNotificationDto onnd = new OxfordNanoporeNotificationDto();
     try (IHDF5Reader genericReader = HDF5FactoryProvider.get().openForReading(firstFile)) {
 
+      // Unless we have UniqueGlobalKey,
       // Get the name of a read so we can access the metadata. getAllGroupMembers() doesn't return
       // names in any
       // particular order so this is arbitrary.
@@ -173,8 +174,6 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
 
       Path p = runDirectory.toPath();
       // nameCount - 1 is the position of the name furthest from the root
-      // TODO: Lars would like the run alias to be 3 directory levels, not just one, eg
-      // 190228_MMinden/161305_run3/20190228_1936_2-A11-D11_PAD12654_b4798e0e
       onnd.setRunAlias(p.getName(p.getNameCount() - 1).toString());
 
       onnd.setSequencerFolderPath(runDirectory.toString());
