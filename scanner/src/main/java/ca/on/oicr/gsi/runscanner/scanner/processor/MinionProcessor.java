@@ -26,11 +26,9 @@ public class MinionProcessor extends BaseOxfordNanoporeProcessor {
   @Override
   protected boolean excludedDirectoryFormat(Path path) {
     String strPath = path.toString();
-    return READS_DIR.matcher(strPath).find()
-        || PASS_DIR.matcher(strPath).find()
-        || FAIL_DIR.matcher(strPath).find()
+    return COMPLETE_READ.matcher(strPath).find()
         || TMP_DIR.matcher(strPath).find()
-        || (!FAST5_DIR.matcher(strPath).find() && ENDS_WITH_NUM.matcher(strPath).find());
+        || RAW_DATA.matcher(strPath).find();
   }
 
   @Override
