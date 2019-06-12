@@ -10,14 +10,12 @@ import java.util.stream.Stream;
 
 public class MinionProcessor extends BaseOxfordNanoporeProcessor {
   // TODO: This is too strict. Some of these are good.
-  private static final Pattern READS_DIR = Pattern.compile("/reads$");
-  private static final Pattern PASS_DIR = Pattern.compile("/pass$");
   private static final Pattern FAIL_DIR = Pattern.compile("/fail$");
   private static final Pattern TMP_DIR = Pattern.compile("/tmp$");
-  private static final Pattern ENDS_WITH_NUM = Pattern.compile("/[0-9]+$");
-  private static final Pattern FAST5_DIR = Pattern.compile("/fast5/[0-9]+$");
   private static final Pattern COMPLETE_READ = Pattern.compile("complete_read");
   private static final Pattern RAW_DATA = Pattern.compile("raw_data");
+  private static final Pattern DOWNLOADS = Pattern.compile("/downloads$");
+  private static final Pattern UPLOAD = Pattern.compile("/upload");
 
   public MinionProcessor(Builder builder, String seqName) {
     super(builder, seqName);
@@ -28,7 +26,10 @@ public class MinionProcessor extends BaseOxfordNanoporeProcessor {
     String strPath = path.toString();
     return COMPLETE_READ.matcher(strPath).find()
         || TMP_DIR.matcher(strPath).find()
-        || RAW_DATA.matcher(strPath).find();
+        || RAW_DATA.matcher(strPath).find()
+        || DOWNLOADS.matcher(strPath).find()
+        || UPLOAD.matcher(strPath).find()
+        || FAIL_DIR.matcher(strPath).find();
   }
 
   @Override
@@ -40,7 +41,9 @@ public class MinionProcessor extends BaseOxfordNanoporeProcessor {
         path.resolve("fastq_fail"),
         path.resolve("fast5_skip"),
         path.resolve("sequencing_summary"),
-        path.resolve(Paths.get("fast5", "0")));
+        path.resolve(Paths.get("fast5", "0")),
+        path.resolve(Paths.get("fast5", "pass", "0")),
+        path.resolve(Paths.get("0")));
   }
 
   @Override

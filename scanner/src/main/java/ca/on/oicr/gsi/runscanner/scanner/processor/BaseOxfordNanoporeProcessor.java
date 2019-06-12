@@ -14,6 +14,7 @@ import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.stream.Stream;
@@ -80,10 +81,18 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
                 throws IOException {
               if (isFileFast5(path)) {
                 runDirectories.add(path.subpath(0, path.getNameCount() - 1).toFile());
-                return FileVisitResult.SKIP_SIBLINGS;
+              } else {
+                mysteryFiles.debug(path.toString());
+                if (Arrays.asList(path.getParent().toFile().listFiles())
+                        .stream()
+                        .filter(File::isDirectory)
+                        .count()
+                    > 0) {
+                  return FileVisitResult.CONTINUE;
+                }
               }
-              mysteryFiles.debug(path.toString());
-              return FileVisitResult.CONTINUE;
+
+              return FileVisitResult.SKIP_SIBLINGS;
             }
 
             @Override
@@ -120,8 +129,6 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
    * Unlike the other process() implementations, this one is 'synchronized'. This is because JHDF5
    * is *NOT THREADSAFE* and will start using read names from other files if not controlled
    *
-   * <p>TODO: This doesn't work right for MinION reads
-   *
    * @param runDirectory the directory to scan (which will be output from {@link
    *     #getRunsFromRoot(File)}
    * @param tz the user-specified timezone that the sequencer exists in
@@ -157,7 +164,11 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
       // Get the name of a read so we can access the metadata. getAllGroupMembers() doesn't return
       // names in any
       // particular order so this is arbitrary.
-      String read_name = genericReader.object().getAllGroupMembers("/").get(0);
+      String read_name =
+          genericReader.object().exists("/UniqueGlobalKey")
+              ? "UniqueGlobalKey"
+              : genericReader.object().getAllGroupMembers("/").get(0);
+
       log.debug("Randomly selected read " + read_name + "from " + firstFile);
 
       Path p = runDirectory.toPath();
