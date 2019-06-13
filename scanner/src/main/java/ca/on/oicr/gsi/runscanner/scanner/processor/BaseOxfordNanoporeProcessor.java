@@ -87,9 +87,12 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
               }
 
               /**
-               * If directory matches criteria we know include the directory, add without looking
-               * inside directory (add, SKIP_SUBTREE). Checking if result of readsDirectoryForRun
-               * 'isDirectory' is an existence check.
+               * readsDirectoryForRun returns a Stream of paths which may potentially exist, and
+               * which we know would be valid reads directories. If any of the paths returned by
+               * readsDirectoryForRun exist, add path to runDirectories, then do not visit the files
+               * within the directory (SKIP_SUBTREE). anyMatch(Files::isDirectory) is used to check
+               * for the existence of one or more of the directories returned by
+               * readsDirectoryForRun.
                */
               if (readsDirectoryForRun(path).anyMatch(Files::isDirectory)) {
                 log.debug("Adding " + path);
