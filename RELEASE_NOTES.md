@@ -1,3 +1,10 @@
+# Unreleased
+
+Changes:
+
+  * Added support for MinION output
+  * Add runscanner-mystery-files.log 
+
 # 1.5.0
 
 Changes:
