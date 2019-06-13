@@ -244,15 +244,11 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
    * @param path path leading to file to test
    * @return true if file is older than Jan 1 2017 OR IOException occurs, false otherwise
    */
-  protected boolean olderThanCutoff(Path path) {
-    try {
-      return Files.readAttributes(path, BasicFileAttributes.class)
-              .creationTime()
-              .compareTo(CUTOFF_DATE)
-          <= 0;
-    } catch (IOException e) {
-      return true;
-    }
+  protected boolean olderThanCutoff(Path path) throws IOException {
+    return Files.readAttributes(path, BasicFileAttributes.class)
+            .creationTime()
+            .compareTo(CUTOFF_DATE)
+        <= 0;
   }
 
   protected abstract void additionalProcess(OxfordNanoporeNotificationDto nnd, IHDF5Reader reader);
