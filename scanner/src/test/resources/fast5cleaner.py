@@ -16,7 +16,10 @@ oldFile = h5py.File(sys.argv[1], 'r')
 newFile = h5py.File(sys.argv[1].replace(".fast5", "_clean.fast5"), 'a')
 
 # Select the first read Group in the specified file 
-readToKeep = oldFile[oldFile.keys()[0]]
+if "UniqueGlobalKey" in oldFile.keys():
+    readToKeep = oldFile["UniqueGlobalKey"]
+else:
+    readToKeep = oldFile[oldFile.keys()[0]]
 
 # Create a single group in the new file under the read's name
 theGroup = newFile.create_group(readToKeep.name)
