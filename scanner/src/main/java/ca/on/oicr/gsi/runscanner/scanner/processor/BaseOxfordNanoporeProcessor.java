@@ -16,7 +16,6 @@ import java.nio.file.attribute.FileTime;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.stream.Stream;
@@ -99,8 +98,7 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
               }
 
               // If directory has directories or fast5s in, keep going through directory (CONTINUE)
-              if (Arrays.asList(path.toFile().listFiles())
-                      .stream()
+              if (Stream.of(path.toFile().listFiles())
                       .filter(f -> f.isDirectory() || isFileFast5(f))
                       .count()
                   > 0) {
