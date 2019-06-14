@@ -1,0 +1,25 @@
+{
+  "completionDate": null,
+  "containerModel": "sqk-rna001",
+  "containerSerialNumber": "FAH20303",
+  "healthType": "UNKNOWN",
+  "laneCount": 1,
+  "metrics": null,
+  "pairedEndRun": false,
+  "platform": "OxfordNanopore",
+  "protocolVersion": "1.7.14",
+  "runAlias": "20171007_1310_NA12878_NHT_DirectRNA_Run1",
+  "runType": "mux_scan",
+  "sequencerFolderPath": null,
+  "sequencerName": "unittest",
+  "sequencerPosition": null,
+  "software": null,
+  "startDate": [
+    2017,
+    10,
+    7,
+    13,
+    10,
+    23
+  ]
+}

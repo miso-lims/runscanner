@@ -1,24 +1,28 @@
-import static org.junit.Assert.fail;
-
 import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.OxfordNanoporeNotificationDto;
+import ca.on.oicr.gsi.runscanner.dto.type.Platform;
+import ca.on.oicr.gsi.runscanner.scanner.processor.MinionProcessor;
+import ca.on.oicr.gsi.runscanner.scanner.processor.RunProcessor;
 import java.io.File;
 import java.io.IOException;
-import org.junit.Ignore;
+import java.util.TimeZone;
 
-@Ignore
 public class MinionProcessorTest extends AbstractProcessorTest {
+  private final MinionProcessor instance =
+      new MinionProcessor(
+          new RunProcessor.Builder(Platform.OXFORDNANOPORE, "minion", null), "unittest");
+
   public MinionProcessorTest() {
     super(OxfordNanoporeNotificationDto.class);
   }
 
   @Override
   protected NotificationDto process(File directory) throws IOException {
-    return null;
+    return instance.process(directory, TimeZone.getTimeZone("America/Toronto"));
   }
 
   @Override
   public void testGoldens() throws IOException {
-    fail("Test not yet implemented.");
+    checkDirectory("/oxfordnanopore/minion");
   }
 }

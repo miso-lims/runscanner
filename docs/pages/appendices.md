@@ -304,5 +304,7 @@ unsupported.
 #### Oxford Nanopore
 
 * **PromethION** - as of PromethION Release 19.01.1
-* _MinION - as of MinION Release 18.12_
-<!-- TODO: make minion bold when the RunProcessor for that is done -->
+* **MinION** - as of MinION Release 18.12
+
+**Note for Oxford Nanopore Sequencers**: all sequencing output created before 
+January 1 2017 is automatically skipped.

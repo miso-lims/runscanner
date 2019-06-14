@@ -1,0 +1,25 @@
+{
+  "completionDate": null,
+  "containerModel": "sqk-rna001",
+  "containerSerialNumber": "FAH59437",
+  "healthType": "UNKNOWN",
+  "laneCount": 1,
+  "metrics": null,
+  "pairedEndRun": false,
+  "platform": "OxfordNanopore",
+  "protocolVersion": "1.10.23",
+  "runAlias": "20180224_1412_Minden_191224_dRNA_run1",
+  "runType": "sequencing_run",
+  "sequencerFolderPath": null,
+  "sequencerName": "unittest",
+  "sequencerPosition": null,
+  "software": null,
+  "startDate": [
+    2018,
+    2,
+    24,
+    14,
+    12,
+    47
+  ]
+}
