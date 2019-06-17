@@ -3,7 +3,8 @@
 Changes:
 
   * Added support for MinION output
-  * Add runscanner-mystery-files.log 
+  * Add runscanner-mystery-files.log
+  * Oxford Nanopore runs now contain all directory names between user-specified directory and fast5 location in run alias 
 
 # 1.5.0
 

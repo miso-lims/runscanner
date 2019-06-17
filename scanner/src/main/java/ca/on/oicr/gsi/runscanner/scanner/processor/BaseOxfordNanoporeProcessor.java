@@ -29,6 +29,8 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
   /** Used for reporting non-fast5 files encountered while looking for fast5s */
   private final Logger mysteryFiles = LoggerFactory.getLogger("mysteryLogger");
 
+  private Path rootPath;
+
   protected static String trackingId;
   protected static String contextTags;
   protected final String SEQUENCER_NAME;
@@ -62,6 +64,7 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
 
   @Override
   public Stream<File> getRunsFromRoot(File root) {
+    rootPath = root.toPath();
     final List<File> runDirectories = new ArrayList<>();
     try {
       Files.walkFileTree(
@@ -211,8 +214,8 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
       log.debug("Selected read name " + read_name + " from " + firstFile);
 
       Path p = runDirectory.toPath();
-      // nameCount - 1 is the position of the name furthest from the root
-      onnd.setRunAlias(p.getName(p.getNameCount() - 1).toString());
+      onnd.setRunAlias(
+          p.subpath(rootPath.getNameCount(), p.getNameCount()).toString().replaceAll("/", "_"));
 
       onnd.setSequencerFolderPath(runDirectory.toString());
       onnd.setSequencerName(SEQUENCER_NAME);
@@ -253,4 +256,8 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
   }
 
   protected abstract void additionalProcess(OxfordNanoporeNotificationDto nnd, IHDF5Reader reader);
+
+  public void setRootPath(Path newPath) {
+    rootPath = newPath;
+  }
 }

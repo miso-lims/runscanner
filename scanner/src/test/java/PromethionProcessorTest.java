@@ -17,6 +17,7 @@ public class PromethionProcessorTest extends AbstractProcessorTest {
 
   @Override
   protected NotificationDto process(File directory) throws IOException {
+    instance.setRootPath(directory.toPath().getParent());
     return instance.process(directory, TimeZone.getTimeZone("America/Toronto"));
   }
 
