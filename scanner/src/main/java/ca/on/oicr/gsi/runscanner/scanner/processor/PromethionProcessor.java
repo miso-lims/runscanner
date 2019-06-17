@@ -4,17 +4,11 @@ import ca.on.oicr.gsi.runscanner.dto.OxfordNanoporeNotificationDto;
 import ch.systemsx.cisd.hdf5.IHDF5Reader;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.nio.file.Path;
-import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class PromethionProcessor extends BaseOxfordNanoporeProcessor {
-  /**
-   * Used for filtering out directories named after sequencer positions, a hallmark of the old
-   * directory format which we need to ignore for performance.
-   */
-  private static final Pattern POSITION = Pattern.compile("/[0-9]-[A-Z][0-9]+-[A-Z][0-9]+");
 
   private static final Logger log = LoggerFactory.getLogger(PromethionProcessor.class);
 
@@ -36,7 +30,7 @@ public class PromethionProcessor extends BaseOxfordNanoporeProcessor {
 
   @Override
   protected boolean excludedDirectoryFormat(Path path) {
-    return POSITION.matcher(path.toString()).find();
+    return false;
   }
 
   @Override
