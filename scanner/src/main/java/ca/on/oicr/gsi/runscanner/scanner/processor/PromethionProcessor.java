@@ -36,7 +36,7 @@ public class PromethionProcessor extends BaseOxfordNanoporeProcessor {
 
   @Override
   protected boolean excludedDirectoryFormat(Path path) {
-    return POSITION.matcher(path.toString()).find();
+    return false;
   }
 
   @Override
