@@ -214,7 +214,8 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
       log.debug("Selected read name " + read_name + " from " + firstFile);
 
       Path p = runDirectory.toPath();
-      onnd.setRunAlias(p.subpath(rootPath.getNameCount(), p.getNameCount()).toString());
+      onnd.setRunAlias(
+          p.subpath(rootPath.getNameCount(), p.getNameCount()).toString().replaceAll("/", "_"));
 
       onnd.setSequencerFolderPath(runDirectory.toString());
       onnd.setSequencerName(SEQUENCER_NAME);
