@@ -5,12 +5,8 @@ import ch.systemsx.cisd.hdf5.IHDF5Reader;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.nio.file.Path;
 import java.util.stream.Stream;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class PromethionProcessor extends BaseOxfordNanoporeProcessor {
-
-  private static final Logger log = LoggerFactory.getLogger(PromethionProcessor.class);
 
   public PromethionProcessor(Builder builder, String seqName) {
     super(builder, seqName);
