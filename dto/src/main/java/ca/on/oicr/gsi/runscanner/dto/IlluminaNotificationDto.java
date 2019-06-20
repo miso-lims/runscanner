@@ -4,6 +4,7 @@ import ca.on.oicr.gsi.runscanner.dto.type.IlluminaChemistry;
 import ca.on.oicr.gsi.runscanner.dto.type.Platform;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 public class IlluminaNotificationDto extends NotificationDto {
@@ -27,27 +28,19 @@ public class IlluminaNotificationDto extends NotificationDto {
     if (!super.equals(obj)) return false;
     if (getClass() != obj.getClass()) return false;
     IlluminaNotificationDto other = (IlluminaNotificationDto) obj;
-    if (runBasesMask == null) {
-      if (other.runBasesMask != null) return false;
-    } else if (!runBasesMask.equals(other.runBasesMask)) return false;
-    if (bclCount != other.bclCount) return false;
-    if (callCycle != other.callCycle) return false;
-    if (chemistry != other.chemistry) return false;
-    if (imgCycle != other.imgCycle) return false;
-    if (indexLengths == null) {
-      if (other.indexLengths != null) return false;
-    } else if (!indexLengths.equals(other.indexLengths)) return false;
-    if (numCycles != other.numCycles) return false;
-    if (numReads != other.numReads) return false;
-    if (poolNames == null) {
-      if (other.poolNames != null) return false;
-    } else if (!poolNames.equals(other.poolNames)) return false;
-    if (readLength != other.readLength) return false;
-    if (scoreCycle != other.scoreCycle) return false;
-    if (workflowType == null) {
-      if (other.workflowType != null) return false;
-    } else if (!workflowType.equals(other.workflowType)) return false;
-    return true;
+
+    return Objects.equals(this.runBasesMask, other.runBasesMask)
+        && Objects.equals(this.bclCount, other.bclCount)
+        && Objects.equals(this.callCycle, other.callCycle)
+        && Objects.equals(this.chemistry, other.chemistry)
+        && Objects.equals(this.imgCycle, other.imgCycle)
+        && Objects.equals(this.indexLengths, other.indexLengths)
+        && Objects.equals(this.numCycles, other.numCycles)
+        && Objects.equals(this.numReads, other.numReads)
+        && Objects.equals(this.poolNames, other.poolNames)
+        && Objects.equals(this.readLength, other.readLength)
+        && Objects.equals(this.scoreCycle, other.scoreCycle)
+        && Objects.equals(this.workflowType, other.workflowType);
   }
 
   public String getRunBasesMask() {
@@ -119,21 +112,19 @@ public class IlluminaNotificationDto extends NotificationDto {
 
   @Override
   public int hashCode() {
-    final int prime = 31;
-    int result = super.hashCode();
-    result = prime * result + ((runBasesMask == null) ? 0 : runBasesMask.hashCode());
-    result = prime * result + bclCount;
-    result = prime * result + callCycle;
-    result = prime * result + ((chemistry == null) ? 0 : chemistry.hashCode());
-    result = prime * result + imgCycle;
-    result = prime * result + ((indexLengths == null) ? 0 : indexLengths.hashCode());
-    result = prime * result + numCycles;
-    result = prime * result + numReads;
-    result = prime * result + ((poolNames == null) ? 0 : poolNames.hashCode());
-    result = prime * result + readLength;
-    result = prime * result + scoreCycle;
-    result = prime * result + ((workflowType == null) ? 0 : workflowType.hashCode());
-    return result;
+    return Objects.hash(
+        runBasesMask,
+        bclCount,
+        callCycle,
+        chemistry,
+        imgCycle,
+        indexLengths,
+        numCycles,
+        numReads,
+        poolNames,
+        readLength,
+        scoreCycle,
+        workflowType);
   }
 
   public void setRunBasesMask(String runBasesMask) {
