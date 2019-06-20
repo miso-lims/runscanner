@@ -43,4 +43,14 @@ public class OxfordNanoporeNotificationDto extends NotificationDto {
   public int hashCode() {
     return Objects.hash(runType, protocolVersion);
   }
+
+  @Override
+  public String toString() {
+    return super.toString()
+        + ", OxfordNanoporeNotificationDto [runType = "
+        + runType
+        + ", protocolVersion = "
+        + protocolVersion
+        + "]";
+  }
 }

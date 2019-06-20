@@ -7,7 +7,7 @@
   "metrics": null,
   "pairedEndRun": false,
   "platform": "OxfordNanopore",
-  "protocolVersion": "1.10.23",
+  "protocolVersion": null,
   "runAlias": "20180224_1412_Minden_191224_dRNA_run1",
   "runType": "sequencing_run",
   "sequencerFolderPath": null,

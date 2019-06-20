@@ -7,6 +7,7 @@
   "metrics": null,
   "pairedEndRun": false,
   "platform": "OxfordNanopore",
+  "protocolVersion": null,
   "runAlias": "20190221_2053_2-E3-H3_PAD10721_98c289ed",
   "runType": "sequencing_run",
   "sequencerFolderPath": null,
