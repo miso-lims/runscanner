@@ -47,28 +47,6 @@ public class PacBioNotificationDto extends NotificationDto {
 
   @Override
   public String toString() {
-    return "PacBioNotificationDto [poolNames="
-        + poolNames
-        + ", getRunAlias()="
-        + getRunAlias()
-        + ", getSequencerName()="
-        + getSequencerName()
-        + ", getContainerSerialNumber()="
-        + getContainerSerialNumber()
-        + ", getLaneCount()="
-        + getLaneCount()
-        + ", getHealthType()="
-        + getHealthType()
-        + ", getSequencerFolderPath()="
-        + getSequencerFolderPath()
-        + ", isPairedEndRun()="
-        + isPairedEndRun()
-        + ", getSoftware()="
-        + getSoftware()
-        + ", getStartDate()="
-        + getStartDate()
-        + ", getCompletionDate()="
-        + getCompletionDate()
-        + "]";
+    return super.toString() + ", PacBioNotificationDto [poolNames = " + poolNames + "]";
   }
 }
