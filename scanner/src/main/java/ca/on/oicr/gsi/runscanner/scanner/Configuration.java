@@ -47,9 +47,9 @@ public class Configuration {
       if (!path.isDirectory()) summary += "Path is not a directory! ";
       if (!path.canRead()) summary += "Path cannot be read! ";
       if (!path.canExecute()) summary += "Path cannot be executed! ";
-      if (processor == null) summary += "Processor is null! ";
-      if (timeZone == null) summary += "TimeZone is null!";
     }
+    if (processor == null) summary += "Processor is null! ";
+    if (timeZone == null) summary += "TimeZone is null!";
     return summary;
   }
 
