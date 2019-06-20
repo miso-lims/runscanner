@@ -18,6 +18,7 @@ import java.util.TimeZone;
  * Attempts to process run directories, provided on the command line, through getRunsFromRoot() and
  * display the results. This is for debugging purposes.
  */
+@SuppressWarnings("all")
 public final class FindRuns {
 
   public static void main(String[] args) throws IOException {

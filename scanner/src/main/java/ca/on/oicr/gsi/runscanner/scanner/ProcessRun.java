@@ -19,6 +19,7 @@ import java.util.TimeZone;
  * Attempts to process run directories, provided on the command line, through a particular processor
  * and display the results. This is for debugging purposes.
  */
+@SuppressWarnings("all")
 public final class ProcessRun {
 
   public static void main(String[] args) throws IOException {

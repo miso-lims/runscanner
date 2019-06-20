@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 /**
  * Parses a notification DTO stored in a file and outputs it to the console, for debugging purposes.
  */
+@SuppressWarnings("all")
 public class ParseNotificationJson {
 
   public static void main(String[] args) throws IOException {
