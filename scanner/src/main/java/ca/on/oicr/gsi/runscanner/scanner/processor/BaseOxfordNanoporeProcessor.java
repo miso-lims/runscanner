@@ -93,9 +93,8 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
                * readsDirectoryForRun returns a Stream of paths which may potentially exist, and
                * which we know would be valid reads directories. If any of the paths returned by
                * readsDirectoryForRun exist, add path to runDirectories, then do not visit the files
-               * within the directory (SKIP_SUBTREE). anyMatch(Files::isDirectory) is used to check
-               * for the existence of one or more of the directories returned by
-               * readsDirectoryForRun.
+               * within the directory (SKIP_SUBTREE). anyMatch(isDirectory) is used to check for the
+               * existence of one or more of the directories returned by readsDirectoryForRun.
                */
               if (readsDirectoryForRun(path).anyMatch(Files::isDirectory)) {
                 log.debug("Adding %s", path);
@@ -176,7 +175,7 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
   public synchronized NotificationDto process(File runDirectory, TimeZone tz) throws IOException {
     final File firstFile =
         readsDirectoryForRun(runDirectory.toPath())
-            .filter(Files::isDirectory)
+            .filter(p -> p.toFile().isDirectory())
             .flatMap(
                 p -> {
                   // Using walk() rather than list() prevents overlooking the case where /0 is empty
