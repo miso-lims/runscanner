@@ -78,14 +78,14 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
             @Override
             public FileVisitResult preVisitDirectory(
                 Path path, BasicFileAttributes basicFileAttributes) throws IOException {
-              log.debug("Pre-visit: " + path);
+              log.debug("Pre-visit: %s", path);
 
               /**
                * If directory matches criteria we know exclude the directory from consideration,
                * don't go into the directory (SKIP_SUBTREE)
                */
               if (excludedDirectoryFormat(path) || olderThanCutoff(path)) {
-                log.debug("Skipping " + path + " because we found an excluded directory in it.");
+                log.debug("Skipping %s because we found an excluded directory in it.", path);
                 return FileVisitResult.SKIP_SUBTREE;
               }
 
@@ -98,7 +98,7 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
                * readsDirectoryForRun.
                */
               if (readsDirectoryForRun(path).anyMatch(Files::isDirectory)) {
-                log.debug("Adding " + path);
+                log.debug("Adding %s", path);
                 runDirectories.add(path.toFile());
                 return FileVisitResult.SKIP_SUBTREE;
               }
@@ -135,14 +135,14 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
 
             @Override
             public FileVisitResult visitFileFailed(Path path, IOException e) throws IOException {
-              log.error("Failed to visit " + path);
+              log.error("Failed to visit %s", path);
               log.error(e.getMessage());
               return FileVisitResult.CONTINUE;
             }
 
             @Override
             public FileVisitResult postVisitDirectory(Path path, IOException e) throws IOException {
-              log.debug("Done visiting " + path);
+              log.debug("Done visiting %s", path);
               return FileVisitResult.CONTINUE;
             }
           });
@@ -198,7 +198,7 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
                 // This can be thrown in cases of extremely large numbers of fast5s. This is OK
                 () -> new IOException("Cannot find FAST5 file in run directory: " + runDirectory));
 
-    log.debug("For runDirectory = " + runDirectory + " we will be considering file: " + firstFile);
+    log.debug("For runDirectory = %s we will be considering file: %s", runDirectory, firstFile);
     OxfordNanoporeNotificationDto onnd = new OxfordNanoporeNotificationDto();
     try (IHDF5Reader genericReader = HDF5FactoryProvider.get().openForReading(firstFile)) {
 
@@ -211,7 +211,7 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
               ? "UniqueGlobalKey"
               : genericReader.object().getAllGroupMembers("/").get(0);
 
-      log.debug("Selected read name " + read_name + " from " + firstFile);
+      log.debug("Selected read name %s from %s", read_name, firstFile);
 
       Path p = runDirectory.toPath();
       onnd.setRunAlias(
