@@ -330,7 +330,7 @@ public class DefaultPacBio extends RunProcessor {
   /**
    * Parse a metadata XML file and put all the relevant data into the DTO.
    *
-   * @param metadataFile the path to the XML file
+   * @param metadata the path to the XML file
    * @param dto the DTO to update
    */
   private void processMetadata(Document metadata, PacBioNotificationDto dto) {
