@@ -22,7 +22,7 @@ public class Configuration {
     return processor;
   }
 
-  public Stream<? extends Pair<File, Configuration>> getRuns() {
+  public Stream<Pair<File, Configuration>> getRuns() {
     return processor.getRunsFromRoot(getPath()).map(directory -> new Pair<>(directory, this));
   }
 
