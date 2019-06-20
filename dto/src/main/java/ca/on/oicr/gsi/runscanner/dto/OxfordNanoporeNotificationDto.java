@@ -1,6 +1,7 @@
 package ca.on.oicr.gsi.runscanner.dto;
 
 import ca.on.oicr.gsi.runscanner.dto.type.Platform;
+import java.util.Objects;
 
 public class OxfordNanoporeNotificationDto extends NotificationDto {
   private String runType;
@@ -25,5 +26,21 @@ public class OxfordNanoporeNotificationDto extends NotificationDto {
 
   public void setProtocolVersion(String protocolVersion) {
     this.protocolVersion = protocolVersion;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) return true;
+    if (!super.equals(obj)) return false;
+    if (getClass() != obj.getClass()) return false;
+    OxfordNanoporeNotificationDto other = (OxfordNanoporeNotificationDto) obj;
+
+    return Objects.equals(this.runType, other.runType)
+        && Objects.equals(this.protocolVersion, other.protocolVersion);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(runType, protocolVersion);
   }
 }
