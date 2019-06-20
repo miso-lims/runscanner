@@ -1,10 +1,13 @@
-# Unreleased
+# 1.5.1
 
 Changes:
 
+  * Added user manual and API documentation
   * Added support for MinION output
   * Add runscanner-mystery-files.log
   * Oxford Nanopore runs now contain all directory names between user-specified directory and fast5 location in run alias 
+  * Fixed %\>Q30 column labels which were previously labelled as error rates, and added density units to Illumina metrics
+  * Removed the Instruments page
 
 # 1.5.0
 
