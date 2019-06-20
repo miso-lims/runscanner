@@ -4,7 +4,6 @@ import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.type.Platform;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.io.File;
 import java.io.IOException;
@@ -114,7 +113,7 @@ public abstract class RunProcessor {
   /** Creates a JSON mapper that is configured to handle the dates in {@link NotificationDto}. */
   public static ObjectMapper createObjectMapper() {
     ObjectMapper mapper = new ObjectMapper();
-    mapper.registerModule(new JavaTimeModule()).setDateFormat(new ISO8601DateFormat());
+    mapper.registerModule(new JavaTimeModule());
 
     return mapper;
   }
