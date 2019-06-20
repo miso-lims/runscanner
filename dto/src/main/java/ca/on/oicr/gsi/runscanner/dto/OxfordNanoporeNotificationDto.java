@@ -41,7 +41,7 @@ public class OxfordNanoporeNotificationDto extends NotificationDto {
 
   @Override
   public int hashCode() {
-    return Objects.hash(runType, protocolVersion);
+    return Objects.hash(super.hashCode(), runType, protocolVersion);
   }
 
   @Override

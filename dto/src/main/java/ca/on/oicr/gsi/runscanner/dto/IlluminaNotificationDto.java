@@ -113,6 +113,7 @@ public class IlluminaNotificationDto extends NotificationDto {
   @Override
   public int hashCode() {
     return Objects.hash(
+        super.hashCode(),
         runBasesMask,
         bclCount,
         callCycle,

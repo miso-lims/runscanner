@@ -2,6 +2,7 @@ package ca.on.oicr.gsi.runscanner.dto;
 
 import ca.on.oicr.gsi.runscanner.dto.type.Platform;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 public class PacBioNotificationDto extends NotificationDto {
@@ -14,10 +15,8 @@ public class PacBioNotificationDto extends NotificationDto {
     if (!super.equals(obj)) return false;
     if (getClass() != obj.getClass()) return false;
     PacBioNotificationDto other = (PacBioNotificationDto) obj;
-    if (poolNames == null) {
-      if (other.poolNames != null) return false;
-    } else if (!poolNames.equals(other.poolNames)) return false;
-    return true;
+
+    return Objects.equals(this.poolNames, other.poolNames);
   }
 
   @Override
@@ -39,10 +38,7 @@ public class PacBioNotificationDto extends NotificationDto {
 
   @Override
   public int hashCode() {
-    final int prime = 31;
-    int result = super.hashCode();
-    result = prime * result + ((poolNames == null) ? 0 : poolNames.hashCode());
-    return result;
+    return Objects.hash(super.hashCode(), poolNames);
   }
 
   public void setPoolNames(Map<String, String> poolNames) {
