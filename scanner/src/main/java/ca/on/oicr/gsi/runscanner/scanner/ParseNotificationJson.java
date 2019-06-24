@@ -12,8 +12,12 @@ import java.util.stream.Collectors;
 
 /**
  * Parses a notification DTO stored in a file and outputs it to the console, for debugging purposes.
+ *
+ * <p>Suppress warnings: "squid:S4823" warns whenever command line arguments are used. "squid:S106"
+ * warns whenever System.out or System.err is used (requests a logging engine is used instead).
+ * "squid:S1148" warns whenever Throwable.printStackTrace() is called.
  */
-@SuppressWarnings("all")
+@SuppressWarnings({"squid:S4823", "squid:S106", "squid:S1148"})
 public class ParseNotificationJson {
 
   public static void main(String[] args) throws IOException {
