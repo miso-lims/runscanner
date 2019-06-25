@@ -6,7 +6,6 @@ import ca.on.oicr.gsi.runscanner.scanner.processor.RunProcessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.io.File;
 import java.io.IOException;
@@ -18,7 +17,12 @@ import java.util.TimeZone;
 /**
  * Attempts to process run directories, provided on the command line, through a particular processor
  * and display the results. This is for debugging purposes.
+ *
+ * <p>Suppress warnings: "squid:S4823" warns whenever command line arguments are used. "squid:S106"
+ * warns whenever System.out or System.err is used (requests a logging engine is used instead).
+ * "squid:S1148" warns whenever Throwable.printStackTrace() is called.
  */
+@SuppressWarnings({"squid:S4823", "squid:S106", "squid:S1148"})
 public final class ProcessRun {
 
   public static void main(String[] args) throws IOException {
@@ -41,7 +45,7 @@ public final class ProcessRun {
       tz = TimeZone.getTimeZone(tzId);
     }
     ObjectMapper mapper = new ObjectMapper();
-    mapper.registerModule(new JavaTimeModule()).setDateFormat(new ISO8601DateFormat());
+    mapper.registerModule(new JavaTimeModule());
 
     Platform pt = Platform.valueOf(platformName);
     String name = System.getProperty("name", "default");

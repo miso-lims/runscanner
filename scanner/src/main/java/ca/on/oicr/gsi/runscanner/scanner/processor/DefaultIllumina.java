@@ -168,7 +168,7 @@ public final class DefaultIllumina extends RunProcessor {
         IntStream.rangeClosed(1, dto.getNumCycles()) //
             .mapToObj(cycle -> String.format("C%d.1", cycle)) //
             .map(laneDir::resolve) //
-            .filter(Files::exists) //
+            .filter(p -> p.toFile().exists()) //
             .allMatch(
                 cycleDir -> {
                   try (Stream<Path> cycleWalk = Files.walk(cycleDir, 1)) {

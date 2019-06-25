@@ -1,6 +1,7 @@
 import static org.junit.Assert.assertEquals;
 
 import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
+import ca.on.oicr.gsi.runscanner.dto.OxfordNanoporeNotificationDto;
 import ca.on.oicr.gsi.runscanner.scanner.processor.RunProcessor;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -28,6 +29,9 @@ public abstract class AbstractProcessorTest {
       result.setSequencerFolderPath(
           null); // We delete this because it is going to be different in each environment.
       result.setMetrics(null); // We delete these because changes in metrics are non-critical.
+      if (clazz.equals(OxfordNanoporeNotificationDto.class)) {
+        ((OxfordNanoporeNotificationDto) result).setProtocolVersion(null);
+      }
       assertEquals(reference, result);
     }
   }

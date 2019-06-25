@@ -22,7 +22,7 @@ public class Configuration {
     return processor;
   }
 
-  public Stream<? extends Pair<File, Configuration>> getRuns() {
+  public Stream<Pair<File, Configuration>> getRuns() {
     return processor.getRunsFromRoot(getPath()).map(directory -> new Pair<>(directory, this));
   }
 
@@ -41,13 +41,15 @@ public class Configuration {
 
   public String validitySummary() {
     String summary = "";
-    if (path == null) summary += "Path is null! ";
-    if (!path.isDirectory()) summary += "Path is not a directory! ";
-    if (!path.canRead()) summary += "Path cannot be read! ";
-    if (!path.canExecute()) summary += "Path cannot be executed! ";
+    if (path == null) {
+      summary += "Path is null! ";
+    } else {
+      if (!path.isDirectory()) summary += "Path is not a directory! ";
+      if (!path.canRead()) summary += "Path cannot be read! ";
+      if (!path.canExecute()) summary += "Path cannot be executed! ";
+    }
     if (processor == null) summary += "Processor is null! ";
     if (timeZone == null) summary += "TimeZone is null!";
-
     return summary;
   }
 

@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -236,22 +237,19 @@ public abstract class NotificationDto {
 
   @Override
   public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + ((completionDate == null) ? 0 : completionDate.hashCode());
-    result =
-        prime * result + ((containerSerialNumber == null) ? 0 : containerSerialNumber.hashCode());
-    result = prime * result + ((containerModel == null) ? 0 : containerModel.hashCode());
-    result = prime * result + ((healthType == null) ? 0 : healthType.hashCode());
-    result = prime * result + laneCount;
-    result = prime * result + ((metrics == null) ? 0 : metrics.hashCode());
-    result = prime * result + (pairedEndRun ? 1231 : 1237);
-    result = prime * result + ((runAlias == null) ? 0 : runAlias.hashCode());
-    result = prime * result + ((sequencerFolderPath == null) ? 0 : sequencerFolderPath.hashCode());
-    result = prime * result + ((sequencerName == null) ? 0 : sequencerName.hashCode());
-    result = prime * result + ((software == null) ? 0 : software.hashCode());
-    result = prime * result + ((startDate == null) ? 0 : startDate.hashCode());
-    return result;
+    return Objects.hash(
+        completionDate,
+        containerSerialNumber,
+        containerModel,
+        healthType,
+        laneCount,
+        metrics,
+        pairedEndRun,
+        runAlias,
+        sequencerFolderPath,
+        sequencerName,
+        software,
+        startDate);
   }
 
   @Override
@@ -260,37 +258,19 @@ public abstract class NotificationDto {
     if (obj == null) return false;
     if (getClass() != obj.getClass()) return false;
     NotificationDto other = (NotificationDto) obj;
-    if (completionDate == null) {
-      if (other.completionDate != null) return false;
-    } else if (!completionDate.equals(other.completionDate)) return false;
-    if (containerSerialNumber == null) {
-      if (other.containerSerialNumber != null) return false;
-    } else if (!containerSerialNumber.equals(other.containerSerialNumber)) return false;
-    if (containerModel == null) {
-      if (other.containerModel != null) return false;
-    } else if (!containerModel.equals(other.containerModel)) return false;
-    if (healthType != other.healthType) return false;
-    if (laneCount != other.laneCount) return false;
-    if (metrics == null) {
-      if (other.metrics != null) return false;
-    } else if (!metrics.equals(other.metrics)) return false;
-    if (pairedEndRun != other.pairedEndRun) return false;
-    if (runAlias == null) {
-      if (other.runAlias != null) return false;
-    } else if (!runAlias.equals(other.runAlias)) return false;
-    if (sequencerFolderPath == null) {
-      if (other.sequencerFolderPath != null) return false;
-    } else if (!sequencerFolderPath.equals(other.sequencerFolderPath)) return false;
-    if (sequencerName == null) {
-      if (other.sequencerName != null) return false;
-    } else if (!sequencerName.equals(other.sequencerName)) return false;
-    if (software == null) {
-      if (other.software != null) return false;
-    } else if (!software.equals(other.software)) return false;
-    if (startDate == null) {
-      if (other.startDate != null) return false;
-    } else if (!startDate.equals(other.startDate)) return false;
-    return true;
+
+    return Objects.equals(this.completionDate, other.completionDate)
+        && Objects.equals(this.containerSerialNumber, other.containerSerialNumber)
+        && Objects.equals(this.containerModel, other.containerModel)
+        && Objects.equals(this.healthType, other.healthType)
+        && Objects.equals(this.laneCount, other.laneCount)
+        && Objects.equals(this.metrics, other.metrics)
+        && Objects.equals(this.pairedEndRun, other.pairedEndRun)
+        && Objects.equals(this.runAlias, other.runAlias)
+        && Objects.equals(this.sequencerFolderPath, other.sequencerFolderPath)
+        && Objects.equals(this.sequencerName, other.sequencerName)
+        && Objects.equals(this.software, other.software)
+        && Objects.equals(this.startDate, other.startDate);
   }
 
   /**

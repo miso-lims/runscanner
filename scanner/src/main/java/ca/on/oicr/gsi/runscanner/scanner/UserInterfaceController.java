@@ -66,6 +66,8 @@ public class UserInterfaceController {
         }
       };
 
+  private static final String CONTENT_TYPE = "text/html;charset=utf-8";
+
   private static final String SCANNED = "Scanned";
   private static final String SCHEDULED = "Scheduled";
   private static final String PROCESSING = "Processing";
@@ -86,7 +88,7 @@ public class UserInterfaceController {
 
   @GetMapping(value = "/listScanned")
   public void listScannedRuns(HttpServletResponse response) throws IOException {
-    response.setContentType("text/html;charset=utf-8");
+    response.setContentType(CONTENT_TYPE);
     response.setStatus(HttpServletResponse.SC_OK);
     try (OutputStream output = response.getOutputStream()) {
       new TablePage(SERVER_CONFIG) {
@@ -119,7 +121,7 @@ public class UserInterfaceController {
   @GetMapping(value = "/list{collection}")
   public void listPaths(@PathVariable String collection, HttpServletResponse response)
       throws IOException {
-    response.setContentType("text/html;charset=utf-8");
+    response.setContentType(CONTENT_TYPE);
     response.setStatus(HttpServletResponse.SC_OK);
     try (OutputStream output = response.getOutputStream()) {
       new TablePage(SERVER_CONFIG) {
@@ -143,7 +145,7 @@ public class UserInterfaceController {
   /** Show the main status page */
   @GetMapping(value = "/")
   public void showStatus(HttpServletResponse response) throws IOException {
-    response.setContentType("text/html;charset=utf-8");
+    response.setContentType(CONTENT_TYPE);
     response.setStatus(HttpServletResponse.SC_OK);
     try (OutputStream output = response.getOutputStream()) {
       new StatusPage(SERVER_CONFIG) {
