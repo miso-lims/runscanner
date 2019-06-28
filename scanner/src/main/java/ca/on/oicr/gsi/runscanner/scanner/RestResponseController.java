@@ -4,15 +4,16 @@ import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.ProgressiveRequestDto;
 import ca.on.oicr.gsi.runscanner.dto.ProgressiveResponseDto;
 import ca.on.oicr.gsi.runscanner.scanner.Scheduler.OutputSizeLimit;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.*;
-import java.nio.charset.StandardCharsets;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +25,9 @@ import springfox.documentation.spring.web.json.Json;
 @RequestMapping(produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 @Api(tags = {"Runs"})
 public class RestResponseController {
+  @ResponseStatus(value = HttpStatus.NOT_FOUND)
+  public class ResourceNotFoundException extends RuntimeException {}
+
   private static final Logger log = LoggerFactory.getLogger(RestResponseController.class);
   private static final LatencyHistogram progressiveLatency =
       new LatencyHistogram(
@@ -72,19 +76,21 @@ public class RestResponseController {
     @ApiResponse(code = 200, message = "Success"),
     @ApiResponse(code = 404, message = "Run not found")
   })
-  public HttpEntity<byte[]> getMetricsByName(
-      @PathVariable("name") @ApiParam(value = "Run name") String id) {
-    byte[] response =
+  @ResponseBody
+  public JsonNode getMetricsByName(@PathVariable("name") @ApiParam(value = "Run name") String id)
+      throws IOException {
+    String response =
         scheduler
             .finished()
             .filter(dto -> dto.getRunAlias().equals(id))
             .findAny()
             .map(NotificationDto::getMetrics)
-            .orElse(null)
-            .getBytes(StandardCharsets.UTF_8);
-    return (response == null
-        ? ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON_UTF8).body(response)
-        : ResponseEntity.notFound().build());
+            .orElse(null);
+    if (response == null) throw new ResourceNotFoundException();
+
+    ObjectMapper mapper = new ObjectMapper();
+    JsonNode node = mapper.readTree(response);
+    return node;
   }
 
   /**
