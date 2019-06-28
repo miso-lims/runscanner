@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -113,7 +114,7 @@ public class DefaultPacBio extends RunProcessor {
         processNumber(
             "//Movie/DurationInSec",
             (dto, duration) -> {
-              LocalDateTime start = dto.getStartDate();
+              Instant start = dto.getStartDate();
               if (start == null) {
                 return;
               }
@@ -150,9 +151,8 @@ public class DefaultPacBio extends RunProcessor {
    * @param setter the writer for the date
    */
   private static ProcessMetadata processDate(
-      String expression, BiConsumer<PacBioNotificationDto, LocalDateTime> setter) {
-    return processString(
-        expression, (dto, result) -> setter.accept(dto, LocalDateTime.parse(result, DATE_FORMAT)));
+      String expression, BiConsumer<PacBioNotificationDto, Instant> setter) {
+    return processString(expression, (dto, result) -> setter.accept(dto, Instant.parse(result)));
   }
 
   /**
@@ -300,17 +300,23 @@ public class DefaultPacBio extends RunProcessor {
       builder.addParameter("instrument", dto.getSequencerName());
       builder.addParameter("run", dto.getRunAlias());
       builder.addParameter(
-          "from", dto.getStartDate().truncatedTo(ChronoUnit.DAYS).format(URL_DATE_FORMAT));
+          "from",
+          dto.getStartDate()
+              .truncatedTo(ChronoUnit.DAYS)
+              .atZone(tz.toZoneId())
+              .format(URL_DATE_FORMAT));
       if (dto.getHealthType().isDone()) {
         builder.addParameter(
             "to",
             dto.getCompletionDate()
+                .atZone(tz.toZoneId())
                 .plusDays(1)
                 .truncatedTo(ChronoUnit.DAYS)
                 .format(URL_DATE_FORMAT));
       } else {
         LocalDateTime today = LocalDateTime.now();
-        LocalDateTime maxRunTime = dto.getStartDate().plusDays(7);
+        LocalDateTime maxRunTime =
+            LocalDateTime.ofInstant(dto.getStartDate(), tz.toZoneId()).plusDays(7);
         builder.addParameter(
             "to",
             (today.isBefore(maxRunTime) ? today : maxRunTime)

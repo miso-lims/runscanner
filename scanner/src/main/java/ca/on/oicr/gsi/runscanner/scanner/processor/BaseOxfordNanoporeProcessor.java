@@ -229,7 +229,7 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
 
       onnd.setStartDate(
           ZonedDateTime.parse(genericReader.string().getAttr(trackingId, "exp_start_time"))
-              .toLocalDateTime());
+              .toInstant());
 
       onnd.setSoftware(genericReader.string().getAttr(trackingId, "version"));
       onnd.setProtocolVersion(genericReader.string().getAttr(trackingId, "protocols_version"));

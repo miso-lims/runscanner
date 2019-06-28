@@ -20,7 +20,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -281,7 +281,7 @@ public final class DefaultIllumina extends RunProcessor {
     // is still going. Scan the logs, if
     // available to determine if the run failed.
     File rtaLogDir = new File(runDirectory, "/Data/RTALogs");
-    LocalDateTime failedDate =
+    Instant failedDate =
         Optional.ofNullable(
                 rtaLogDir.listFiles(
                     file ->
@@ -298,16 +298,14 @@ public final class DefaultIllumina extends RunProcessor {
                     }
                     Matcher m = FAILED_MESSAGE.matcher(failMessage);
                     // Somehow, scanner will return things that don't match, so, we check again
-                    return m.matches()
-                        ? LocalDateTime.parse(m.group(1), FAILED_MESSAGE_DATE_FORMATTER)
-                        : null;
+                    return m.matches() ? Instant.parse(m.group(1)) : null;
                   } catch (FileNotFoundException e) {
                     log.error("RTA file vanished before reading", e);
                     return null;
                   }
                 })
             .filter(Objects::nonNull)
-            .sorted(LocalDateTime::compareTo)
+            .sorted(Instant::compareTo)
             .findFirst()
             .orElse(null);
 
@@ -398,7 +396,7 @@ public final class DefaultIllumina extends RunProcessor {
           Files.getLastModifiedTime(new File(runDirectory, fileName).toPath())
               .toInstant()
               .atZone(ZoneId.of("Z"))
-              .toLocalDateTime());
+              .toInstant());
     }
   }
 
