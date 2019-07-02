@@ -38,6 +38,7 @@ import org.w3c.dom.Document;
 
 /** Scan PacBio runs from a directory. The address */
 public class DefaultPacBio extends RunProcessor {
+
   /** Extract data from an XML metadata file and put it in the DTO. */
   interface ProcessMetadata {
     public void accept(Document document, PacBioNotificationDto dto) throws XPathException;
@@ -130,6 +131,8 @@ public class DefaultPacBio extends RunProcessor {
 
   private static final Pattern WELL_LINE = Pattern.compile("^([A-Z]\\d+),.*$");
 
+  private static TimeZone timeZone;
+
   static {
     HTTP_REQUEST_FACTORY.setConnectionRequestTimeout(20_000);
     HTTP_REQUEST_FACTORY.setConnectTimeout(20_000);
@@ -152,7 +155,14 @@ public class DefaultPacBio extends RunProcessor {
    */
   private static ProcessMetadata processDate(
       String expression, BiConsumer<PacBioNotificationDto, Instant> setter) {
-    return processString(expression, (dto, result) -> setter.accept(dto, Instant.parse(result)));
+    return processString(
+        expression,
+        (dto, result) ->
+            setter.accept(
+                dto,
+                LocalDateTime.parse(result)
+                    .toInstant(
+                        timeZone.toZoneId().getRules().getOffset(LocalDateTime.parse(result)))));
   }
 
   /**
@@ -197,7 +207,7 @@ public class DefaultPacBio extends RunProcessor {
         // will be automatically assigned.
         log.warn(
             String.format(
-                "Multiple pools in well %s on run %s; abandoing automatic pool assignment",
+                "Multiple pools in well %s on run %s; abandoning automatic pool assignment",
                 well, dto.getRunAlias()));
         name = "";
       }
@@ -246,6 +256,7 @@ public class DefaultPacBio extends RunProcessor {
 
   @Override
   public NotificationDto process(File runDirectory, TimeZone tz) throws IOException {
+    this.timeZone = tz;
     // We create one DTO for a run, but there are going to be many wells with independent and
     // duplicate metadata that will will simply
     // overwrite in the shared DTO. If the data differs, the last well wins.
