@@ -22,9 +22,9 @@ int length(const illumina::interop::model::run::cycle_range &range) {
              : 0;
 }
 
-std::string formatDate(std::tm *timeValue) {
+std::string formatDate(std::tm *timeValue, std::string offset) {
   std::stringstream date_buffer;
-  date_buffer << std::put_time(timeValue, "%Y-%m-%dT%H:%M:%S");
+  date_buffer << std::put_time(timeValue, "%Y-%m-%dT%H:%M:%S") << offset;
   return date_buffer.str();
 }
 
@@ -449,7 +449,7 @@ void add_yield_bars(
 }
 
 int main(int argc, const char **argv) {
-  if (argc != 2) {
+  if (argc != 3) {
     return 1;
   }
 
@@ -486,7 +486,7 @@ int main(int argc, const char **argv) {
     const char *output =
         strptime(run.run_info().date().c_str(), dateformat, &detectedTime);
     if (output != nullptr && *output == 0) {
-      result["startDate"] = formatDate(&detectedTime);
+      result["startDate"] = formatDate(&detectedTime, argv[2]);
       break;
     }
   }

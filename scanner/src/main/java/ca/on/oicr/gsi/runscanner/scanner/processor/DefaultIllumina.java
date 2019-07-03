@@ -211,7 +211,8 @@ public final class DefaultIllumina extends RunProcessor {
     // C++ object has no direct binding to the
     // DTO, so any changes to the DTO must be manually changed in the C++ code.
     ProcessBuilder builder =
-        new ProcessBuilder("nice", "runscanner-illumina", runDirectory.getAbsolutePath())
+        new ProcessBuilder(
+                "nice", "runscanner-illumina", runDirectory.getAbsolutePath(), tz.getDisplayName())
             .directory(runDirectory)
             .redirectError(Redirect.INHERIT);
     builder.environment().put("TZ", tz.getID());
