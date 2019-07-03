@@ -22,9 +22,20 @@ int length(const illumina::interop::model::run::cycle_range &range) {
              : 0;
 }
 
-std::string formatDate(std::tm *timeValue, std::string offset) {
+std::string formatDate(std::tm *timeValue) {
   std::stringstream date_buffer;
-  date_buffer << std::put_time(timeValue, "%Y-%m-%dT%H:%M:%S") << offset;
+  date_buffer << std::put_time(timeValue, "%Y-%m-%dT%H:%M:%S");
+  std::stringstream tz_buffer;
+  tz_buffer << std::put_time(timeValue, "%z");
+  auto tz = tz_buffer.str();
+  // We need to mangle this zone into the format that Java expects by string
+  // manipulation. If the timezone offset it something really weird (e.g.,
+  // +33), then just give up on this whole endeavour. It should have to be at
+  // least +hmm, if not +hhmm.
+  if (tz.length() > 3) {
+    date_buffer << tz.substr(0, tz.length() - 2) << ":"
+                << tz.substr(tz.length() - 2, 2);
+  }
   return date_buffer.str();
 }
 
@@ -449,7 +460,7 @@ void add_yield_bars(
 }
 
 int main(int argc, const char **argv) {
-  if (argc != 3) {
+  if (argc != 2) {
     return 1;
   }
 
@@ -486,7 +497,11 @@ int main(int argc, const char **argv) {
     const char *output =
         strptime(run.run_info().date().c_str(), dateformat, &detectedTime);
     if (output != nullptr && *output == 0) {
-      result["startDate"] = formatDate(&detectedTime, argv[2]);
+      // We now roundtrip this into a epoch time and back to time parts so that
+      // it will get the DST information computed for us.
+      detectedTime.tm_isdst = -1; // Unknown DST; force computation
+      auto detectedTimestamp = std::mktime(&detectedTime);
+      result["startDate"] = formatDate(std::localtime(&detectedTimestamp));
       break;
     }
   }
