@@ -3,7 +3,7 @@
   "callCycle": 242,
   "chemistry": "V2",
   "platform": "Illumina",
-  "completionDate": "2013-04-18T10:36:31Z",
+  "completionDate": "2013-04-18T14:36:31Z",
   "containerSerialNumber": "000000000-A2WDF",
   "containerModel": "15028382",
   "healthType": "COMPLETED",
@@ -22,5 +22,5 @@
   "runBasesMask": "y121,y121",
   "scoreCycle": 242,
   "sequencerName": "M00146",
-  "startDate": "2013-04-17T00:00:00Z"
+  "startDate": "2013-04-17T04:00:00Z"
 }

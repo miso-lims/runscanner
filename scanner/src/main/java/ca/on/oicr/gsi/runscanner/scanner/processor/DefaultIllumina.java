@@ -7,6 +7,11 @@ import ca.on.oicr.gsi.runscanner.dto.type.HealthType;
 import ca.on.oicr.gsi.runscanner.dto.type.IlluminaChemistry;
 import ca.on.oicr.gsi.runscanner.scanner.LatencyHistogram;
 import ca.on.oicr.gsi.runscanner.scanner.WhineyFunction;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.Sets;
 import io.prometheus.client.Counter;
@@ -22,7 +27,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -211,8 +218,7 @@ public final class DefaultIllumina extends RunProcessor {
     // C++ object has no direct binding to the
     // DTO, so any changes to the DTO must be manually changed in the C++ code.
     ProcessBuilder builder =
-        new ProcessBuilder(
-                "nice", "runscanner-illumina", runDirectory.getAbsolutePath(), tz.getDisplayName())
+        new ProcessBuilder("nice", "runscanner-illumina", runDirectory.getAbsolutePath())
             .directory(runDirectory)
             .redirectError(Redirect.INHERIT);
     builder.environment().put("TZ", tz.getID());
@@ -222,7 +228,39 @@ public final class DefaultIllumina extends RunProcessor {
     int exitcode;
     try (InputStream output = process.getInputStream();
         OutputStream input = process.getOutputStream()) {
-      dto = createObjectMapper().readValue(output, IlluminaNotificationDto.class);
+      SimpleModule module = new SimpleModule("customInstantParsingModule");
+
+      module.addSerializer(
+          Instant.class,
+          new JsonSerializer<Instant>() {
+            @Override
+            public void serialize(
+                Instant instant, JsonGenerator jsonGenerator, SerializerProvider serializerProvider)
+                throws IOException {
+              jsonGenerator.writeString(instant.atZone(tz.toZoneId()).toString());
+            }
+          });
+
+      module.addDeserializer(
+          Instant.class,
+          new JsonDeserializer<Instant>() {
+            @Override
+            public Instant deserialize(
+                JsonParser jsonParser, DeserializationContext deserializationContext)
+                throws IOException, JsonProcessingException {
+              String inststr = jsonParser.getText();
+              try {
+                return ZonedDateTime.parse(inststr).toInstant();
+              } catch (DateTimeParseException dtpe) {
+                throw new IOException(dtpe);
+              }
+            }
+          });
+
+      dto =
+          new ObjectMapper()
+              .registerModule(module)
+              .readValue(output, IlluminaNotificationDto.class);
       dto.setSequencerFolderPath(runDirectory.getAbsolutePath());
     } finally {
       try {
