@@ -8,6 +8,7 @@ import ca.on.oicr.gsi.runscanner.dto.type.IlluminaChemistry;
 import ca.on.oicr.gsi.runscanner.scanner.LatencyHistogram;
 import ca.on.oicr.gsi.runscanner.scanner.WhineyFunction;
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.*;
@@ -253,7 +254,7 @@ public final class DefaultIllumina extends RunProcessor {
               try {
                 return ZonedDateTime.parse(inststr).toInstant();
               } catch (DateTimeParseException dtpe) {
-                throw new IOException(dtpe);
+                throw new JsonParseException(jsonParser, "Failed to parse Instant", dtpe);
               }
             }
           });
