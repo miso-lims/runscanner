@@ -55,7 +55,7 @@ public class PacBioProcessorTest extends AbstractProcessorTest {
                 .getTypeFactory()
                 .constructMapLikeType(HashMap.class, String.class, String.class));
     return new TestPacBio(statusResponses, sampleSheetResponses)
-        .process(directory, TimeZone.getDefault());
+        .process(directory, TimeZone.getTimeZone("America/Toronto"));
   }
 
   @Override
