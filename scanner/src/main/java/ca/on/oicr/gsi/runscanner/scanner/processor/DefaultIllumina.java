@@ -214,6 +214,46 @@ public final class DefaultIllumina extends RunProcessor {
     return false;
   }
 
+  /**
+   * Define a Module with custom Instant parsing behaviour to handle datetime strings in a time zone
+   * other than UTC.
+   *
+   * @param tz Time Zone to expect for datetime string
+   * @return Module with custom Instant parsing
+   */
+  private Module setUpCustomModule(TimeZone tz) {
+    SimpleModule module = new SimpleModule("customInstantParsingModule");
+
+    module.addSerializer(
+        Instant.class,
+        new JsonSerializer<Instant>() {
+          @Override
+          public void serialize(
+              Instant instant, JsonGenerator jsonGenerator, SerializerProvider serializerProvider)
+              throws IOException {
+            jsonGenerator.writeString(instant.atZone(tz.toZoneId()).toString());
+          }
+        });
+
+    module.addDeserializer(
+        Instant.class,
+        new JsonDeserializer<Instant>() {
+          @Override
+          public Instant deserialize(
+              JsonParser jsonParser, DeserializationContext deserializationContext)
+              throws IOException, JsonProcessingException {
+            String inststr = jsonParser.getText();
+            try {
+              return ZonedDateTime.parse(inststr).toInstant();
+            } catch (DateTimeParseException dtpe) {
+              throw new JsonParseException(jsonParser, "Failed to parse Instant", dtpe);
+            }
+          }
+        });
+
+    return module;
+  }
+
   @Override
   public NotificationDto process(File runDirectory, TimeZone tz) throws IOException {
     // Call the C++ program to do the real work and write a notification DTO to standard output. The
@@ -230,38 +270,9 @@ public final class DefaultIllumina extends RunProcessor {
     int exitcode;
     try (InputStream output = process.getInputStream();
         OutputStream input = process.getOutputStream()) {
-      SimpleModule module = new SimpleModule("customInstantParsingModule");
-
-      module.addSerializer(
-          Instant.class,
-          new JsonSerializer<Instant>() {
-            @Override
-            public void serialize(
-                Instant instant, JsonGenerator jsonGenerator, SerializerProvider serializerProvider)
-                throws IOException {
-              jsonGenerator.writeString(instant.atZone(tz.toZoneId()).toString());
-            }
-          });
-
-      module.addDeserializer(
-          Instant.class,
-          new JsonDeserializer<Instant>() {
-            @Override
-            public Instant deserialize(
-                JsonParser jsonParser, DeserializationContext deserializationContext)
-                throws IOException, JsonProcessingException {
-              String inststr = jsonParser.getText();
-              try {
-                return ZonedDateTime.parse(inststr).toInstant();
-              } catch (DateTimeParseException dtpe) {
-                throw new JsonParseException(jsonParser, "Failed to parse Instant", dtpe);
-              }
-            }
-          });
-
       dto =
           new ObjectMapper()
-              .registerModule(module)
+              .registerModule(setUpCustomModule(tz))
               .readValue(output, IlluminaNotificationDto.class);
       dto.setSequencerFolderPath(runDirectory.getAbsolutePath());
     } finally {
