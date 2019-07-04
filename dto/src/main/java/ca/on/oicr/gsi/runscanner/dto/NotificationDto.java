@@ -2,14 +2,11 @@ package ca.on.oicr.gsi.runscanner.dto;
 
 import ca.on.oicr.gsi.runscanner.dto.type.HealthType;
 import ca.on.oicr.gsi.runscanner.dto.type.Platform;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -36,8 +33,8 @@ public abstract class NotificationDto {
   private String containerModel;
   private int laneCount;
   private HealthType healthType;
-  private LocalDateTime startDate;
-  private LocalDateTime completionDate;
+  private Instant startDate;
+  private Instant completionDate;
   private boolean pairedEndRun;
   private String software;
   private String metrics;
@@ -167,11 +164,11 @@ public abstract class NotificationDto {
   }
 
   /** Get the time when the sequencer run started, if known. */
-  public LocalDateTime getStartDate() {
+  public Instant getStartDate() {
     return startDate;
   }
 
-  public void setStartDate(LocalDateTime startDate) {
+  public void setStartDate(Instant startDate) {
     this.startDate = startDate;
   }
 
@@ -181,11 +178,11 @@ public abstract class NotificationDto {
    * <p>This is only read if {@link HealthType#isDone()}. If the run is not done, the completion
    * date of the run is set to null regardless of the contents of this field.
    */
-  public LocalDateTime getCompletionDate() {
+  public Instant getCompletionDate() {
     return completionDate;
   }
 
-  public void setCompletionDate(LocalDateTime completionDate) {
+  public void setCompletionDate(Instant completionDate) {
     this.completionDate = completionDate;
   }
 

@@ -7,6 +7,12 @@ import ca.on.oicr.gsi.runscanner.dto.type.HealthType;
 import ca.on.oicr.gsi.runscanner.dto.type.IlluminaChemistry;
 import ca.on.oicr.gsi.runscanner.scanner.LatencyHistogram;
 import ca.on.oicr.gsi.runscanner.scanner.WhineyFunction;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.Sets;
 import io.prometheus.client.Counter;
@@ -20,9 +26,12 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -205,6 +214,46 @@ public final class DefaultIllumina extends RunProcessor {
     return false;
   }
 
+  /**
+   * Define a Module with custom Instant parsing behaviour to handle datetime strings in a time zone
+   * other than UTC.
+   *
+   * @param tz Time Zone to expect for datetime string
+   * @return Module with custom Instant parsing
+   */
+  private Module setUpCustomModule(TimeZone tz) {
+    SimpleModule module = new SimpleModule("customInstantParsingModule");
+
+    module.addSerializer(
+        Instant.class,
+        new JsonSerializer<Instant>() {
+          @Override
+          public void serialize(
+              Instant instant, JsonGenerator jsonGenerator, SerializerProvider serializerProvider)
+              throws IOException {
+            jsonGenerator.writeString(instant.atZone(tz.toZoneId()).toString());
+          }
+        });
+
+    module.addDeserializer(
+        Instant.class,
+        new JsonDeserializer<Instant>() {
+          @Override
+          public Instant deserialize(
+              JsonParser jsonParser, DeserializationContext deserializationContext)
+              throws IOException, JsonProcessingException {
+            String inststr = jsonParser.getText();
+            try {
+              return ZonedDateTime.parse(inststr).toInstant();
+            } catch (DateTimeParseException dtpe) {
+              throw new JsonParseException(jsonParser, "Failed to parse Instant", dtpe);
+            }
+          }
+        });
+
+    return module;
+  }
+
   @Override
   public NotificationDto process(File runDirectory, TimeZone tz) throws IOException {
     // Call the C++ program to do the real work and write a notification DTO to standard output. The
@@ -221,7 +270,10 @@ public final class DefaultIllumina extends RunProcessor {
     int exitcode;
     try (InputStream output = process.getInputStream();
         OutputStream input = process.getOutputStream()) {
-      dto = createObjectMapper().readValue(output, IlluminaNotificationDto.class);
+      dto =
+          new ObjectMapper()
+              .registerModule(setUpCustomModule(tz))
+              .readValue(output, IlluminaNotificationDto.class);
       dto.setSequencerFolderPath(runDirectory.getAbsolutePath());
     } finally {
       try {
@@ -281,7 +333,7 @@ public final class DefaultIllumina extends RunProcessor {
     // is still going. Scan the logs, if
     // available to determine if the run failed.
     File rtaLogDir = new File(runDirectory, "/Data/RTALogs");
-    LocalDateTime failedDate =
+    Instant failedDate =
         Optional.ofNullable(
                 rtaLogDir.listFiles(
                     file ->
@@ -300,6 +352,8 @@ public final class DefaultIllumina extends RunProcessor {
                     // Somehow, scanner will return things that don't match, so, we check again
                     return m.matches()
                         ? LocalDateTime.parse(m.group(1), FAILED_MESSAGE_DATE_FORMATTER)
+                            .atZone(tz.toZoneId())
+                            .toInstant()
                         : null;
                   } catch (FileNotFoundException e) {
                     log.error("RTA file vanished before reading", e);
@@ -307,7 +361,7 @@ public final class DefaultIllumina extends RunProcessor {
                   }
                 })
             .filter(Objects::nonNull)
-            .sorted(LocalDateTime::compareTo)
+            .sorted(Instant::compareTo)
             .findFirst()
             .orElse(null);
 
@@ -398,7 +452,7 @@ public final class DefaultIllumina extends RunProcessor {
           Files.getLastModifiedTime(new File(runDirectory, fileName).toPath())
               .toInstant()
               .atZone(ZoneId.of("Z"))
-              .toLocalDateTime());
+              .toInstant());
     }
   }
 

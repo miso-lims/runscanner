@@ -4,6 +4,7 @@ import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.OxfordNanoporeNotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.type.HealthType;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 public class OxfordNanoporeNotificationDtoTest extends AbstractNotificationDtoTest {
   private OxfordNanoporeNotificationDto notificationDto;
@@ -21,8 +22,10 @@ public class OxfordNanoporeNotificationDtoTest extends AbstractNotificationDtoTe
     notificationDto.setSequencerName(sequencerName);
     notificationDto.setLaneCount(8);
     notificationDto.setHealthType(HealthType.RUNNING);
-    notificationDto.setStartDate(LocalDateTime.of(2017, 2, 23, 0, 0));
-    notificationDto.setCompletionDate(LocalDateTime.of(2017, 2, 27, 0, 0));
+    notificationDto.setStartDate(
+        LocalDateTime.of(2017, 2, 23, 0, 0).atZone(ZoneId.of("America/Toronto")).toInstant());
+    notificationDto.setCompletionDate(
+        LocalDateTime.of(2017, 2, 27, 0, 0).atZone(ZoneId.of("America/Toronto")).toInstant());
     notificationDto.setPairedEndRun(true);
     notificationDto.setSoftware("Fido Opus SEAdog Standard Interface Layer");
     notificationDto.setRunType("sequencing_run");

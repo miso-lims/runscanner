@@ -3,14 +3,7 @@
   "callCycle": 202,
   "chemistry": "V3",
   "platform": "Illumina",
-  "completionDate": [
-    2014,
-    10,
-    4,
-    23,
-    9,
-    49
-  ],
+  "completionDate": "2014-10-05T03:09:49Z",
   "containerSerialNumber": "C59Y4ACXX",
   "containerModel": "HiSeq SR Flow Cell v3",
   "healthType": "COMPLETED",
@@ -27,11 +20,5 @@
   "runBasesMask": "y101,y101",
   "scoreCycle": 202,
   "sequencerName": "SN7001179",
-  "startDate": [
-    2014,
-    9,
-    23,
-    0,
-    0
-  ]
+  "startDate": "2014-09-23T04:00:00Z"
 }

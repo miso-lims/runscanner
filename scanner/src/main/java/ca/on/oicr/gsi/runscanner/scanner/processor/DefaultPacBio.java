@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -37,6 +38,7 @@ import org.w3c.dom.Document;
 
 /** Scan PacBio runs from a directory. The address */
 public class DefaultPacBio extends RunProcessor {
+
   /** Extract data from an XML metadata file and put it in the DTO. */
   interface ProcessMetadata {
     public void accept(Document document, PacBioNotificationDto dto) throws XPathException;
@@ -113,7 +115,7 @@ public class DefaultPacBio extends RunProcessor {
         processNumber(
             "//Movie/DurationInSec",
             (dto, duration) -> {
-              LocalDateTime start = dto.getStartDate();
+              Instant start = dto.getStartDate();
               if (start == null) {
                 return;
               }
@@ -128,6 +130,8 @@ public class DefaultPacBio extends RunProcessor {
       DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
 
   private static final Pattern WELL_LINE = Pattern.compile("^([A-Z]\\d+),.*$");
+
+  private static TimeZone timeZone;
 
   static {
     HTTP_REQUEST_FACTORY.setConnectionRequestTimeout(20_000);
@@ -150,9 +154,15 @@ public class DefaultPacBio extends RunProcessor {
    * @param setter the writer for the date
    */
   private static ProcessMetadata processDate(
-      String expression, BiConsumer<PacBioNotificationDto, LocalDateTime> setter) {
+      String expression, BiConsumer<PacBioNotificationDto, Instant> setter) {
     return processString(
-        expression, (dto, result) -> setter.accept(dto, LocalDateTime.parse(result, DATE_FORMAT)));
+        expression,
+        (dto, result) ->
+            setter.accept(
+                dto,
+                LocalDateTime.parse(result)
+                    .toInstant(
+                        timeZone.toZoneId().getRules().getOffset(LocalDateTime.parse(result)))));
   }
 
   /**
@@ -197,7 +207,7 @@ public class DefaultPacBio extends RunProcessor {
         // will be automatically assigned.
         log.warn(
             String.format(
-                "Multiple pools in well %s on run %s; abandoing automatic pool assignment",
+                "Multiple pools in well %s on run %s; abandoning automatic pool assignment",
                 well, dto.getRunAlias()));
         name = "";
       }
@@ -246,6 +256,7 @@ public class DefaultPacBio extends RunProcessor {
 
   @Override
   public NotificationDto process(File runDirectory, TimeZone tz) throws IOException {
+    this.timeZone = tz;
     // We create one DTO for a run, but there are going to be many wells with independent and
     // duplicate metadata that will will simply
     // overwrite in the shared DTO. If the data differs, the last well wins.
@@ -300,17 +311,23 @@ public class DefaultPacBio extends RunProcessor {
       builder.addParameter("instrument", dto.getSequencerName());
       builder.addParameter("run", dto.getRunAlias());
       builder.addParameter(
-          "from", dto.getStartDate().truncatedTo(ChronoUnit.DAYS).format(URL_DATE_FORMAT));
+          "from",
+          dto.getStartDate()
+              .atZone(tz.toZoneId())
+              .truncatedTo(ChronoUnit.DAYS)
+              .format(URL_DATE_FORMAT));
       if (dto.getHealthType().isDone()) {
         builder.addParameter(
             "to",
             dto.getCompletionDate()
+                .atZone(tz.toZoneId())
                 .plusDays(1)
                 .truncatedTo(ChronoUnit.DAYS)
                 .format(URL_DATE_FORMAT));
       } else {
         LocalDateTime today = LocalDateTime.now();
-        LocalDateTime maxRunTime = dto.getStartDate().plusDays(7);
+        LocalDateTime maxRunTime =
+            LocalDateTime.ofInstant(dto.getStartDate(), tz.toZoneId()).plusDays(7);
         builder.addParameter(
             "to",
             (today.isBefore(maxRunTime) ? today : maxRunTime)

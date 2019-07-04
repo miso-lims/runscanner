@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -27,7 +28,8 @@ public abstract class AbstractNotificationDtoTest {
   @Test
   public void testPartiallyPopulatedNotificationRoundTrip() throws Exception {
     notificationDto.setSequencerName("Coffee");
-    notificationDto.setCompletionDate(LocalDateTime.of(2017, 2, 23, 0, 0));
+    notificationDto.setCompletionDate(
+        LocalDateTime.of(2017, 2, 23, 0, 0).atZone(ZoneId.of("America/Toronto")).toInstant());
     notificationDto.setHealthType(HealthType.RUNNING);
 
     ObjectMapper mapper = new ObjectMapper();

@@ -1,3 +1,10 @@
+# Unreleased
+
+Changes:
+
+ * Fixed /metrics endpoints
+ * All times reported by Run Scanner are now standard datetime strings rather than arrays of integer values
+
 # 1.6.0
 
 Changes:
