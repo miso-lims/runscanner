@@ -26,6 +26,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -337,7 +338,11 @@ public final class DefaultIllumina extends RunProcessor {
                     }
                     Matcher m = FAILED_MESSAGE.matcher(failMessage);
                     // Somehow, scanner will return things that don't match, so, we check again
-                    return m.matches() ? Instant.parse(m.group(1)) : null;
+                    return m.matches()
+                        ? LocalDateTime.parse(m.group(1), FAILED_MESSAGE_DATE_FORMATTER)
+                            .atZone(tz.toZoneId())
+                            .toInstant()
+                        : null;
                   } catch (FileNotFoundException e) {
                     log.error("RTA file vanished before reading", e);
                     return null;
