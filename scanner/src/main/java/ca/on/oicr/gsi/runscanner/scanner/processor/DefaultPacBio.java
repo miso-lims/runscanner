@@ -41,7 +41,8 @@ public class DefaultPacBio extends RunProcessor {
 
   /** Extract data from an XML metadata file and put it in the DTO. */
   interface ProcessMetadata {
-    public void accept(Document document, PacBioNotificationDto dto) throws XPathException;
+    public void accept(Document document, PacBioNotificationDto dto, TimeZone timeZone)
+        throws XPathException;
   }
 
   /**
@@ -131,8 +132,6 @@ public class DefaultPacBio extends RunProcessor {
 
   private static final Pattern WELL_LINE = Pattern.compile("^([A-Z]\\d+),.*$");
 
-  private static TimeZone timeZone;
-
   static {
     HTTP_REQUEST_FACTORY.setConnectionRequestTimeout(20_000);
     HTTP_REQUEST_FACTORY.setConnectTimeout(20_000);
@@ -155,14 +154,16 @@ public class DefaultPacBio extends RunProcessor {
    */
   private static ProcessMetadata processDate(
       String expression, BiConsumer<PacBioNotificationDto, Instant> setter) {
-    return processString(
-        expression,
-        (dto, result) ->
-            setter.accept(
-                dto,
-                LocalDateTime.parse(result)
-                    .toInstant(
-                        timeZone.toZoneId().getRules().getOffset(LocalDateTime.parse(result)))));
+    XPathExpression expr = RunProcessor.compileXPath(expression)[0];
+    return (document, dto, timeZone) -> {
+      String result = (String) expr.evaluate(document, XPathConstants.STRING);
+      if (result != null) {
+        setter.accept(
+            dto,
+            LocalDateTime.parse(result)
+                .toInstant(timeZone.toZoneId().getRules().getOffset(LocalDateTime.parse(result))));
+      }
+    };
   }
 
   /**
@@ -175,7 +176,7 @@ public class DefaultPacBio extends RunProcessor {
   private static ProcessMetadata processNumber(
       String expression, BiConsumer<PacBioNotificationDto, Double> setter) {
     XPathExpression expr = RunProcessor.compileXPath(expression)[0];
-    return (document, dto) -> {
+    return (document, dto, timeZone) -> {
       Double result = (Double) expr.evaluate(document, XPathConstants.NUMBER);
       if (result != null) {
         setter.accept(dto, result);
@@ -190,7 +191,7 @@ public class DefaultPacBio extends RunProcessor {
    */
   private static ProcessMetadata processSampleInformation() {
     XPathExpression[] expr = RunProcessor.compileXPath("//Sample/WellName", "//Sample/Name");
-    return (document, dto) -> {
+    return (document, dto, timeZone) -> {
       String well = (String) expr[0].evaluate(document, XPathConstants.STRING);
       String name = (String) expr[1].evaluate(document, XPathConstants.STRING);
       if (isStringBlankOrNull(name) || isStringBlankOrNull(well)) {
@@ -225,7 +226,7 @@ public class DefaultPacBio extends RunProcessor {
   private static ProcessMetadata processString(
       String expression, BiConsumer<PacBioNotificationDto, String> setter) {
     XPathExpression expr = RunProcessor.compileXPath(expression)[0];
-    return (document, dto) -> {
+    return (document, dto, timeZone) -> {
       String result = (String) expr.evaluate(document, XPathConstants.STRING);
       if (result != null) {
         setter.accept(dto, result);
@@ -256,7 +257,6 @@ public class DefaultPacBio extends RunProcessor {
 
   @Override
   public NotificationDto process(File runDirectory, TimeZone tz) throws IOException {
-    this.timeZone = tz;
     // We create one DTO for a run, but there are going to be many wells with independent and
     // duplicate metadata that will will simply
     // overwrite in the shared DTO. If the data differs, the last well wins.
@@ -276,7 +276,7 @@ public class DefaultPacBio extends RunProcessor {
                     cellDirectory.listFiles(file -> file.getName().endsWith(".metadata.xml"))))
         .map(RunProcessor::parseXml)
         .filter(Optional::isPresent)
-        .forEach(metadata -> processMetadata(metadata.get(), dto));
+        .forEach(metadata -> processMetadata(metadata.get(), dto, tz));
 
     // The current job state is not available from the metadata files, so contact the PacBio
     // instrument's web service.
@@ -350,10 +350,10 @@ public class DefaultPacBio extends RunProcessor {
    * @param metadata the path to the XML file
    * @param dto the DTO to update
    */
-  private void processMetadata(Document metadata, PacBioNotificationDto dto) {
+  private void processMetadata(Document metadata, PacBioNotificationDto dto, TimeZone timeZone) {
     for (ProcessMetadata processor : METADATA_PROCESSORS) {
       try {
-        processor.accept(metadata, dto);
+        processor.accept(metadata, dto, timeZone);
       } catch (XPathException e) {
         log.error("Failed to extract metadata", e);
       }
