@@ -313,8 +313,8 @@ public class DefaultPacBio extends RunProcessor {
       builder.addParameter(
           "from",
           dto.getStartDate()
-              .truncatedTo(ChronoUnit.DAYS)
               .atZone(tz.toZoneId())
+              .truncatedTo(ChronoUnit.DAYS)
               .format(URL_DATE_FORMAT));
       if (dto.getHealthType().isDone()) {
         builder.addParameter(
