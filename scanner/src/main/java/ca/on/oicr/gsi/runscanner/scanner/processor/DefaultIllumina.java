@@ -12,6 +12,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.Sets;
@@ -104,7 +105,7 @@ public final class DefaultIllumina extends RunProcessor {
   static {
     XPath xpath = XPathFactory.newInstance().newXPath();
     try {
-      WORKFLOW_TYPE = xpath.compile("//WorkflowType/text()");
+      WORKFLOW_TYPE = xpath.compile("//WorkflowType/text()|//ClusteringChoice/text()");
       FLOWCELL = xpath.compile("//Setup/Flowcell/text()");
       FLOWCELL_PAIRED = xpath.compile("//Setup/PairEndFC/text()");
 
@@ -305,9 +306,12 @@ public final class DefaultIllumina extends RunProcessor {
                       .orElse(IlluminaChemistry.UNKNOWN));
               dto.setContainerModel(findContainerModel(runParams));
               dto.setSequencerPosition(findSequencerPosition(runParams));
-              // See if we can figure out the workflow type (NovaSeq only, at the time of this
-              // writing)
-              dto.setWorkflowType(findWorkflowType(runParams));
+              // See if we can figure out the workflow type on the NovaSeq or HiSeq. This mostly
+              // tells us how the clustering was done
+              final String workflowType = findWorkflowType(runParams);
+              if (workflowType != null && !workflowType.equals("None")) {
+                dto.setWorkflowType(workflowType);
+              }
             });
 
     // See if we can figure out a sample sheet
