@@ -1,11 +1,4 @@
----
-layout: default
-title: "Illumina Setup"
-order: 2
-categories: ["User Manual"]
----
-
-To use the Illumina support in Run Scanner, the additional package 
+To use the Illumina support in Run Scanner, the additional package
 _runscanner-illumina_ must be built.
 
 You will need a copy of [jsoncpp](https://github.com/open-source-parsers/jsoncpp) and an AutoTools-capable build environment with libstdc++ 5 or later. On Debian/Ubuntu:
@@ -25,8 +18,8 @@ Then:
 
     export CXX=$(which clang++-5.0 clang++) && ./build-illumina-interop && autoreconf -i && ./configure && make && sudo make install
 
-After which, deploy Run Scanner as directed in 
-<a href="installation.html">Installation & Setup</a>.
+After which, deploy Run Scanner as directed in
+[Installation & Setup](/installation/)
 
 <!-- All this should be moved to the Developer Documentation once we're at that point
 ## Developer Information

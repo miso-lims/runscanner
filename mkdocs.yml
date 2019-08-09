@@ -1,0 +1,17 @@
+site_name: Run Scanner
+theme: readthedocs
+nav:
+    - About : index.md
+    - Getting Started:
+        - Installation and Setup : installation.md
+        - Illumina setup : illuminasetup.md
+        - Monitoring with Prometheus : prometheus.md
+    - Pages:
+        - Main : main.md
+        - Scanned : scanned.md
+        - Scheduled : scheduled.md
+        - Processing : processing.md
+        - Unreadable : unreadable.md
+        - API Docs : api.md
+    - Troubleshooting : troubleshooting.md
+    - Appendices : appendices.md
