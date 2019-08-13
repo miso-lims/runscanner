@@ -20,6 +20,10 @@ To test out changes locally, run:
 mkdocs serve -f .mkdocs.yml
 ```
 
+The pages will be likely be hosted at [http://127.0.0.1:8000](http://127.0.0.1:8000), 
+though be sure to check the output in case it hosts at another address or port.
+
+
 ## Readthedocs configuration
 
 Configuration for readthedocs is located in 
