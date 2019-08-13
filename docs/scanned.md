@@ -17,11 +17,11 @@ from the sequencing run output.
 
 This file contains the same information which will be returned when accessed
 via the REST API.
-<!-- right? --> <!-- For more information, please refer to [API Docs](/api/). -->
+<!-- right? --> <!-- For more information, please refer to [API Docs](../api/). -->
 
 The fields within this file vary based on the model of sequencer which has
 produced the run. (For more information, please refer to
- [Appendix B: Run JSON Fields](/appendices/#appendix-b-run-json-fields))
+ [Appendix B: Run JSON Fields](../appendices/#appendix-b-run-json-fields))
 
 All major web browsers should support viewing JSON files interactively,
 <!-- right? --> however these files can also be opened in a text editor or

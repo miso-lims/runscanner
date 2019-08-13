@@ -29,7 +29,7 @@ and execute permissions on said directory. The processor in the configuration
  JSON must also be specified correctly, and be provided a valid time zone.
 
 For more information on the configuration JSON file, please refer to
-[Setting Up Run Scanner](/installation/#setting-up-run-scanner).
+[Setting Up Run Scanner](../installation/#setting-up-run-scanner).
 
 <!-- TODO: These messages really could be more user-friendly in Run Scanner itself -->
 #### 'Path is null!'
@@ -61,8 +61,8 @@ contents.
 This message appears if Run Scanner cannot construct a Processor given the
 information specified in the configuration JSON. Ensure that the 'name',
 'platformType', and 'parameters' fields are filled out appropriately as per
-[Setting Up Run Scanner](/installation/#setting-up-run-scanner) and
-[Appendix A: Processor Definitions](/appendices/#appendix-a-processor-definitions).
+[Setting Up Run Scanner](../installation/#setting-up-run-scanner) and
+[Appendix A: Processor Definitions](../appendices/#appendix-a-processor-definitions).
 
 #### 'TimeZone is null!'
 This message appears if the 'timeZone' field in the configuration JSON is
@@ -82,7 +82,7 @@ blank or invalid. This field uses TZ Database names. Please refer to
     Run Scanner expects run data to be in certain formats per sequencer.
     Please ensure your sequencer is supported and running a supported software
     version. Please refer to 
-    [Appendix C: Sequencers Supported by Run Scanner](/appendices/#appendix-c-sequencers-supported-by-run-scanner)
+    [Appendix C: Sequencers Supported by Run Scanner](../appendices/#appendix-c-sequencers-supported-by-run-scanner)
     for more information.
 
 It is also possible that the run data contains invalid information. Try
@@ -98,5 +98,5 @@ sequencing output directory. Grant these permissions if necessary.
 #### Ensure runscanner-illumina is installed
 If runs from an Illumina sequencer are universally failing, ensure that
 runscanner-illumina is installed correctly, as outlined in
-[Illumina Setup](/illuminasetup/). Illumina runs
+[Illumina Setup](../illuminasetup/). Illumina runs
 cannot be read without this interoperability application.

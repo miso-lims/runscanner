@@ -27,7 +27,7 @@ tasks by Run Scanner. Run Scanner will continue processing runs after scanning
 Underneath the [Core](#core) section, Run Scanner displays one
 section per sequencing output directory, as defined in the configuration
 JSON (for more information, please refer to
-[Setting Up Run Scanner](/installation/#setting-up-run-scanner)). Each section
+[Setting Up Run Scanner](../installation/#setting-up-run-scanner)). Each section
 is headed by the directory path, and outlines the platform, processor type,
 and time zone defined in the JSON file.
 
@@ -38,10 +38,10 @@ facing in accessing the directory. The issue may be that the target of the
 provided path does not exist, or that Run Scanner does not have the necessary
  permissions to read or write to the directory. For more information, please
 refer to
-[Sequencing Output Directory 'Valid?' reads 'No'](/troubleshooting/#sequencing-output-directory-valid-reads-no).
+[Sequencing Output Directory 'Valid?' reads 'No'](../troubleshooting/#sequencing-output-directory-valid-reads-no).
 
 ### Processors
 The final section of the Main Page is a list of available name and
 platformType combinations. This section can be considered a reference for
 creating the configuration JSON (as outlined in
-[Setting Up Run Scanner](/installation/#setting-up-run-scanner)).
+[Setting Up Run Scanner](../installation/#setting-up-run-scanner)).

@@ -19,7 +19,7 @@ Then:
     export CXX=$(which clang++-5.0 clang++) && ./build-illumina-interop && autoreconf -i && ./configure && make && sudo make install
 
 After which, deploy Run Scanner as directed in
-[Installation & Setup](/installation/)
+[Installation & Setup](../installation)
 
 <!-- All this should be moved to the Developer Documentation once we're at that point
 ## Developer Information
