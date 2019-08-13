@@ -17,7 +17,7 @@ from the sequencing run output.
 
 This file contains the same information which will be returned when accessed
 via the REST API.
-<!-- right? --> <!-- For more information, please refer to <a href="api.html">API Docs</a>. -->
+<!-- right? --> <!-- For more information, please refer to [API Docs](/api/). -->
 
 The fields within this file vary based on the model of sequencer which has
 produced the run. (For more information, please refer to

@@ -34,7 +34,7 @@
 	</tr>
 	<tr>
 		<td>timeZone</td>
-		<td>Valid String ID for Java TimeZone, which is a TZ Database name. <a href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List">List of TZ Database names on Wikipedia</a></td>
+		<td>Valid String ID for Java TimeZone, which is a TZ Database name. [List of TZ Database names on Wikipedia](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List) </td>
 	</tr>
 	<tr>
 		<td>parameters</td>

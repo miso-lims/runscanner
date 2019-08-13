@@ -11,8 +11,9 @@ For Illumina support:
 * jsoncpp
 
 Please ensure that your sequencer(s) are supported by Run Scanner.
-Please refer to <a href="appendices.html#C">Appendix C: Sequencers Supported
-by Run Scanner</a> for more information.
+Please refer to 
+[Appendix C: Sequencers Supported by Run Scanner](/appendices/#appendix-c-sequencers-supported-by-run-scanner)
+ for more information.
 
 ### Downloading the latest release
 <!-- This will change when we have docker images -->

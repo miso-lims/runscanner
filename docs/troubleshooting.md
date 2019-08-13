@@ -81,8 +81,9 @@ blank or invalid. This field uses TZ Database names. Please refer to
 2.  **Verify format of run data.**
     Run Scanner expects run data to be in certain formats per sequencer.
     Please ensure your sequencer is supported and running a supported software
-    version. Please refer to <a href="appendices.html#C">Appendix C: Sequencers
-    Supported by Run Scanner</a> for more information.
+    version. Please refer to 
+    [Appendix C: Sequencers Supported by Run Scanner](/appendices/#appendix-c-sequencers-supported-by-run-scanner)
+    for more information.
 
 It is also possible that the run data contains invalid information. Try
 inspecting the run files with a tool appropriate for the file type (such
@@ -97,5 +98,5 @@ sequencing output directory. Grant these permissions if necessary.
 #### Ensure runscanner-illumina is installed
 If runs from an Illumina sequencer are universally failing, ensure that
 runscanner-illumina is installed correctly, as outlined in
-<a href="illuminasetup.html">Illumina Setup</a>. Illumina runs
+[Illumina Setup](/illuminasetup/). Illumina runs
 cannot be read without this interoperability application.
