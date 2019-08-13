@@ -1,11 +1,5 @@
----
-layout: default
-title: Appendices
-categories: ['User Manual']
-order: 11
----
-<a id="A" />
-### Appendix A: Processor Definitions
+# Appendix A: Processor Definitions
+
 <table>
 	<tr>
 		<th>JSON Name</th>
@@ -40,7 +34,7 @@ order: 11
 	</tr>
 	<tr>
 		<td>timeZone</td>
-		<td>Valid String ID for Java TimeZone, which is a TZ Database name. <a href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List">List of TZ Database names on Wikipedia</a></td>
+		<td>Valid String ID for Java TimeZone, which is a TZ Database name. [List of TZ Database names on Wikipedia](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List) </td>
 	</tr>
 	<tr>
 		<td>parameters</td>
@@ -79,9 +73,8 @@ order: 11
 </table>
 
 
-<a id="B" />
-### Appendix B: Run JSON Fields
-<!-- TODO: Convert this to explanations rather than checkmarks, 
+# Appendix B: Run JSON Fields
+<!-- TODO: Convert this to explanations rather than checkmarks,
 esp bc they might vary in meaning b/w PromION and MinION -->
 <table>
 	<tr>
@@ -269,22 +262,22 @@ esp bc they might vary in meaning b/w PromION and MinION -->
 
 
 
-<a id="C" />
-### Appendix C: Sequencers Supported by Run Scanner
-This is a list of sequencers for which Run Scanner is capable of processing 
-output. 
+# Appendix C: Sequencers Supported by Run Scanner
+This is a list of sequencers for which Run Scanner is capable of processing
+output.
 
-**Bold** items are verified to work with Run Scanner. 
+**Bold** items are verified to work with Run Scanner.
 
-_Italic_ items are under development. 
+_Italic_ items are under development.
 
-Other sequencers are expected to work so long as their output is in the same 
-format as a sequencer whose name is bolded, however they have not been tested. 
+Other sequencers are expected to work so long as their output is in the same
+format as a sequencer whose name is bolded, however they have not been tested.
 
-If a sequencer is not included in this list, it should be assumed to be 
+If a sequencer is not included in this list, it should be assumed to be
 unsupported.
 
 #### PacBio
+
 * **RS**
 * **RS II**
 * _Sequel - Under development_
@@ -306,5 +299,5 @@ unsupported.
 * **PromethION** - as of PromethION Release 19.01.1
 * **MinION** - as of MinION Release 18.12
 
-**Note for Oxford Nanopore Sequencers**: all sequencing output created before 
+**Note for Oxford Nanopore Sequencers**: all sequencing output created before
 January 1 2017 is automatically skipped.
