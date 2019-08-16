@@ -12,7 +12,7 @@ For Illumina support:
 
 Please ensure that your sequencer(s) are supported by Run Scanner.
 Please refer to 
-[Appendix C: Sequencers Supported by Run Scanner](/appendices/#appendix-c-sequencers-supported-by-run-scanner)
+[Appendix C: Sequencers Supported by Run Scanner](../appendices/#appendix-c-sequencers-supported-by-run-scanner)
  for more information.
 
 ### Downloading the latest release
@@ -62,9 +62,9 @@ list of instruments:
 
 The name/platformType combination is used to define how to interpret the
 sequencer's results. A full list of instrument options can be found in
-[Appendix A: Processor Definitions](/appendices/#appendix-a-processor-definitions) and a
+[Appendix A: Processor Definitions](../appendices/#appendix-a-processor-definitions) and a
 full list of supported sequencers can be found in
-[Appendix C: Sequencers Supported by Run Scanner](/appendices/#appendix-c-sequencers-supported-by-run-scanner).
+[Appendix C: Sequencers Supported by Run Scanner](../appendices/#appendix-c-sequencers-supported-by-run-scanner).
 
 ### Building Run Scanner
 
@@ -79,12 +79,12 @@ There will be an important build artefact:
 #### Enabling Illumina scanning
 
 If you would like to scan for Illumina output, please follow
-[Illumina Setup](/illuminasetup/) before deploying.
+[Illumina Setup](../illuminasetup/) before deploying.
 
 ### Deploying
 
 1. Stop Run Scanner's Tomcat.
 1. Remove `${CATALINA_HOME}/webapps/${CONTEXT}` directory and `${CATALINA_HOME}/webapps/${CONTEXT}.war` file
-   (See note about `${CONTEXT}` in [Setting Up Run Scanner](/installation/#setting-up-run-scanner) above).
+   (See note about `${CONTEXT}` in [Setting Up Run Scanner](../installation/#setting-up-run-scanner) above).
 1. Copy the `scanner-${VERSION}.war` from the build to `${CATALINA_HOME}/webapps/${CONTEXT}.war`.
 1. Start Run Scanner's Tomcat.
