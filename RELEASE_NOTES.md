@@ -1,4 +1,11 @@
-# Unreleased
+# 1.7.0
+
+Changes:
+
+  * Capture HiSeq clustering type as the workflow type
+  * Convert documentation to readthedocs
+
+# 1.6.2
 
 Changes:
 
