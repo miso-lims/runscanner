@@ -28,6 +28,7 @@ import java.util.stream.Stream;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.stream.XMLStreamException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -37,6 +38,9 @@ import springfox.documentation.annotations.ApiIgnore;
 @Controller
 @ApiIgnore
 public class UserInterfaceController {
+  @Value("${project.version}")
+  String projectVersion;
+
   public static final ServerConfig SERVER_CONFIG =
       new ServerConfig() {
 
@@ -194,6 +198,7 @@ public class UserInterfaceController {
 
         @Override
         protected void emitCore(SectionRenderer renderer) throws XMLStreamException {
+          renderer.line("Run Scanner Version", projectVersion);
           renderer.line("Is Configuration Good?", scheduler.isConfigurationGood() ? "Yes" : "No");
           renderer.line("Last Configuration Read", scheduler.getConfigurationLastRead());
           renderer.line("Scanning Enabled", scheduler.isScanningEnabled() ? "Yes" : "No");
