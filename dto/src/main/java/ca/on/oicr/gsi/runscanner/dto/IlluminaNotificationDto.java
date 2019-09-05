@@ -9,7 +9,6 @@ import java.util.Optional;
 
 public class IlluminaNotificationDto extends NotificationDto {
 
-  private String runBasesMask;
   private int bclCount;
   private int callCycle;
   private IlluminaChemistry chemistry;
@@ -19,6 +18,8 @@ public class IlluminaNotificationDto extends NotificationDto {
   private int numReads;
   private Map<Integer, String> poolNames;
   private int readLength;
+  private List<Integer> readLengths;
+  private String runBasesMask;
   private int scoreCycle;
   private String workflowType;
 
@@ -39,12 +40,9 @@ public class IlluminaNotificationDto extends NotificationDto {
         && Objects.equals(this.numReads, other.numReads)
         && Objects.equals(this.poolNames, other.poolNames)
         && Objects.equals(this.readLength, other.readLength)
+        && Objects.equals(this.readLengths, other.readLengths)
         && Objects.equals(this.scoreCycle, other.scoreCycle)
         && Objects.equals(this.workflowType, other.workflowType);
-  }
-
-  public String getRunBasesMask() {
-    return runBasesMask;
   }
 
   public int getBclCount() {
@@ -102,6 +100,14 @@ public class IlluminaNotificationDto extends NotificationDto {
     return readLength;
   }
 
+  public List<Integer> getReadLengths() {
+    return readLengths;
+  }
+
+  public String getRunBasesMask() {
+    return runBasesMask;
+  }
+
   public int getScoreCycle() {
     return scoreCycle;
   }
@@ -124,12 +130,9 @@ public class IlluminaNotificationDto extends NotificationDto {
         numReads,
         poolNames,
         readLength,
+        readLengths,
         scoreCycle,
         workflowType);
-  }
-
-  public void setRunBasesMask(String runBasesMask) {
-    this.runBasesMask = runBasesMask;
   }
 
   public void setBclCount(int bclCount) {
@@ -168,6 +171,14 @@ public class IlluminaNotificationDto extends NotificationDto {
     this.readLength = readLength;
   }
 
+  public void setReadLengths(List<Integer> readLengths) {
+    this.readLengths = readLengths;
+  }
+
+  public void setRunBasesMask(String runBasesMask) {
+    this.runBasesMask = runBasesMask;
+  }
+
   public void setScoreCycle(int scoreCycle) {
     this.scoreCycle = scoreCycle;
   }
@@ -191,6 +202,8 @@ public class IlluminaNotificationDto extends NotificationDto {
         + numCycles
         + ", poolNames="
         + poolNames
+        + ", readLengths="
+        + readLengths
         + ", readLength="
         + readLength
         + ", scoreCycle="
