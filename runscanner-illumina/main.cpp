@@ -561,6 +561,7 @@ int main(int argc, const char **argv) {
 
   int readLength = 0;
   Json::Value indexLengths(Json::arrayValue);
+  Json::Value readLengths(Json::arrayValue);
   Json::Value::Int numReads = 0;
 
   for (const auto &read : run.run_info().reads()) {
@@ -568,6 +569,7 @@ int main(int argc, const char **argv) {
       indexLengths.append(length(read));
     } else {
       readLength = std::max(readLength, length(read));
+      readLengths.append(length(read));
       numReads++;
     }
   }
@@ -576,6 +578,7 @@ int main(int argc, const char **argv) {
   result["readLength"] = readLength;
   result["runBasesMask"] = getRunBasesMask(run);
   result["indexLengths"] = std::move(indexLengths);
+  result["readLengths"] = std::move(readLengths);
 
   /* We can't tell the difference between the stopped or running states, so we
    * just assume running if it isn't finished. */
