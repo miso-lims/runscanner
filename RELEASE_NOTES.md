@@ -1,3 +1,15 @@
+# Unreleased
+
+Changes:
+
+  * Fix version incompatibility which made PromethION runs Unreadable
+
+# 1.8.0
+
+Changes:
+
+  * Export length of all reads in Illumina runs
+
 # 1.7.0
 
 Changes:
