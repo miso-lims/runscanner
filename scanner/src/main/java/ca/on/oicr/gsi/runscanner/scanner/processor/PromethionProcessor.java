@@ -5,7 +5,6 @@ import ch.systemsx.cisd.hdf5.IHDF5Reader;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.nio.file.Path;
 import java.util.stream.Stream;
-import ncsa.hdf.hdf5lib.exceptions.HDF5AttributeException;
 
 public class PromethionProcessor extends BaseOxfordNanoporeProcessor {
 
@@ -33,11 +32,10 @@ public class PromethionProcessor extends BaseOxfordNanoporeProcessor {
   @Override
   protected void additionalProcess(OxfordNanoporeNotificationDto onnd, IHDF5Reader reader) {
     onnd.setSequencerPosition(reader.string().getAttr(trackingId, "device_id"));
-    try {
+    if (reader.hasAttribute(contextTags, "flow_cell_product_code")) {
       onnd.setContainerModel(reader.string().getAttr(contextTags, "flow_cell_product_code"));
-    } catch (HDF5AttributeException h5ae) {
+    } else if (reader.hasAttribute(contextTags, "flowcell_type")) {
       onnd.setContainerModel(reader.string().getAttr(contextTags, "flowcell_type"));
-      // Will throw again, causing failed read & trace in log, if neither works
     }
   }
 
