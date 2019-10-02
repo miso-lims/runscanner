@@ -222,19 +222,24 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
       trackingId = read_name + "/tracking_id";
       contextTags = read_name + "/context_tags";
 
-      onnd.setContainerSerialNumber(genericReader.string().getAttr(trackingId, "flow_cell_id"));
+      if (genericReader.hasAttribute(trackingId, "flow_cell_id"))
+        onnd.setContainerSerialNumber(genericReader.string().getAttr(trackingId, "flow_cell_id"));
 
       onnd.setLaneCount(LANE_COUNT);
       onnd.setHealthType(HealthType.UNKNOWN);
 
-      onnd.setStartDate(
-          ZonedDateTime.parse(genericReader.string().getAttr(trackingId, "exp_start_time"))
-              .toInstant());
+      if (genericReader.hasAttribute(trackingId, "exp_start_time"))
+        onnd.setStartDate(
+            ZonedDateTime.parse(genericReader.string().getAttr(trackingId, "exp_start_time"))
+                .toInstant());
 
-      onnd.setSoftware(genericReader.string().getAttr(trackingId, "version"));
-      onnd.setProtocolVersion(genericReader.string().getAttr(trackingId, "protocols_version"));
+      if (genericReader.hasAttribute(trackingId, "version"))
+        onnd.setSoftware(genericReader.string().getAttr(trackingId, "version"));
+      if (genericReader.hasAttribute(trackingId, "protocols_version"))
+        onnd.setProtocolVersion(genericReader.string().getAttr(trackingId, "protocols_version"));
 
-      onnd.setRunType(genericReader.string().getAttr(trackingId, "exp_script_purpose"));
+      if (genericReader.hasAttribute(trackingId, "exp_script_purpose"))
+        onnd.setRunType(genericReader.string().getAttr(trackingId, "exp_script_purpose"));
 
       additionalProcess(onnd, genericReader);
       return onnd;
