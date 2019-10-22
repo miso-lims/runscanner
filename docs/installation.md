@@ -56,7 +56,7 @@ list of instruments:
         "platformType": "OXFORDNANOPORE",
         "name": "promethion",
         "timeZone": "America/Toronto",
-        "parameters": {"name": "promethion_001"}
+        "parameters": {}
       }
     ]
 

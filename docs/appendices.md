@@ -65,8 +65,8 @@
 				<th>OXFORDNANOPORE</th>
 			</tr>
 			<tr>
-				<td>name (required)</td>
-				<td>Unique name for Oxford Nanopore sequencer to be reported as `sequencerName` in run information</td>
+				<td>(no additional parameters)</td>
+				<td></td>
 			</tr>
 		</table></td>
 	</tr>

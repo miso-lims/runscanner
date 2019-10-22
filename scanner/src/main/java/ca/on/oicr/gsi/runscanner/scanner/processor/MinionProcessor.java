@@ -15,8 +15,8 @@ public class MinionProcessor extends BaseOxfordNanoporeProcessor {
   private static final Pattern DOWNLOADS = Pattern.compile("/downloads$");
   private static final Pattern UPLOAD = Pattern.compile("/upload");
 
-  public MinionProcessor(Builder builder, String seqName) {
-    super(builder, seqName);
+  public MinionProcessor(Builder builder) {
+    super(builder);
   }
 
   @Override
@@ -45,11 +45,15 @@ public class MinionProcessor extends BaseOxfordNanoporeProcessor {
 
   @Override
   protected void additionalProcess(OxfordNanoporeNotificationDto onnd, IHDF5Reader reader) {
-    if (reader.hasAttribute(contextTags, "sequencing_kit"))
+    if (reader.hasAttribute(trackingId, "device_id")) {
+      onnd.setSequencerName(reader.string().getAttr(trackingId, "device_id"));
+    }
+    if (reader.hasAttribute(contextTags, "sequencing_kit")) {
       onnd.setContainerModel(reader.string().getAttr(contextTags, "sequencing_kit"));
+    }
   }
 
   public static RunProcessor create(Builder builder, ObjectNode jsonNodes) {
-    return new MinionProcessor(builder, jsonNodes.get("name").asText());
+    return new MinionProcessor(builder);
   }
 }
