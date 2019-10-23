@@ -9,7 +9,7 @@ import java.util.TimeZone;
 
 public class PromethionProcessorTest extends AbstractProcessorTest {
   private final PromethionProcessor instance =
-      new PromethionProcessor(new Builder(Platform.OXFORDNANOPORE, "promethion", null), "unittest");
+      new PromethionProcessor(new Builder(Platform.OXFORDNANOPORE, "promethion", null));
 
   public PromethionProcessorTest() {
     super(OxfordNanoporeNotificationDto.class);

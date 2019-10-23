@@ -9,8 +9,7 @@ import java.util.TimeZone;
 
 public class MinionProcessorTest extends AbstractProcessorTest {
   private final MinionProcessor instance =
-      new MinionProcessor(
-          new RunProcessor.Builder(Platform.OXFORDNANOPORE, "minion", null), "unittest");
+      new MinionProcessor(new RunProcessor.Builder(Platform.OXFORDNANOPORE, "minion", null));
 
   public MinionProcessorTest() {
     super(OxfordNanoporeNotificationDto.class);

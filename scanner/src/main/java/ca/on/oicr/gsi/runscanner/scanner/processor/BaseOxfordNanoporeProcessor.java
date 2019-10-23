@@ -33,7 +33,6 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
 
   protected static String trackingId;
   protected static String contextTags;
-  protected final String SEQUENCER_NAME;
   protected static final int LANE_COUNT = 1;
 
   /** Skip processing anything older than 2017 since they typically fail */
@@ -52,9 +51,8 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
     return isFileFast5(file.getFileName().toString());
   }
 
-  public BaseOxfordNanoporeProcessor(Builder builder, String seqName) {
+  public BaseOxfordNanoporeProcessor(Builder builder) {
     super(builder);
-    SEQUENCER_NAME = seqName;
   }
 
   @Override
@@ -217,7 +215,6 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
           p.subpath(rootPath.getNameCount(), p.getNameCount()).toString().replaceAll("/", "_"));
 
       onnd.setSequencerFolderPath(runDirectory.toString());
-      onnd.setSequencerName(SEQUENCER_NAME);
 
       trackingId = read_name + "/tracking_id";
       contextTags = read_name + "/context_tags";

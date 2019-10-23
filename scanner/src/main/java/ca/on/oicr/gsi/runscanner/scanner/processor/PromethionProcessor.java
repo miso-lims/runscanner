@@ -8,8 +8,8 @@ import java.util.stream.Stream;
 
 public class PromethionProcessor extends BaseOxfordNanoporeProcessor {
 
-  public PromethionProcessor(Builder builder, String seqName) {
-    super(builder, seqName);
+  public PromethionProcessor(Builder builder) {
+    super(builder);
   }
 
   @Override
@@ -31,8 +31,12 @@ public class PromethionProcessor extends BaseOxfordNanoporeProcessor {
 
   @Override
   protected void additionalProcess(OxfordNanoporeNotificationDto onnd, IHDF5Reader reader) {
-    if (reader.hasAttribute(trackingId, "device_id"))
+    if (reader.hasAttribute(trackingId, "hostname")) {
+      onnd.setSequencerName(reader.string().getAttr(trackingId, "hostname"));
+    }
+    if (reader.hasAttribute(trackingId, "device_id")) {
       onnd.setSequencerPosition(reader.string().getAttr(trackingId, "device_id"));
+    }
 
     if (reader.hasAttribute(contextTags, "flow_cell_product_code")) {
       onnd.setContainerModel(reader.string().getAttr(contextTags, "flow_cell_product_code"));
@@ -42,6 +46,6 @@ public class PromethionProcessor extends BaseOxfordNanoporeProcessor {
   }
 
   public static RunProcessor create(Builder builder, ObjectNode jsonNodes) {
-    return new PromethionProcessor(builder, jsonNodes.get("name").asText());
+    return new PromethionProcessor(builder);
   }
 }
