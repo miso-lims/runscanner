@@ -23,7 +23,7 @@
   <packaging>pom</packaging>
   <groupId>ca.on.oicr.gsi.runscanner</groupId>
   <name>Run Scanner</name>
-  <version>1.8.1-SNAPSHOT</version>
+  <version>1.9.0</version>
   <modules>
     <module>scanner</module>
     <module>dto</module>

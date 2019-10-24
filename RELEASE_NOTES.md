@@ -2,6 +2,10 @@
 
 Changes:
 
+# 1.9.0
+
+Changes:
+
   * Fix version incompatibility which made PromethION runs Unreadable
   * Get Oxford Nanopore sequencer name from files instead of configuration
 
