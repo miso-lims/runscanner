@@ -48,9 +48,6 @@ public class MinionProcessor extends BaseOxfordNanoporeProcessor {
     if (reader.hasAttribute(trackingId, "device_id")) {
       onnd.setSequencerName(reader.string().getAttr(trackingId, "device_id"));
     }
-    if (reader.hasAttribute(contextTags, "sequencing_kit")) {
-      onnd.setContainerModel(reader.string().getAttr(contextTags, "sequencing_kit"));
-    }
   }
 
   public static RunProcessor create(Builder builder, ObjectNode jsonNodes) {

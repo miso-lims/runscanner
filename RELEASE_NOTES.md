@@ -2,6 +2,8 @@
 
 Changes:
 
+  * Fix MinION sequencing container models (was previously reporting the sequencing kit instead)
+
 # 1.9.0
 
 Changes:
