@@ -238,6 +238,13 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
       if (genericReader.hasAttribute(trackingId, "exp_script_purpose"))
         onnd.setRunType(genericReader.string().getAttr(trackingId, "exp_script_purpose"));
 
+      if (genericReader.hasAttribute(contextTags, "flow_cell_product_code")) {
+        onnd.setContainerModel(
+            genericReader.string().getAttr(contextTags, "flow_cell_product_code"));
+      } else if (genericReader.hasAttribute(contextTags, "flowcell_type")) {
+        onnd.setContainerModel(genericReader.string().getAttr(contextTags, "flowcell_type"));
+      }
+
       additionalProcess(onnd, genericReader);
       return onnd;
     }
