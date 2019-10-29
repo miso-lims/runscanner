@@ -48,8 +48,10 @@ public class MinionProcessor extends BaseOxfordNanoporeProcessor {
     if (reader.hasAttribute(trackingId, "device_id")) {
       onnd.setSequencerName(reader.string().getAttr(trackingId, "device_id"));
     }
-    if (reader.hasAttribute(contextTags, "sequencing_kit")) {
-      onnd.setContainerModel(reader.string().getAttr(contextTags, "sequencing_kit"));
+    if (reader.hasAttribute(contextTags, "flow_cell_product_code")) {
+      onnd.setContainerModel(reader.string().getAttr(contextTags, "flow_cell_product_code"));
+    } else if (reader.hasAttribute(contextTags, "flowcell_type")) {
+      onnd.setContainerModel(reader.string().getAttr(contextTags, "flowcell_type"));
     }
   }
 
