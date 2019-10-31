@@ -245,6 +245,10 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
         onnd.setContainerModel(genericReader.string().getAttr(contextTags, "flowcell_type"));
       }
 
+      if (genericReader.hasAttribute(contextTags, "sequencing_kit")) {
+        onnd.setSequencingKit(genericReader.string().getAttr(contextTags, "sequencing_kit"));
+      }
+
       additionalProcess(onnd, genericReader);
       return onnd;
     }

@@ -31,6 +31,7 @@ public abstract class NotificationDto {
   private String sequencerPosition;
   private String containerSerialNumber;
   private String containerModel;
+  private String sequencingKit;
   private int laneCount;
   private HealthType healthType;
   private Instant startDate;
@@ -97,6 +98,15 @@ public abstract class NotificationDto {
 
   public void setContainerModel(String containerModel) {
     this.containerModel = containerModel;
+  }
+
+  /** @return the part number OR name of the sequencing kit */
+  public String getSequencingKit() {
+    return sequencingKit;
+  }
+
+  public void setSequencingKit(String sequencingKit) {
+    this.sequencingKit = sequencingKit;
   }
 
   /**
