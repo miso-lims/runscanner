@@ -4,6 +4,7 @@ Changes:
 
   * Fix MinION sequencing container models (was previously reporting the sequencing kit instead)
   * Added sequencing kit field for Oxford Nanopore runs
+  * Show in red when configuration is bad
 
 # 1.9.0
 

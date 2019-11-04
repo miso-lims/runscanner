@@ -1,5 +1,9 @@
 .link td:first-child {
-	cursor: pointer;
-	color: #4169E1;
-	text-decoration: underline;
+    cursor: pointer;
+    color: #4169E1;
+    text-decoration: underline;
+}
+
+.bad {
+    color: red;
 }
