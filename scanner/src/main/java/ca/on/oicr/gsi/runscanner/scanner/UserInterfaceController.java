@@ -199,7 +199,11 @@ public class UserInterfaceController {
         @Override
         protected void emitCore(SectionRenderer renderer) throws XMLStreamException {
           renderer.line("Run Scanner Version", projectVersion);
-          renderer.line("Is Configuration Good?", scheduler.isConfigurationGood() ? "Yes" : "No");
+          if (scheduler.isConfigurationGood()) {
+            renderer.line("Is Configuration Good?", "Yes");
+          } else {
+            renderer.line(Stream.of(new Pair<String, String>("class", "bad")), "Is Configuration Good?", "No");
+          }
           renderer.line("Last Configuration Read", scheduler.getConfigurationLastRead());
           renderer.line("Scanning Enabled", scheduler.isScanningEnabled() ? "Yes" : "No");
           renderer.line("Currently Scanning", scheduler.isScanningNow() ? "Yes" : "No");
