@@ -2,6 +2,12 @@
 
 Changes:
 
+  * Fix Illumina scanner reporting sample IDs as pool names
+
+# 1.10.0
+
+Changes:
+
   * Fix MinION sequencing container models (was previously reporting the sequencing kit instead)
   * Added sequencing kit field for Oxford Nanopore runs
   * Show in red when configuration is bad

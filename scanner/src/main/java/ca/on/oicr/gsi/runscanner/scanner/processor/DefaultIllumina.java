@@ -1,12 +1,10 @@
 package ca.on.oicr.gsi.runscanner.scanner.processor;
 
-import ca.on.oicr.gsi.Pair;
 import ca.on.oicr.gsi.runscanner.dto.IlluminaNotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.type.HealthType;
 import ca.on.oicr.gsi.runscanner.dto.type.IlluminaChemistry;
 import ca.on.oicr.gsi.runscanner.scanner.LatencyHistogram;
-import ca.on.oicr.gsi.runscanner.scanner.WhineyFunction;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
@@ -23,7 +21,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.ProcessBuilder.Redirect;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -44,7 +41,6 @@ import java.util.TimeZone;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import javax.xml.xpath.XPath;
@@ -84,8 +80,6 @@ public final class DefaultIllumina extends RunProcessor {
 
   private static final XPathExpression RUN_COMPLETION_STATUS_EXPRESSION =
       compileXPath("//CompletionStatus")[0];
-
-  private static final Pattern COMMA = Pattern.compile(",");
 
   private static final Predicate<String> BCL_FILENAME =
       Pattern.compile("^(s_[0-9]*_[0-9]*\\.bcl(\\.gz)?|L\\d*_\\d*.cbcl)").asPredicate();
@@ -313,25 +307,6 @@ public final class DefaultIllumina extends RunProcessor {
                 dto.setWorkflowType(workflowType);
               }
             });
-
-    // See if we can figure out a sample sheet
-    dto.setPoolNames(
-        Optional.of(new File(runDirectory, "SampleSheet.csv")) //
-            .filter(File::canRead) //
-            .map(File::toPath)
-            .map(
-                WhineyFunction.rethrow(
-                    path -> {
-                      try (Stream<String> lines = Files.lines(path, StandardCharsets.ISO_8859_1)) {
-                        return lines
-                            .filter(rejectUntil(line -> line.startsWith("Sample_ID,"))) //
-                            .map(COMMA::split) //
-                            .map(Pair.number(1))
-                            .filter(pair -> pair.second().length > 0) //
-                            .collect(Collectors.toMap(Pair::first, e -> e.second()[0]));
-                      }
-                    })) //
-            .orElse(Collections.emptyMap()));
 
     // The Illumina library can't distinguish between a failed run and one that either finished or
     // is still going. Scan the logs, if
