@@ -1,5 +1,9 @@
 # Unreleased
 
+
+
+# 1.10.1
+
 Changes:
 
   * Fix Illumina scanner reporting sample IDs as pool names
