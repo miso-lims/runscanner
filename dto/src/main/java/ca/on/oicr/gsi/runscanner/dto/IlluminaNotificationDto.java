@@ -3,9 +3,7 @@ package ca.on.oicr.gsi.runscanner.dto;
 import ca.on.oicr.gsi.runscanner.dto.type.IlluminaChemistry;
 import ca.on.oicr.gsi.runscanner.dto.type.Platform;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 
 public class IlluminaNotificationDto extends NotificationDto {
 
@@ -16,7 +14,6 @@ public class IlluminaNotificationDto extends NotificationDto {
   private List<Integer> indexLengths;
   private int numCycles;
   private int numReads;
-  private Map<Integer, String> poolNames;
   private int readLength;
   private List<Integer> readLengths;
   private String runBasesMask;
@@ -38,7 +35,6 @@ public class IlluminaNotificationDto extends NotificationDto {
         && Objects.equals(this.indexLengths, other.indexLengths)
         && Objects.equals(this.numCycles, other.numCycles)
         && Objects.equals(this.numReads, other.numReads)
-        && Objects.equals(this.poolNames, other.poolNames)
         && Objects.equals(this.readLength, other.readLength)
         && Objects.equals(this.readLengths, other.readLengths)
         && Objects.equals(this.scoreCycle, other.scoreCycle)
@@ -72,13 +68,6 @@ public class IlluminaNotificationDto extends NotificationDto {
     return indexLengths;
   }
 
-  @Override
-  public Optional<String> getLaneContents(int lane) {
-    return poolNames != null && poolNames.containsKey(lane)
-        ? Optional.of(poolNames.get(lane))
-        : Optional.empty();
-  }
-
   public int getNumCycles() {
     return numCycles;
   }
@@ -90,10 +79,6 @@ public class IlluminaNotificationDto extends NotificationDto {
   @Override
   public Platform getPlatformType() {
     return Platform.ILLUMINA;
-  }
-
-  public Map<Integer, String> getPoolNames() {
-    return poolNames;
   }
 
   public int getReadLength() {
@@ -128,7 +113,6 @@ public class IlluminaNotificationDto extends NotificationDto {
         indexLengths,
         numCycles,
         numReads,
-        poolNames,
         readLength,
         readLengths,
         scoreCycle,
@@ -161,10 +145,6 @@ public class IlluminaNotificationDto extends NotificationDto {
 
   public void setNumReads(int numReads) {
     this.numReads = numReads;
-  }
-
-  public void setPoolNames(Map<Integer, String> poolNames) {
-    this.poolNames = poolNames;
   }
 
   public void setReadLength(int readLength) {
@@ -200,8 +180,6 @@ public class IlluminaNotificationDto extends NotificationDto {
         + indexLengths
         + ", numCycles="
         + numCycles
-        + ", poolNames="
-        + poolNames
         + ", readLengths="
         + readLengths
         + ", readLength="
