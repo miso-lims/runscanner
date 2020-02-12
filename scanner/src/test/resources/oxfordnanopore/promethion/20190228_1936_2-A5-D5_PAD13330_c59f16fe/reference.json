@@ -1,8 +1,8 @@
 {
-  "completionDate": null,
+  "completionDate": "2019-09-27T18:29:57.342564Z",
   "containerModel": "flo-pro002",
   "containerSerialNumber": "PAD13330",
-  "healthType": "UNKNOWN",
+  "healthType": "COMPLETED",
   "laneCount": 1,
   "metrics": null,
   "pairedEndRun": false,

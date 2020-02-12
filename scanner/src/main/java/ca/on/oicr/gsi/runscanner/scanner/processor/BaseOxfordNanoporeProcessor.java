@@ -6,7 +6,9 @@ import ca.on.oicr.gsi.runscanner.dto.type.HealthType;
 import ch.systemsx.cisd.hdf5.HDF5FactoryProvider;
 import ch.systemsx.cisd.hdf5.IHDF5Reader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.FileVisitResult;
 import java.nio.file.FileVisitor;
 import java.nio.file.Files;
@@ -17,6 +19,7 @@ import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.TimeZone;
 import java.util.stream.Stream;
 import org.slf4j.Logger;
@@ -247,6 +250,23 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
 
       if (genericReader.hasAttribute(contextTags, "sequencing_kit")) {
         onnd.setSequencingKit(genericReader.string().getAttr(contextTags, "sequencing_kit"));
+      }
+
+      final File summaryFile = new File(runDirectory, "final_summary.txt");
+      if (summaryFile.exists()) {
+        final Properties summary = new Properties();
+        try (final InputStream summaryInput = new FileInputStream(summaryFile)) {
+          summary.load(summaryInput);
+        }
+        if (summary.containsKey("started")) {
+          onnd.setHealthType(HealthType.RUNNING);
+        }
+        if (summary.containsKey("acquisition_stopped")
+            && !summary.getProperty("acquisition_stopped").isEmpty()) {
+          onnd.setCompletionDate(
+              ZonedDateTime.parse(summary.getProperty("acquisition_stopped")).toInstant());
+          onnd.setHealthType(HealthType.COMPLETED);
+        }
       }
 
       additionalProcess(onnd, genericReader);
