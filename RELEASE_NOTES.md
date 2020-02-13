@@ -2,6 +2,10 @@
 
 
 
+# 1.11.0
+
+  * Attempt to find ONT run status and completion time in final_summary.txt
+
 # 1.10.1
 
 Changes:
