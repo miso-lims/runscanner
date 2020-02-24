@@ -2,6 +2,7 @@
 #include <iomanip>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <vector>
 #include <interop/interop.h>
@@ -479,9 +480,11 @@ int main(int argc, const char **argv) {
     /* Assume that incomplete data is an active run, rather than a broken one.
      */
     is_complete = false;
-  } catch (...) {
+  } catch (std::runtime_error e) {
     /* We are really unable to recover from any other exceptions, so just bail
      * out. */
+    std::cerr << "Exception from Illumina interop parser for run in " << argv[1]
+              << ": " << e.what() << std::endl;
     return 2;
   }
 
