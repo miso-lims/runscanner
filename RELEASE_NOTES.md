@@ -1,8 +1,12 @@
 # Unreleased
 
+Changes:
 
+  * Log Illumina library exceptions
 
 # 1.11.0
+
+Changes:
 
   * Attempt to find ONT run status and completion time in final_summary.txt
 
