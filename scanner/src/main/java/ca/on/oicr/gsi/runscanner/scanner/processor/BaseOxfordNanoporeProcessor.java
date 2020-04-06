@@ -222,34 +222,46 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
       trackingId = read_name + "/tracking_id";
       contextTags = read_name + "/context_tags";
 
-      if (genericReader.hasAttribute(trackingId, "flow_cell_id"))
-        onnd.setContainerSerialNumber(genericReader.string().getAttr(trackingId, "flow_cell_id"));
+      if (genericReader.hasAttribute(trackingId, "flow_cell_id")) {
+        String id = genericReader.string().getAttr(trackingId, "flow_cell_id");
+        if (!(id.equals(""))) onnd.setContainerSerialNumber(id);
+      }
 
       onnd.setLaneCount(LANE_COUNT);
       onnd.setHealthType(HealthType.UNKNOWN);
 
-      if (genericReader.hasAttribute(trackingId, "exp_start_time"))
-        onnd.setStartDate(
-            ZonedDateTime.parse(genericReader.string().getAttr(trackingId, "exp_start_time"))
-                .toInstant());
+      if (genericReader.hasAttribute(trackingId, "exp_start_time")) {
+        String start = genericReader.string().getAttr(trackingId, "exp_start_time");
+        if (!(start.equals(""))) onnd.setStartDate(ZonedDateTime.parse(start).toInstant());
+      }
 
-      if (genericReader.hasAttribute(trackingId, "version"))
-        onnd.setSoftware(genericReader.string().getAttr(trackingId, "version"));
-      if (genericReader.hasAttribute(trackingId, "protocols_version"))
-        onnd.setProtocolVersion(genericReader.string().getAttr(trackingId, "protocols_version"));
+      if (genericReader.hasAttribute(trackingId, "version")) {
+        String version = genericReader.string().getAttr(trackingId, "version");
+        if (!(version.equals(""))) onnd.setSoftware(version);
+      }
 
-      if (genericReader.hasAttribute(trackingId, "exp_script_purpose"))
-        onnd.setRunType(genericReader.string().getAttr(trackingId, "exp_script_purpose"));
+      if (genericReader.hasAttribute(trackingId, "protocols_version")) {
+        String protocolVersion = genericReader.string().getAttr(trackingId, "protocols_version");
+        if (!(protocolVersion.equals(""))) onnd.setProtocolVersion(protocolVersion);
+      }
+
+      if (genericReader.hasAttribute(trackingId, "exp_script_purpose")) {
+        String runType = genericReader.string().getAttr(trackingId, "exp_script_purpose");
+        if (!(runType.equals(""))) onnd.setRunType(runType);
+      }
 
       if (genericReader.hasAttribute(contextTags, "flow_cell_product_code")) {
-        onnd.setContainerModel(
-            genericReader.string().getAttr(contextTags, "flow_cell_product_code"));
+        String flowCellProductCode =
+            genericReader.string().getAttr(contextTags, "flow_cell_product_code");
+        if (!(flowCellProductCode.equals(""))) onnd.setContainerModel(flowCellProductCode);
       } else if (genericReader.hasAttribute(contextTags, "flowcell_type")) {
-        onnd.setContainerModel(genericReader.string().getAttr(contextTags, "flowcell_type"));
+        String flowcellType = genericReader.string().getAttr(contextTags, "flowcell_type");
+        if (!(flowcellType.equals(""))) onnd.setContainerModel(flowcellType);
       }
 
       if (genericReader.hasAttribute(contextTags, "sequencing_kit")) {
-        onnd.setSequencingKit(genericReader.string().getAttr(contextTags, "sequencing_kit"));
+        String sequencingKit = genericReader.string().getAttr(contextTags, "sequencing_kit");
+        if (!(sequencingKit.equals(""))) onnd.setSequencingKit(sequencingKit);
       }
 
       final File summaryFile = new File(runDirectory, "final_summary.txt");
