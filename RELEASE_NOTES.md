@@ -3,6 +3,7 @@
 Changes:
 
   * Log Illumina library exceptions
+  * Nanopore processor will report null if attribute is empty string
 
 # 1.11.0
 
