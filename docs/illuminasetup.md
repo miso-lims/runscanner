@@ -19,7 +19,11 @@ Then:
     export CXX=$(which clang++-5.0 clang++) && ./build-illumina-interop && autoreconf -i && ./configure && make && sudo make install
 
 After which, deploy Run Scanner as directed in
-[Installation & Setup](../installation)
+[Installation & Setup](../installation).
+
+Note that Run Scanner expects to be able to find the `runscanner-illumina`
+program on the path. For Debian and Ubuntu systems, in `/etc/init.d/tomcat8`,
+adjust the `PATH` to include `/usr/local/bin`.
 
 <!-- All this should be moved to the Developer Documentation once we're at that point
 ## Developer Information
