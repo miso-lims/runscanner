@@ -5,10 +5,8 @@ import ca.on.oicr.gsi.runscanner.dto.OxfordNanoporeNotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.type.HealthType;
 import ch.systemsx.cisd.hdf5.HDF5FactoryProvider;
 import ch.systemsx.cisd.hdf5.IHDF5Reader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+
+import java.io.*;
 import java.nio.file.FileVisitResult;
 import java.nio.file.FileVisitor;
 import java.nio.file.Files;
@@ -17,10 +15,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.time.Instant;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-import java.util.TimeZone;
+import java.util.*;
 import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -214,9 +209,11 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
       log.debug("Selected read name {} from {}", read_name, firstFile);
 
       Path p = runDirectory.toPath();
+      final int runDirectoryNameCount = p.getNameCount();
+      // when running ProcessRun, the rootPath is not set resulting in a NullPointerException
+      final int rootDirectoryNameCount = rootPath == null ? runDirectoryNameCount - 3 : rootPath.getNameCount();
       onnd.setRunAlias(
-          p.subpath(rootPath.getNameCount(), p.getNameCount()).toString().replaceAll("/", "_"));
-
+              p.subpath(rootDirectoryNameCount, runDirectoryNameCount).toString().replaceAll("/", "_"));
       onnd.setSequencerFolderPath(runDirectory.toString());
 
       trackingId = read_name + "/tracking_id";
@@ -263,11 +260,12 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
         String sequencingKit = genericReader.string().getAttr(contextTags, "sequencing_kit");
         if (!(sequencingKit.equals(""))) onnd.setSequencingKit(sequencingKit);
       }
-
-      final File summaryFile = new File(runDirectory, "final_summary.txt");
-      if (summaryFile.exists()) {
+      final Optional<File> summaryFile = Stream.of(Objects.requireNonNull(runDirectory.listFiles()))
+              .filter(f -> f.getName().matches("final_summary.*\\.txt"))
+              .findFirst();
+      if (summaryFile.isPresent() && summaryFile.get().exists()) {
         final Properties summary = new Properties();
-        try (final InputStream summaryInput = new FileInputStream(summaryFile)) {
+        try (final InputStream summaryInput = new FileInputStream(summaryFile.get())) {
           summary.load(summaryInput);
         }
         if (summary.containsKey("started")) {
