@@ -263,7 +263,7 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
       final Optional<File> summaryFile = Stream.of(Objects.requireNonNull(runDirectory.listFiles()))
               .filter(f -> f.getName().matches("final_summary.*\\.txt"))
               .findFirst();
-      if (summaryFile.isPresent() && summaryFile.get().exists()) {
+      if (summaryFile.isPresent()) {
         final Properties summary = new Properties();
         try (final InputStream summaryInput = new FileInputStream(summaryFile.get())) {
           summary.load(summaryInput);
