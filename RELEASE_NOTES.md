@@ -1,3 +1,10 @@
+# 1.12.2
+
+Changes:
+
+  * Documentation fixes
+  * Bugfixes for using ProcessRun on Nanopore runs
+
 # 1.12.1
 
 Changes:
