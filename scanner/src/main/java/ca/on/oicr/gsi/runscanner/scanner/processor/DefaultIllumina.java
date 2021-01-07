@@ -4,6 +4,7 @@ import ca.on.oicr.gsi.runscanner.dto.IlluminaNotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.type.HealthType;
 import ca.on.oicr.gsi.runscanner.dto.type.IlluminaChemistry;
+import ca.on.oicr.gsi.runscanner.dto.type.IndexSequencing;
 import ca.on.oicr.gsi.runscanner.scanner.LatencyHistogram;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParseException;
@@ -95,6 +96,7 @@ public final class DefaultIllumina extends RunProcessor {
       Pattern.compile("^([a-zA-Z]+(?: Rapid)?) (Flow Cell v\\d)$");
   private static final XPathExpression FLOWCELL_PAIRED;
   private static final XPathExpression WORKFLOW_TYPE;
+  private static final XPathExpression SBS_CONSUMABLE_VERSION;
 
   static {
     XPath xpath = XPathFactory.newInstance().newXPath();
@@ -102,6 +104,7 @@ public final class DefaultIllumina extends RunProcessor {
       WORKFLOW_TYPE = xpath.compile("//WorkflowType/text()|//ClusteringChoice/text()");
       FLOWCELL = xpath.compile("//Setup/Flowcell/text()");
       FLOWCELL_PAIRED = xpath.compile("//Setup/PairEndFC/text()");
+      SBS_CONSUMABLE_VERSION = xpath.compile("//RfidsInfo/SbsConsumableVersion/text()");
 
       XPathExpression miSeqPartNumber = xpath.compile("//FlowcellRFIDTag/PartNumber/text()");
       XPathExpression nextSeqPartNumber = xpath.compile("//FlowCellRfidTag/PartNumber/text()");
@@ -306,6 +309,7 @@ public final class DefaultIllumina extends RunProcessor {
               if (workflowType != null && !workflowType.equals("None")) {
                 dto.setWorkflowType(workflowType);
               }
+              dto.setIndexSequencing(findIndexSequencing(runParams));
             });
 
     // The Illumina library can't distinguish between a failed run and one that either finished or
@@ -473,6 +477,19 @@ public final class DefaultIllumina extends RunProcessor {
       workflowType = null;
     }
     return isStringEmptyOrNull(workflowType) ? null : workflowType;
+  }
+
+  private IndexSequencing findIndexSequencing(Document runParams) {
+    try {
+      String stringVersion = SBS_CONSUMABLE_VERSION.evaluate(runParams);
+      if (isStringEmptyOrNull(stringVersion)) {
+        return null;
+      }
+      int sbsConsumableVersion = Integer.parseInt(stringVersion);
+      return IndexSequencing.getBySbsConsumableVersion(sbsConsumableVersion);
+    } catch (XPathExpressionException | NumberFormatException e) {
+      return null;
+    }
   }
 
   /**
