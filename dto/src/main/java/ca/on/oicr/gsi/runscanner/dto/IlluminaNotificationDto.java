@@ -1,6 +1,7 @@
 package ca.on.oicr.gsi.runscanner.dto;
 
 import ca.on.oicr.gsi.runscanner.dto.type.IlluminaChemistry;
+import ca.on.oicr.gsi.runscanner.dto.type.IndexSequencing;
 import ca.on.oicr.gsi.runscanner.dto.type.Platform;
 import java.util.List;
 import java.util.Objects;
@@ -19,6 +20,7 @@ public class IlluminaNotificationDto extends NotificationDto {
   private String runBasesMask;
   private int scoreCycle;
   private String workflowType;
+  private IndexSequencing indexSequencing;
 
   @Override
   public boolean equals(Object obj) {
@@ -38,7 +40,8 @@ public class IlluminaNotificationDto extends NotificationDto {
         && Objects.equals(this.readLength, other.readLength)
         && Objects.equals(this.readLengths, other.readLengths)
         && Objects.equals(this.scoreCycle, other.scoreCycle)
-        && Objects.equals(this.workflowType, other.workflowType);
+        && Objects.equals(this.workflowType, other.workflowType)
+        && Objects.equals(this.indexSequencing, other.indexSequencing);
   }
 
   public int getBclCount() {
@@ -101,6 +104,10 @@ public class IlluminaNotificationDto extends NotificationDto {
     return workflowType;
   }
 
+  public IndexSequencing getIndexSequencing() {
+    return indexSequencing;
+  }
+
   @Override
   public int hashCode() {
     return Objects.hash(
@@ -116,7 +123,8 @@ public class IlluminaNotificationDto extends NotificationDto {
         readLength,
         readLengths,
         scoreCycle,
-        workflowType);
+        workflowType,
+        indexSequencing);
   }
 
   public void setBclCount(int bclCount) {
@@ -167,6 +175,10 @@ public class IlluminaNotificationDto extends NotificationDto {
     this.workflowType = workflowType;
   }
 
+  public void setIndexSequencing(IndexSequencing indexSequencing) {
+    this.indexSequencing = indexSequencing;
+  }
+
   @Override
   public String toString() {
     return super.toString()
@@ -194,6 +206,8 @@ public class IlluminaNotificationDto extends NotificationDto {
         + numReads
         + ", workflowType="
         + workflowType
+        + ", indexSequencing="
+        + indexSequencing
         + "]";
   }
 }
