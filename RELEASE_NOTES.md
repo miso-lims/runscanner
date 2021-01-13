@@ -1,3 +1,9 @@
+# 1.12.3
+
+Changes:
+
+  * Detect NovaSeq index sequencing method
+
 # 1.12.2
 
 Changes:
