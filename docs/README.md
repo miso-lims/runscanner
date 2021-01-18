@@ -14,7 +14,7 @@ Install [mkdocs](https://www.mkdocs.org/#installation).
 
 ## Test and deploy locally
 
-To test out changes locally, run:
+To test out changes locally, run from the repository root directory:
 
 ```
 mkdocs serve -f .mkdocs.yml
