@@ -280,7 +280,6 @@ unsupported.
 
 * **RS**
 * **RS II**
-* _Sequel - Under development_
 
 #### Illumina
 * **HiSeq 1000**
