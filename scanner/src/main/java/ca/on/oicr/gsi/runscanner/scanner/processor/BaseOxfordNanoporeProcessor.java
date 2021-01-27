@@ -5,7 +5,6 @@ import ca.on.oicr.gsi.runscanner.dto.OxfordNanoporeNotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.type.HealthType;
 import ch.systemsx.cisd.hdf5.HDF5FactoryProvider;
 import ch.systemsx.cisd.hdf5.IHDF5Reader;
-
 import java.io.*;
 import java.nio.file.FileVisitResult;
 import java.nio.file.FileVisitor;
@@ -211,9 +210,10 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
       Path p = runDirectory.toPath();
       final int runDirectoryNameCount = p.getNameCount();
       // when running ProcessRun, the rootPath is not set resulting in a NullPointerException
-      final int rootDirectoryNameCount = rootPath == null ? runDirectoryNameCount - 3 : rootPath.getNameCount();
+      final int rootDirectoryNameCount =
+          rootPath == null ? runDirectoryNameCount - 3 : rootPath.getNameCount();
       onnd.setRunAlias(
-              p.subpath(rootDirectoryNameCount, runDirectoryNameCount).toString().replaceAll("/", "_"));
+          p.subpath(rootDirectoryNameCount, runDirectoryNameCount).toString().replaceAll("/", "_"));
       onnd.setSequencerFolderPath(runDirectory.toString());
 
       trackingId = read_name + "/tracking_id";
@@ -247,7 +247,11 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
         if (!(runType.equals(""))) onnd.setRunType(runType);
       }
 
-      if (genericReader.hasAttribute(contextTags, "flow_cell_product_code")) {
+      if (genericReader.hasAttribute(trackingId, "flow_cell_product_code")) {
+        String flowCellProductCode =
+            genericReader.string().getAttr(trackingId, "flow_cell_product_code");
+        if (!(flowCellProductCode.equals(""))) onnd.setContainerModel(flowCellProductCode);
+      } else if (genericReader.hasAttribute(contextTags, "flow_cell_product_code")) {
         String flowCellProductCode =
             genericReader.string().getAttr(contextTags, "flow_cell_product_code");
         if (!(flowCellProductCode.equals(""))) onnd.setContainerModel(flowCellProductCode);
@@ -260,7 +264,8 @@ public abstract class BaseOxfordNanoporeProcessor extends RunProcessor {
         String sequencingKit = genericReader.string().getAttr(contextTags, "sequencing_kit");
         if (!(sequencingKit.equals(""))) onnd.setSequencingKit(sequencingKit);
       }
-      final Optional<File> summaryFile = Stream.of(Objects.requireNonNull(runDirectory.listFiles()))
+      final Optional<File> summaryFile =
+          Stream.of(Objects.requireNonNull(runDirectory.listFiles()))
               .filter(f -> f.getName().matches("final_summary.*\\.txt"))
               .findFirst();
       if (summaryFile.isPresent()) {
