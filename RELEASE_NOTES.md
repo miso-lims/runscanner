@@ -1,3 +1,9 @@
+# 1.12.4
+
+Changes:
+
+  * Fix detecting Oxford Nanopore flow cell model
+
 # 1.12.3
 
 Changes:
