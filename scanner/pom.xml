@@ -60,6 +60,11 @@
         <groupId>io.springfox</groupId>
         <artifactId>springfox-swagger-ui</artifactId>
       </dependency>
+      <dependency>
+        <groupId>cisd</groupId>
+        <artifactId>jhdf5</artifactId>
+      </dependency>
+
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
