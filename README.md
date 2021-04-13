@@ -8,8 +8,8 @@ Full instructions for the setup and use of Run Scanner can be found in the [Run 
 
 ## Prerequisites
 
-* JDK 8
-* Tomcat 8
+* JDK 11 or later
+* Tomcat 8 or later
 * C++ build environment
 * jsoncpp
 * [Maven 3.0.5](http://maven.apache.org/download.html) or later

@@ -1,7 +1,7 @@
 ### Prerequisites
 
-* JDK 8
-* Tomcat 8
+* JDK 11 or later
+* Tomcat 8 or later
 * [Maven 3.0.5](http://maven.apache.org/download.html) or later
 * git
 
@@ -11,7 +11,7 @@ For Illumina support:
 * jsoncpp
 
 Please ensure that your sequencer(s) are supported by Run Scanner.
-Please refer to 
+Please refer to
 [Appendix C: Sequencers Supported by Run Scanner](../appendices/#appendix-c-sequencers-supported-by-run-scanner)
  for more information.
 

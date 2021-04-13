@@ -30,8 +30,6 @@
   </modules>
   <properties>
     <skipIllumina>true</skipIllumina>
-    <maven.compiler.source>1.8</maven.compiler.source>
-    <maven.compiler.target>1.8</maven.compiler.target>
     <jackson.version>2.12.2</jackson.version>
     <spring.version>5.2.3.RELEASE</spring.version>
   </properties>
@@ -191,7 +189,11 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.1</version>
+        <version>3.8.1</version>
+        <configuration>
+          <release>11</release>
+          <showWarnings>true</showWarnings>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
