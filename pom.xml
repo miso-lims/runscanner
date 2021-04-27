@@ -183,7 +183,7 @@
     </repository>
     <repository>
       <id>ImageJ Public</id>
-      <url>http://maven.imagej.net/content/repositories/public/</url>
+      <url>https://maven.imagej.net/content/repositories/public/</url>
     </repository>
   </repositories>
   <build>
