@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/miso-lims/runscanner.svg)](https://travis-ci.org/miso-lims/runscanner)[![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=ca.on.oicr.gsi.runscanner%3Arunscanner&metric=alert_status)](https://sonarcloud.io/dashboard?id=ca.on.oicr.gsi.runscanner:runscanner)
+![CI](https://github.com/miso-lims/runscanner/actions/workflows/run_scanner_ci.yml/badge.svg)
 
 # Run Scanner
 This is a web service that monitors directories on the file system containing
@@ -8,10 +8,9 @@ Full instructions for the setup and use of Run Scanner can be found in the [Run 
 
 ## Prerequisites
 
-* JDK 11 or later
-* Tomcat 8 or later
-* C++ build environment
-* jsoncpp
+* JDK 11
+* Tomcat 8 or 9
+* C++ build environment (see [runscanner-llumina](runscanner-illumina/README.md))
 * [Maven 3.0.5](http://maven.apache.org/download.html) or later
 * git
 
