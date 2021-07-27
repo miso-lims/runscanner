@@ -1,0 +1,36 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  CI:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+      - name: Cache Maven packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update \
+          && sudo apt-get install pkg-config cmake libjsoncpp-dev autoconf \
+          libtool build-essential clang-6.0
+      - name: Build Illumina Interop
+        run: |
+          pushd runscanner-illumina \
+          && git submodule init \
+          && git submodule update \
+          && ./build-illumina-interop \
+          && autoreconf -i \
+          && ./configure \
+          && make \
+          && popd
+      - name: Run tests
+        run: |
+          PATH=$PATH:$(pwd)/runscanner-illumina mvn --batch-mode clean test \
+          -DskipIllumina=false
