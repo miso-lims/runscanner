@@ -118,7 +118,7 @@
         <!-- Do not remove. Used via reflection. Project will compile but fail without it -->
         <groupId>org.apache.httpcomponents</groupId>
         <artifactId>httpclient</artifactId>
-        <version>4.5.3</version>
+        <version>4.5.13</version>
       </dependency>
 
       <dependency>
