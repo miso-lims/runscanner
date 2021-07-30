@@ -1,3 +1,9 @@
+# 1.13.0
+
+Changes:
+
+  * Updated to Java 11. Now requires JDK 11 to build. Tomcat also must be using Java 11.
+
 # 1.12.5
 
 Changes:
