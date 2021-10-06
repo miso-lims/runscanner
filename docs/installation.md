@@ -24,6 +24,7 @@ Extract the `.zip` or `.tar.gz` file to a temporary location.
 ### Setting Up Run Scanner
 
 In the following instructions:
+
 * Let `${CATALINA_HOME}` be the directory where Tomcat is installed.
 * Let `${CONTEXT}` be the context URL you wish to use for Run Scanner.
     * To deploy to the root context (e.g., https://www.myrunscanner.org), let `${CONTEXT}` be `ROOT`
