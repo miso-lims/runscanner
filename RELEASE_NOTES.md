@@ -1,3 +1,9 @@
+# 1.13.1
+
+Changes:
+
+  * Updated to log4j 2.17.1
+
 # 1.13.0
 
 Changes:
