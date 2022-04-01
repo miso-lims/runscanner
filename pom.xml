@@ -30,7 +30,7 @@
   </modules>
   <properties>
     <skipIllumina>true</skipIllumina>
-    <jackson.version>2.12.2</jackson.version>
+    <jackson.version>2.12.6.1</jackson.version>
     <spring.version>5.3.18</spring.version>
   </properties>
   <dependencyManagement>
