@@ -1,3 +1,11 @@
+# 1.13.2
+
+Changes:
+  
+  * Removed guava dependency
+  * Update spring-beans to 5.3.18
+  * Update jackson to 2.13.2
+
 # 1.13.1
 
 Changes:
