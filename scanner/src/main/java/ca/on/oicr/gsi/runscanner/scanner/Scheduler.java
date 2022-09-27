@@ -237,6 +237,11 @@ public class Scheduler {
           .help("The number of runs waiting to be processed.")
           .labelNames(PLATFORM_LABEL)
           .register();
+  private static final Gauge lastScanStartTime =
+      Gauge.build()
+          .name("miso_runscanner_last_scan_start_time_seconds")
+          .help("start time of last scan")
+          .register();
 
   private File configurationFile;
 
@@ -462,6 +467,7 @@ public class Scheduler {
                   readConfiguration();
                 }
                 scanLastStarted = Instant.now();
+                lastScanStartTime.setToCurrentTime();
                 UnreadableDirectories newUnreadableDirectories = new UnreadableDirectories();
                 try (StreamCountSpy<Pair<File, Configuration>> newRuns =
                         new StreamCountSpy<>(newRunsScanned);

@@ -1,3 +1,9 @@
+# Unreleased
+
+Changes:
+
+  * Added metric to track last scan start time
+
 # 1.13.2
 
 Changes:
