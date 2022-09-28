@@ -24,6 +24,11 @@ groups:
       description: The run scanner {{$labels.instance}} has found candidate sequencer
         output directories that it does not have permission to read.
       summary: Unreadable directories run directories on {{$labels.instance}}
+  - alert: ScanningStopped
+    expr: time() - process_start_time_seconds  > 30 * 60 and time() - miso_runscanner_last_scan_start_time_seconds > 30 * 60
+    annotations:
+      description: Run Scanner has not started a new scan in over 30 minutes
+      summary: Run Scanner seems to have stopped scanning
   - alert: AutoInhibit
     expr: time() - process_start_time_seconds{job="runscanner"}  < 15 * 60 or sum(miso_runscanner_waiting_runs) by (environment, instance, job) - miso_runscanner_bad_runs > 5
     labels:
