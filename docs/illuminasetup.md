@@ -10,6 +10,10 @@ On Fedora/Red Hat:
     sudo yum groupinstall "Development Tools"
     sudo yum install pkgconfig cmake jsoncpp-devel libtool autoconf clang
 
+Note: Some metrics will be formatted based on the machine's locale preferences,
+so you may want to check those via the `locale` command (on most systems).
+
+
 Pull the Illumina Interop code via:
 
     git submodule init && git submodule update
