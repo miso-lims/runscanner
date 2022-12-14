@@ -1,6 +1,6 @@
 ### Prerequisites
 
-* JDK 11
+* JDK 17
 * Tomcat 8 or 9
 * [Maven 3.0.5](http://maven.apache.org/download.html) or later
 * git
