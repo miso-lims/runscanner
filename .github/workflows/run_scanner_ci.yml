@@ -19,7 +19,7 @@ jobs:
         run: |
           sudo apt-get update \
           && sudo apt-get install pkg-config cmake libjsoncpp-dev autoconf \
-          libtool build-essential clang-6.0
+          libtool build-essential clang-12
       - name: Build Illumina Interop
         run: |
           pushd runscanner-illumina \
