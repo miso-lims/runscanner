@@ -20,7 +20,7 @@ Pull the Illumina Interop code via:
 
 Then:
 
-    ./build-illumina-interop && autoreconf -i && ./configure && make && make install
+    cd runscanner-illumina && ./build-illumina-interop && autoreconf -i && ./configure && make && make install
 
 After which, deploy Run Scanner as directed in
 [Installation & Setup](../installation).
