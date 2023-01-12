@@ -1,3 +1,9 @@
+# 1.14.0
+
+Changes:
+
+  * Upgrade to Java 17
+
 # 1.13.3
 
 Changes:
