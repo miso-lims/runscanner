@@ -394,8 +394,8 @@ void add_lane_cluster_plot(
   Json::Value cluster_pf_data(Json::arrayValue);
 
   for (const auto summary : *run_summary.begin()) {
-    cluster_data.append(summary.reads());
-    cluster_pf_data.append(summary.reads_pf());
+    cluster_data.append((Json::LargestUInt) summary.reads());
+    cluster_pf_data.append((Json::LargestUInt) summary.reads_pf());
   }
 
   Json::Value series(Json::arrayValue);
