@@ -1,3 +1,9 @@
+# Unreleased
+
+Changes:
+
+  * Update illumina-interop to 1.2.0
+
 # 1.14.0
 
 Changes:
