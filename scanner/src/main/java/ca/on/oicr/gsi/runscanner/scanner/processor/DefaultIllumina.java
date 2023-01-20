@@ -97,6 +97,8 @@ public final class DefaultIllumina extends RunProcessor {
   private static final XPathExpression FLOWCELL_PAIRED;
   private static final XPathExpression WORKFLOW_TYPE;
   private static final XPathExpression SBS_CONSUMABLE_VERSION;
+  private static final XPathExpression START_TIME_XPATH;
+  private static final XPathExpression READ_2_REVERSE_COMPLIMENT;
 
   static {
     XPath xpath = XPathFactory.newInstance().newXPath();
@@ -109,15 +111,19 @@ public final class DefaultIllumina extends RunProcessor {
       XPathExpression miSeqPartNumber = xpath.compile("//FlowcellRFIDTag/PartNumber/text()");
       XPathExpression nextSeqPartNumber = xpath.compile("//FlowCellRfidTag/PartNumber/text()");
       XPathExpression novaSeqPartNum = xpath.compile("//RfidsInfo/FlowCellMode/text()");
+      XPathExpression nextSeq2000PartNumber = xpath.compile("//FlowCellPartNumber/text()");
       CONTAINER_PARTNUMBER_XPATHS =
           Collections.unmodifiableSet(
-              Sets.newHashSet(miSeqPartNumber, nextSeqPartNumber, novaSeqPartNum));
+              Sets.newHashSet(
+                  miSeqPartNumber, nextSeqPartNumber, novaSeqPartNum, nextSeq2000PartNumber));
 
       XPathExpression hiSeqPosition = xpath.compile("//Setup/FCPosition/text()");
       XPathExpression novaSeqPosition = xpath.compile("//Side/text()");
       POSITION_XPATHS =
           Collections.unmodifiableSet(Sets.newHashSet(hiSeqPosition, novaSeqPosition));
-
+      START_TIME_XPATH = xpath.compile("//RunStartTime/text()");
+      READ_2_REVERSE_COMPLIMENT =
+          xpath.compile("//Run/Reads/Read[@Number='2']/@IsReverseComplement");
     } catch (XPathExpressionException e) {
       throw new IllegalStateException("Failed to compile xpaths", e);
     }
@@ -196,7 +202,8 @@ public final class DefaultIllumina extends RunProcessor {
     }
     // For NextSeq, check for a file per cycle
     try (Stream<Path> laneWalk = Files.walk(laneDir, 1)) {
-      // First, examine the control files to determine all the BCL files we intend to find for each
+      // First, examine the control files to determine all the BCL files we intend to
+      // find for each
       // cycle.
       long bgzfCount =
           laneWalk //
@@ -254,7 +261,8 @@ public final class DefaultIllumina extends RunProcessor {
 
   @Override
   public NotificationDto process(File runDirectory, TimeZone tz) throws IOException {
-    // Call the C++ program to do the real work and write a notification DTO to standard output. The
+    // Call the C++ program to do the real work and write a notification DTO to
+    // standard output. The
     // C++ object has no direct binding to the
     // DTO, so any changes to the DTO must be manually changed in the C++ code.
     ProcessBuilder builder =
@@ -288,6 +296,8 @@ public final class DefaultIllumina extends RunProcessor {
           "Illumina run processor did not exit cleanly: " + runDirectory.getAbsolutePath());
     }
 
+    final Document runInfo = getRunInfo(runDirectory);
+
     Stream.of("runParameters.xml", "RunParameters.xml")
         .map(f -> new File(runDirectory, f))
         .filter(file -> file.exists() && file.canRead())
@@ -303,16 +313,21 @@ public final class DefaultIllumina extends RunProcessor {
                       .orElse(IlluminaChemistry.UNKNOWN));
               dto.setContainerModel(findContainerModel(runParams));
               dto.setSequencerPosition(findSequencerPosition(runParams));
-              // See if we can figure out the workflow type on the NovaSeq or HiSeq. This mostly
+              // See if we can figure out the workflow type on the NovaSeq or HiSeq. This
+              // mostly
               // tells us how the clustering was done
               final String workflowType = findWorkflowType(runParams);
               if (workflowType != null && !workflowType.equals("None")) {
                 dto.setWorkflowType(workflowType);
               }
-              dto.setIndexSequencing(findIndexSequencing(runParams));
+              dto.setIndexSequencing(findIndexSequencing(runInfo, runParams));
+              if (dto.getStartDate() == null) {
+                dto.setStartDate(findStartDate(runParams));
+              }
             });
 
-    // The Illumina library can't distinguish between a failed run and one that either finished or
+    // The Illumina library can't distinguish between a failed run and one that
+    // either finished or
     // is still going. Scan the logs, if
     // available to determine if the run failed.
     File rtaLogDir = new File(runDirectory, "/Data/RTALogs");
@@ -355,7 +370,8 @@ public final class DefaultIllumina extends RunProcessor {
 
     // This run claims to be complete, but is it really?
     if (dto.getHealthType() == HealthType.COMPLETED) {
-      // Maybe a NextSeq wrote a completion status, that we take as authoritative even though it's
+      // Maybe a NextSeq wrote a completion status, that we take as authoritative even
+      // though it's
       // totally undocumented behaviour.
       Optional<HealthType> updatedHealth =
           Optional.of(new File(runDirectory, "RunCompletionStatus.xml")) //
@@ -384,9 +400,11 @@ public final class DefaultIllumina extends RunProcessor {
                   .filter(File::exists) //
                   .count();
           if (netCopyFiles == 0) {
-            // This might mean incomplete or it might mean the sequencer never wrote the files
+            // This might mean incomplete or it might mean the sequencer never wrote the
+            // files
           } else {
-            // If we see some net copy files, then it's still running; if they're all here, assume
+            // If we see some net copy files, then it's still running; if they're all here,
+            // assume
             // it's done.
             if (netCopyFiles < dto.getNumReads()) {
               updatedHealth = Optional.of(HealthType.RUNNING);
@@ -402,7 +420,8 @@ public final class DefaultIllumina extends RunProcessor {
         }
       }
 
-      // Check that all the data files have copied. This is a really expensive check, so we let the
+      // Check that all the data files have copied. This is a really expensive check,
+      // so we let the
       // user disable it.
       if (!updatedHealth.isPresent() && checkOutput) {
         try (AutoCloseable latency = directory_scan_time.start()) {
@@ -426,6 +445,14 @@ public final class DefaultIllumina extends RunProcessor {
     }
 
     return dto;
+  }
+
+  private Document getRunInfo(File runDirectory) {
+    File runInfoFile = new File(runDirectory, "RunInfo.xml");
+    if (runInfoFile.exists() && runInfoFile.canRead()) {
+      return RunProcessor.parseXml(runInfoFile).orElse(null);
+    }
+    return null;
   }
 
   private void updateCompletionDateFromFile(
@@ -479,7 +506,17 @@ public final class DefaultIllumina extends RunProcessor {
     return isStringEmptyOrNull(workflowType) ? null : workflowType;
   }
 
-  private IndexSequencing findIndexSequencing(Document runParams) {
+  private IndexSequencing findIndexSequencing(Document runInfo, Document runParams) {
+    try {
+      String i5Reverse = READ_2_REVERSE_COMPLIMENT.evaluate(runInfo);
+      if (Objects.equals(i5Reverse, "Y")) {
+        return IndexSequencing.I5_REVERSE_COMPLEMENT;
+      } else if (Objects.equals(i5Reverse, "N")) {
+        return IndexSequencing.NORMAL;
+      }
+    } catch (XPathExpressionException e) {
+      // continue to try other source
+    }
     try {
       String stringVersion = SBS_CONSUMABLE_VERSION.evaluate(runParams);
       if (isStringEmptyOrNull(stringVersion)) {
@@ -488,6 +525,15 @@ public final class DefaultIllumina extends RunProcessor {
       int sbsConsumableVersion = Integer.parseInt(stringVersion);
       return IndexSequencing.getBySbsConsumableVersion(sbsConsumableVersion);
     } catch (XPathExpressionException | NumberFormatException e) {
+      return null;
+    }
+  }
+
+  private Instant findStartDate(Document runParams) {
+    try {
+      String timestamp = START_TIME_XPATH.evaluate(runParams);
+      return Instant.parse(timestamp);
+    } catch (XPathExpressionException | DateTimeParseException e) {
       return null;
     }
   }
