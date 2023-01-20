@@ -289,6 +289,7 @@ unsupported.
 * **MiSeq**
 * **NextSeq 500**
 * **NextSeq 550**
+* _NextSeq 2000_
 * **NovaSeq 6000**
 * iSeq
 * MiniSeq
