@@ -2,6 +2,12 @@
 
 Changes:
 
+
+
+# 1.15.0
+
+Changes:
+
   * Fixed detection of startDate, containerModel, and indexSequencing for NextSeq 2000 runs
   * Update illumina-interop to 1.2.0
 

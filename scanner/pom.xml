@@ -3,7 +3,7 @@
   <parent>
     <groupId>ca.on.oicr.gsi.runscanner</groupId>
     <artifactId>runscanner</artifactId>
-    <version>1.14.1-SNAPSHOT</version>
+    <version>1.15.0</version>
   </parent>
   <artifactId>scanner</artifactId>
   <packaging>war</packaging>
@@ -11,7 +11,7 @@
     <dependency>
     	<groupId>ca.on.oicr.gsi.runscanner</groupId>
     	<artifactId>runscanner-dto</artifactId>
-    	<version>1.14.1-SNAPSHOT</version>
+    	<version>1.15.0</version>
     </dependency>
     <dependency>
       <groupId>io.prometheus</groupId>
