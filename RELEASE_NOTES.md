@@ -2,7 +2,7 @@
 
 Changes:
 
-
+  * Fixed detecting wrong indexSequencing for NextSeq 2000 runs
 
 # 1.15.0
 

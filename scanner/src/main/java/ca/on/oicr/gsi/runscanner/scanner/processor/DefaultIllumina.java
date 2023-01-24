@@ -98,7 +98,7 @@ public final class DefaultIllumina extends RunProcessor {
   private static final XPathExpression WORKFLOW_TYPE;
   private static final XPathExpression SBS_CONSUMABLE_VERSION;
   private static final XPathExpression START_TIME_XPATH;
-  private static final XPathExpression READ_2_REVERSE_COMPLIMENT;
+  private static final XPathExpression I5_REVERSE_COMPLEMENT;
 
   static {
     XPath xpath = XPathFactory.newInstance().newXPath();
@@ -122,8 +122,8 @@ public final class DefaultIllumina extends RunProcessor {
       POSITION_XPATHS =
           Collections.unmodifiableSet(Sets.newHashSet(hiSeqPosition, novaSeqPosition));
       START_TIME_XPATH = xpath.compile("//RunStartTime/text()");
-      READ_2_REVERSE_COMPLIMENT =
-          xpath.compile("//Run/Reads/Read[@Number='2']/@IsReverseComplement");
+      I5_REVERSE_COMPLEMENT =
+          xpath.compile("//Run/Reads/Read[@IsIndexedRead='Y'][2]/@IsReverseComplement");
     } catch (XPathExpressionException e) {
       throw new IllegalStateException("Failed to compile xpaths", e);
     }
@@ -508,7 +508,7 @@ public final class DefaultIllumina extends RunProcessor {
 
   private IndexSequencing findIndexSequencing(Document runInfo, Document runParams) {
     try {
-      String i5Reverse = READ_2_REVERSE_COMPLIMENT.evaluate(runInfo);
+      String i5Reverse = I5_REVERSE_COMPLEMENT.evaluate(runInfo);
       if (Objects.equals(i5Reverse, "Y")) {
         return IndexSequencing.I5_REVERSE_COMPLEMENT;
       } else if (Objects.equals(i5Reverse, "N")) {
