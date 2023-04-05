@@ -27,7 +27,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -45,7 +44,6 @@ import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
@@ -79,51 +77,61 @@ public final class DefaultIllumina extends RunProcessor {
 
   private static final Logger log = LoggerFactory.getLogger(DefaultIllumina.class);
 
-  private static final XPathExpression RUN_COMPLETION_STATUS_EXPRESSION =
-      compileXPath("//CompletionStatus")[0];
-
   private static final Predicate<String> BCL_FILENAME =
       Pattern.compile("^(s_[0-9]*_[0-9]*\\.bcl(\\.gz)?|L\\d*_\\d*.cbcl)").asPredicate();
 
   private static final Predicate<String> BCL_BGZF_FILENAME =
       Pattern.compile("^[0-9]*\\.(bcl\\.bgzf|cbcl)").asPredicate();
 
-  private static final Set<XPathExpression> CONTAINER_PARTNUMBER_XPATHS;
-  private static final Set<XPathExpression> POSITION_XPATHS;
+  private static final XPath xpath = XPathFactory.newInstance().newXPath();
 
-  private static final XPathExpression FLOWCELL;
+  // RunInfo XPaths
+  private static final XPathExpression RUNINFO_START_TIME_XPATH = xpath("//Run/Date/text()");
+  private static final XPathExpression I5_REVERSE_COMPLEMENT =
+      xpath("//Run/Reads/Read[@IsIndexedRead='Y'][2]/@IsReverseComplement");
+
+  // RunParameters XPaths
+  private static final XPathExpression miSeqPartNumber =
+      xpath("//FlowcellRFIDTag/PartNumber/text()");
+  private static final XPathExpression nextSeqPartNumber =
+      xpath("//FlowCellRfidTag/PartNumber/text()");
+  private static final XPathExpression novaSeqPartNum = xpath("//RfidsInfo/FlowCellMode/text()");
+  private static final XPathExpression nextSeq2000PartNumber = xpath("//FlowCellPartNumber/text()");
+  private static final XPathExpression novaSeqXPartNumber =
+      xpath(
+          "//ConsumableInfo/ConsumableInfo/Type[text() = 'FlowCell']/parent::*/PartNumber/text()");
+  private static final Set<XPathExpression> CONTAINER_PARTNUMBER_XPATHS =
+      Collections.unmodifiableSet(
+          Sets.newHashSet(
+              miSeqPartNumber,
+              nextSeqPartNumber,
+              novaSeqPartNum,
+              nextSeq2000PartNumber,
+              novaSeqXPartNumber));
+  private static final XPathExpression hiSeqPosition = xpath("//Setup/FCPosition/text()");
+  private static final XPathExpression novaSeqPosition = xpath("//Side/text()");
+  private static final Set<XPathExpression> POSITION_XPATHS =
+      Collections.unmodifiableSet(Sets.newHashSet(hiSeqPosition, novaSeqPosition));;
+  private static final XPathExpression FLOWCELL = xpath("//Setup/Flowcell/text()");
   private static final Pattern FLOWCELL_PATTERN =
       Pattern.compile("^([a-zA-Z]+(?: Rapid)?) (Flow Cell v\\d)$");
-  private static final XPathExpression FLOWCELL_PAIRED;
-  private static final XPathExpression WORKFLOW_TYPE;
-  private static final XPathExpression SBS_CONSUMABLE_VERSION;
-  private static final XPathExpression START_TIME_XPATH;
-  private static final XPathExpression I5_REVERSE_COMPLEMENT;
+  private static final XPathExpression FLOWCELL_PAIRED = xpath("//Setup/PairEndFC/text()");
+  private static final XPathExpression WORKFLOW_TYPE =
+      xpath("//WorkflowType/text()|//ClusteringChoice/text()");
+  private static final XPathExpression SBS_CONSUMABLE_VERSION =
+      xpath("//RfidsInfo/SbsConsumableVersion/text()");
+  private static final XPathExpression RUNPARAM_START_TIME_XPATH = xpath("//RunStartTime/text()");
 
-  static {
-    XPath xpath = XPathFactory.newInstance().newXPath();
+  // RunCompletionInfo XPaths
+  private static final XPathExpression COMPLETION_STATUS_NEXTSEQ =
+      xpath("//CompletionStatus/text()");
+  private static final XPathExpression COMPLETION_STATUS_NOVASEQ = xpath("//RunStatus/text()");
+  private static final XPathExpression START_TIME = xpath("//RunStartTime/text()");
+  private static final XPathExpression END_TIME = xpath("//RunEndTime/text()");
+
+  private static XPathExpression xpath(String expression) {
     try {
-      WORKFLOW_TYPE = xpath.compile("//WorkflowType/text()|//ClusteringChoice/text()");
-      FLOWCELL = xpath.compile("//Setup/Flowcell/text()");
-      FLOWCELL_PAIRED = xpath.compile("//Setup/PairEndFC/text()");
-      SBS_CONSUMABLE_VERSION = xpath.compile("//RfidsInfo/SbsConsumableVersion/text()");
-
-      XPathExpression miSeqPartNumber = xpath.compile("//FlowcellRFIDTag/PartNumber/text()");
-      XPathExpression nextSeqPartNumber = xpath.compile("//FlowCellRfidTag/PartNumber/text()");
-      XPathExpression novaSeqPartNum = xpath.compile("//RfidsInfo/FlowCellMode/text()");
-      XPathExpression nextSeq2000PartNumber = xpath.compile("//FlowCellPartNumber/text()");
-      CONTAINER_PARTNUMBER_XPATHS =
-          Collections.unmodifiableSet(
-              Sets.newHashSet(
-                  miSeqPartNumber, nextSeqPartNumber, novaSeqPartNum, nextSeq2000PartNumber));
-
-      XPathExpression hiSeqPosition = xpath.compile("//Setup/FCPosition/text()");
-      XPathExpression novaSeqPosition = xpath.compile("//Side/text()");
-      POSITION_XPATHS =
-          Collections.unmodifiableSet(Sets.newHashSet(hiSeqPosition, novaSeqPosition));
-      START_TIME_XPATH = xpath.compile("//RunStartTime/text()");
-      I5_REVERSE_COMPLEMENT =
-          xpath.compile("//Run/Reads/Read[@IsIndexedRead='Y'][2]/@IsReverseComplement");
+      return xpath.compile(expression);
     } catch (XPathExpressionException e) {
       throw new IllegalStateException("Failed to compile xpaths", e);
     }
@@ -148,17 +156,26 @@ public final class DefaultIllumina extends RunProcessor {
     return !parameters.hasNonNull("checkOutput") || parameters.get("checkOutput").asBoolean();
   }
 
-  private static Optional<HealthType> getHealth(Document document) {
-    try {
-      String status =
-          (String) RUN_COMPLETION_STATUS_EXPRESSION.evaluate(document, XPathConstants.STRING);
+  private static Optional<HealthType> getHealth(Document runCompletionStatus) {
+    // NextSeq 550 pattern
+    String status = getValueFromXml(runCompletionStatus, COMPLETION_STATUS_NEXTSEQ);
+    if (status != null) {
       if (status.equals("CompletedAsPlanned")) {
         return Optional.of(HealthType.COMPLETED);
       } else {
-        log.debug("New Illumina completion status found: {}", status);
+        log.debug("New Illumina CompletionStatus found: {}", status);
+        return Optional.empty();
       }
-    } catch (XPathExpressionException e) {
-      log.error("Failed to evaluate completion status", e);
+    }
+    // NovaSeq X pattern
+    status = getValueFromXml(runCompletionStatus, COMPLETION_STATUS_NOVASEQ);
+    if (status != null) {
+      if (status.equals("RunCompleted")) {
+        return Optional.of(HealthType.COMPLETED);
+      } else {
+        log.debug("New Illumina RunStatus status found: {}", status);
+        return Optional.empty();
+      }
     }
     return Optional.empty();
   }
@@ -296,35 +313,31 @@ public final class DefaultIllumina extends RunProcessor {
           "Illumina run processor did not exit cleanly: " + runDirectory.getAbsolutePath());
     }
 
-    final Document runInfo = getRunInfo(runDirectory);
+    final Document runInfo = getXmlDocument(runDirectory, "RunInfo.xml");
+    final Document runParameters = getRunParameters(runDirectory);
+    final Document runCompletionStatus = getXmlDocument(runDirectory, "RunCompletionStatus.xml");
 
-    Stream.of("runParameters.xml", "RunParameters.xml")
-        .map(f -> new File(runDirectory, f))
-        .filter(file -> file.exists() && file.canRead())
-        .findAny()
-        .flatMap(RunProcessor::parseXml)
-        .ifPresent(
-            runParams -> {
-              // See if we can figure out the chemistry
-              dto.setChemistry(
-                  Arrays.stream(IlluminaChemistry.values())
-                      .filter(chemistry -> chemistry.test(runParams))
-                      .findFirst()
-                      .orElse(IlluminaChemistry.UNKNOWN));
-              dto.setContainerModel(findContainerModel(runParams));
-              dto.setSequencerPosition(findSequencerPosition(runParams));
-              // See if we can figure out the workflow type on the NovaSeq or HiSeq. This
-              // mostly
-              // tells us how the clustering was done
-              final String workflowType = findWorkflowType(runParams);
-              if (workflowType != null && !workflowType.equals("None")) {
-                dto.setWorkflowType(workflowType);
-              }
-              dto.setIndexSequencing(findIndexSequencing(runInfo, runParams));
-              if (dto.getStartDate() == null) {
-                dto.setStartDate(findStartDate(runParams));
-              }
-            });
+    if (runParameters != null) {
+      // See if we can figure out the chemistry
+      dto.setChemistry(
+          Arrays.stream(IlluminaChemistry.values())
+              .filter(chemistry -> chemistry.test(runParameters))
+              .findFirst()
+              .orElse(IlluminaChemistry.UNKNOWN));
+      dto.setContainerModel(findContainerModel(runParameters));
+      dto.setSequencerPosition(findSequencerPosition(runParameters));
+      // See if we can figure out the workflow type on the NovaSeq or HiSeq. This
+      // mostly
+      // tells us how the clustering was done
+      final String workflowType = getValueFromXml(runParameters, WORKFLOW_TYPE);
+      if (workflowType != null && !workflowType.equals("None")) {
+        dto.setWorkflowType(workflowType);
+      }
+      dto.setIndexSequencing(findIndexSequencing(runInfo, runParameters));
+      if (dto.getStartDate() == null) {
+        dto.setStartDate(findStartDate(runInfo, runParameters, runCompletionStatus));
+      }
+    }
 
     // The Illumina library can't distinguish between a failed run and one that
     // either finished or
@@ -371,17 +384,13 @@ public final class DefaultIllumina extends RunProcessor {
     // This run claims to be complete, but is it really?
     if (dto.getHealthType() == HealthType.COMPLETED) {
       // Maybe a NextSeq wrote a completion status, that we take as authoritative even
-      // though it's
-      // totally undocumented behaviour.
+      // though it's totally undocumented behaviour.
       Optional<HealthType> updatedHealth =
-          Optional.of(new File(runDirectory, "RunCompletionStatus.xml")) //
-              .filter(File::canRead) //
-              .flatMap(RunProcessor::parseXml) //
-              .flatMap(DefaultIllumina::getHealth);
+          runCompletionStatus == null ? Optional.empty() : getHealth(runCompletionStatus);
 
       if (updatedHealth.isPresent()) {
         completness_method_success.labels("xml").inc();
-        updateCompletionDateFromFile(runDirectory, "RunCompletionStatus.xml", dto);
+        updateCompletionDateFromRunCompletionStatus(runDirectory, runCompletionStatus, dto);
       }
 
       if (!updatedHealth.isPresent() && dto.getNumReads() > 0) {
@@ -447,22 +456,38 @@ public final class DefaultIllumina extends RunProcessor {
     return dto;
   }
 
-  private Document getRunInfo(File runDirectory) {
-    File runInfoFile = new File(runDirectory, "RunInfo.xml");
-    if (runInfoFile.exists() && runInfoFile.canRead()) {
-      return RunProcessor.parseXml(runInfoFile).orElse(null);
+  private Document getXmlDocument(File runDirectory, String filename) {
+    File file = new File(runDirectory, filename);
+    if (file.exists() && file.canRead()) {
+      return RunProcessor.parseXml(file).orElse(null);
     }
     return null;
+  }
+
+  private Document getRunParameters(File runDirectory) {
+    Document document = getXmlDocument(runDirectory, "runParameters.xml");
+    if (document == null) {
+      document = getXmlDocument(runDirectory, "RunParameters.xml");
+    }
+    return document;
+  }
+
+  private void updateCompletionDateFromRunCompletionStatus(
+      File runDirectory, Document runCompletionStatus, IlluminaNotificationDto dto)
+      throws IOException {
+    Instant timestamp = getInstant(runCompletionStatus, END_TIME);
+    if (timestamp != null) {
+      dto.setCompletionDate(timestamp);
+    } else {
+      updateCompletionDateFromFile(runDirectory, "RunCompletionStatus.xml", dto);
+    }
   }
 
   private void updateCompletionDateFromFile(
       File runDirectory, String fileName, IlluminaNotificationDto dto) throws IOException {
     if (dto.getCompletionDate() == null) {
       dto.setCompletionDate(
-          Files.getLastModifiedTime(new File(runDirectory, fileName).toPath())
-              .toInstant()
-              .atZone(ZoneId.of("Z"))
-              .toInstant());
+          Files.getLastModifiedTime(new File(runDirectory, fileName).toPath()).toInstant());
     }
   }
 
@@ -472,21 +497,16 @@ public final class DefaultIllumina extends RunProcessor {
     if (partNum != null) {
       return partNum;
     }
-    try {
-      String flowcell = FLOWCELL.evaluate(runParams);
-      if (isStringEmptyOrNull(flowcell)) {
-        return null;
-      }
-      String paired = FLOWCELL_PAIRED.evaluate(runParams);
-      Matcher m = FLOWCELL_PATTERN.matcher(flowcell);
-      if (!isStringEmptyOrNull(paired) && m.matches()) {
-        return m.group(1) + (Boolean.parseBoolean(paired) ? " PE " : " SR ") + m.group(2);
-      } else {
-        return flowcell;
-      }
-    } catch (XPathExpressionException e) {
-      // ignore
+    String flowcell = getValueFromXml(runParams, FLOWCELL);
+    if (flowcell == null) {
       return null;
+    }
+    String paired = getValueFromXml(runParams, FLOWCELL_PAIRED);
+    Matcher m = FLOWCELL_PATTERN.matcher(flowcell);
+    if (paired != null && m.matches()) {
+      return m.group(1) + (Boolean.parseBoolean(paired) ? " PE " : " SR ") + m.group(2);
+    } else {
+      return flowcell;
     }
   }
 
@@ -496,44 +516,47 @@ public final class DefaultIllumina extends RunProcessor {
     return position;
   }
 
-  private String findWorkflowType(Document runParams) {
-    String workflowType;
-    try {
-      workflowType = WORKFLOW_TYPE.evaluate(runParams);
-    } catch (XPathExpressionException e) {
-      workflowType = null;
-    }
-    return isStringEmptyOrNull(workflowType) ? null : workflowType;
-  }
-
   private IndexSequencing findIndexSequencing(Document runInfo, Document runParams) {
-    try {
-      String i5Reverse = I5_REVERSE_COMPLEMENT.evaluate(runInfo);
-      if (Objects.equals(i5Reverse, "Y")) {
-        return IndexSequencing.I5_REVERSE_COMPLEMENT;
-      } else if (Objects.equals(i5Reverse, "N")) {
-        return IndexSequencing.NORMAL;
-      }
-    } catch (XPathExpressionException e) {
-      // continue to try other source
+    String i5Reverse = getValueFromXml(runInfo, I5_REVERSE_COMPLEMENT);
+    if (Objects.equals(i5Reverse, "Y")) {
+      return IndexSequencing.I5_REVERSE_COMPLEMENT;
+    } else if (Objects.equals(i5Reverse, "N")) {
+      return IndexSequencing.NORMAL;
     }
     try {
-      String stringVersion = SBS_CONSUMABLE_VERSION.evaluate(runParams);
-      if (isStringEmptyOrNull(stringVersion)) {
+      String stringVersion = getValueFromXml(runParams, SBS_CONSUMABLE_VERSION);
+      if (stringVersion == null) {
         return null;
       }
       int sbsConsumableVersion = Integer.parseInt(stringVersion);
       return IndexSequencing.getBySbsConsumableVersion(sbsConsumableVersion);
-    } catch (XPathExpressionException | NumberFormatException e) {
+    } catch (NumberFormatException e) {
       return null;
     }
   }
 
-  private Instant findStartDate(Document runParams) {
+  private Instant findStartDate(
+      Document runInfo, Document runParams, Document runCompletionStatus) {
+    // NovaSeq X writes a more accurate start time here after the run completes
+    Instant startDate = getInstant(runCompletionStatus, START_TIME);
+    if (startDate != null) {
+      return startDate;
+    }
+    startDate = getInstant(runParams, RUNPARAM_START_TIME_XPATH);
+    if (startDate == null) {
+      startDate = getInstant(runInfo, RUNINFO_START_TIME_XPATH);
+    }
+    return startDate;
+  }
+
+  private static Instant getInstant(Document document, XPathExpression xpath) {
     try {
-      String timestamp = START_TIME_XPATH.evaluate(runParams);
+      String timestamp = getValueFromXml(document, xpath);
+      if (timestamp == null) {
+        return null;
+      }
       return Instant.parse(timestamp);
-    } catch (XPathExpressionException | DateTimeParseException e) {
+    } catch (DateTimeParseException e) {
       return null;
     }
   }
@@ -553,19 +576,26 @@ public final class DefaultIllumina extends RunProcessor {
     return position;
   }
 
+  private static String getValueFromXml(Document xml, XPathExpression xpath) {
+    String value;
+    try {
+      value = xpath.evaluate(xml);
+      if (isStringEmptyOrNull(value)) {
+        return null;
+      } else {
+        return value;
+      }
+    } catch (XPathExpressionException e) {
+      // ignore
+      return null;
+    }
+  }
+
   private static String getValueFromXml(Document xml, Collection<XPathExpression> xpaths) {
     return xpaths
         .stream()
-        .map(
-            expr -> {
-              try {
-                return expr.evaluate(xml);
-              } catch (XPathExpressionException e) {
-                // ignore
-                return null;
-              }
-            })
-        .filter(model -> !isStringEmptyOrNull(model))
+        .map(xpath -> getValueFromXml(xml, xpath))
+        .filter(Objects::nonNull)
         .findAny()
         .orElse(null);
   }

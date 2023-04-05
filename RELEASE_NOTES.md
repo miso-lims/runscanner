@@ -2,6 +2,10 @@
 
 Changes:
 
+  * NovaSeq X support - improved detection of startDate, completionDate, and containerModel
+
+# 1.15.1
+
   * Fixed detecting wrong indexSequencing for NextSeq 2000 runs
 
 # 1.15.0
