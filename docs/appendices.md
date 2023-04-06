@@ -291,6 +291,7 @@ unsupported.
 * **NextSeq 550**
 * _NextSeq 2000_
 * **NovaSeq 6000**
+* _NovaSeq X Plus_
 * iSeq
 * MiniSeq
 
