@@ -243,6 +243,13 @@ public class Scheduler {
           .help("start time of last scan")
           .register();
 
+  private static final Gauge loadingRunDirectoryStatus =
+      Gauge.build()
+          .name("miso_runscanner_run_directory_status")
+          .help("The individual loading status of run directories.")
+          .labelNames("directory")
+          .register();
+
   private File configurationFile;
 
   private Instant configurationLastRead = Instant.now();
@@ -432,6 +439,11 @@ public class Scheduler {
                         RunProcessor.processorFor(
                                 source.getPlatformType(), source.getName(), source.getParameters())
                             .orElse(null));
+                    /* Create gauge metric to inform us if directory is valid or not */
+                    loadingRunDirectoryStatus
+                        .labels(source.getPath())
+                        .set(destination.isValid() ? 1 : 0);
+
                     return destination;
                   })
               .collect(Collectors.toList());
