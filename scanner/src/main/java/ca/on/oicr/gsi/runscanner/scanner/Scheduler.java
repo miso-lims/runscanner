@@ -239,14 +239,14 @@ public class Scheduler {
           .register();
   private static final Gauge lastScanStartTime =
       Gauge.build()
-          .name("miso_runscanner_last_scan_start_time_seconds")
+          .name("miso_runscanner_last_scan_start_time_seconds.")
           .help("start time of last scan")
           .register();
 
-  private static final Gauge loadingRunDirectoryStatus =
+  private static final Gauge loadingRunDirectoryValid =
       Gauge.build()
-          .name("miso_runscanner_run_directory_status")
-          .help("The individual loading status of run directories.")
+          .name("miso_runscanner_run_directory_valid")
+          .help("The current state of run directories displaying if they are valid or not.")
           .labelNames("directory")
           .register();
 
@@ -440,7 +440,7 @@ public class Scheduler {
                                 source.getPlatformType(), source.getName(), source.getParameters())
                             .orElse(null));
                     /* Create gauge metric to inform us if directory is valid or not */
-                    loadingRunDirectoryStatus
+                    loadingRunDirectoryValid
                         .labels(source.getPath())
                         .set(destination.isValid() ? 1 : 0);
 
