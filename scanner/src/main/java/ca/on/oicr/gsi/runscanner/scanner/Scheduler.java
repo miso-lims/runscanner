@@ -240,7 +240,14 @@ public class Scheduler {
   private static final Gauge lastScanStartTime =
       Gauge.build()
           .name("miso_runscanner_last_scan_start_time_seconds")
-          .help("start time of last scan")
+          .help("start time of last scan.")
+          .register();
+
+  private static final Gauge loadingRunDirectoryValid =
+      Gauge.build()
+          .name("miso_runscanner_run_directory_valid")
+          .help("The current state of run directories displaying if they are valid or not.")
+          .labelNames("directory")
           .register();
 
   private File configurationFile;
@@ -354,7 +361,7 @@ public class Scheduler {
   /**
    * Determine if a run directory is in need of processing.
    *
-   * <p>This means that is is not in a processing queue, failed processing last time, nor needs
+   * <p>This means that it is not in a processing queue, failed processing last time, nor needs
    * reprocessing (for runs still active on the sequencer)
    */
   private boolean isUnprocessed(File directory) {
@@ -432,6 +439,11 @@ public class Scheduler {
                         RunProcessor.processorFor(
                                 source.getPlatformType(), source.getName(), source.getParameters())
                             .orElse(null));
+                    /* Create gauge metric to inform us if directory is valid or not */
+                    loadingRunDirectoryValid
+                        .labels(source.getPath())
+                        .set(destination.isValid() ? 1 : 0);
+
                     return destination;
                   })
               .collect(Collectors.toList());
