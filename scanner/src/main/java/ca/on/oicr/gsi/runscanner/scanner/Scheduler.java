@@ -239,8 +239,8 @@ public class Scheduler {
           .register();
   private static final Gauge lastScanStartTime =
       Gauge.build()
-          .name("miso_runscanner_last_scan_start_time_seconds.")
-          .help("start time of last scan")
+          .name("miso_runscanner_last_scan_start_time_seconds")
+          .help("start time of last scan.")
           .register();
 
   private static final Gauge loadingRunDirectoryValid =
@@ -361,7 +361,7 @@ public class Scheduler {
   /**
    * Determine if a run directory is in need of processing.
    *
-   * <p>This means that is is not in a processing queue, failed processing last time, nor needs
+   * <p>This means that it is not in a processing queue, failed processing last time, nor needs
    * reprocessing (for runs still active on the sequencer)
    */
   private boolean isUnprocessed(File directory) {
