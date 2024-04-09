@@ -11,8 +11,10 @@ import io.prometheus.client.Gauge;
 import io.prometheus.client.Histogram;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -97,6 +99,8 @@ public class Scheduler {
     private String path;
     private Platform platformType;
     private String timeZone;
+    private ArrayList<String> ignoreSubdirectories; // Addition
+    private ArrayList<Path> relativeFilePaths; // Testing using relative paths !!!
 
     public String getName() {
       return name;
@@ -118,6 +122,14 @@ public class Scheduler {
       return timeZone;
     }
 
+    public ArrayList<String> getIgnoreSubdirectories() {
+      return ignoreSubdirectories;
+    } // Addition
+
+    public ArrayList<Path> getRelativeFilePaths() {
+      return relativeFilePaths;
+    } // Testing using relative paths !!!
+
     public void setName(String name) {
       this.name = name;
     }
@@ -136,6 +148,14 @@ public class Scheduler {
 
     public void setTimeZone(String timeZone) {
       this.timeZone = timeZone;
+    }
+
+    public void setIgnoreSubdirectories(ArrayList<String> ignoreSubdirectories) {
+      this.ignoreSubdirectories = ignoreSubdirectories; // Addition !!!
+    }
+
+    public void setRelativeFilePaths(ArrayList<Path> relativeFilePaths) {
+      this.relativeFilePaths = relativeFilePaths; // Testing using relative paths !!!
     }
   }
 
@@ -264,7 +284,7 @@ public class Scheduler {
 
   private boolean isConfigurationGood = true;
 
-  // The paths that are current being processed (and the corresponding processor).
+  // The paths that are currently being processed (and the corresponding processor).
   private final Set<File> processing = new ConcurrentSkipListSet<>();
 
   // The directories that contain run directories that need to be scanned and the processors for
@@ -365,16 +385,26 @@ public class Scheduler {
    * reprocessing (for runs still active on the sequencer)
    */
   private boolean isUnprocessed(File directory) {
+    System.out.println("Current directory name: " + directory.getName()); // DEBUGGING !!!
+    System.out.println("getRoots() is: " + getRoots()); // DEBUGGING !!!
+    System.out.println(
+        "Should ignore directory? "
+            + roots
+                .stream()
+                .anyMatch(n -> n.getIgnoreSubdirectories().contains(directory.getName())));
     return !workToDo.contains(directory)
         && !processing.contains(directory)
         && (!failed.containsKey(directory)
             || Duration.between(failed.get(directory), Instant.now()).toMinutes() > 20)
-        && (!finishedWork.containsKey(directory) || finishedWork.get(directory).shouldRerun());
+        && (!finishedWork.containsKey(directory) || finishedWork.get(directory).shouldRerun())
+        // Exclude from processing if directory name in list of directories to ignore
+        && !roots.stream().anyMatch(n -> n.getIgnoreSubdirectories().contains(directory.getName()));
   }
 
   /** Push a run directory into the processing queue. */
   private void queueDirectory(
       final File directory, final RunProcessor processor, final TimeZone tz) {
+
     workToDo.add(directory);
     waitingRuns.labels(processor.getPlatformType().name()).inc();
     workPool.submit(
@@ -439,6 +469,11 @@ public class Scheduler {
                         RunProcessor.processorFor(
                                 source.getPlatformType(), source.getName(), source.getParameters())
                             .orElse(null));
+                    // Addition !!!
+                    destination.setIgnoreSubdirectories(source.getIgnoreSubdirectories());
+
+                    // TESTING !!!
+                    destination.setRelativeFilePaths(source.getRelativeFilePaths());
                     /* Create gauge metric to inform us if directory is valid or not */
                     loadingRunDirectoryValid
                         .labels(source.getPath())
