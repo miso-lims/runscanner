@@ -186,6 +186,12 @@ public class Scheduler {
           .name("miso_runscanner_directories_attempted")
           .help("The number of directories that were considered in the last pass.")
           .register();
+
+  private static final Gauge goodRuns =
+      Gauge.build()
+          .name("miso_runscanner_readable_runs")
+          .help("The number of runs that succeeded in processing.")
+          .register();
   private static final Gauge badRuns =
       Gauge.build()
           .name("miso_runscanner_bad_runs")
@@ -404,7 +410,6 @@ public class Scheduler {
   /** Push a run directory into the processing queue. */
   private void queueDirectory(
       final File directory, final RunProcessor processor, final TimeZone tz) {
-
     workToDo.add(directory);
     waitingRuns.labels(processor.getPlatformType().name()).inc();
     workPool.submit(
@@ -433,6 +438,7 @@ public class Scheduler {
             errors.labels(processor.getPlatformType().name()).inc();
             failed.put(directory, Instant.now());
           }
+          goodRuns.set(finishedWork.size()); // Addition !!!
           badRuns.set(failed.size());
           processTime
               .labels(processor.getPlatformType().name(), instrumentName)
