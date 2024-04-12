@@ -192,12 +192,9 @@ public class UserInterfaceController {
                                   configuration.isValid()
                                       ? "Yes"
                                       : "No: " + configuration.validitySummary());
-                              renderer.line( // Addition
+                              renderer.line(
                                   "Ignoring subdirectories",
                                   configuration.getIgnoreSubdirectories().toString());
-                              renderer.line( // TESTING !!!
-                                  "Ignoring relativepaths",
-                                  configuration.getRelativeFilePaths().toString());
                             }
                           }));
         }

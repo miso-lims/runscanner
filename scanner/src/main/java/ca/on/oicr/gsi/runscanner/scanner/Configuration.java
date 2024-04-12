@@ -3,7 +3,6 @@ package ca.on.oicr.gsi.runscanner.scanner;
 import ca.on.oicr.gsi.Pair;
 import ca.on.oicr.gsi.runscanner.scanner.processor.RunProcessor;
 import java.io.File;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.TimeZone;
 import java.util.stream.Stream;
@@ -16,9 +15,7 @@ public class Configuration {
 
   private TimeZone timeZone;
 
-  private ArrayList<String> ignoreSubdirectories; // Addition
-
-  private ArrayList<Path> relativeFilePaths; // Testing using relative paths !!!
+  private ArrayList<String> ignoreSubdirectories;
 
   public File getPath() {
     return path;
@@ -38,11 +35,7 @@ public class Configuration {
 
   public ArrayList<String> getIgnoreSubdirectories() {
     return ignoreSubdirectories;
-  } // Addition
-
-  public ArrayList<Path> getRelativeFilePaths() {
-    return relativeFilePaths;
-  } // Testing using relative paths !!!
+  }
 
   public boolean isValid() {
     return path != null
@@ -81,9 +74,5 @@ public class Configuration {
 
   public void setIgnoreSubdirectories(ArrayList<String> ignoreSubdirectories) {
     this.ignoreSubdirectories = ignoreSubdirectories;
-  } // Addition
-
-  public void setRelativeFilePaths(ArrayList<Path> relativeFilePaths) {
-    this.relativeFilePaths = relativeFilePaths;
-  } // Testing using relative paths !!!
+  }
 }
