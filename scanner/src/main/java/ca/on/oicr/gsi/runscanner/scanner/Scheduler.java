@@ -122,7 +122,7 @@ public class Scheduler {
 
     public ArrayList<String> getIgnoreSubdirectories() {
       return ignoreSubdirectories;
-    } // Addition
+    }
 
     public void setName(String name) {
       this.name = name;
@@ -145,7 +145,7 @@ public class Scheduler {
     }
 
     public void setIgnoreSubdirectories(ArrayList<String> ignoreSubdirectories) {
-      this.ignoreSubdirectories = ignoreSubdirectories; // Addition !!!
+      this.ignoreSubdirectories = ignoreSubdirectories;
     }
   }
 
@@ -468,7 +468,7 @@ public class Scheduler {
                                 source.getPlatformType(), source.getName(), source.getParameters())
                             .orElse(null));
                     destination.setIgnoreSubdirectories(source.getIgnoreSubdirectories());
-                    /* Create gauge metric to inform us if directory is valid or not */
+                    // Create gauge metric to inform us if directory is valid or not
                     loadingRunDirectoryValid
                         .labels(source.getPath())
                         .set(destination.isValid() ? 1 : 0);
