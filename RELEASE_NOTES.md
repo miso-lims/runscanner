@@ -2,9 +2,19 @@
 
 Changes:
 
+* Added ability to exclude runs from processing using ignoreSubdirectories field in 
+  configuration file
+* Added metric to track good (readable) runs
+
+# 1.16.0
+
+Changes:
+
   * NovaSeq X support - improved detection of startDate, completionDate, and containerModel
 
 # 1.15.1
+
+Changes:
 
   * Fixed detecting wrong indexSequencing for NextSeq 2000 runs
 
