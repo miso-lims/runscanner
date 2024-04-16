@@ -389,14 +389,14 @@ public class Scheduler {
    * list of subdirectories to ignore nor needs reprocessing (for runs still active on the
    * sequencer)
    */
-  private boolean isUnprocessed(File directory) {
+  private boolean isUnprocessed(File directory, ArrayList<String> ignoreDirectories) {
     return !workToDo.contains(directory)
         && !processing.contains(directory)
         && (!failed.containsKey(directory)
             || Duration.between(failed.get(directory), Instant.now()).toMinutes() > 20)
         && (!finishedWork.containsKey(directory) || finishedWork.get(directory).shouldRerun())
         // Exclude from processing if directory name in list of directories to ignore
-        && roots.stream().noneMatch(n -> n.getIgnoreSubdirectories().contains(directory.getName()));
+        && !ignoreDirectories.contains(directory.getName());
   }
 
   /** Push a run directory into the processing queue. */
@@ -524,7 +524,10 @@ public class Scheduler {
                       .peek(attempted) //
                       .filter(entry -> newUnreadableDirectories.test(entry.first())) //
                       .peek(accepted) //
-                      .filter(entry -> isUnprocessed(entry.first())) //
+                      .filter(
+                          entry ->
+                              isUnprocessed(
+                                  entry.first(), entry.second().getIgnoreSubdirectories())) //
                       .peek(newRuns) //
                       .forEach(
                           entry ->
