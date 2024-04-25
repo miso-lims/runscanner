@@ -1,5 +1,12 @@
 # Unreleased
 
+# 1.16.1
+Changes:
+
+  * Fix build parameters for readthedocs config
+  * Add metric for run directory readability
+
+# 1.16.0
 Changes:
 
   * NovaSeq X support - improved detection of startDate, completionDate, and containerModel
