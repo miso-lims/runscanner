@@ -98,7 +98,7 @@ public class Scheduler {
     private String path;
     private Platform platformType;
     private String timeZone;
-    private ArrayList<String> ignoreSubdirectories;
+    private ArrayList<File> ignoreSubdirectories;
 
     public String getName() {
       return name;
@@ -120,7 +120,7 @@ public class Scheduler {
       return timeZone;
     }
 
-    public ArrayList<String> getIgnoreSubdirectories() {
+    public ArrayList<File> getIgnoreSubdirectories() {
       return ignoreSubdirectories;
     }
 
@@ -144,7 +144,7 @@ public class Scheduler {
       this.timeZone = timeZone;
     }
 
-    public void setIgnoreSubdirectories(ArrayList<String> ignoreSubdirectories) {
+    public void setIgnoreSubdirectories(ArrayList<File> ignoreSubdirectories) {
       this.ignoreSubdirectories = ignoreSubdirectories;
     }
   }
@@ -382,6 +382,17 @@ public class Scheduler {
     return scanningNow;
   }
 
+  // Helper to check if current run directory should be ignored
+  private boolean skipSubDirectory(File directory, ArrayList<File> ignoreDirectories) {
+    for (File currentSubDir : ignoreDirectories) {
+      File fullPath = new File(directory.getParent(), currentSubDir.getPath());
+      if (directory.equals(fullPath)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   /**
    * Determine if a run directory is in need of processing.
    *
@@ -389,14 +400,14 @@ public class Scheduler {
    * list of subdirectories to ignore nor needs reprocessing (for runs still active on the
    * sequencer)
    */
-  private boolean isUnprocessed(File directory, ArrayList<String> ignoreDirectories) {
+  private boolean isUnprocessed(File directory, ArrayList<File> ignoreDirectories) {
     return !workToDo.contains(directory)
         && !processing.contains(directory)
         && (!failed.containsKey(directory)
             || Duration.between(failed.get(directory), Instant.now()).toMinutes() > 20)
         && (!finishedWork.containsKey(directory) || finishedWork.get(directory).shouldRerun())
-        // Exclude from processing if directory name in list of directories to ignore
-        && !ignoreDirectories.contains(directory.getName());
+        // Exclude from processing if directory name in list of directories to ignore directory
+        && !skipSubDirectory(directory, ignoreDirectories);
   }
 
   /** Push a run directory into the processing queue. */
@@ -525,9 +536,10 @@ public class Scheduler {
                       .filter(entry -> newUnreadableDirectories.test(entry.first())) //
                       .peek(accepted) //
                       .filter(
-                          entry ->
-                              isUnprocessed(
-                                  entry.first(), entry.second().getIgnoreSubdirectories())) //
+                          entry -> {
+                            return isUnprocessed(
+                                entry.first(), entry.second().getIgnoreSubdirectories());
+                          }) //
                       .peek(newRuns) //
                       .forEach(
                           entry ->

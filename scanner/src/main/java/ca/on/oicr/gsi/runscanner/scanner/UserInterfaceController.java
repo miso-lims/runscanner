@@ -194,8 +194,8 @@ public class UserInterfaceController {
                                       : "No: " + configuration.validitySummary());
                               renderer.line("Ignoring subdirectories", " ");
                               // Add a new render line for each subdirectory to ignore
-                              for (String directory : configuration.getIgnoreSubdirectories()) {
-                                renderer.line("-", directory);
+                              for (File directory : configuration.getIgnoreSubdirectories()) {
+                                renderer.line("-", directory.toString());
                               }
                             }
                           }));

@@ -15,7 +15,7 @@ public class Configuration {
 
   private TimeZone timeZone;
 
-  private ArrayList<String> ignoreSubdirectories;
+  private ArrayList<File> ignoreSubdirectories;
 
   public File getPath() {
     return path;
@@ -33,7 +33,7 @@ public class Configuration {
     return timeZone;
   }
 
-  public ArrayList<String> getIgnoreSubdirectories() {
+  public ArrayList<File> getIgnoreSubdirectories() {
     return ignoreSubdirectories;
   }
 
@@ -72,7 +72,11 @@ public class Configuration {
     this.timeZone = timeZone;
   }
 
-  public void setIgnoreSubdirectories(ArrayList<String> ignoreSubdirectories) {
-    this.ignoreSubdirectories = ignoreSubdirectories;
+  public void setIgnoreSubdirectories(ArrayList<File> ignoreSubdirectories) {
+    if (ignoreSubdirectories == null) {
+      this.ignoreSubdirectories = new ArrayList<>();
+    } else {
+      this.ignoreSubdirectories = ignoreSubdirectories;
+    }
   }
 }

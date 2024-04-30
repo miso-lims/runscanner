@@ -1,0 +1,3 @@
+<Context>
+  <Parameter name="runscanner.configFile" value="/home/c2ho/runscanner.json" override="false"/>
+</Context>
