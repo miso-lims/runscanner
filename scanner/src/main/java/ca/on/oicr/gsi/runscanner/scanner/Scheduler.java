@@ -383,10 +383,11 @@ public class Scheduler {
   }
 
   // Helper to check if current run directory should be ignored
-  private boolean skipSubDirectory(File directory, ArrayList<File> ignoreDirectories) {
-    for (File currentSubDir : ignoreDirectories) {
-      File fullPath = new File(directory.getParent(), currentSubDir.getPath());
-      if (directory.equals(fullPath)) {
+  private boolean skipSubDirectory(
+      File currentRunDirectory, ArrayList<File> ignoreDirectories, File baseDirectory) {
+    for (File currentSubDirectory : ignoreDirectories) {
+      File basePlusSubDirectory = new File(baseDirectory, currentSubDirectory.getPath());
+      if (currentRunDirectory.equals(basePlusSubDirectory)) {
         return true;
       }
     }
@@ -400,14 +401,15 @@ public class Scheduler {
    * list of subdirectories to ignore nor needs reprocessing (for runs still active on the
    * sequencer)
    */
-  private boolean isUnprocessed(File directory, ArrayList<File> ignoreDirectories) {
+  private boolean isUnprocessed(
+      File directory, ArrayList<File> ignoreDirectories, File baseDirectory) {
     return !workToDo.contains(directory)
         && !processing.contains(directory)
         && (!failed.containsKey(directory)
             || Duration.between(failed.get(directory), Instant.now()).toMinutes() > 20)
         && (!finishedWork.containsKey(directory) || finishedWork.get(directory).shouldRerun())
         // Exclude from processing if directory name in list of directories to ignore directory
-        && !skipSubDirectory(directory, ignoreDirectories);
+        && !skipSubDirectory(directory, ignoreDirectories, baseDirectory);
   }
 
   /** Push a run directory into the processing queue. */
@@ -538,7 +540,9 @@ public class Scheduler {
                       .filter(
                           entry -> {
                             return isUnprocessed(
-                                entry.first(), entry.second().getIgnoreSubdirectories());
+                                entry.first(),
+                                entry.second().getIgnoreSubdirectories(),
+                                entry.second().getPath());
                           }) //
                       .peek(newRuns) //
                       .forEach(
