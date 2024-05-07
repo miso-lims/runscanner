@@ -98,7 +98,7 @@ public class Scheduler {
     private String path;
     private Platform platformType;
     private String timeZone;
-    private ArrayList<File> ignoreSubdirectories;
+    private List<File> ignoreSubdirectories;
 
     public String getName() {
       return name;
@@ -120,7 +120,7 @@ public class Scheduler {
       return timeZone;
     }
 
-    public ArrayList<File> getIgnoreSubdirectories() {
+    public List<File> getIgnoreSubdirectories() {
       return ignoreSubdirectories;
     }
 
@@ -382,12 +382,31 @@ public class Scheduler {
     return scanningNow;
   }
 
-  // Helper to check if current run directory should be ignored
-  private boolean skipSubDirectory(
-      File currentRunDirectory, ArrayList<File> ignoreDirectories, File baseDirectory) {
-    for (File currentSubDirectory : ignoreDirectories) {
-      File basePlusSubDirectory = new File(baseDirectory, currentSubDirectory.getPath());
+  private static boolean isSubDirectory(File baseDirectory, File subDirectory) {
+    File parent = subDirectory.getParentFile();
+    while (parent != null) {
+      if (baseDirectory.equals(parent)) {
+        return true;
+      }
+      parent = parent.getParentFile();
+    }
+    return false;
+  }
+
+  /** Helper to check if current run directory should be ignored */
+  protected static boolean skipSubDirectory(
+      File currentRunDirectory, List<File> ignoreDirectories, File baseDirectory) {
+    // Loop through list of directories to ignore
+    for (File currentIgnoreDirectory : ignoreDirectories) {
+      File basePlusSubDirectory = new File(baseDirectory, currentIgnoreDirectory.getPath());
+
+      // Check if current directory is same as ignore directory
       if (currentRunDirectory.equals(basePlusSubDirectory)) {
+        return true;
+      }
+
+      // Check if current directory is subdirectory of ignore directory
+      if (isSubDirectory(basePlusSubDirectory, currentRunDirectory)) {
         return true;
       }
     }
@@ -401,14 +420,14 @@ public class Scheduler {
    * list of subdirectories to ignore nor needs reprocessing (for runs still active on the
    * sequencer)
    */
-  private boolean isUnprocessed(
-      File directory, ArrayList<File> ignoreDirectories, File baseDirectory) {
+  private boolean isUnprocessed(File directory, List<File> ignoreDirectories, File baseDirectory) {
     return !workToDo.contains(directory)
         && !processing.contains(directory)
         && (!failed.containsKey(directory)
             || Duration.between(failed.get(directory), Instant.now()).toMinutes() > 20)
         && (!finishedWork.containsKey(directory) || finishedWork.get(directory).shouldRerun())
-        // Exclude from processing if directory name in list of directories to ignore directory
+        // Exclude from processing if directory name in list of directories to ignore,
+        // or it is a sub-directory of an ignore directory
         && !skipSubDirectory(directory, ignoreDirectories, baseDirectory);
   }
 

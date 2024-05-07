@@ -1,8 +1,8 @@
+package ca.on.oicr.gsi.runscanner.scanner.processor;
+
 import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.OxfordNanoporeNotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.type.Platform;
-import ca.on.oicr.gsi.runscanner.scanner.processor.MinionProcessor;
-import ca.on.oicr.gsi.runscanner.scanner.processor.RunProcessor;
 import java.io.File;
 import java.io.IOException;
 import java.util.TimeZone;

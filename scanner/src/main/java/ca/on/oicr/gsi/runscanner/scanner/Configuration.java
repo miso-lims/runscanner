@@ -4,6 +4,7 @@ import ca.on.oicr.gsi.Pair;
 import ca.on.oicr.gsi.runscanner.scanner.processor.RunProcessor;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.TimeZone;
 import java.util.stream.Stream;
 
@@ -15,7 +16,7 @@ public class Configuration {
 
   private TimeZone timeZone;
 
-  private ArrayList<File> ignoreSubdirectories;
+  private List<File> ignoreSubdirectories;
 
   public File getPath() {
     return path;
@@ -33,7 +34,7 @@ public class Configuration {
     return timeZone;
   }
 
-  public ArrayList<File> getIgnoreSubdirectories() {
+  public List<File> getIgnoreSubdirectories() {
     return ignoreSubdirectories;
   }
 
@@ -72,7 +73,7 @@ public class Configuration {
     this.timeZone = timeZone;
   }
 
-  public void setIgnoreSubdirectories(ArrayList<File> ignoreSubdirectories) {
+  public void setIgnoreSubdirectories(List<File> ignoreSubdirectories) {
     if (ignoreSubdirectories == null) {
       this.ignoreSubdirectories = new ArrayList<>();
     } else {

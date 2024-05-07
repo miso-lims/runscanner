@@ -1,7 +1,8 @@
+package ca.on.oicr.gsi.runscanner.scanner.processor;
+
 import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.PacBioNotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.type.Platform;
-import ca.on.oicr.gsi.runscanner.scanner.processor.DefaultPacBio;
 import ca.on.oicr.gsi.runscanner.scanner.processor.DefaultPacBio.StatusResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
