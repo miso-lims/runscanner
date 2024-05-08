@@ -1,7 +1,8 @@
+package ca.on.oicr.gsi.runscanner.scanner.processor;
+
 import ca.on.oicr.gsi.runscanner.dto.IlluminaNotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.type.Platform;
-import ca.on.oicr.gsi.runscanner.scanner.processor.DefaultIllumina;
 import ca.on.oicr.gsi.runscanner.scanner.processor.RunProcessor.Builder;
 import java.io.File;
 import java.io.IOException;

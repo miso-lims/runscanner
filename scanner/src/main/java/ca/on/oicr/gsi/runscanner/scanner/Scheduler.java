@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -97,6 +98,7 @@ public class Scheduler {
     private String path;
     private Platform platformType;
     private String timeZone;
+    private List<File> ignoreSubdirectories;
 
     public String getName() {
       return name;
@@ -118,6 +120,10 @@ public class Scheduler {
       return timeZone;
     }
 
+    public List<File> getIgnoreSubdirectories() {
+      return ignoreSubdirectories;
+    }
+
     public void setName(String name) {
       this.name = name;
     }
@@ -136,6 +142,10 @@ public class Scheduler {
 
     public void setTimeZone(String timeZone) {
       this.timeZone = timeZone;
+    }
+
+    public void setIgnoreSubdirectories(ArrayList<File> ignoreSubdirectories) {
+      this.ignoreSubdirectories = ignoreSubdirectories;
     }
   }
 
@@ -166,21 +176,31 @@ public class Scheduler {
           .name("miso_runscanner_directories_attempted")
           .help("The number of directories that were considered in the last pass.")
           .register();
+
+  private static final Gauge goodRuns =
+      Gauge.build()
+          .name("miso_runscanner_good_runs")
+          .help("The number of runs that succeeded in processing.")
+          .register();
+
   private static final Gauge badRuns =
       Gauge.build()
           .name("miso_runscanner_bad_runs")
           .help("The number of runs that failed to process.")
           .register();
+
   private static final Gauge configurationEntries =
       Gauge.build()
           .name("miso_runscanner_configuration_entries")
           .help("The number of entries from the last configuration.")
           .register();
+
   private static final Gauge configurationTimestamp =
       Gauge.build()
           .name("miso_runscanner_configuration_timestamp")
           .help("The epoch time when the configuration was last read.")
           .register();
+
   private static final Gauge configurationValid =
       Gauge.build()
           .name("miso_runscanner_configuration_valid")
@@ -200,7 +220,9 @@ public class Scheduler {
           .help("The number of bad directories encountered.")
           .labelNames(PLATFORM_LABEL)
           .register();
+
   private static Logger log = LoggerFactory.getLogger(Scheduler.class);
+
   private static final Gauge newRunsScanned =
       Gauge.build()
           .name("miso_runscanner_new_runs_scanned")
@@ -231,12 +253,14 @@ public class Scheduler {
   private static final LatencyHistogram scanTime =
       new LatencyHistogram(
           "miso_runscanner_directory_scan_time", "Time to scan the run directories in seconds.");
+
   private static final Gauge waitingRuns =
       Gauge.build()
           .name("miso_runscanner_waiting_runs")
           .help("The number of runs waiting to be processed.")
           .labelNames(PLATFORM_LABEL)
           .register();
+
   private static final Gauge lastScanStartTime =
       Gauge.build()
           .name("miso_runscanner_last_scan_start_time_seconds")
@@ -264,7 +288,7 @@ public class Scheduler {
 
   private boolean isConfigurationGood = true;
 
-  // The paths that are current being processed (and the corresponding processor).
+  // The paths that are currently being processed (and the corresponding processor).
   private final Set<File> processing = new ConcurrentSkipListSet<>();
 
   // The directories that contain run directories that need to be scanned and the processors for
@@ -358,18 +382,53 @@ public class Scheduler {
     return scanningNow;
   }
 
+  private static boolean isSubDirectory(File baseDirectory, File subDirectory) {
+    File parent = subDirectory.getParentFile();
+    while (parent != null) {
+      if (baseDirectory.equals(parent)) {
+        return true;
+      }
+      parent = parent.getParentFile();
+    }
+    return false;
+  }
+
+  /** Helper to check if current run directory should be ignored */
+  protected static boolean skipSubDirectory(
+      File currentRunDirectory, List<File> ignoreDirectories, File baseDirectory) {
+    // Loop through list of directories to ignore
+    for (File currentIgnoreDirectory : ignoreDirectories) {
+      File basePlusSubDirectory = new File(baseDirectory, currentIgnoreDirectory.getPath());
+
+      // Check if current directory is same as ignore directory
+      if (currentRunDirectory.equals(basePlusSubDirectory)) {
+        return true;
+      }
+
+      // Check if current directory is subdirectory of ignore directory
+      if (isSubDirectory(basePlusSubDirectory, currentRunDirectory)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   /**
    * Determine if a run directory is in need of processing.
    *
-   * <p>This means that it is not in a processing queue, failed processing last time, nor needs
-   * reprocessing (for runs still active on the sequencer)
+   * <p>This means that it is not in a processing queue, failed processing last time, not in the
+   * list of subdirectories to ignore nor needs reprocessing (for runs still active on the
+   * sequencer)
    */
-  private boolean isUnprocessed(File directory) {
+  private boolean isUnprocessed(File directory, List<File> ignoreDirectories, File baseDirectory) {
     return !workToDo.contains(directory)
         && !processing.contains(directory)
         && (!failed.containsKey(directory)
             || Duration.between(failed.get(directory), Instant.now()).toMinutes() > 20)
-        && (!finishedWork.containsKey(directory) || finishedWork.get(directory).shouldRerun());
+        && (!finishedWork.containsKey(directory) || finishedWork.get(directory).shouldRerun())
+        // Exclude from processing if directory name in list of directories to ignore,
+        // or it is a sub-directory of an ignore directory
+        && !skipSubDirectory(directory, ignoreDirectories, baseDirectory);
   }
 
   /** Push a run directory into the processing queue. */
@@ -403,6 +462,7 @@ public class Scheduler {
             errors.labels(processor.getPlatformType().name()).inc();
             failed.put(directory, Instant.now());
           }
+          goodRuns.set(finishedWork.size());
           badRuns.set(failed.size());
           processTime
               .labels(processor.getPlatformType().name(), instrumentName)
@@ -439,7 +499,8 @@ public class Scheduler {
                         RunProcessor.processorFor(
                                 source.getPlatformType(), source.getName(), source.getParameters())
                             .orElse(null));
-                    /* Create gauge metric to inform us if directory is valid or not */
+                    destination.setIgnoreSubdirectories(source.getIgnoreSubdirectories());
+                    // Create gauge metric to inform us if directory is valid or not
                     loadingRunDirectoryValid
                         .labels(source.getPath())
                         .set(destination.isValid() ? 1 : 0);
@@ -495,7 +556,13 @@ public class Scheduler {
                       .peek(attempted) //
                       .filter(entry -> newUnreadableDirectories.test(entry.first())) //
                       .peek(accepted) //
-                      .filter(entry -> isUnprocessed(entry.first())) //
+                      .filter(
+                          entry -> {
+                            return isUnprocessed(
+                                entry.first(),
+                                entry.second().getIgnoreSubdirectories(),
+                                entry.second().getPath());
+                          }) //
                       .peek(newRuns) //
                       .forEach(
                           entry ->

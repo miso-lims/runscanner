@@ -192,6 +192,11 @@ public class UserInterfaceController {
                                   configuration.isValid()
                                       ? "Yes"
                                       : "No: " + configuration.validitySummary());
+                              renderer.line("Ignoring subdirectories", " ");
+                              // Add a new render line for each subdirectory to ignore
+                              for (File directory : configuration.getIgnoreSubdirectories()) {
+                                renderer.line("-", directory.toString());
+                              }
                             }
                           }));
         }
@@ -202,7 +207,10 @@ public class UserInterfaceController {
           if (scheduler.isConfigurationGood()) {
             renderer.line("Is Configuration Good?", "Yes");
           } else {
-            renderer.line(Stream.of(new Pair<String, String>("class", "bad")), "Is Configuration Good?", "No");
+            renderer.line(
+                Stream.of(new Pair<String, String>("class", "bad")),
+                "Is Configuration Good?",
+                "No");
           }
           renderer.line("Last Configuration Read", scheduler.getConfigurationLastRead());
           renderer.line("Scanning Enabled", scheduler.isScanningEnabled() ? "Yes" : "No");
