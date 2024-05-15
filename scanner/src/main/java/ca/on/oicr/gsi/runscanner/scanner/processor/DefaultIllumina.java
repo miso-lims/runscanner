@@ -52,7 +52,7 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
 /**
- * Scan an Illumina sequener's output using the Illumina Interop C++ library.
+ * Scan an Illumina sequencer's output using the Illumina Interop C++ library.
  *
  * <p>This should work for all sequencer execept the Genome Analyzer and Genome Analyzer II.
  */
