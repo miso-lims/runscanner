@@ -52,7 +52,7 @@ list of instruments:
         "timeZone": "America/Toronto",
         "parameters": {},
         "ignoreSubdirectories": [
-            "/run1"
+            "run1"
         ]
       },
       {
@@ -69,10 +69,9 @@ list of instruments:
     ]
 
 The ignoreSubdirectories field is used to exclude subdirectories from processing. For example, a 
-known bad run or a test folder holding temporary files like /test/mytestrun. This is optional 
+known bad run or a test folder holding temporary files. This is optional 
 and in cases where ignoreSubdirectories is not included in the configuration file, all 
-subdirectories under that instrument path will be processed by Run Scanner. For some examples of 
-how to use this feature, check out the tests inside `SchedulerTest`.
+subdirectories under that instrument path will be processed by Run Scanner.
 
 The name/platformType combination is used to define how to interpret the
 sequencer's results. A full list of instrument options can be found in
