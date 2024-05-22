@@ -1,4 +1,7 @@
 # Unreleased
+Changes:
+
+  * Update Installation documentation to include ignore directories change
 
 # 1.16.1
 Changes:

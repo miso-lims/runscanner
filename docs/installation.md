@@ -50,16 +50,28 @@ list of instruments:
         "platformType": "ILLUMINA",
         "name": "default",
         "timeZone": "America/Toronto",
-        "parameters": {}
+        "parameters": {},
+        "ignoreSubdirectories": [
+            "run1"
+        ]
       },
       {
         "path": "/srv/sequencer/promethion",
         "platformType": "OXFORDNANOPORE",
         "name": "promethion",
         "timeZone": "America/Toronto",
-        "parameters": {}
+        "parameters": {},
+        "ignoreSubdirectories": [
+            "test/run1",
+            "run2"
+        ]
       }
     ]
+
+The ignoreSubdirectories field is used to exclude subdirectories from processing. For example, a 
+known bad run or a test folder holding temporary files. This is optional 
+and in cases where ignoreSubdirectories is not included in the configuration file, all 
+subdirectories under that instrument path will be processed by Run Scanner.
 
 The name/platformType combination is used to define how to interpret the
 sequencer's results. A full list of instrument options can be found in
