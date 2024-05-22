@@ -62,8 +62,8 @@ list of instruments:
         "timeZone": "America/Toronto",
         "parameters": {},
         "ignoreSubdirectories": [
-            "/test/run1",
-            "/run2"
+            "test/run1",
+            "run2"
         ]
       }
     ]
