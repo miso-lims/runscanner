@@ -1,20 +1,19 @@
 # Unreleased
+
+# 1.16.2
+
 Changes:
 
   * Update Installation documentation to include ignore directories change
+  * Added ability to exclude runs from processing using ignoreSubdirectories field in configuration file
+  * Added metric to track good (readable) runs
 
 # 1.16.1
+
 Changes:
 
   * Fix build parameters for readthedocs config
   * Add metric for run directory readability
-
-# 1.16.0
-Changes:
-
-* Added ability to exclude runs from processing using ignoreSubdirectories field in 
-  configuration file
-* Added metric to track good (readable) runs
 
 # 1.16.0
 
