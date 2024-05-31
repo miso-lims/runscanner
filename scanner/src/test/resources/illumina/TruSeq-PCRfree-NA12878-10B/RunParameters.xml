@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunParameters xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Side>A</Side>
+  <Application>NovaSeqXSeries Control Software</Application>
+  <SystemSuiteVersion>1.2.0.26708</SystemSuiteVersion>
+  <OutputFolder>//uskm-prd-isi01/Lightning/DVT/Wave2_Bridging_Study/Sequencing_Runs/20231010_pi1-07_0329_A222N7LTD3</OutputFolder>
+  <CloudUploadMode>RunMonitoringAndStorage</CloudUploadMode>
+  <RunSetupMode>Manual</RunSetupMode>
+  <SecondaryAnalysisMode>None</SecondaryAnalysisMode>
+  <InstrumentType>NovaSeqXPlus</InstrumentType>
+  <InstrumentSerialNumber>pi1-07</InstrumentSerialNumber>
+  <RunId>20231010_pi1-07_0329_A222N7LTD3</RunId>
+  <RunCounter>329</RunCounter>
+  <RecipeName>10B Sequencing</RecipeName>
+  <RecipeVersion>10B-01.02.00_Candidate1HM</RecipeVersion>
+  <ExperimentName>10B_TSPF_4a</ExperimentName>
+  <FlowCellName>NovaSeqXSeries B3</FlowCellName>
+  <FlowCellType>NovaSeqXSeriesB3</FlowCellType>
+  <ConsumableInfo>
+    <ConsumableInfo>
+      <SerialNumber>LC1018851-LC1</SerialNumber>
+      <LotNumber>1000018406</LotNumber>
+      <PartNumber>20072271</PartNumber>
+      <ExpirationDate>2024-07-05T00:00:00-07:00</ExpirationDate>
+      <Type>SampleTube</Type>
+      <Mode>3</Mode>
+      <Version>1.0</Version>
+      <Name>8 Lane</Name>
+    </ConsumableInfo>
+    <ConsumableInfo>
+      <SerialNumber>LC2306160632-1</SerialNumber>
+      <LotNumber>23061501</LotNumber>
+      <PartNumber>10</PartNumber>
+      <ExpirationDate>2024-12-15T00:00:00-08:00</ExpirationDate>
+      <Type>Buffer</Type>
+      <Mode>3</Mode>
+      <Version>11</Version>
+      <Name />
+    </ConsumableInfo>
+    <ConsumableInfo>
+      <SerialNumber>222N7LTD3</SerialNumber>
+      <LotNumber>20775744</LotNumber>
+      <PartNumber>20060993</PartNumber>
+      <ExpirationDate>2025-01-17T00:00:00-08:00</ExpirationDate>
+      <Type>FlowCell</Type>
+      <Mode>3</Mode>
+      <Version>1.0</Version>
+      <Name>10B</Name>
+    </ConsumableInfo>
+    <ConsumableInfo>
+      <SerialNumber>12341234</SerialNumber>
+      <LotNumber>9</LotNumber>
+      <PartNumber>10</PartNumber>
+      <ExpirationDate>2024-09-27T00:00:00-07:00</ExpirationDate>
+      <Type>Lyo</Type>
+      <Mode>3</Mode>
+      <Version>11</Version>
+      <Name />
+    </ConsumableInfo>
+    <ConsumableInfo>
+      <SerialNumber>LC4038676-LC3</SerialNumber>
+      <LotNumber>20777866</LotNumber>
+      <PartNumber>20066614</PartNumber>
+      <ExpirationDate>2025-01-31T00:00:00-08:00</ExpirationDate>
+      <Type>Reagent</Type>
+      <Mode>3</Mode>
+      <Version>1.0</Version>
+      <Name>10B 300c</Name>
+    </ConsumableInfo>
+  </ConsumableInfo>
+  <PlannedReads>
+    <Read ReadName="Read1" Cycles="151" />
+    <Read ReadName="Index1" Cycles="10" />
+    <Read ReadName="Index2" Cycles="10" />
+    <Read ReadName="Read2" Cycles="151" />
+  </PlannedReads>
+  <SecondaryAnalysisInfo />
+  <DisableBclCopy>false</DisableBclCopy>
+</RunParameters>

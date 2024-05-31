@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunParameters xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <SampleSheetFilePath>/usr/local/illumina/runs/setup/2024-02-16_14-35-58_VH00136/SampleSheetImport/SampleSheet.csv</SampleSheetFilePath>
+  <PlannedCycles>
+    <Read1>101</Read1>
+    <Index1>10</Index1>
+    <Index2>10</Index2>
+    <Read2>101</Read2>
+  </PlannedCycles>
+  <CompletedCycles>
+    <Read1>101</Read1>
+    <Index1>10</Index1>
+    <Index2>10</Index2>
+    <Read2>101</Read2>
+  </CompletedCycles>
+  <InstrumentName>VH00136</InstrumentName>
+  <InstrumentSerialNumber>VH00136</InstrumentSerialNumber>
+  <InstrumentType>NextSeq 2000</InstrumentType>
+  <ApplicationName>NextSeq 1000/2000 Control Software</ApplicationName>
+  <ApplicationVersion>1.7.0.45751</ApplicationVersion>
+  <FlowCellSerialNumber>2222JVWNX</FlowCellSerialNumber>
+  <FlowCellPartNumber>20104448</FlowCellPartNumber>
+  <FlowCellLotNumber>20815851</FlowCellLotNumber>
+  <FlowCellExpirationDate>2025-02-06</FlowCellExpirationDate>
+  <FlowCellVersion>5</FlowCellVersion>
+  <FlowCellMode>NextSeq 2000 P4 Flow Cell Cartridge</FlowCellMode>
+  <CartridgeSerialNumber>EC1548265-EC14</CartridgeSerialNumber>
+  <CartridgePartNumber>20098513</CartridgePartNumber>
+  <CartridgeLotNumber>20828764</CartridgeLotNumber>
+  <CartridgeExpirationDate>2025-01-01</CartridgeExpirationDate>
+  <CartridgeVersion>5</CartridgeVersion>
+  <CartridgeMode>NextSeq 2000 P4 Reagent Cartridge (338 Cycles)</CartridgeMode>
+  <ExperimentName>240216_UK_VH00136_P4_BRG_Enrich-24Plex_950pM_COCA_33</ExperimentName>
+  <RecipeName>XO-XLEAP-Seq</RecipeName>
+  <RecipeVersion>1.0</RecipeVersion>
+  <RtaVersion>4.12.2</RtaVersion>
+  <RunStartTime>2024-02-16T15:45:48.4420519Z</RunStartTime>
+  <RunEndTime>2024-02-18T01:33:59.0412728Z</RunEndTime>
+  <RunElapsedTime>1:9:48:10:599 (d:hr:min:s:ms)</RunElapsedTime>
+  <RunCounter>539</RunCounter>
+  <CimVersion>cim@1.4.6</CimVersion>
+  <ChmVersion>chm@1.4.6</ChmVersion>
+  <ImbVersion>imb@1.4.6</ImbVersion>
+  <CibFpgaVersion>0x3200000a</CibFpgaVersion>
+  <CopyServiceRunId>1B0D04564C79C357</CopyServiceRunId>
+  <CopyServiceVersion>2.7.3.4836</CopyServiceVersion>
+  <BaseSpaceRunId>275490215</BaseSpaceRunId>
+  <PlannedRunId>srn.64517d83e7314880aebb713bb364c52b</PlannedRunId>
+  <BsshMode>RunMonitoringAndStorage</BsshMode>
+  <SecondaryAnalysisPlatformVersion>4.2.7</SecondaryAnalysisPlatformVersion>
+  <SecondaryAnalysisWorkflow>Cloud_DragenEnrichment</SecondaryAnalysisWorkflow>
+  <RunSetupMode>CloudOrchestrated</RunSetupMode>
+  <SecondaryAnalysisMode>Cloud</SecondaryAnalysisMode>
+  <OutputFolder>/mnt/ns2kchx/Upload_Ingenuity/SYSDVT_Runs/240216_VH00136_539_2222JVWNX</OutputFolder>
+  <SkipObdd>false</SkipObdd>
+  <PurgeReagentCartridge>false</PurgeReagentCartridge>
+  <CustomPrimerSelections>
+    <Read1>None</Read1>
+    <Index1>None</Index1>
+    <Index2>None</Index2>
+    <Read2>None</Read2>
+  </CustomPrimerSelections>
+</RunParameters>

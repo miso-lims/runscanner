@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunParameters xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Side>A</Side>
+  <Application>NovaSeqXSeries Control Software</Application>
+  <SystemSuiteVersion>1.2.2.48004</SystemSuiteVersion>
+  <OutputFolder>20240424_pi1-04_0368_A227KGJLT4</OutputFolder>
+  <CloudUploadMode>RunMonitoringAndStorage</CloudUploadMode>
+  <RunSetupMode>Manual</RunSetupMode>
+  <SecondaryAnalysisMode>None</SecondaryAnalysisMode>
+  <InstrumentType>NovaSeqXPlus</InstrumentType>
+  <InstrumentSerialNumber>pi1-04</InstrumentSerialNumber>
+  <RunId>20240424_pi1-04_0368_A227KGJLT4</RunId>
+  <RunCounter>368</RunCounter>
+  <RecipeName>25B Sequencing</RecipeName>
+  <RecipeVersion>25B-01.02.01</RecipeVersion>
+  <ExperimentName>W2Hotfix_25Bwith10B_v8LVF_CF_TSPF_2</ExperimentName>
+  <FlowCellName>NovaSeqXSeries B4</FlowCellName>
+  <FlowCellType>NovaSeqXSeriesB4</FlowCellType>
+  <ConsumableInfo>
+    <ConsumableInfo>
+      <SerialNumber>LC1041657-LC1</SerialNumber>
+      <LotNumber>1000020056</LotNumber>
+      <PartNumber>20072271</PartNumber>
+      <ExpirationDate>2025-12-11T00:00:00-08:00</ExpirationDate>
+      <Type>SampleTube</Type>
+      <Mode>3</Mode>
+      <Version>1.0</Version>
+      <Name>8 Lane</Name>
+    </ConsumableInfo>
+    <ConsumableInfo>
+      <SerialNumber>LC4090535-25B3</SerialNumber>
+      <LotNumber>20807442</LotNumber>
+      <PartNumber>20066626</PartNumber>
+      <ExpirationDate>2024-12-07T00:00:00-08:00</ExpirationDate>
+      <Type>Reagent</Type>
+      <Mode>4</Mode>
+      <Version>1.5</Version>
+      <Name>25B 300c</Name>
+    </ConsumableInfo>
+    <ConsumableInfo>
+      <SerialNumber>LC2402020123-1</SerialNumber>
+      <LotNumber>24013001</LotNumber>
+      <PartNumber>20089853</PartNumber>
+      <ExpirationDate>2025-07-30T00:00:00-07:00</ExpirationDate>
+      <Type>Buffer</Type>
+      <Mode>3</Mode>
+      <Version>1.0</Version>
+      <Name>Universal</Name>
+    </ConsumableInfo>
+    <ConsumableInfo>
+      <SerialNumber>227KGJLT4</SerialNumber>
+      <LotNumber>20839129</LotNumber>
+      <PartNumber>20088039</PartNumber>
+      <ExpirationDate>2024-12-04T00:00:00-08:00</ExpirationDate>
+      <Type>FlowCell</Type>
+      <Mode>4</Mode>
+      <Version>1.0</Version>
+      <Name>25B</Name>
+    </ConsumableInfo>
+    <ConsumableInfo>
+      <SerialNumber>LC2057265-LI6</SerialNumber>
+      <LotNumber>18121670</LotNumber>
+      <PartNumber>20090671</PartNumber>
+      <ExpirationDate>2025-01-10T00:00:00-08:00</ExpirationDate>
+      <Type>Lyo</Type>
+      <Mode>11</Mode>
+      <Version>1.5</Version>
+      <Name>High</Name>
+    </ConsumableInfo>
+  </ConsumableInfo>
+  <PlannedReads>
+    <Read ReadName="Read1" Cycles="151" />
+    <Read ReadName="Index1" Cycles="10" />
+    <Read ReadName="Index2" Cycles="10" />
+    <Read ReadName="Read2" Cycles="151" />
+  </PlannedReads>
+  <SecondaryAnalysisInfo />
+  <DisableBclCopy>false</DisableBclCopy>
+</RunParameters>
