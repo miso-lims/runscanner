@@ -54,7 +54,7 @@ import org.w3c.dom.Document;
 /**
  * Scan an Illumina sequencer's output using the Illumina Interop C++ library.
  *
- * <p>This should work for all sequencer execept the Genome Analyzer and Genome Analyzer II.
+ * <p>This should work for all sequencers except the Genome Analyzer and Genome Analyzer II.
  */
 public final class DefaultIllumina extends RunProcessor {
   private static final LatencyHistogram directory_scan_time =
