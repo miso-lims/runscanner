@@ -121,6 +121,7 @@ public final class DefaultIllumina extends RunProcessor {
   private static final XPathExpression SBS_CONSUMABLE_VERSION =
       xpath("//RfidsInfo/SbsConsumableVersion/text()");
   private static final XPathExpression RUNPARAM_START_TIME_XPATH = xpath("//RunStartTime/text()");
+  private static final XPathExpression RUNPARAM_END_TIME_XPATH = xpath("//RunEndTime/text()");
 
   // RunCompletionInfo XPaths
   private static final XPathExpression COMPLETION_STATUS_NEXTSEQ =
@@ -313,6 +314,7 @@ public final class DefaultIllumina extends RunProcessor {
           "Illumina run processor did not exit cleanly: " + runDirectory.getAbsolutePath());
     }
 
+    // Grab .xml files with information about the run
     final Document runInfo = getXmlDocument(runDirectory, "RunInfo.xml");
     final Document runParameters = getRunParameters(runDirectory);
     final Document runCompletionStatus = getXmlDocument(runDirectory, "RunCompletionStatus.xml");
@@ -376,6 +378,7 @@ public final class DefaultIllumina extends RunProcessor {
             .findFirst()
             .orElse(null);
 
+    // If we have a date failed, use that as completion date
     if (failedDate != null) {
       dto.setHealthType(HealthType.FAILED);
       dto.setCompletionDate(failedDate);
@@ -385,20 +388,33 @@ public final class DefaultIllumina extends RunProcessor {
     if (dto.getHealthType() == HealthType.COMPLETED) {
       // Maybe a NextSeq wrote a completion status, that we take as authoritative even
       // though it's totally undocumented behaviour.
+      // Set updatedHealth to empty depending on if RunCompletionStatus is null
       Optional<HealthType> updatedHealth =
           runCompletionStatus == null ? Optional.empty() : getHealth(runCompletionStatus);
 
+      // If we have RunCompletionStatus.xml, use that to grab the CompletionDate
       if (updatedHealth.isPresent()) {
         completness_method_success.labels("xml").inc();
         updateCompletionDateFromRunCompletionStatus(runDirectory, runCompletionStatus, dto);
       }
 
+      // We don't have RunCompletionStatus.xml file, check other options
       if (!updatedHealth.isPresent() && dto.getNumReads() > 0) {
+        // Do we have CopyComplete.txt?
         if (new File(runDirectory, "CopyComplete.txt").exists()) {
           // It's allegedly done.
           updatedHealth = Optional.of(HealthType.COMPLETED);
           completness_method_success.labels("complete.txt").inc();
           updateCompletionDateFromFile(runDirectory, "CopyComplete.txt", dto);
+        }
+        // Do we have RunEndTime in RunParameters.xml?
+        else if (new File(runDirectory, "RunParameters.xml").exists()) {
+          // Check if RunEndTime exists and use that for CompletionDate
+          if (getValueFromXml(runParameters, RUNPARAM_END_TIME_XPATH) != null) {
+            updatedHealth = Optional.of(HealthType.COMPLETED);
+            completness_method_success.labels("complete.txt").inc();
+            updateCompletionDateFromRunParameters(runDirectory, runParameters, dto);
+          }
         } else {
           // Well, that didn't work. Maybe there are netcopy files.
           long netCopyFiles =
@@ -409,7 +425,7 @@ public final class DefaultIllumina extends RunProcessor {
                   .filter(File::exists) //
                   .count();
           if (netCopyFiles == 0) {
-            // This might mean incomplete or it might mean the sequencer never wrote the
+            // This might mean incomplete, or it might mean the sequencer never wrote the
             // files
           } else {
             // If we see some net copy files, then it's still running; if they're all here,
@@ -480,6 +496,16 @@ public final class DefaultIllumina extends RunProcessor {
       dto.setCompletionDate(timestamp);
     } else {
       updateCompletionDateFromFile(runDirectory, "RunCompletionStatus.xml", dto);
+    }
+  }
+
+  private void updateCompletionDateFromRunParameters(
+      File runDirectory, Document runParameters, IlluminaNotificationDto dto) throws IOException {
+    Instant timestamp = getInstant(runParameters, RUNPARAM_END_TIME_XPATH);
+    if (timestamp != null) {
+      dto.setCompletionDate(timestamp);
+    } else {
+      updateCompletionDateFromFile(runDirectory, "RunParameters.xml", dto);
     }
   }
 
