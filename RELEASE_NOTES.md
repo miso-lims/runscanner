@@ -3,8 +3,6 @@
 Changes:
 
   * Added test data for NovaSeq X
-  * Added test data for NextSeq 2000
-  * Improved detection of RunCompletionDate using RunParameters.xml file
 
 # 1.16.2
 
