@@ -52,9 +52,9 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
 /**
- * Scan an Illumina sequener's output using the Illumina Interop C++ library.
+ * Scan an Illumina sequencer's output using the Illumina Interop C++ library.
  *
- * <p>This should work for all sequencer execept the Genome Analyzer and Genome Analyzer II.
+ * <p>This should work for all sequencers except the Genome Analyzer and Genome Analyzer II.
  */
 public final class DefaultIllumina extends RunProcessor {
   private static final LatencyHistogram directory_scan_time =
@@ -313,6 +313,7 @@ public final class DefaultIllumina extends RunProcessor {
           "Illumina run processor did not exit cleanly: " + runDirectory.getAbsolutePath());
     }
 
+    // Grab .xml files with information about the run
     final Document runInfo = getXmlDocument(runDirectory, "RunInfo.xml");
     final Document runParameters = getRunParameters(runDirectory);
     final Document runCompletionStatus = getXmlDocument(runDirectory, "RunCompletionStatus.xml");
@@ -376,6 +377,7 @@ public final class DefaultIllumina extends RunProcessor {
             .findFirst()
             .orElse(null);
 
+    // If we have a date failed, use that as completion date
     if (failedDate != null) {
       dto.setHealthType(HealthType.FAILED);
       dto.setCompletionDate(failedDate);
@@ -385,15 +387,18 @@ public final class DefaultIllumina extends RunProcessor {
     if (dto.getHealthType() == HealthType.COMPLETED) {
       // Maybe a NextSeq wrote a completion status, that we take as authoritative even
       // though it's totally undocumented behaviour.
+      // Set updatedHealth to empty depending on if RunCompletionStatus is null
       Optional<HealthType> updatedHealth =
           runCompletionStatus == null ? Optional.empty() : getHealth(runCompletionStatus);
 
+      // If we have RunCompletionStatus.xml, use that to grab the CompletionDate
       if (updatedHealth.isPresent()) {
         completness_method_success.labels("xml").inc();
         updateCompletionDateFromRunCompletionStatus(runDirectory, runCompletionStatus, dto);
       }
-
+      // We don't have RunCompletionStatus.xml file, check other options
       if (!updatedHealth.isPresent() && dto.getNumReads() > 0) {
+        // Do we have CopyComplete.txt?
         if (new File(runDirectory, "CopyComplete.txt").exists()) {
           // It's allegedly done.
           updatedHealth = Optional.of(HealthType.COMPLETED);
@@ -409,7 +414,7 @@ public final class DefaultIllumina extends RunProcessor {
                   .filter(File::exists) //
                   .count();
           if (netCopyFiles == 0) {
-            // This might mean incomplete or it might mean the sequencer never wrote the
+            // This might mean incomplete, or it might mean the sequencer never wrote the
             // files
           } else {
             // If we see some net copy files, then it's still running; if they're all here,

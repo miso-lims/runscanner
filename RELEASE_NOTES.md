@@ -1,5 +1,9 @@
 # Unreleased
 
+Changes:
+
+  * Added test data for NovaSeq X
+
 # 1.16.2
 
 Changes:
