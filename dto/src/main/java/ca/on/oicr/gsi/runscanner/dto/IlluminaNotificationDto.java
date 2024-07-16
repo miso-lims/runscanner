@@ -28,8 +28,8 @@ public class IlluminaNotificationDto extends NotificationDto {
     if (!super.equals(obj)) return false;
     if (getClass() != obj.getClass()) return false;
     IlluminaNotificationDto other = (IlluminaNotificationDto) obj;
-
-    return Objects.equals(this.runBasesMask, other.runBasesMask)
+    return Objects.equals(this.getMetrics(), other.getMetrics())
+        && Objects.equals(this.runBasesMask, other.runBasesMask)
         && Objects.equals(this.bclCount, other.bclCount)
         && Objects.equals(this.callCycle, other.callCycle)
         && Objects.equals(this.chemistry, other.chemistry)
@@ -112,6 +112,7 @@ public class IlluminaNotificationDto extends NotificationDto {
   public int hashCode() {
     return Objects.hash(
         super.hashCode(),
+        getMetrics(),
         runBasesMask,
         bclCount,
         callCycle,
