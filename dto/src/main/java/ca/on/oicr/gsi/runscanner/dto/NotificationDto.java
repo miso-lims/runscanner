@@ -239,8 +239,6 @@ public abstract class NotificationDto {
         + pairedEndRun
         + ", software="
         + software
-        + ", metrics="
-        + metrics
         + "]";
   }
 
