@@ -182,6 +182,8 @@ public class IlluminaNotificationDto extends NotificationDto {
   @Override
   public String toString() {
     return super.toString()
+        + ", metrics="
+        + getMetrics()
         + ", IlluminaNotificationDto [callCycle="
         + callCycle
         + ", chemistry="
