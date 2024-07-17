@@ -44,7 +44,7 @@ public abstract class AbstractProcessorTest {
         JsonNode jsonNodeResult = MapperTest.readTree(result.getMetrics());
         JsonNode jsonNodeReference = MapperTest.readTree(reference.getMetrics());
         if (jsonNodeResult.equals(jsonNodeReference)) {
-          // If Json objects are equal, set them to be the same before testing assertEquals
+          // If Json objects are equal, set string representation to also be equal
           reference.setMetrics(result.getMetrics());
         }
       }

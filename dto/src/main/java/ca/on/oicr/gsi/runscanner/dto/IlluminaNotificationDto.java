@@ -28,6 +28,7 @@ public class IlluminaNotificationDto extends NotificationDto {
     if (!super.equals(obj)) return false;
     if (getClass() != obj.getClass()) return false;
     IlluminaNotificationDto other = (IlluminaNotificationDto) obj;
+
     return Objects.equals(this.runBasesMask, other.runBasesMask)
         && Objects.equals(this.bclCount, other.bclCount)
         && Objects.equals(this.callCycle, other.callCycle)
