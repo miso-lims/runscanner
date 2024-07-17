@@ -37,13 +37,12 @@ public abstract class AbstractProcessorTest {
         result.setMetrics(null); // We delete these because changes in metrics are non-critical.
       }
 
-      // For Illumina processors
+      // For Illumina processors only
       if (clazz.equals(IlluminaNotificationDto.class)) {
         // Load the metrics into a Jackson JsonNode to test for equality
-        ObjectMapper mapperResult = new ObjectMapper();
-        ObjectMapper mapperReference = new ObjectMapper();
-        JsonNode jsonNodeResult = mapperResult.readTree(result.getMetrics());
-        JsonNode jsonNodeReference = mapperReference.readTree(reference.getMetrics());
+        ObjectMapper MapperTest = new ObjectMapper();
+        JsonNode jsonNodeResult = MapperTest.readTree(result.getMetrics());
+        JsonNode jsonNodeReference = MapperTest.readTree(reference.getMetrics());
         if (jsonNodeResult.equals(jsonNodeReference)) {
           // If Json objects are equal, set them to be the same before testing assertEquals
           reference.setMetrics(result.getMetrics());
