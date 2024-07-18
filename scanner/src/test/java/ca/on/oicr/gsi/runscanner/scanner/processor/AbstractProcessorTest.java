@@ -1,6 +1,7 @@
 package ca.on.oicr.gsi.runscanner.scanner.processor;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import ca.on.oicr.gsi.runscanner.dto.IlluminaNotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
@@ -32,22 +33,20 @@ public abstract class AbstractProcessorTest {
       result.setSequencerFolderPath(
           null); // We delete this because it is going to be different in each environment.
 
-      // For all non-Illumina processors
-      if (!clazz.equals(IlluminaNotificationDto.class)) {
-        result.setMetrics(null); // We delete these because changes in metrics are non-critical.
-      }
-
       // For Illumina processors only
       if (clazz.equals(IlluminaNotificationDto.class)) {
         // Load the metrics into a Jackson JsonNode to test for equality
         ObjectMapper MapperTest = new ObjectMapper();
         JsonNode jsonNodeResult = MapperTest.readTree(result.getMetrics());
         JsonNode jsonNodeReference = MapperTest.readTree(reference.getMetrics());
-        if (jsonNodeResult.equals(jsonNodeReference)) {
-          // If Json objects are equal, set string representation to also be equal
-          reference.setMetrics(result.getMetrics());
+        if (!jsonNodeResult.equals(jsonNodeReference)) {
+          fail("Metrics aren't equal.");
         }
       }
+
+      // For non-Illumina processors, we delete these because changes in metrics are non-critical.
+      // For Illumina processors, we've already checked equality of metrics using JsonNode equals
+      result.setMetrics(null);
 
       if (clazz.equals(OxfordNanoporeNotificationDto.class)) {
         ((OxfordNanoporeNotificationDto) result).setProtocolVersion(null);

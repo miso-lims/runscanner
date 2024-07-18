@@ -271,7 +271,6 @@ public abstract class NotificationDto {
         && Objects.equals(this.containerModel, other.containerModel)
         && Objects.equals(this.healthType, other.healthType)
         && Objects.equals(this.laneCount, other.laneCount)
-        // && Objects.equals(this.metrics, other.metrics) // Check equality using JsonNode instead
         && Objects.equals(this.pairedEndRun, other.pairedEndRun)
         && Objects.equals(this.runAlias, other.runAlias)
         && Objects.equals(this.sequencerFolderPath, other.sequencerFolderPath)
