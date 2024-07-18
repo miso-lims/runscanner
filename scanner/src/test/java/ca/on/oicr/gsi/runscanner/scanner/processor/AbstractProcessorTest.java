@@ -1,7 +1,6 @@
 package ca.on.oicr.gsi.runscanner.scanner.processor;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 import ca.on.oicr.gsi.runscanner.dto.IlluminaNotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
@@ -39,12 +38,11 @@ public abstract class AbstractProcessorTest {
         ObjectMapper MapperTest = new ObjectMapper();
         JsonNode jsonNodeResult = MapperTest.readTree(result.getMetrics());
         JsonNode jsonNodeReference = MapperTest.readTree(reference.getMetrics());
-        if (!jsonNodeResult.equals(jsonNodeReference)) {
-          fail("Metrics aren't equal.");
-        } else {
-          // We know metrics equal, set reference to null to match result metrics
-          reference.setMetrics(null);
+        if (!jsonNodeReference.equals(jsonNodeResult)) {
+          assertEquals(reference, result);
         }
+        // We know metrics equal, set reference to null to match result metrics
+        reference.setMetrics(null);
       }
 
       // For non-Illumina processors, we delete these because changes in metrics are non-critical.
