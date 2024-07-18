@@ -41,6 +41,9 @@ public abstract class AbstractProcessorTest {
         JsonNode jsonNodeReference = MapperTest.readTree(reference.getMetrics());
         if (!jsonNodeResult.equals(jsonNodeReference)) {
           fail("Metrics aren't equal.");
+        } else {
+          // We know metrics equal, set reference to null to match result metrics
+          reference.setMetrics(null);
         }
       }
 
