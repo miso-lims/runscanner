@@ -1,7 +1,6 @@
 package ca.on.oicr.gsi.runscanner.scanner.processor;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 import ca.on.oicr.gsi.runscanner.dto.IlluminaNotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
@@ -40,15 +39,13 @@ public abstract class AbstractProcessorTest {
         JsonNode jsonNodeResult = MapperTest.readTree(result.getMetrics());
         JsonNode jsonNodeReference = MapperTest.readTree(reference.getMetrics());
         // Test for full deep value equality (no order)
-        if (!jsonNodeReference.equals(jsonNodeResult)) {
-          fail();
-        }
-        // If the string version of metrics match, don't remove reference or result, if no then
-        // remove
-        // from metrics from both
-        if (!result.getMetrics().equals(reference.getMetrics())) {
-          result.setMetrics(null);
-          reference.setMetrics(null);
+        if (jsonNodeReference.equals(jsonNodeResult)) {
+          // If the string version of metrics match, don't remove reference or result, if no then
+          // remove metrics from both
+          if (!result.getMetrics().equals(reference.getMetrics())) {
+            result.setMetrics(null);
+            reference.setMetrics(null);
+          }
         }
       }
 
