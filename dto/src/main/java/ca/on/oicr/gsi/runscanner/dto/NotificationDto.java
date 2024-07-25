@@ -250,7 +250,6 @@ public abstract class NotificationDto {
         containerModel,
         healthType,
         laneCount,
-        metrics,
         pairedEndRun,
         runAlias,
         sequencerFolderPath,
