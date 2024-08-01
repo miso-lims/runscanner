@@ -5,6 +5,7 @@
   "healthType": "COMPLETED",
   "laneCount": 1,
   "pairedEndRun": false,
+  "metrics": "[{\"type\":\"link\",\"name\":\"PacBio Dashboard\",\"href\":\"http://example.com/Metrics/RSRunReport?instrument=00118&run=RS00118_20150406_FSEDryRun&from=20150407-000000&to=20150408-000000\"}]",
   "poolNames": {
     "A01": ""
   },

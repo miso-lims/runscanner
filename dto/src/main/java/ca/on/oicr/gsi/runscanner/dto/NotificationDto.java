@@ -223,12 +223,16 @@ public abstract class NotificationDto {
         + sequencerFolderPath
         + ", sequencerName="
         + sequencerName
+        + ", sequencerPosition="
+        + sequencerPosition
         + ", containerSerialNumber="
         + containerSerialNumber
         + ", containerModel="
         + containerModel
         + ", laneCount="
         + laneCount
+        + ", sequencingKit="
+        + sequencingKit
         + ", healthType="
         + healthType
         + ", startDate="
