@@ -2,6 +2,7 @@ package ca.on.oicr.gsi.runscanner.scanner.processor;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 
 import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.OxfordNanoporeNotificationDto;
@@ -40,7 +41,10 @@ public abstract class AbstractProcessorTest {
         ObjectMapper MapperTest = new ObjectMapper();
         JsonNode jsonNodeResult = MapperTest.readTree(result.getMetrics());
         JsonNode jsonNodeReference = MapperTest.readTree(reference.getMetrics());
-        assertEquals(jsonNodeReference, jsonNodeResult);
+        if (!jsonNodeReference.equals(jsonNodeResult)) {
+          fail();
+        }
+        // assertEquals(jsonNodeReference, jsonNodeResult);
       }
 
       // For only Oxford Nanopore processors
