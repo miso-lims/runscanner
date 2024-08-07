@@ -37,7 +37,7 @@ public abstract class AbstractProcessorTest {
       } else {
         // ensure metrics are equal
         // Load the metrics into a Jackson JsonNode to test for equality
-        ObjectMapper MapperTest = new ObjectMapper();
+        ObjectMapper MapperTest = RunProcessor.createObjectMapper();
         JsonNode jsonNodeResult = MapperTest.readTree(result.getMetrics());
         JsonNode jsonNodeReference = MapperTest.readTree(reference.getMetrics());
         assertEquals(jsonNodeReference, jsonNodeResult);
