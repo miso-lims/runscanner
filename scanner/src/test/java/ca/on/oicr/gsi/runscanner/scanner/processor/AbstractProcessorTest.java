@@ -40,12 +40,7 @@ public abstract class AbstractProcessorTest {
         ObjectMapper MapperTest = new ObjectMapper();
         JsonNode jsonNodeResult = MapperTest.readTree(result.getMetrics());
         JsonNode jsonNodeReference = MapperTest.readTree(reference.getMetrics());
-        // assertEquals(jsonNodeReference, jsonNodeResult);
-        if (jsonNodeReference.equals(jsonNodeResult)) {
-          assertEquals(reference, result);
-        } else {
-          assertEquals(jsonNodeReference, jsonNodeResult);
-        }
+        assertEquals(jsonNodeReference, jsonNodeResult);
       }
 
       // For only Oxford Nanopore processors
