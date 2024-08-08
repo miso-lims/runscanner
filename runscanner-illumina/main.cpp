@@ -1,4 +1,5 @@
 #include <ctime>
+#include <locale>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
@@ -264,8 +265,14 @@ void add_global_chart(
     // Read has two different meanings in this context due to Illumina
     // terminology, so we're going with clusters because that's what SAV says
 
+    // this creates a new locale based on the current application default
+    // (which is either the one given on startup, but can be overriden with
+    // std::locale::global) - then extends it with an extra facet that
+    // controls numeric output.
+    std::locale comma_locale(std::locale(), new comma_numpunct());
+
     std::stringstream total_reads;
-    total_reads.imbue(std::locale(""));
+    total_reads.imbue(comma_locale); // TODO
     total_reads << std::accumulate(
         run_summary.begin()->begin(), run_summary.begin()->end(), 0L,
         [](long acc,
@@ -275,7 +282,7 @@ void add_global_chart(
     add_chart_row(values, "Clusters", total_reads.str());
 
     std::stringstream total_reads_pf;
-    total_reads_pf.imbue(std::locale(""));
+    total_reads_pf.imbue(comma_locale); // TODO
     total_reads_pf << std::accumulate(
         run_summary.begin()->begin(), run_summary.begin()->end(), 0L,
         [](long acc,
@@ -459,6 +466,18 @@ void add_yield_bars(
 
   output.append(std::move(result));
 }
+
+// TODO
+class comma_numpunct : public std::numpunct<char> {
+  protected:
+    virtual char do_thousands_sep() const {
+        return ',';
+    }
+
+    virtual std::string do_grouping() const {
+        return "\03";
+    }
+};
 
 int main(int argc, const char **argv) {
   if (argc != 2) {
