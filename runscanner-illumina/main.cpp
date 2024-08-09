@@ -167,7 +167,8 @@ void plot_by_lane_wrapper(
 }
 
 /**
-* We set the facet locally for storing numbers
+* We want to format metric numbers which are strings to include commas to have a consistent output
+* from Run Scanner. We set the facet locally for storing total_reads
 */
 template<typename CharT>
 struct Sep : public std::numpunct<CharT>
