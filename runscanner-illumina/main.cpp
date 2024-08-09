@@ -167,6 +167,20 @@ void plot_by_lane_wrapper(
 }
 
 /**
+* We set the facet locally for storing numbers
+*/
+template<typename CharT>
+struct Sep : public std::numpunct<CharT>
+{
+  virtual std::string do_grouping() const {
+    return "\003";
+  }
+  virtual CharT do_thousands_sep() const {
+    return ',';
+  }
+};
+
+/**
  * For a particular Illumina metric, construct a per-cycle candlestick plot.
 *
 * In an awkward-to-read-way, this takes a template parameter: a function to
@@ -264,15 +278,8 @@ void add_global_chart(
   if (run_summary.begin() != run_summary.end()) {
     // Read has two different meanings in this context due to Illumina
     // terminology, so we're going with clusters because that's what SAV says
-
-    // this creates a new locale based on the current application default
-    // (which is either the one given on startup, but can be overriden with
-    // std::locale::global) - then extends it with an extra facet that
-    // controls numeric output.
-    std::locale comma_locale(std::locale(), new comma_numpunct());
-
     std::stringstream total_reads;
-    total_reads.imbue(comma_locale); // TODO
+    total_reads.imbue(std::locale(std::cout.getloc(), new Sep <char>()));
     total_reads << std::accumulate(
         run_summary.begin()->begin(), run_summary.begin()->end(), 0L,
         [](long acc,
@@ -282,7 +289,7 @@ void add_global_chart(
     add_chart_row(values, "Clusters", total_reads.str());
 
     std::stringstream total_reads_pf;
-    total_reads_pf.imbue(comma_locale); // TODO
+    total_reads_pf.imbue(std::locale(std::cout.getloc(), new Sep <char>()));
     total_reads_pf << std::accumulate(
         run_summary.begin()->begin(), run_summary.begin()->end(), 0L,
         [](long acc,
@@ -466,18 +473,6 @@ void add_yield_bars(
 
   output.append(std::move(result));
 }
-
-// TODO
-class comma_numpunct : public std::numpunct<char> {
-  protected:
-    virtual char do_thousands_sep() const {
-        return ',';
-    }
-
-    virtual std::string do_grouping() const {
-        return "\03";
-    }
-};
 
 int main(int argc, const char **argv) {
   if (argc != 2) {
