@@ -168,7 +168,8 @@ void plot_by_lane_wrapper(
 
 /**
 * We want to format metric numbers which are strings to include commas to have a consistent output
-* from Run Scanner. We set the facet locally for storing total_reads
+* If we imbue with "" locale - this uses the system default but doesn't guarantee we get a comma
+* We want to force a comma, regardless of system default locale settings
 */
 template<typename CharT>
 struct Sep : public std::numpunct<CharT>

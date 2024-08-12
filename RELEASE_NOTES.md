@@ -4,6 +4,7 @@ Changes:
 
   * Added back metrics for Illumina Tests
   * Added test data for NovaSeq X
+  * Update tests to include sequencing kits
 
 # 1.16.2
 
