@@ -2,7 +2,10 @@
 
 Changes:
 
+  * Added back metrics for Illumina Tests
   * Added test data for NovaSeq X
+  * Update tests to include sequencing kits
+  * Changed Illumina metrics number format punctuation for consistency
 
 # 1.16.2
 

@@ -5,6 +5,7 @@
   "healthType": "COMPLETED",
   "laneCount": 2,
   "pairedEndRun": false,
+  "metrics": "[{\"type\":\"link\",\"name\":\"PacBio Dashboard\",\"href\":\"http://example.com/Metrics/RSRunReport?instrument=00118&run=RS00118_20170706_FSETest&from=20170706-000000&to=20170707-000000\"}]",
   "poolNames": {
     "A01": "Lambda 2kb 0.1 nM A01",
     "B01": "Lambda 2kb 0.1 nM B01"

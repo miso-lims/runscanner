@@ -223,12 +223,16 @@ public abstract class NotificationDto {
         + sequencerFolderPath
         + ", sequencerName="
         + sequencerName
+        + ", sequencerPosition="
+        + sequencerPosition
         + ", containerSerialNumber="
         + containerSerialNumber
         + ", containerModel="
         + containerModel
         + ", laneCount="
         + laneCount
+        + ", sequencingKit="
+        + sequencingKit
         + ", healthType="
         + healthType
         + ", startDate="
@@ -248,13 +252,14 @@ public abstract class NotificationDto {
         completionDate,
         containerSerialNumber,
         containerModel,
+        sequencingKit,
         healthType,
         laneCount,
-        metrics,
         pairedEndRun,
         runAlias,
         sequencerFolderPath,
         sequencerName,
+        sequencerPosition,
         software,
         startDate);
   }
@@ -269,13 +274,14 @@ public abstract class NotificationDto {
     return Objects.equals(this.completionDate, other.completionDate)
         && Objects.equals(this.containerSerialNumber, other.containerSerialNumber)
         && Objects.equals(this.containerModel, other.containerModel)
+        && Objects.equals(this.sequencingKit, other.sequencingKit)
         && Objects.equals(this.healthType, other.healthType)
         && Objects.equals(this.laneCount, other.laneCount)
-        && Objects.equals(this.metrics, other.metrics)
         && Objects.equals(this.pairedEndRun, other.pairedEndRun)
         && Objects.equals(this.runAlias, other.runAlias)
         && Objects.equals(this.sequencerFolderPath, other.sequencerFolderPath)
         && Objects.equals(this.sequencerName, other.sequencerName)
+        && Objects.equals(this.sequencerPosition, other.sequencerPosition)
         && Objects.equals(this.software, other.software)
         && Objects.equals(this.startDate, other.startDate);
   }

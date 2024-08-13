@@ -12,6 +12,7 @@
   "runType": "sequencing_run",
   "sequencerFolderPath": null,
   "sequencerName": "PCT0013",
+  "sequencingKit": "sqk-lsk109",
   "sequencerPosition": "2-A5-D5",
   "software": null,
   "startDate": "2019-02-28T19:37:01Z"

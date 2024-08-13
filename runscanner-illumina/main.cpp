@@ -1,4 +1,5 @@
 #include <ctime>
+#include <locale>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
@@ -166,6 +167,24 @@ void plot_by_lane_wrapper(
 }
 
 /**
+* We want to format metric numbers which are strings to include commas to have a consistent output
+* If we imbue with "" locale - this uses the system default but doesn't guarantee we get a comma
+* We want to force a comma, regardless of system default locale settings
+* Related thread and solution found here:
+* https://stackoverflow.com/questions/7276826/format-number-with-commas-in-c/7277333#7277333
+*/
+template<typename CharT>
+struct FormatMetricsWithCommas : public std::numpunct<CharT>
+{
+  virtual std::string do_grouping() const {
+    return "\003";
+  }
+  virtual CharT do_thousands_sep() const {
+    return ',';
+  }
+};
+
+/**
  * For a particular Illumina metric, construct a per-cycle candlestick plot.
 *
 * In an awkward-to-read-way, this takes a template parameter: a function to
@@ -263,9 +282,8 @@ void add_global_chart(
   if (run_summary.begin() != run_summary.end()) {
     // Read has two different meanings in this context due to Illumina
     // terminology, so we're going with clusters because that's what SAV says
-
     std::stringstream total_reads;
-    total_reads.imbue(std::locale(""));
+    total_reads.imbue(std::locale(std::cout.getloc(), new FormatMetricsWithCommas <char>()));
     total_reads << std::accumulate(
         run_summary.begin()->begin(), run_summary.begin()->end(), 0L,
         [](long acc,
@@ -275,7 +293,7 @@ void add_global_chart(
     add_chart_row(values, "Clusters", total_reads.str());
 
     std::stringstream total_reads_pf;
-    total_reads_pf.imbue(std::locale(""));
+    total_reads_pf.imbue(std::locale(std::cout.getloc(), new FormatMetricsWithCommas <char>()));
     total_reads_pf << std::accumulate(
         run_summary.begin()->begin(), run_summary.begin()->end(), 0L,
         [](long acc,
