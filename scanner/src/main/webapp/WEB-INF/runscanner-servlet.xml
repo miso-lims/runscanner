@@ -34,23 +34,26 @@
                       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.2.xsd"
   default-autowire="byName">
 
-  <context:property-placeholder location="classpath:runscanner.properties" ignore-unresolvable="true"/>
+  <context:property-placeholder location="classpath:runscanner.properties"
+    ignore-unresolvable="true" />
   <context:component-scan base-package="ca.on.oicr.gsi.runscanner" />
-  <mvc:resources mapping="/resources/**" location="/resources/" cache-period="31556926"/>
+  <mvc:resources mapping="/resources/**" location="/resources/" cache-period="31556926" />
   <mvc:annotation-driven>
     <mvc:message-converters register-defaults="true">
       <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
         <property name="objectMapper">
           <bean class="org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean">
-            <property name="simpleDateFormat" value="hh:MM:ss'T'HH:mm:ssXXX"/>
+            <property name="simpleDateFormat" value="hh:MM:ss'T'HH:mm:ssXXX" />
             <property name="featuresToEnable">
               <array>
-                <util:constant static-field="com.fasterxml.jackson.databind.SerializationFeature.INDENT_OUTPUT"/>
+                <util:constant
+                  static-field="com.fasterxml.jackson.databind.SerializationFeature.INDENT_OUTPUT" />
               </array>
             </property>
             <property name="featuresToDisable">
               <array>
-                <util:constant static-field="com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS"/>
+                <util:constant
+                  static-field="com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS" />
               </array>
             </property>
           </bean>
@@ -61,7 +64,7 @@
 
 
   <!-- static mapping for swagger ui -->
-  <mvc:resources location="classpath:/META-INF/resources/" mapping="swagger-ui.html"/>
-  <mvc:resources mapping="/webjars/**" location="classpath:/META-INF/resources/webjars/"/>
-  <bean class="ca.on.oicr.gsi.runscanner.scanner.SwaggerConfig"/>
+  <mvc:resources location="classpath:/META-INF/resources/webjars/springfox-swagger-ui/"
+    mapping="/swagger-ui/**" />
+  <bean class="ca.on.oicr.gsi.runscanner.scanner.SwaggerConfig" />
 </beans>

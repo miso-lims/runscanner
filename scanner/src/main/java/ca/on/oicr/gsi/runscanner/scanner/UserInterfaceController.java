@@ -66,7 +66,7 @@ public class UserInterfaceController {
 
         @Override
         public String documentationUrl() {
-          return "swagger-ui.html";
+          return "swagger-ui/index.html";
         }
       };
 
@@ -121,6 +121,7 @@ public class UserInterfaceController {
       }.renderPage(output);
     }
   }
+
   /** List a collection of files */
   @GetMapping(value = "/list{collection}")
   public void listPaths(@PathVariable String collection, HttpServletResponse response)
