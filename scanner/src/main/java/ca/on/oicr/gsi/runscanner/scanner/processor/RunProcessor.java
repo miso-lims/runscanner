@@ -86,6 +86,7 @@ public abstract class RunProcessor {
     Stream<Builder> standard =
         Stream.of(
             new Builder(Platform.ILLUMINA, "default", DefaultIllumina::create),
+            new Builder(Platform.ILLUMINA, "novaseqx", NovaseqXProcessor::create),
             new Builder(Platform.PACBIO, "default", DefaultPacBio::create),
             new Builder(Platform.OXFORDNANOPORE, "promethion", PromethionProcessor::create),
             new Builder(Platform.OXFORDNANOPORE, "minion", MinionProcessor::create));
