@@ -53,8 +53,10 @@ public class NovaseqXProcessor extends DefaultIllumina {
         // TODO: Get info about how many analysis steps to scan for
         // Currently we just assume BCLConvert and nothing else
 
-        ObjectNode jsonSampleInfo = MAPPER.createObjectNode();
-        ObjectNode BCLConvertLines = MAPPER.createObjectNode();
+        ObjectNode jsonSampleInfo = MAPPER.createObjectNode(),
+            BCLConvert = MAPPER.createObjectNode(),
+            BCLConvertData = MAPPER.createObjectNode(),
+            BCLConvertSettings = MAPPER.createObjectNode();
         int s = 0;
         String sectionName = "";
         for (String[] line : lines) {
@@ -63,7 +65,7 @@ public class NovaseqXProcessor extends DefaultIllumina {
             s = 0;
             continue;
           }
-          switch (sectionName) { // TODO separate out the BCLConvert Settings
+          switch (sectionName) {
             case "[BCLConvert_Data]":
               if (line[0].equals("Lane")) break; // Skip column label line
               s++; // Hopefully the lines stream in a consistent order and this will recreate the S#
@@ -72,8 +74,10 @@ public class NovaseqXProcessor extends DefaultIllumina {
               nested.put("Sample_ID", line[1]);
               nested.put("Index", line[2]);
               nested.put("Index2", line[3]); // Some have a line[4] like "Y27;I10;I10;Y27"
-              BCLConvertLines.set(Integer.toString(s), nested);
+              BCLConvertData.set(Integer.toString(s), nested);
               break;
+            case "[BCLConvert_Settings]":
+              BCLConvertSettings.put(line[0], line[1]);
             case "[Cloud_Settings]": // Discard the cloud config
             case "[Cloud_Data]":
               break;
@@ -81,7 +85,9 @@ public class NovaseqXProcessor extends DefaultIllumina {
               jsonSampleInfo.put(line[0], line[1]);
           }
         }
-        jsonSampleInfo.set("BCLConvert_Data", BCLConvertLines);
+        BCLConvert.set("Data", BCLConvertData);
+        BCLConvert.set("Settings", BCLConvertSettings);
+        jsonSampleInfo.set("BCLConvert", BCLConvert);
         jsonAttempt.set("SampleSheet", jsonSampleInfo);
 
         // Get fastqs from root Analysis/#/Data/BCLConvert/fastq/Reports/fastq_list.csv
