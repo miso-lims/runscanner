@@ -63,6 +63,24 @@ public class RestResponseController {
         .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
   }
 
+  @DeleteMapping("/run/{name}")
+  @ApiOperation(
+      value = "Invalidate cache for run by name",
+      response = Boolean.class,
+      responseContainer = "ResponseEntity")
+  @ApiResponses({
+    @ApiResponse(code = 200, message = "Success"),
+    @ApiResponse(code = 404, message = "Run not found")
+  })
+  public ResponseEntity<Boolean> deleteByName(
+      @PathVariable("name") @ApiParam(value = "Run name") String id) {
+    if (scheduler.invalidate(id)) {
+      return new ResponseEntity<>(HttpStatus.OK);
+    } else {
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+  }
+
   /**
    * Given a known run name. get its metrics. If no run is found, null is returned. If there are
    * multiple runs with the same name that are from different sequencers, one is randomly selected.

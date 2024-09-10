@@ -382,6 +382,16 @@ public class Scheduler {
     return scanningNow;
   }
 
+  public boolean invalidate(String runName) {
+    int oldSize = finishedWork.size();
+    finishedWork
+        .keySet()
+        .stream()
+        .filter(file -> file.getName().equals(runName))
+        .forEach(finishedWork::remove);
+    return finishedWork.size() < oldSize;
+  }
+
   private static boolean isSubDirectory(File baseDirectory, File subDirectory) {
     File parent = subDirectory.getParentFile();
     while (parent != null) {
