@@ -105,8 +105,8 @@ public class NovaseqXProcessor extends DefaultIllumina {
               if (fastq[0].startsWith("RGID")) continue; // Skip the column label line
               ObjectNode fastq_line = MAPPER.createObjectNode();
               fastq_line.put("Lane", fastq[3]);
-              fastq_line.put("Read1File", fastq[4]);
-              fastq_line.put("Read2File", fastq[5]);
+              fastq_line.put("Read1File", analysisAttempt + "/Data/BCLConvert/fastq/" + fastq[4]);
+              fastq_line.put("Read2File", analysisAttempt + "/Data/BCLConvert/fastq/" + fastq[5]);
               fastq_json.add(fastq_line);
             }
             jsonAttempt.set("BCLConvert", fastq_json);
