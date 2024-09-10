@@ -6,7 +6,7 @@ import java.util.Objects;
 // TODO: It'd be nice to use composition here, but something is asking for the properties directly
 // They do not scan properly even if you implement all the getters to reference the inner
 public class IlluminaDragenNotificationDto extends IlluminaNotificationDto {
-  private JsonNode dragen;
+  private JsonNode analysis;
 
   public IlluminaDragenNotificationDto(IlluminaNotificationDto parent, JsonNode json) {
     this.setBclCount(parent.getBclCount());
@@ -35,24 +35,24 @@ public class IlluminaDragenNotificationDto extends IlluminaNotificationDto {
     this.setPairedEndRun(parent.isPairedEndRun());
     this.setSoftware(parent.getSoftware());
     this.setMetrics(parent.getMetrics());
-    this.dragen = json;
+    this.analysis = json;
   }
 
-  public JsonNode getDragen() {
-    return dragen;
+  public JsonNode getAnalysis() {
+    return analysis;
   }
 
-  public void setDragen(JsonNode dragen) {
-    this.dragen = dragen;
+  public void setAnalysis(JsonNode analysis) {
+    this.analysis = analysis;
   }
 
   public boolean equals(Object obj) {
     return super.equals(obj)
         && (obj instanceof IlluminaDragenNotificationDto)
-        && this.dragen.equals(((IlluminaDragenNotificationDto) obj).dragen);
+        && this.analysis.equals(((IlluminaDragenNotificationDto) obj).analysis);
   }
 
   public int hashCode() {
-    return Objects.hash(super.hashCode(), dragen);
+    return Objects.hash(super.hashCode(), analysis);
   }
 }

@@ -86,7 +86,7 @@ public class NovaseqXProcessor extends DefaultIllumina {
             BCLConvert.set("Data", BCLConvertData);
             BCLConvert.set("Settings", BCLConvertSettings);
             jsonSampleInfo.set("BCLConvert", BCLConvert);
-            jsonAttempt.set("SampleSheet", jsonSampleInfo);
+            jsonAttempt.set("DRAGEN_Samplesheet", jsonSampleInfo);
           } else {
             System.err.println("No samplesheet for " + runDirectory + ", was DRAGEN enabled?");
           }
