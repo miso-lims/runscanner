@@ -3,39 +3,88 @@ package ca.on.oicr.gsi.runscanner.scanner.processor;
 import ca.on.oicr.gsi.runscanner.dto.IlluminaDragenNotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.IlluminaNotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
+import ca.on.oicr.gsi.runscanner.scanner.processor.NovaseqXProcessor.BCLConvertAnalysis.Analysis;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.TimeZone;
 
 public class NovaseqXProcessor extends DefaultIllumina {
-  private class BCLConvertAnalysis {
-    int lane;
-    String read1File, read2File;
-    long readCount;
+  static class BCLConvertAnalysis {
+    List<Analysis> analyses = new LinkedList<>();
 
-    public ObjectNode toJson() {
-      ObjectNode analysisJson = MAPPER.createObjectNode();
-      analysisJson.put("Lane", lane);
-      analysisJson.put("Read1File", read1File);
-      analysisJson.put("Read2File", read2File);
-      analysisJson.put("ReadCount", readCount);
-      return analysisJson;
+    static class Analysis {
+      String sample;
+      int lane;
+      String read1File, read2File;
+      long readCount;
+
+      boolean isEmpty() {
+        return sample == null
+            && lane == 0
+            && read1File == null
+            && read2File == null
+            && readCount == 0;
+      }
+
+      ObjectNode toJson() {
+        ObjectNode analysisJson = MAPPER.createObjectNode();
+        analysisJson.put("Sample", sample);
+        analysisJson.put("Lane", lane);
+        analysisJson.put("Read1File", read1File);
+        analysisJson.put("Read2File", read2File);
+        analysisJson.put("ReadCount", readCount);
+        return analysisJson;
+      }
+    }
+
+    Analysis get(String sample, String lane) {
+      return get(sample, Integer.parseInt(lane));
+    }
+
+    Analysis get(String sample, int lane) {
+      return analyses
+          .stream()
+          .filter(a -> a.sample.equals(sample) && a.lane == lane)
+          .findFirst()
+          .orElse(new Analysis());
+    }
+
+    void put(Analysis newAnalysis) {
+      Analysis oldAnalysis = get(newAnalysis.sample, String.valueOf(newAnalysis.lane));
+      if (!oldAnalysis.isEmpty()) {
+        analyses.remove(oldAnalysis);
+      }
+      analyses.add(newAnalysis);
+    }
+
+    ArrayNode toJson() {
+      ArrayNode ret = MAPPER.createArrayNode();
+      analyses
+          .stream()
+          .sorted(
+              (a1, a2) -> {
+                int comp = a1.sample.compareTo(a2.sample);
+                if (comp == 0) { // same sample
+                  return Integer.compare(a1.lane, a2.lane);
+                }
+                return comp;
+              })
+          .forEach(a -> ret.add(a.toJson()));
+      return ret;
     }
   }
 
   final String NUMERAL = "\\d+";
-  final ObjectMapper MAPPER = new ObjectMapper();
+  static final ObjectMapper MAPPER = new ObjectMapper();
 
-  // Sample Name + "_L<Lane>" to BCLConvertAnalysis' object
-  Map<String, BCLConvertAnalysis> BCLConvertAnalyses = new HashMap<>();
+  BCLConvertAnalysis BCLConvertAnalyses = new BCLConvertAnalysis();
 
   public NovaseqXProcessor(Builder builder, boolean checkOutput) {
     super(builder, checkOutput);
@@ -121,23 +170,41 @@ public class NovaseqXProcessor extends DefaultIllumina {
                     .toList();
             for (String[] fastq : fastqLines) {
               if (fastq[0].startsWith("RGID")) continue; // Skip the column label line
-              BCLConvertAnalysis analysis = new BCLConvertAnalysis();
-
               // 0 = RGID, 1 = RGSM, 2 = RGLB, 3 = Lane, 4 = Read1File, 5 = Read2File
+              Analysis analysis = BCLConvertAnalyses.get(fastq[1], fastq[3]);
+              analysis.sample = fastq[1];
               analysis.lane = Integer.parseInt(fastq[3]);
               analysis.read1File = analysisAttempt + "/Data/BCLConvert/fastq/" + fastq[4];
               analysis.read2File = analysisAttempt + "/Data/BCLConvert/fastq/" + fastq[5];
-              BCLConvertAnalyses.put(fastq[1] + "_L" + fastq[3], analysis);
+              BCLConvertAnalyses.put(analysis);
             }
           } else {
             System.err.println("No fastq_list.csv for " + runDirectory + ", old DRAGEN version?");
           }
 
-          ObjectNode analysisJson = MAPPER.createObjectNode();
-          for (Entry<String, BCLConvertAnalysis> entry : BCLConvertAnalyses.entrySet()) {
-            analysisJson.set(entry.getKey(), entry.getValue().toJson());
+          // Get read counts from root
+          // Analysis/#/Data/BCLConvert/fastq/Reports/Demultiplex_Stats.csv
+          File demulitplexStats =
+              new File(analysisAttempt, "Data/BCLConvert/fastq/Reports/Demultiplex_Stats.csv");
+          if (demulitplexStats.exists() && demulitplexStats.isFile()) {
+            List<String[]> demultiplexLines =
+                Files.readAllLines(demulitplexStats.toPath())
+                    .stream()
+                    .map(line -> line.split(","))
+                    .toList();
+            for (String[] demuxLine : demultiplexLines) {
+              if (demuxLine[0].startsWith("Lane")) continue; // skip the column labels
+              // 0 = Lane, 1 = SampleId, 2 = Index, 3= # Reads, 4 = # Perfect Index Reads,
+              // 5 = # One Mismatch Index Reads, 6 = # Two Mismatch Index Reads, 7 = % Reads,
+              // 8 = % Perfect Index Reads, 9 = % One Mismatch Index Reads,
+              // 10 = % Two Mismatch Index Reads
+              Analysis analysis = BCLConvertAnalyses.get(demuxLine[1], demuxLine[0]);
+              analysis.readCount = Long.parseLong(demuxLine[3]);
+              BCLConvertAnalyses.put(analysis);
+            }
           }
-          jsonAttempt.set("BCLConvert", analysisJson);
+
+          jsonAttempt.set("BCLConvert", BCLConvertAnalyses.toJson());
           json.set(attemptNum, jsonAttempt);
         } // end if
       } // end For Analysis/n/
