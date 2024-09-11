@@ -4,18 +4,38 @@ import ca.on.oicr.gsi.runscanner.dto.IlluminaDragenNotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.IlluminaNotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.TimeZone;
 
 public class NovaseqXProcessor extends DefaultIllumina {
+  private class BCLConvertAnalysis {
+    int lane;
+    String read1File, read2File;
+    long readCount;
+
+    public ObjectNode toJson() {
+      ObjectNode analysisJson = MAPPER.createObjectNode();
+      analysisJson.put("Lane", lane);
+      analysisJson.put("Read1File", read1File);
+      analysisJson.put("Read2File", read2File);
+      analysisJson.put("ReadCount", readCount);
+      return analysisJson;
+    }
+  }
+
   final String NUMERAL = "\\d+";
   final ObjectMapper MAPPER = new ObjectMapper();
+
+  // Sample Name + "_L<Lane>" to BCLConvertAnalysis' object
+  Map<String, BCLConvertAnalysis> BCLConvertAnalyses = new HashMap<>();
 
   public NovaseqXProcessor(Builder builder, boolean checkOutput) {
     super(builder, checkOutput);
@@ -50,9 +70,9 @@ public class NovaseqXProcessor extends DefaultIllumina {
             // Currently we just assume BCLConvert and nothing else
 
             ObjectNode jsonSampleInfo = MAPPER.createObjectNode(),
-                BCLConvert = MAPPER.createObjectNode(),
-                BCLConvertData = MAPPER.createObjectNode(),
-                BCLConvertSettings = MAPPER.createObjectNode();
+                sampleSheetBCLConvertSection = MAPPER.createObjectNode(),
+                sampleSheetBCLConvertData = MAPPER.createObjectNode(),
+                sampleSheetBCLConvertSettings = MAPPER.createObjectNode();
             int s = 0;
             String sectionName = "";
             for (String[] line : lines) {
@@ -65,17 +85,16 @@ public class NovaseqXProcessor extends DefaultIllumina {
                 case "[BCLConvert_Data]":
                   if (line[0].equals("Lane")) break; // Skip column label line
                   s++; // Hopefully the lines stream in a consistent order and this will recreate
-                  // the
-                  // S#
+                  // the S#
                   ObjectNode nested = MAPPER.createObjectNode();
                   nested.put("Lane", line[0]);
                   nested.put("Sample_ID", line[1]);
                   nested.put("Index", line[2]);
                   nested.put("Index2", line[3]); // Some have a line[4] like "Y27;I10;I10;Y27"
-                  BCLConvertData.set(Integer.toString(s), nested);
+                  sampleSheetBCLConvertData.set(Integer.toString(s), nested);
                   break;
                 case "[BCLConvert_Settings]":
-                  BCLConvertSettings.put(line[0], line[1]);
+                  sampleSheetBCLConvertSettings.put(line[0], line[1]);
                 case "[Cloud_Settings]": // Discard the cloud config
                 case "[Cloud_Data]":
                   break;
@@ -83,9 +102,9 @@ public class NovaseqXProcessor extends DefaultIllumina {
                   jsonSampleInfo.put(line[0], line[1]);
               }
             }
-            BCLConvert.set("Data", BCLConvertData);
-            BCLConvert.set("Settings", BCLConvertSettings);
-            jsonSampleInfo.set("BCLConvert", BCLConvert);
+            sampleSheetBCLConvertSection.set("Data", sampleSheetBCLConvertData);
+            sampleSheetBCLConvertSection.set("Settings", sampleSheetBCLConvertSettings);
+            jsonSampleInfo.set("BCLConvert", sampleSheetBCLConvertSection);
             jsonAttempt.set("DRAGEN_Samplesheet", jsonSampleInfo);
           } else {
             System.err.println("No samplesheet for " + runDirectory + ", was DRAGEN enabled?");
@@ -95,25 +114,30 @@ public class NovaseqXProcessor extends DefaultIllumina {
           File fastqList =
               new File(analysisAttempt, "Data/BCLConvert/fastq/Reports/fastq_list.csv");
           if (fastqList.exists() && fastqList.isFile()) {
-            List<String[]> fastq_lines =
+            List<String[]> fastqLines =
                 Files.readAllLines(fastqList.toPath())
                     .stream()
                     .map(line -> line.split(","))
                     .toList();
-            ArrayNode fastq_json = MAPPER.createArrayNode();
-            for (String[] fastq : fastq_lines) {
+            for (String[] fastq : fastqLines) {
               if (fastq[0].startsWith("RGID")) continue; // Skip the column label line
-              ObjectNode fastq_line = MAPPER.createObjectNode();
-              fastq_line.put("Lane", fastq[3]);
-              fastq_line.put("Read1File", analysisAttempt + "/Data/BCLConvert/fastq/" + fastq[4]);
-              fastq_line.put("Read2File", analysisAttempt + "/Data/BCLConvert/fastq/" + fastq[5]);
-              fastq_json.add(fastq_line);
+              BCLConvertAnalysis analysis = new BCLConvertAnalysis();
+
+              // 0 = RGID, 1 = RGSM, 2 = RGLB, 3 = Lane, 4 = Read1File, 5 = Read2File
+              analysis.lane = Integer.parseInt(fastq[3]);
+              analysis.read1File = analysisAttempt + "/Data/BCLConvert/fastq/" + fastq[4];
+              analysis.read2File = analysisAttempt + "/Data/BCLConvert/fastq/" + fastq[5];
+              BCLConvertAnalyses.put(fastq[1] + "_L" + fastq[3], analysis);
             }
-            jsonAttempt.set("BCLConvert", fastq_json);
           } else {
             System.err.println("No fastq_list.csv for " + runDirectory + ", old DRAGEN version?");
           }
 
+          ObjectNode analysisJson = MAPPER.createObjectNode();
+          for (Entry<String, BCLConvertAnalysis> entry : BCLConvertAnalyses.entrySet()) {
+            analysisJson.set(entry.getKey(), entry.getValue().toJson());
+          }
+          jsonAttempt.set("BCLConvert", analysisJson);
           json.set(attemptNum, jsonAttempt);
         } // end if
       } // end For Analysis/n/
