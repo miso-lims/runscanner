@@ -96,7 +96,6 @@ public class NovaseqXProcessor extends DefaultIllumina {
     ObjectNode json = MAPPER.createObjectNode();
     File analysisDir = new File(runDirectory, "Analysis");
 
-    // TODO: autoclosing try?
     // For n in Analysis/n/Data (accommodate reruns)
     if (analysisDir.exists() && analysisDir.isDirectory()) {
       // Null pointer should never actually happen because of above checks
@@ -115,7 +114,7 @@ public class NovaseqXProcessor extends DefaultIllumina {
                     .map(line -> line.split(","))
                     .filter(line -> line.length != 0)
                     .toList();
-            // TODO: Get info about how many analysis steps to scan for
+            // TODO (DRAGEN Phase 2): Get info about how many analysis steps to scan for
             // Currently we just assume BCLConvert and nothing else
 
             ObjectNode jsonSampleInfo = MAPPER.createObjectNode(),
@@ -206,9 +205,9 @@ public class NovaseqXProcessor extends DefaultIllumina {
 
           jsonAttempt.set("BCLConvert", BCLConvertAnalyses.toJson());
           json.set(attemptNum, jsonAttempt);
-        } // end if
-      } // end For Analysis/n/
-    } // end if
+        }
+      }
+    }
 
     return new IlluminaDragenNotificationDto(parentDto, json);
   }
