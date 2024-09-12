@@ -102,7 +102,8 @@ public class NovaseqXProcessor extends DefaultIllumina {
     ObjectNode json = MAPPER.createObjectNode();
     File analysisDir = new File(runDirectory, "Analysis");
 
-    // For n in Analysis/n/Data (accommodate reruns)
+    // For n in Analysis/n/Data (accommodate reruns, ish. if more reruns appear, they won't be
+    // scanned. Someone will need to invalidate the run with the API.)
     if (analysisDir.exists() && analysisDir.isDirectory()) {
       // Null pointer should never actually happen because of above checks
       for (File analysisAttempt : Objects.requireNonNull(analysisDir.listFiles())) {
@@ -121,8 +122,6 @@ public class NovaseqXProcessor extends DefaultIllumina {
                     .map(line -> line.split(","))
                     .filter(line -> line.length != 0)
                     .toList();
-            // TODO: Get info about how many analysis steps to scan for
-            // Currently we just assume BCLConvert and nothing else
 
             ObjectNode jsonSampleInfo = MAPPER.createObjectNode(),
                 sampleSheetBCLConvertSection = MAPPER.createObjectNode(),
@@ -234,11 +233,6 @@ public class NovaseqXProcessor extends DefaultIllumina {
     }
     dto.setAnalysis(json);
     return dto;
-  }
-
-  @Override
-  public Class endsProcessingWith() {
-    return AnalysisStatus.class;
   }
 
   public static NovaseqXProcessor create(Builder builder, ObjectNode parameters) {
