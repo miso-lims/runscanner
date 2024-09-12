@@ -10,6 +10,11 @@ public class IlluminaDragenNotificationDto extends IlluminaNotificationDto {
   private JsonNode analysis;
   private AnalysisStatus analysisStatus;
 
+  @Override
+  public boolean isDone() {
+    return getHealthType().isDone() && analysisStatus.equals(AnalysisStatus.COMPLETED);
+  }
+
   public void clone(IlluminaNotificationDto parent) {
     this.setBclCount(parent.getBclCount());
     this.setCallCycle(parent.getCallCycle());
