@@ -3,6 +3,8 @@ package ca.on.oicr.gsi.runscanner.scanner.processor;
 import ca.on.oicr.gsi.runscanner.dto.IlluminaDragenNotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.IlluminaNotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
+import ca.on.oicr.gsi.runscanner.dto.type.AnalysisStatus;
+import ca.on.oicr.gsi.runscanner.dto.type.DRAGENWorkflow;
 import ca.on.oicr.gsi.runscanner.scanner.processor.NovaseqXProcessor.BCLConvertAnalysis.Analysis;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -10,8 +12,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.TimeZone;
 
@@ -92,7 +96,9 @@ public class NovaseqXProcessor extends DefaultIllumina {
 
   @Override
   public NotificationDto process(File runDirectory, TimeZone tz) throws IOException {
-    IlluminaNotificationDto parentDto = (IlluminaNotificationDto) super.process(runDirectory, tz);
+    IlluminaDragenNotificationDto dto = new IlluminaDragenNotificationDto();
+    dto.clone((IlluminaNotificationDto) super.process(runDirectory, tz));
+    dto.setAnalysisStatus(AnalysisStatus.PENDING);
     ObjectNode json = MAPPER.createObjectNode();
     File analysisDir = new File(runDirectory, "Analysis");
 
@@ -103,6 +109,7 @@ public class NovaseqXProcessor extends DefaultIllumina {
         if (analysisAttempt.isDirectory() && analysisAttempt.getName().matches(NUMERAL)) {
           String attemptNum = analysisAttempt.getName();
           ObjectNode jsonAttempt = MAPPER.createObjectNode();
+          Map<DRAGENWorkflow, Boolean> expectedWorkflows = new HashMap<>();
 
           // Get info from Sample Sheet
           // at root Analysis/#/Data/BCLConvert/SampleSheet.csv
@@ -114,7 +121,7 @@ public class NovaseqXProcessor extends DefaultIllumina {
                     .map(line -> line.split(","))
                     .filter(line -> line.length != 0)
                     .toList();
-            // TODO (DRAGEN Phase 2): Get info about how many analysis steps to scan for
+            // TODO: Get info about how many analysis steps to scan for
             // Currently we just assume BCLConvert and nothing else
 
             ObjectNode jsonSampleInfo = MAPPER.createObjectNode(),
@@ -143,6 +150,7 @@ public class NovaseqXProcessor extends DefaultIllumina {
                   break;
                 case "[BCLConvert_Settings]":
                   sampleSheetBCLConvertSettings.put(line[0], line[1]);
+                  expectedWorkflows.put(DRAGENWorkflow.BCLConvert, false);
                 case "[Cloud_Settings]": // Discard the cloud config
                 case "[Cloud_Data]":
                   break;
@@ -157,59 +165,80 @@ public class NovaseqXProcessor extends DefaultIllumina {
           } else {
             System.err.println("No samplesheet for " + runDirectory + ", was DRAGEN enabled?");
           }
-
-          // Get fastqs from root Analysis/#/Data/BCLConvert/fastq/Reports/fastq_list.csv
-          File fastqList =
-              new File(analysisAttempt, "Data/BCLConvert/fastq/Reports/fastq_list.csv");
-          if (fastqList.exists() && fastqList.isFile()) {
-            List<String[]> fastqLines =
-                Files.readAllLines(fastqList.toPath())
-                    .stream()
-                    .map(line -> line.split(","))
-                    .toList();
-            for (String[] fastq : fastqLines) {
-              if (fastq[0].startsWith("RGID")) continue; // Skip the column label line
-              // 0 = RGID, 1 = RGSM, 2 = RGLB, 3 = Lane, 4 = Read1File, 5 = Read2File
-              Analysis analysis = BCLConvertAnalyses.get(fastq[1], fastq[3]);
-              analysis.sample = fastq[1];
-              analysis.lane = Integer.parseInt(fastq[3]);
-              analysis.read1File = analysisAttempt + "/Data/BCLConvert/fastq/" + fastq[4];
-              analysis.read2File = analysisAttempt + "/Data/BCLConvert/fastq/" + fastq[5];
-              BCLConvertAnalyses.put(analysis);
-            }
-          } else {
-            System.err.println("No fastq_list.csv for " + runDirectory + ", old DRAGEN version?");
+          if (expectedWorkflows.isEmpty()) {
+            dto.setAnalysisStatus(AnalysisStatus.COMPLETED);
+            return dto;
           }
 
-          // Get read counts from root
-          // Analysis/#/Data/BCLConvert/fastq/Reports/Demultiplex_Stats.csv
-          File demulitplexStats =
-              new File(analysisAttempt, "Data/BCLConvert/fastq/Reports/Demultiplex_Stats.csv");
-          if (demulitplexStats.exists() && demulitplexStats.isFile()) {
-            List<String[]> demultiplexLines =
-                Files.readAllLines(demulitplexStats.toPath())
-                    .stream()
-                    .map(line -> line.split(","))
-                    .toList();
-            for (String[] demuxLine : demultiplexLines) {
-              if (demuxLine[0].startsWith("Lane")) continue; // skip the column labels
-              // 0 = Lane, 1 = SampleId, 2 = Index, 3= # Reads, 4 = # Perfect Index Reads,
-              // 5 = # One Mismatch Index Reads, 6 = # Two Mismatch Index Reads, 7 = % Reads,
-              // 8 = % Perfect Index Reads, 9 = % One Mismatch Index Reads,
-              // 10 = % Two Mismatch Index Reads
-              Analysis analysis = BCLConvertAnalyses.get(demuxLine[1], demuxLine[0]);
-              analysis.readCount = Long.parseLong(demuxLine[3]);
-              BCLConvertAnalyses.put(analysis);
-            }
-          }
+          if (expectedWorkflows.containsKey(DRAGENWorkflow.BCLConvert)) {
+            // Get fastqs from root Analysis/#/Data/BCLConvert/fastq/Reports/fastq_list.csv
+            File fastqList =
+                new File(analysisAttempt, "Data/BCLConvert/fastq/Reports/fastq_list.csv");
+            if (fastqList.exists() && fastqList.isFile()) {
+              List<String[]> fastqLines =
+                  Files.readAllLines(fastqList.toPath())
+                      .stream()
+                      .map(line -> line.split(","))
+                      .toList();
+              for (String[] fastq : fastqLines) {
+                if (fastq[0].startsWith("RGID")) continue; // Skip the column label line
+                // 0 = RGID, 1 = RGSM, 2 = RGLB, 3 = Lane, 4 = Read1File, 5 = Read2File
+                Analysis analysis = BCLConvertAnalyses.get(fastq[1], fastq[3]);
+                analysis.sample = fastq[1];
+                analysis.lane = Integer.parseInt(fastq[3]);
+                analysis.read1File = analysisAttempt + "/Data/BCLConvert/fastq/" + fastq[4];
+                analysis.read2File = analysisAttempt + "/Data/BCLConvert/fastq/" + fastq[5];
+                BCLConvertAnalyses.put(analysis);
+              }
 
-          jsonAttempt.set("BCLConvert", BCLConvertAnalyses.toJson());
+              // Get read counts from root
+              // Analysis/#/Data/BCLConvert/fastq/Reports/Demultiplex_Stats.csv
+              File demulitplexStats =
+                  new File(analysisAttempt, "Data/BCLConvert/fastq/Reports/Demultiplex_Stats.csv");
+              if (demulitplexStats.exists() && demulitplexStats.isFile()) {
+                List<String[]> demultiplexLines =
+                    Files.readAllLines(demulitplexStats.toPath())
+                        .stream()
+                        .map(line -> line.split(","))
+                        .toList();
+                for (String[] demuxLine : demultiplexLines) {
+                  if (demuxLine[0].startsWith("Lane")) continue; // skip the column labels
+                  // 0 = Lane, 1 = SampleId, 2 = Index, 3= # Reads, 4 = # Perfect Index Reads,
+                  // 5 = # One Mismatch Index Reads, 6 = # Two Mismatch Index Reads, 7 = % Reads,
+                  // 8 = % Perfect Index Reads, 9 = % One Mismatch Index Reads,
+                  // 10 = % Two Mismatch Index Reads
+                  Analysis analysis = BCLConvertAnalyses.get(demuxLine[1], demuxLine[0]);
+                  analysis.readCount = Long.parseLong(demuxLine[3]);
+                  BCLConvertAnalyses.put(analysis);
+                }
+                expectedWorkflows.put(DRAGENWorkflow.BCLConvert, Boolean.TRUE);
+              } else {
+                System.err.println("No Demultiplex_Stats.csv for " + runDirectory);
+              }
+            } else {
+              System.err.println("No fastq_list.csv for " + runDirectory + ", old DRAGEN version?");
+            }
+            jsonAttempt.set("BCLConvert", BCLConvertAnalyses.toJson());
+          } // end if expectedWorkflows contains BCLConvert
+
+          // Phase 2: more workflows go here
+
+          if (expectedWorkflows.values().stream().allMatch(b -> b.equals(Boolean.TRUE))) {
+            dto.setAnalysisStatus(AnalysisStatus.COMPLETED);
+          }
           json.set(attemptNum, jsonAttempt);
         }
       }
+    } else { // Analysis dir does not exist
+      dto.setAnalysisStatus(AnalysisStatus.COMPLETED);
     }
+    dto.setAnalysis(json);
+    return dto;
+  }
 
-    return new IlluminaDragenNotificationDto(parentDto, json);
+  @Override
+  public Class endsProcessingWith() {
+    return AnalysisStatus.class;
   }
 
   public static NovaseqXProcessor create(Builder builder, ObjectNode parameters) {

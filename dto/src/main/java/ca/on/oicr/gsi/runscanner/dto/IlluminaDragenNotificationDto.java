@@ -1,5 +1,6 @@
 package ca.on.oicr.gsi.runscanner.dto;
 
+import ca.on.oicr.gsi.runscanner.dto.type.AnalysisStatus;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Objects;
 
@@ -7,8 +8,9 @@ import java.util.Objects;
 // They do not scan properly even if you implement all the getters to reference the inner
 public class IlluminaDragenNotificationDto extends IlluminaNotificationDto {
   private JsonNode analysis;
+  private AnalysisStatus analysisStatus;
 
-  public IlluminaDragenNotificationDto(IlluminaNotificationDto parent, JsonNode json) {
+  public void clone(IlluminaNotificationDto parent) {
     this.setBclCount(parent.getBclCount());
     this.setCallCycle(parent.getCallCycle());
     this.setChemistry(parent.getChemistry());
@@ -35,11 +37,14 @@ public class IlluminaDragenNotificationDto extends IlluminaNotificationDto {
     this.setPairedEndRun(parent.isPairedEndRun());
     this.setSoftware(parent.getSoftware());
     this.setMetrics(parent.getMetrics());
-    this.analysis = json;
   }
 
   public JsonNode getAnalysis() {
     return analysis;
+  }
+
+  public AnalysisStatus getAnalysisStatus() {
+    return analysisStatus;
   }
 
   public void setAnalysis(JsonNode analysis) {
@@ -54,5 +59,9 @@ public class IlluminaDragenNotificationDto extends IlluminaNotificationDto {
 
   public int hashCode() {
     return Objects.hash(super.hashCode(), analysis);
+  }
+
+  public void setAnalysisStatus(AnalysisStatus analysisStatus) {
+    this.analysisStatus = analysisStatus;
   }
 }

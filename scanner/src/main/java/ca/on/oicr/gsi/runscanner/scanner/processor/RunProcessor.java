@@ -1,6 +1,7 @@
 package ca.on.oicr.gsi.runscanner.scanner.processor;
 
 import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
+import ca.on.oicr.gsi.runscanner.dto.type.HealthType;
 import ca.on.oicr.gsi.runscanner.dto.type.Platform;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -149,6 +150,19 @@ public abstract class RunProcessor {
     super();
     platformType = builder.getPlatformType();
     name = builder.getName();
+  }
+
+  /**
+   * By which status class scanning should be considered completed.
+   *
+   * <p>For older sequencers which only do sequencing, we have the HealthType status which watches
+   * for when sequencing output is finished. For newer sequencers which also do onboard analysis,
+   * override this method and return AnalysisStatus.class.
+   *
+   * @return Class HealthType or AnalysisStatus.
+   */
+  public Class endsProcessingWith() {
+    return HealthType.class;
   }
 
   /**
