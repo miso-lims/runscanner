@@ -57,11 +57,12 @@ public class IlluminaDragenNotificationDto extends IlluminaNotificationDto {
   public boolean equals(Object obj) {
     return super.equals(obj)
         && (obj instanceof IlluminaDragenNotificationDto)
-        && this.analysis.equals(((IlluminaDragenNotificationDto) obj).analysis);
+        && this.analysis.equals(((IlluminaDragenNotificationDto) obj).analysis)
+        && this.analysisStatus.equals(((IlluminaDragenNotificationDto) obj).analysisStatus);
   }
 
   public int hashCode() {
-    return Objects.hash(super.hashCode(), analysis);
+    return Objects.hash(super.hashCode(), analysis, analysisStatus);
   }
 
   public void setAnalysisStatus(AnalysisStatus analysisStatus) {
