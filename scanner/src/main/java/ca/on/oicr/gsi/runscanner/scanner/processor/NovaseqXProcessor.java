@@ -228,7 +228,7 @@ public class NovaseqXProcessor extends DefaultIllumina {
           json.set(attemptNum, jsonAttempt);
         }
       }
-    } else { // Analysis dir does not exist
+    } else { // TODO: Analysis dir does not exist. Does it spawn immediately or later?
       dto.setAnalysisStatus(AnalysisStatus.COMPLETED);
     }
     dto.setAnalysis(json);
