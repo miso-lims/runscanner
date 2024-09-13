@@ -20,10 +20,9 @@ import java.util.Optional;
 @JsonSubTypes({ //
   @Type(value = PacBioNotificationDto.class, name = "PacBio"), //
   @Type(value = IlluminaNotificationDto.class, name = "Illumina"), //
-  @Type(
-      value = IlluminaDragenNotificationDto.class,
-      name = "Illumina-DRAGEN"), // TODO: this will probably have consequences! Tests break if it's
-  // just Illumina tho
+  // TODO: if I set this to 'Illumina' then a bunch of tests fail for unclear reasons
+  // But if i remove it, 'platform' gets set to IlluminaDragenNotificationDto, which is also wrong
+  @Type(value = IlluminaDragenNotificationDto.class, name = "Illumina-DRAGEN"), //
   @Type(value = OxfordNanoporeNotificationDto.class, name = "OxfordNanopore") //
 }) //
 @JsonIgnoreProperties(ignoreUnknown = true)

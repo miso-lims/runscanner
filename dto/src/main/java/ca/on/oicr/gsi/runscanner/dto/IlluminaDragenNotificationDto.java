@@ -4,8 +4,6 @@ import ca.on.oicr.gsi.runscanner.dto.type.AnalysisStatus;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Objects;
 
-// TODO: It'd be nice to use composition here, but something is asking for the properties directly
-// They do not scan properly even if you implement all the getters to reference the inner
 public class IlluminaDragenNotificationDto extends IlluminaNotificationDto {
   private JsonNode analysis;
   private AnalysisStatus analysisStatus;
