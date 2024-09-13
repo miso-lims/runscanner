@@ -149,7 +149,7 @@ public class NovaseqXProcessor extends DefaultIllumina {
                   break;
                 case "[BCLConvert_Settings]":
                   sampleSheetBCLConvertSettings.put(line[0], line[1]);
-                  expectedWorkflows.put(DRAGENWorkflow.BCLConvert, false);
+                  expectedWorkflows.put(DRAGENWorkflow.BCLConvert, Boolean.FALSE);
                 case "[Cloud_Settings]": // Discard the cloud config
                 case "[Cloud_Data]":
                   break;
