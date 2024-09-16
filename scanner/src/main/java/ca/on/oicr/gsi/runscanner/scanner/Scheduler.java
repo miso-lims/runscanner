@@ -384,18 +384,12 @@ public class Scheduler {
   }
 
   public boolean invalidate(String runName) {
-    int oldSize = finishedWork.size();
-    boolean bad;
-    do {
-      bad =
-          finishedWork
-              .keySet()
-              .stream()
-              .filter(file -> file.getName().equals(runName))
-              .map(finishedWork::remove)
-              .anyMatch(Objects::isNull);
-    } while (bad);
-    return finishedWork.size() < oldSize;
+    return finishedWork
+        .keySet()
+        .stream()
+        .filter(file -> file.getName().equals(runName))
+        .map(finishedWork::remove)
+        .anyMatch(Objects::nonNull);
   }
 
   private static boolean isSubDirectory(File baseDirectory, File subDirectory) {
