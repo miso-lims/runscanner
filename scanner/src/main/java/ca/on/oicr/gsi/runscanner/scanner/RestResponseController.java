@@ -64,21 +64,14 @@ public class RestResponseController {
   }
 
   @DeleteMapping("/run/{name}")
-  @ApiOperation(
-      value = "Invalidate cache for run by name",
-      response = Void.class,
-      responseContainer = "ResponseEntity")
+  @ApiOperation(value = "Invalidate cache for run by name")
   @ApiResponses({
     @ApiResponse(code = 204, message = "Success"),
     @ApiResponse(code = 404, message = "Run not found")
   })
-  public ResponseEntity<Void> deleteByName(
-      @PathVariable("name") @ApiParam(value = "Run name") String id) {
-    if (scheduler.invalidate(id)) {
-      return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    } else {
-      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    }
+  @ResponseStatus(code = HttpStatus.NO_CONTENT)
+  public void deleteByName(@PathVariable("name") @ApiParam(value = "Run name") String id) {
+    if (!scheduler.invalidate(id)) throw new ResourceNotFoundException();
   }
 
   /**
