@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
@@ -384,11 +385,16 @@ public class Scheduler {
 
   public boolean invalidate(String runName) {
     int oldSize = finishedWork.size();
-    finishedWork
-        .keySet()
-        .stream()
-        .filter(file -> file.getName().equals(runName))
-        .forEach(finishedWork::remove);
+    boolean bad;
+    do {
+      bad =
+          finishedWork
+              .keySet()
+              .stream()
+              .filter(file -> file.getName().equals(runName))
+              .map(finishedWork::remove)
+              .anyMatch(Objects::isNull);
+    } while (bad);
     return finishedWork.size() < oldSize;
   }
 
