@@ -89,7 +89,6 @@ public class NovaseqXProcessor extends DefaultIllumina {
 
   final String NUMERAL = "\\d+";
   static ObjectMapper MAPPER;
-  BCLConvertAnalysis BCLConvertAnalyses = new BCLConvertAnalysis();
   private static final Logger log = LoggerFactory.getLogger(NovaseqXProcessor.class);
 
   public NovaseqXProcessor(Builder builder, boolean checkOutput) {
@@ -99,6 +98,7 @@ public class NovaseqXProcessor extends DefaultIllumina {
   @Override
   public NotificationDto process(File runDirectory, TimeZone tz) throws IOException {
     MAPPER = new ObjectMapper().registerModule(super.setUpCustomModule(tz));
+    BCLConvertAnalysis BCLConvertAnalyses = new BCLConvertAnalysis();
     IlluminaDragenNotificationDto dto = new IlluminaDragenNotificationDto();
     dto.clone((IlluminaNotificationDto) super.process(runDirectory, tz));
     dto.setAnalysisStatus(AnalysisStatus.PENDING);
