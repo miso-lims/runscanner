@@ -243,7 +243,7 @@ public class DefaultIllumina extends RunProcessor {
    * @param tz Time Zone to expect for datetime string
    * @return Module with custom Instant parsing
    */
-  private Module setUpCustomModule(TimeZone tz) {
+  Module setUpCustomModule(TimeZone tz) {
     SimpleModule module = new SimpleModule("customInstantParsingModule");
 
     module.addSerializer(
