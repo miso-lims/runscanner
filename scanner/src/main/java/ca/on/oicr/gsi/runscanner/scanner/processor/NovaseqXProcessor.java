@@ -61,7 +61,7 @@ public class NovaseqXProcessor extends DefaultIllumina {
     }
 
     void put(Analysis newAnalysis) {
-      Analysis oldAnalysis = get(newAnalysis.sample, String.valueOf(newAnalysis.lane));
+      Analysis oldAnalysis = get(newAnalysis.sample, newAnalysis.lane);
       if (!oldAnalysis.isEmpty()) {
         analyses.remove(oldAnalysis);
       }
