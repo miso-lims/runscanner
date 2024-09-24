@@ -87,7 +87,7 @@ public class NovaseqXProcessor extends DefaultIllumina {
     }
   }
 
-  final String NUMERAL = "\\d+";
+  private final String NUMERAL = "\\d+";
   static ObjectMapper MAPPER;
   private static final Logger log = LoggerFactory.getLogger(NovaseqXProcessor.class);
 
