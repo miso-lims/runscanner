@@ -152,7 +152,7 @@ public class NovaseqXProcessor extends DefaultIllumina {
                   break;
                 case "[BCLConvert_Settings]":
                   sampleSheetBCLConvertSettings.put(line[0], line[1]);
-                  expectedWorkflows.put(DRAGENWorkflow.BCLConvert, Boolean.FALSE);
+                  expectedWorkflows.put(DRAGENWorkflow.BCL_CONVERT, Boolean.FALSE);
                 case "[Cloud_Settings]": // Discard the cloud config
                 case "[Cloud_Data]":
                   break;
@@ -172,7 +172,7 @@ public class NovaseqXProcessor extends DefaultIllumina {
             return dto;
           }
 
-          if (expectedWorkflows.containsKey(DRAGENWorkflow.BCLConvert)) {
+          if (expectedWorkflows.containsKey(DRAGENWorkflow.BCL_CONVERT)) {
             // Get fastqs from root Analysis/#/Data/BCLConvert/fastq/Reports/fastq_list.csv
             File fastqList =
                 new File(analysisAttempt, "Data/BCLConvert/fastq/Reports/fastq_list.csv");
@@ -213,7 +213,7 @@ public class NovaseqXProcessor extends DefaultIllumina {
                   analysis.readCount = Long.parseLong(demuxLine[3]);
                   BCLConvertAnalyses.put(analysis);
                 }
-                expectedWorkflows.put(DRAGENWorkflow.BCLConvert, Boolean.TRUE);
+                expectedWorkflows.put(DRAGENWorkflow.BCL_CONVERT, Boolean.TRUE);
               } else {
                 log.info("No Demultiplex_Stats.csv for {}", runDirectory);
               }
