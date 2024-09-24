@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TimeZone;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class NovaseqXProcessor extends DefaultIllumina {
   static class BCLConvertAnalysis {
@@ -87,8 +89,8 @@ public class NovaseqXProcessor extends DefaultIllumina {
 
   final String NUMERAL = "\\d+";
   static ObjectMapper MAPPER;
-
   BCLConvertAnalysis BCLConvertAnalyses = new BCLConvertAnalysis();
+  private static final Logger log = LoggerFactory.getLogger(NovaseqXProcessor.class);
 
   public NovaseqXProcessor(Builder builder, boolean checkOutput) {
     super(builder, checkOutput);
@@ -163,7 +165,7 @@ public class NovaseqXProcessor extends DefaultIllumina {
             jsonSampleInfo.set("BCLConvert", sampleSheetBCLConvertSection);
             jsonAttempt.set("DRAGEN_Samplesheet", jsonSampleInfo);
           } else {
-            System.err.println("No samplesheet for " + runDirectory + ", was DRAGEN enabled?");
+            log.info("No samplesheet for {}, was DRAGEN enabled?", runDirectory);
           }
           if (expectedWorkflows.isEmpty()) {
             dto.setAnalysisStatus(AnalysisStatus.COMPLETED);
@@ -213,10 +215,10 @@ public class NovaseqXProcessor extends DefaultIllumina {
                 }
                 expectedWorkflows.put(DRAGENWorkflow.BCLConvert, Boolean.TRUE);
               } else {
-                System.err.println("No Demultiplex_Stats.csv for " + runDirectory);
+                log.info("No Demultiplex_Stats.csv for {}", runDirectory);
               }
             } else {
-              System.err.println("No fastq_list.csv for " + runDirectory + ", old DRAGEN version?");
+              log.info("No fastq_list.csv for {}, old DRAGEN version?", runDirectory);
             }
             jsonAttempt.set("BCLConvert", BCLConvertAnalyses.toJson());
           } // end if expectedWorkflows contains BCLConvert
