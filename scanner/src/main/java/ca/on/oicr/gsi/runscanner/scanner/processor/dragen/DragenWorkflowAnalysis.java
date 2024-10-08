@@ -1,6 +1,7 @@
 package ca.on.oicr.gsi.runscanner.scanner.processor.dragen;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -25,6 +26,22 @@ public class DragenWorkflowAnalysis {
         .filter(a -> a.getSample().equals(sample) && a.getLane() == lane)
         .findFirst()
         .orElse(new Analysis());
+  }
+
+  Analysis get(Path filePath) {
+    List<Analysis> list =
+        analyses
+            .stream()
+            .filter(a -> a.getFiles().stream().anyMatch(f -> f.getPath().equals(filePath)))
+            .toList();
+    if (list.size() > 1) {
+      throw new IllegalStateException(
+          "Can't have more than one Analysis with same file " + filePath);
+    }
+    if (list.isEmpty()) {
+      return null;
+    }
+    return list.get(0);
   }
 
   void put(Analysis newAnalysis) {
