@@ -45,6 +45,38 @@ public class BCLConvert {
         bclConvertAnalysis.put(analysis);
       }
 
+      // Get file checksums from Analysis/#/Manifest.tsv
+      File manifest = new File(rootDir, "Manifest.tsv");
+      if (manifest.exists() && manifest.isFile()) {
+        List<String[]> manifestLines =
+            Files.readAllLines(manifest.toPath())
+                .stream()
+                .map(line -> line.split("\t"))
+                .filter(line -> line[0].startsWith("Data/BCLConvert"))
+                .filter(line -> line[0].endsWith(".fastq.gz"))
+                .toList();
+        for (String[] manifestLine : manifestLines) {
+          // 0 = path, 1 = crc32 checksum
+          Path filename = new File(rootDir, manifestLine[0]).toPath();
+
+          // When this is null, it's often for an Undetermined read. We do not care.
+          try {
+            Analysis analysis = bclConvertAnalysis.get(filename);
+            for (AnalysisFile file : analysis.getFiles()) {
+              if (file.getPath().equals(filename)) {
+                file.setChecksum(manifestLine[1]);
+                break;
+              }
+            }
+          } catch (NullPointerException npe) {
+            log.info("Unable to map {} to an Analysis object", filename);
+          }
+        }
+
+      } else {
+        log.info("No Manifest.tsv for {}", rootDir);
+      }
+
       // Get read counts from root
       // Analysis/#/Data/BCLConvert/fastq/Reports/Demultiplex_Stats.csv
       File demulitplexStats =
@@ -83,7 +115,7 @@ public class BCLConvert {
     Path fullPath = Paths.get(rootDir.getPath(), "/Data/BCLConvert/fastq/", fileName);
     AnalysisFile newFile = new AnalysisFile();
     newFile.setPath(fullPath);
-    newFile.addInfoItem("size", Files.size(fullPath));
+    newFile.setSize(Files.size(fullPath));
     // TODO: need checksum
     return newFile;
   }
