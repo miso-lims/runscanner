@@ -45,6 +45,10 @@ public class NovaseqXProcessor extends DefaultIllumina {
         if (analysisAttempt.isDirectory() && analysisAttempt.getName().matches(NUMERAL)) {
           String attemptNum = analysisAttempt.getName();
           Samplesheet samplesheet = new Samplesheet(MAPPER, analysisAttempt);
+          if (samplesheet.getInfo() == null) { // no info populated if samplesheet doesn't yet exist
+            dto.setAnalysisStatus(AnalysisStatus.PENDING);
+            return dto;
+          }
 
           if (samplesheet.noWorkflowsExpected()) {
             dto.setAnalysisStatus(AnalysisStatus.COMPLETED);
@@ -70,8 +74,8 @@ public class NovaseqXProcessor extends DefaultIllumina {
           json.set(attemptNum, dragenAnalysis.toJson());
         }
       }
-    } else { // TODO: Analysis dir does not exist. Does it spawn immediately or later?
-      dto.setAnalysisStatus(AnalysisStatus.COMPLETED);
+    } else { // Analysis dir does not exist - we are not expecting DRAGEN for this run.
+      dto.setAnalysisStatus(AnalysisStatus.NONE);
     }
     dto.setAnalysis(json);
     return dto;

@@ -10,7 +10,9 @@ public class IlluminaDragenNotificationDto extends IlluminaNotificationDto {
 
   @Override
   public boolean isDone() {
-    return getHealthType().isDone() && analysisStatus.equals(AnalysisStatus.COMPLETED);
+    return getHealthType().isDone()
+        && (analysisStatus.equals(AnalysisStatus.COMPLETED)
+            || analysisStatus.equals(AnalysisStatus.NONE));
   }
 
   public void clone(IlluminaNotificationDto parent) {
