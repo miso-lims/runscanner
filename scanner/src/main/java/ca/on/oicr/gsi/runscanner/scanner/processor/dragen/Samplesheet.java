@@ -72,7 +72,8 @@ public class Samplesheet {
       sampleSheetBCLConvertSection.set("Settings", sampleSheetBCLConvertSettings);
       info.set("BCLConvert", sampleSheetBCLConvertSection);
     } else {
-      log.info("No samplesheet for {}, was DRAGEN enabled?", rootDir);
+      // Samplesheet appears several hours after Analysis directory does
+      log.info("No samplesheet for {}, will look again later", rootDir);
     }
   }
 
