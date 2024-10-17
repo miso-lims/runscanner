@@ -58,10 +58,11 @@ public class NovaseqXProcessor extends DefaultIllumina {
           DragenAnalysis dragenAnalysis = new DragenAnalysis(MAPPER, samplesheet);
 
           if (samplesheet.isWorkflowExpected(DRAGENWorkflow.BCL_CONVERT)) {
-            dragenAnalysis.put("BCLConvert", BCLConvert.process(analysisAttempt));
+            BCLConvert bclConvert = new BCLConvert(samplesheet, analysisAttempt);
+            dragenAnalysis.put("BCLConvert", bclConvert.getResult());
 
-            // TODO there's more to this than that
-            samplesheet.setWorkflowComplete(DRAGENWorkflow.BCL_CONVERT);
+            // TODO: Should we not put() anything if not OK?
+            if (bclConvert.isOk()) samplesheet.setWorkflowComplete(DRAGENWorkflow.BCL_CONVERT);
           }
 
           // Phase 2: more workflows go here
