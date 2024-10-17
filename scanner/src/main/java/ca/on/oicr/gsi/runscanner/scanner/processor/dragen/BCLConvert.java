@@ -1,5 +1,6 @@
 package ca.on.oicr.gsi.runscanner.scanner.processor.dragen;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -11,8 +12,27 @@ import org.slf4j.LoggerFactory;
 
 public class BCLConvert {
   private static final Logger log = LoggerFactory.getLogger(BCLConvert.class);
+  private final Samplesheet samplesheet;
+  private final File rootDir;
+  private DragenWorkflowAnalysis result;
+  private boolean isOk = false;
 
-  public static DragenWorkflowAnalysis process(File rootDir) throws IOException {
+  public BCLConvert(Samplesheet sheet, File dir) throws IOException {
+    this.samplesheet = sheet;
+    this.rootDir = dir;
+    process();
+  }
+
+  public boolean isOk() {
+    return isOk;
+  }
+
+  public DragenWorkflowAnalysis getResult() throws IOException {
+    if (result == null) process();
+    return result;
+  }
+
+  private void process() throws IOException {
     DragenWorkflowAnalysis bclConvertAnalysis = new DragenWorkflowAnalysis();
     // Get fastqs from root Analysis/#/Data/BCLConvert/fastq/Reports/fastq_list.csv
     File fastqList = new File(rootDir, "Data/BCLConvert/fastq/Reports/fastq_list.csv");
@@ -107,7 +127,34 @@ public class BCLConvert {
     } else {
       log.info("No fastq_list.csv for {}, old DRAGEN version?", rootDir);
     }
-    return bclConvertAnalysis;
+
+    // Check against samplesheet for okayness
+    isOk = true;
+    for (JsonNode item : samplesheet.getInfo().get("BCLConvert").get("Data")) {
+      Analysis analysisItem =
+          bclConvertAnalysis.get(
+              item.get("Sample_ID").textValue(),
+              item.get("Lane").textValue(),
+              item.get("Index").textValue(),
+              item.get("Index2").textValue());
+      if (analysisItem == null || analysisItem.isEmpty()) {
+        isOk = false;
+        break;
+      } else {
+        for (AnalysisFile itemFile : analysisItem.getFiles()) {
+          if (itemFile.getPath() == null
+              || itemFile.getPath().toString().isBlank()
+              || itemFile.getInfo() == null
+              || itemFile.getChecksum() == null
+              || itemFile.getChecksum().isBlank()) {
+            isOk = false;
+            break;
+          }
+        }
+      }
+    }
+
+    result = bclConvertAnalysis;
   }
 
   private static AnalysisFile analysisFileFromFilename(File rootDir, String fileName)
@@ -116,7 +163,6 @@ public class BCLConvert {
     AnalysisFile newFile = new AnalysisFile();
     newFile.setPath(fullPath);
     newFile.setSize(Files.size(fullPath));
-    // TODO: need checksum
     return newFile;
   }
 }
