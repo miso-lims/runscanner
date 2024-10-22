@@ -163,6 +163,8 @@ public class BCLConvert {
     AnalysisFile newFile = new AnalysisFile();
     newFile.setPath(fullPath);
     newFile.setSize(Files.size(fullPath));
+    newFile.setCreated(Files.getLastModifiedTime(fullPath).toInstant());
+    newFile.setModified(newFile.getCreated()); // Not perfect but f/s won't give us a created time
     return newFile;
   }
 }

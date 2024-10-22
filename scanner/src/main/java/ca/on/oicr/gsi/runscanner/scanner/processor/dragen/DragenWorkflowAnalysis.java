@@ -1,12 +1,17 @@
 package ca.on.oicr.gsi.runscanner.scanner.processor.dragen;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.LinkedList;
 import java.util.List;
 
 public class DragenWorkflowAnalysis {
   List<Analysis> analyses = new LinkedList<>();
+  Instant completionTime;
+  Instant startTime;
 
   Analysis get(String sample, String lane, String index1, String index2) {
     return get(sample, lane, new StringBuilder(index1).append("-").append(index2).toString());
@@ -53,8 +58,9 @@ public class DragenWorkflowAnalysis {
     analyses.add(newAnalysis);
   }
 
-  ArrayNode toJson() {
-    ArrayNode ret = DragenAnalysis.mapper.createArrayNode();
+  JsonNode toJson() {
+    ObjectNode ret = DragenAnalysis.mapper.createObjectNode();
+    ArrayNode arr = DragenAnalysis.mapper.createArrayNode();
     analyses
         .stream()
         .sorted(
@@ -69,7 +75,27 @@ public class DragenWorkflowAnalysis {
               }
               return sampleComp;
             })
-        .forEach(a -> ret.add(a.toJson()));
+        .forEach(a -> arr.add(a.toJson()));
+    ret.set("results", arr);
+    ret.put("start_date", startTime.getEpochSecond());
+    ret.put("completed_date", completionTime.getEpochSecond());
+
     return ret;
+  }
+
+  public Instant getCompletionTime() {
+    return completionTime;
+  }
+
+  public void setCompletionTime(Instant i) {
+    this.completionTime = i;
+  }
+
+  public Instant getStartTime() {
+    return startTime;
+  }
+
+  public void setStartTime(Instant i) {
+    this.startTime = i;
   }
 }

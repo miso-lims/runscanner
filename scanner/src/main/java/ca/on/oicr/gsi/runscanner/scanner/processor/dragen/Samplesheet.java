@@ -49,8 +49,7 @@ public class Samplesheet {
         switch (sectionName) {
           case "[BCLConvert_Data]":
             if (line[0].equals("Lane")) break; // Skip column label line
-            s++; // Hopefully the lines stream in a consistent order and this will recreate
-            // the S#
+            s++;
             ObjectNode nested = mapper.createObjectNode();
             nested.put("Lane", line[0]);
             nested.put("Sample_ID", line[1]);

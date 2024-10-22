@@ -10,6 +10,7 @@ import ca.on.oicr.gsi.runscanner.scanner.processor.dragen.DragenAnalysis;
 import ca.on.oicr.gsi.runscanner.scanner.processor.dragen.Samplesheet;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
@@ -29,7 +30,10 @@ public class NovaseqXProcessor extends DefaultIllumina {
 
   @Override
   public NotificationDto process(File runDirectory, TimeZone tz) throws IOException {
-    MAPPER = new ObjectMapper().registerModule(super.setUpCustomModule(tz));
+    MAPPER =
+        new ObjectMapper()
+            .registerModule(super.setUpCustomModule(tz))
+            .registerModule(new JavaTimeModule());
     ObjectNode json = MAPPER.createObjectNode();
     IlluminaDragenNotificationDto dto = new IlluminaDragenNotificationDto();
     dto.clone((IlluminaNotificationDto) super.process(runDirectory, tz));
