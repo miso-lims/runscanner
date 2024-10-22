@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,7 @@ public class Samplesheet {
   private Map<DRAGENWorkflow, Boolean> expectedWorkflows = new HashMap<>();
   static ObjectMapper mapper;
   private static final Logger log = LoggerFactory.getLogger(Samplesheet.class);
+  private Instant mtime;
 
   public Samplesheet(ObjectMapper m, File rootDir) throws IOException {
     mapper = m;
@@ -25,7 +27,9 @@ public class Samplesheet {
   }
 
   private void process(File rootDir) throws IOException {
+    // TODO: you will regret using this path in Phase 2, probably
     File sampleSheet = new File(rootDir, "Data/BCLConvert/SampleSheet.csv");
+    this.mtime = Files.getLastModifiedTime(sampleSheet.toPath()).toInstant();
     if (sampleSheet.exists()) {
       List<String[]> lines =
           Files.readAllLines(sampleSheet.toPath())
@@ -100,6 +104,10 @@ public class Samplesheet {
 
   public boolean noWorkflowsExpected() {
     return expectedWorkflows.isEmpty();
+  }
+
+  public Instant getMtime() {
+    return mtime;
   }
 
   private void throwForUnexpectedWorkflow(DRAGENWorkflow wf) {
