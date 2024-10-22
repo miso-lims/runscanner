@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Instant;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +35,8 @@ public class BCLConvert {
 
   private void process() throws IOException {
     DragenWorkflowAnalysis bclConvertAnalysis = new DragenWorkflowAnalysis();
+    bclConvertAnalysis.setStartTime(samplesheet.getMtime());
+    Instant max_date = Instant.MIN; // yes you read that right
     // Get fastqs from root Analysis/#/Data/BCLConvert/fastq/Reports/fastq_list.csv
     File fastqList = new File(rootDir, "Data/BCLConvert/fastq/Reports/fastq_list.csv");
     if (fastqList.exists() && fastqList.isFile()) {
@@ -59,11 +62,18 @@ public class BCLConvert {
         file1.addInfoItem("read_number", 1);
         file2.addInfoItem("read_number", 2);
 
+        for (AnalysisFile f : new AnalysisFile[] {file1, file2}) {
+          if (f.getModified().compareTo(max_date) > 0) {
+            max_date = f.getModified();
+          }
+        }
+
         analysis.addFile(file1);
         analysis.addFile(file2);
 
         bclConvertAnalysis.put(analysis);
       }
+      bclConvertAnalysis.setCompletionTime(max_date);
 
       // Get file checksums from Analysis/#/Manifest.tsv
       File manifest = new File(rootDir, "Manifest.tsv");
@@ -127,6 +137,8 @@ public class BCLConvert {
     } else {
       log.info("No fastq_list.csv for {}, old DRAGEN version?", rootDir);
     }
+
+    // Use earliest and latest
 
     // Check against samplesheet for okayness
     isOk = true;
