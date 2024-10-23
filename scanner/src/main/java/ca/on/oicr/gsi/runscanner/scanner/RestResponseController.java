@@ -6,7 +6,12 @@ import ca.on.oicr.gsi.runscanner.dto.ProgressiveResponseDto;
 import ca.on.oicr.gsi.runscanner.scanner.Scheduler.OutputSizeLimit;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.annotations.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -18,12 +23,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import springfox.documentation.spring.web.json.Json;
 
 /** Provide information about the run scanner's current run cache via a REST interface. */
 @RestController
-@RequestMapping(produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-@Api(tags = {"Runs"})
+@RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+@Tag(name = "Runs")
 public class RestResponseController {
   @ResponseStatus(value = HttpStatus.NOT_FOUND)
   public class ResourceNotFoundException extends RuntimeException {}
@@ -45,16 +49,13 @@ public class RestResponseController {
    * the same name that are from different sequencers, one is randomly selected.
    */
   @GetMapping("/run/{name}")
-  @ApiOperation(
-      value = "Get run by name",
-      response = ca.on.oicr.gsi.runscanner.dto.NotificationDto.class,
-      responseContainer = "ResponseEntity")
+  @Operation(summary = "Get run by name")
   @ApiResponses({
-    @ApiResponse(code = 200, message = "Success"),
-    @ApiResponse(code = 404, message = "Run not found")
+    @ApiResponse(responseCode = "200", description = "Success", useReturnTypeSchema = true),
+    @ApiResponse(responseCode = "404", description = "Run not found", content = @Content)
   })
   public ResponseEntity<NotificationDto> getByName(
-      @PathVariable("name") @ApiParam(value = "Run name") String id) {
+      @PathVariable("name") @Parameter(description = "Run name") String id) {
     return scheduler
         .finished()
         .filter(dto -> dto.getRunAlias().equals(id))
@@ -64,13 +65,13 @@ public class RestResponseController {
   }
 
   @DeleteMapping("/run/{name}")
-  @ApiOperation(value = "Invalidate cache for run by name")
+  @Operation(summary = "Invalidate cache for run by name")
   @ApiResponses({
-    @ApiResponse(code = 204, message = "Success"),
-    @ApiResponse(code = 404, message = "Run not found")
+    @ApiResponse(responseCode = "204", description = "Success"),
+    @ApiResponse(responseCode = "404", description = "Run not found")
   })
   @ResponseStatus(code = HttpStatus.NO_CONTENT)
-  public void deleteByName(@PathVariable("name") @ApiParam(value = "Run name") String id) {
+  public void deleteByName(@PathVariable("name") @Parameter(description = "Run name") String id) {
     if (!scheduler.invalidate(id)) throw new ResourceNotFoundException();
   }
 
@@ -79,17 +80,14 @@ public class RestResponseController {
    * multiple runs with the same name that are from different sequencers, one is randomly selected.
    */
   @GetMapping("/run/{name}/metrics")
-  @ApiOperation(
-      value = "Get metrics by run name",
-      response = Json[].class,
-      responseContainer = "HttpEntity")
+  @Operation(summary = "Get metrics by run name")
   @ApiResponses({
-    @ApiResponse(code = 200, message = "Success"),
-    @ApiResponse(code = 404, message = "Run not found")
+    @ApiResponse(responseCode = "200", description = "Success", useReturnTypeSchema = true),
+    @ApiResponse(responseCode = "404", description = "Run not found", content = @Content)
   })
   @ResponseBody
-  public JsonNode getMetricsByName(@PathVariable("name") @ApiParam(value = "Run name") String id)
-      throws IOException {
+  public JsonNode getMetricsByName(
+      @PathVariable("name") @Parameter(description = "Run name") String id) throws IOException {
     String response =
         scheduler
             .finished()
@@ -110,10 +108,7 @@ public class RestResponseController {
    * <p>Runs are not guaranteed to have unique names.
    */
   @GetMapping("/runs/all")
-  @ApiOperation(
-      value = "Get all runs",
-      response = ca.on.oicr.gsi.runscanner.dto.NotificationDto.class,
-      responseContainer = "List")
+  @Operation(summary = "Get all runs")
   @ResponseBody
   public List<NotificationDto> list() {
     return scheduler.finished().collect(Collectors.toList());
@@ -138,12 +133,11 @@ public class RestResponseController {
    * @return
    */
   @PostMapping("/runs/progressive")
-  @ApiOperation(
-      value = "Progressive scan of runs",
-      response = ca.on.oicr.gsi.runscanner.dto.ProgressiveResponseDto.class)
+  @Operation(summary = "Progressive scan of runs")
   @ResponseBody
   public ProgressiveResponseDto progressive(
-      @ApiParam(value = "ProgressiveRequestDto object containing request options") @RequestBody
+      @Parameter(description = "ProgressiveRequestDto object containing request options")
+          @RequestBody
           ProgressiveRequestDto request) {
     ProgressiveResponseDto response = new ProgressiveResponseDto();
     response.setToken(token);

@@ -26,7 +26,7 @@ After which, deploy Run Scanner as directed in
 [Installation & Setup](../installation).
 
 Note that Run Scanner expects to be able to find the `runscanner-illumina`
-program on the path. For Debian and Ubuntu systems, in `/etc/init.d/tomcat8`,
+program on the path. For Debian and Ubuntu systems, in `/etc/init.d/tomcat10`,
 adjust the `PATH` to include `/usr/local/bin`.
 
 <!-- All this should be moved to the Developer Documentation once we're at that point

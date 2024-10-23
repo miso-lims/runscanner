@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
@@ -29,7 +30,13 @@ import java.util.stream.Stream;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathException;
 import javax.xml.xpath.XPathExpression;
-import org.apache.http.client.utils.URIBuilder;
+import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.config.ConnectionConfig;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
+import org.apache.hc.core5.http.io.SocketConfig;
+import org.apache.hc.core5.net.URIBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
@@ -95,11 +102,7 @@ public class DefaultPacBio extends RunProcessor {
   private static final Predicate<String> CELL_DIRECTORY =
       Pattern.compile("[A-Z]{1}[0-9]{2}_[0-9]{1}").asPredicate();
 
-  private static final DateTimeFormatter DATE_FORMAT =
-      DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
-
-  private static final HttpComponentsClientHttpRequestFactory HTTP_REQUEST_FACTORY =
-      new HttpComponentsClientHttpRequestFactory();
+  private static final HttpComponentsClientHttpRequestFactory HTTP_REQUEST_FACTORY;
 
   private static final Pattern LINES = Pattern.compile("\\r?\\n");
 
@@ -133,9 +136,18 @@ public class DefaultPacBio extends RunProcessor {
   private static final Pattern WELL_LINE = Pattern.compile("^([A-Z]\\d+),.*$");
 
   static {
-    HTTP_REQUEST_FACTORY.setConnectionRequestTimeout(20_000);
-    HTTP_REQUEST_FACTORY.setConnectTimeout(20_000);
-    HTTP_REQUEST_FACTORY.setReadTimeout(20_000);
+    PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
+    connectionManager.setDefaultSocketConfig(
+        SocketConfig.custom().setSoTimeout(20, TimeUnit.SECONDS).build());
+    connectionManager.setDefaultConnectionConfig(
+        ConnectionConfig.custom().setConnectTimeout(20, TimeUnit.SECONDS).build());
+    HttpClient httpClient =
+        HttpClientBuilder.create()
+            .setConnectionManager(connectionManager)
+            .setDefaultRequestConfig(
+                RequestConfig.custom().setConnectionRequestTimeout(20, TimeUnit.SECONDS).build())
+            .build();
+    HTTP_REQUEST_FACTORY = new HttpComponentsClientHttpRequestFactory(httpClient);
   }
 
   public static DefaultPacBio create(Builder builder, ObjectNode parameters) {
@@ -202,9 +214,11 @@ public class DefaultPacBio extends RunProcessor {
         poolInfo = new HashMap<>();
         dto.setPoolNames(poolInfo);
       } else if (poolInfo.containsKey(well)) {
-        // If there are multiple things assigned to this well in the sample sheet, then MISO will
+        // If there are multiple things assigned to this well in the sample sheet, then
+        // MISO will
         // not be able to figure out a single pool to
-        // assign to this well. In this case, we set the pool to be the empty string so that nothing
+        // assign to this well. In this case, we set the pool to be the empty string so
+        // that nothing
         // will be automatically assigned.
         log.warn(
             String.format(
@@ -257,7 +271,8 @@ public class DefaultPacBio extends RunProcessor {
 
   @Override
   public NotificationDto process(File runDirectory, TimeZone tz) throws IOException {
-    // We create one DTO for a run, but there are going to be many wells with independent and
+    // We create one DTO for a run, but there are going to be many wells with
+    // independent and
     // duplicate metadata that will will simply
     // overwrite in the shared DTO. If the data differs, the last well wins.
     PacBioNotificationDto dto = new PacBioNotificationDto();
@@ -278,12 +293,14 @@ public class DefaultPacBio extends RunProcessor {
         .filter(Optional::isPresent)
         .forEach(metadata -> processMetadata(metadata.get(), dto, tz));
 
-    // The current job state is not available from the metadata files, so contact the PacBio
+    // The current job state is not available from the metadata files, so contact
+    // the PacBio
     // instrument's web service.
     String plateUrl = dto.getContainerSerialNumber();
     dto.setHealthType(
         getStatus(String.format("%s/Jobs/Plate/%s/Status", address, plateUrl)).translateStatus());
-    // If the metadata gave us a completion date, but the web service told us the run isn't
+    // If the metadata gave us a completion date, but the web service told us the
+    // run isn't
     // complete, delete the completion date of lies.
     if (!dto.getHealthType().isDone()) {
       dto.setCompletionDate(null);

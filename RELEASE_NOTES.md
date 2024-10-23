@@ -3,6 +3,7 @@
 Changes:
 
   * Add invalidation endpoint for individual runs
+  * Tomcat 10 is now required
 
 # 1.16.3
 
