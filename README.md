@@ -9,7 +9,7 @@ Full instructions for the setup and use of Run Scanner can be found in the [Run 
 ## Prerequisites
 
 * JDK 17
-* Tomcat 8 or 9
+* Tomcat 10
 * C++ build environment (see [runscanner-llumina](runscanner-illumina/README.md))
 * [Maven 3.8](http://maven.apache.org/download.html) or later
 * git

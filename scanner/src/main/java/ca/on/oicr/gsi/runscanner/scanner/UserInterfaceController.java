@@ -13,6 +13,8 @@ import ca.on.oicr.gsi.status.StatusPage;
 import ca.on.oicr.gsi.status.TablePage;
 import ca.on.oicr.gsi.status.TableRowWriter;
 import com.google.common.collect.ImmutableMap;
+import io.swagger.v3.oas.annotations.Hidden;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -25,18 +27,16 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Stream;
-import javax.servlet.http.HttpServletResponse;
 import javax.xml.stream.XMLStreamException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import springfox.documentation.annotations.ApiIgnore;
 
 /** Front-end status monitoring for run scanner */
 @Controller
-@ApiIgnore
+@Hidden
 public class UserInterfaceController {
   @Value("${project.version}")
   String projectVersion;
