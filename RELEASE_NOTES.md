@@ -1,5 +1,7 @@
 # Unreleased
 
+# 2.0.0
+
 Changes:
 
   * Add invalidation endpoint for individual runs
