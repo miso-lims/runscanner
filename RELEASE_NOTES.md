@@ -1,5 +1,7 @@
 # Unreleased
 
+# 2.0.1
+
 Changes:
 
   * Fixed error loading Scheduled, Processing, Unreadable, and File System Error pages
