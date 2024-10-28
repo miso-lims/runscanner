@@ -1,6 +1,6 @@
 package ca.on.oicr.gsi.runscanner.scanner;
 
-import io.prometheus.client.Gauge;
+import io.prometheus.metrics.core.metrics.Gauge;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
