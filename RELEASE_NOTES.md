@@ -1,11 +1,19 @@
 # Unreleased
 
+Changes:
+
+  * Fixed error loading Scheduled, Processing, Unreadable, and File System Error pages
+
 # 2.0.0
 
 Changes:
 
   * Add invalidation endpoint for individual runs
   * Tomcat 10 is now required
+
+Known Issues:
+
+  * Error loading Scheduled, Processing, Unreadable, and File System Error pages
 
 # 1.16.3
 
