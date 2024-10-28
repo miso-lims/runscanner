@@ -1,6 +1,6 @@
 package ca.on.oicr.gsi.runscanner.scanner;
 
-import io.prometheus.client.Histogram;
+import io.prometheus.metrics.core.metrics.Histogram;
 
 public class LatencyHistogram {
 
@@ -8,8 +8,8 @@ public class LatencyHistogram {
 
   public LatencyHistogram(String name, String help, String... labels) {
     histogram =
-        Histogram.build()
-            .buckets(1, 5, 10, 30, 60, 300, 600, 3600)
+        Histogram.builder()
+            .classicUpperBounds(1, 5, 10, 30, 60, 300, 600, 3600)
             .name(name)
             .help(help)
             .labelNames(labels)
@@ -19,6 +19,6 @@ public class LatencyHistogram {
   public AutoCloseable start(final String... labels) {
     long startTime = System.nanoTime();
 
-    return () -> histogram.labels(labels).observe((System.nanoTime() - startTime) / 1e9);
+    return () -> histogram.labelValues(labels).observe((System.nanoTime() - startTime) / 1e9);
   }
 }

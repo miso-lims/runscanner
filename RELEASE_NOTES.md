@@ -3,6 +3,7 @@
 Changes:
 
   * Fixed error loading Scheduled, Processing, Unreadable, and File System Error pages
+  * Fixed missing Run Scanner metrics
 
 # 2.0.0
 
@@ -14,6 +15,7 @@ Changes:
 Known Issues:
 
   * Error loading Scheduled, Processing, Unreadable, and File System Error pages
+  * Missing Run Scanner metrics
 
 # 1.16.3
 

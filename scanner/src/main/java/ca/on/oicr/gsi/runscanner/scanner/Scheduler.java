@@ -6,9 +6,9 @@ import ca.on.oicr.gsi.runscanner.dto.type.Platform;
 import ca.on.oicr.gsi.runscanner.scanner.processor.RunProcessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import io.prometheus.client.Counter;
-import io.prometheus.client.Gauge;
-import io.prometheus.client.Histogram;
+import io.prometheus.metrics.core.metrics.Counter;
+import io.prometheus.metrics.core.metrics.Gauge;
+import io.prometheus.metrics.core.metrics.Histogram;
 import java.io.File;
 import java.io.IOException;
 import java.time.Duration;
@@ -166,57 +166,57 @@ public class Scheduler {
   }
 
   private static final Gauge acceptedDirectories =
-      Gauge.build()
+      Gauge.builder()
           .name("miso_runscanner_directories_accepted")
           .help(
               "The number of directories that were readable and sent for processing in the last pass.")
           .register();
 
   private static final Gauge attemptedDirectories =
-      Gauge.build()
+      Gauge.builder()
           .name("miso_runscanner_directories_attempted")
           .help("The number of directories that were considered in the last pass.")
           .register();
 
   private static final Gauge goodRuns =
-      Gauge.build()
+      Gauge.builder()
           .name("miso_runscanner_good_runs")
           .help("The number of runs that succeeded in processing.")
           .register();
 
   private static final Gauge badRuns =
-      Gauge.build()
+      Gauge.builder()
           .name("miso_runscanner_bad_runs")
           .help("The number of runs that failed to process.")
           .register();
 
   private static final Gauge configurationEntries =
-      Gauge.build()
+      Gauge.builder()
           .name("miso_runscanner_configuration_entries")
           .help("The number of entries from the last configuration.")
           .register();
 
   private static final Gauge configurationTimestamp =
-      Gauge.build()
+      Gauge.builder()
           .name("miso_runscanner_configuration_timestamp")
           .help("The epoch time when the configuration was last read.")
           .register();
 
   private static final Gauge configurationValid =
-      Gauge.build()
+      Gauge.builder()
           .name("miso_runscanner_configuration_valid")
           .help("Whether the configuration loaded from disk is valid.")
           .register();
 
   private static final Gauge epochGauge =
-      Gauge.build()
+      Gauge.builder()
           .name("miso_runscanner_epoch")
           .help(
               "The current round of processing done for keeping the client in sync when progressively scanning.")
           .register();
 
   private static final Counter errors =
-      Counter.build()
+      Counter.builder()
           .name("miso_runscanner_errors")
           .help("The number of bad directories encountered.")
           .labelNames(PLATFORM_LABEL)
@@ -225,28 +225,28 @@ public class Scheduler {
   private static Logger log = LoggerFactory.getLogger(Scheduler.class);
 
   private static final Gauge newRunsScanned =
-      Gauge.build()
+      Gauge.builder()
           .name("miso_runscanner_new_runs_scanned")
           .help("The number of runs discovered in the last pass.")
           .register();
 
   private static final Gauge processingRuns =
-      Gauge.build()
+      Gauge.builder()
           .name("miso_runscanner_processing_runs")
           .labelNames(PLATFORM_LABEL)
           .help("The number of runs currently being processed.")
           .register();
 
   private static final Histogram processTime =
-      Histogram.build()
-          .buckets(1, 5, 10, 30, 60, 300, 600, 3600)
+      Histogram.builder()
+          .classicUpperBounds(1, 5, 10, 30, 60, 300, 600, 3600)
           .name("miso_runscanner_directory_process_time")
           .help("Time to process a run directories in seconds.")
           .labelNames(PLATFORM_LABEL, "instrument")
           .register();
 
   private static final Counter reentered =
-      Counter.build()
+      Counter.builder()
           .name("miso_runscanner_reentered")
           .help("The number of times the scanner was already running while scheduled to run again.")
           .register();
@@ -256,20 +256,20 @@ public class Scheduler {
           "miso_runscanner_directory_scan_time", "Time to scan the run directories in seconds.");
 
   private static final Gauge waitingRuns =
-      Gauge.build()
+      Gauge.builder()
           .name("miso_runscanner_waiting_runs")
           .help("The number of runs waiting to be processed.")
           .labelNames(PLATFORM_LABEL)
           .register();
 
   private static final Gauge lastScanStartTime =
-      Gauge.build()
+      Gauge.builder()
           .name("miso_runscanner_last_scan_start_time_seconds")
           .help("start time of last scan.")
           .register();
 
   private static final Gauge loadingRunDirectoryValid =
-      Gauge.build()
+      Gauge.builder()
           .name("miso_runscanner_run_directory_valid")
           .help("The current state of run directories displaying if they are valid or not.")
           .labelNames("directory")
@@ -445,14 +445,14 @@ public class Scheduler {
   private void queueDirectory(
       final File directory, final RunProcessor processor, final TimeZone tz) {
     workToDo.add(directory);
-    waitingRuns.labels(processor.getPlatformType().name()).inc();
+    waitingRuns.labelValues(processor.getPlatformType().name()).inc();
     workPool.submit(
         () -> {
           Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
           processing.add(directory);
-          processingRuns.labels(processor.getPlatformType().name()).inc();
+          processingRuns.labelValues(processor.getPlatformType().name()).inc();
           workToDo.remove(directory);
-          waitingRuns.labels(processor.getPlatformType().name()).dec();
+          waitingRuns.labelValues(processor.getPlatformType().name()).dec();
 
           long runStartTime = System.nanoTime();
           String instrumentName = "unknown";
@@ -469,16 +469,16 @@ public class Scheduler {
             epochGauge.set(work.epoch);
           } catch (Exception e) {
             log.error("Failed to process run: " + directory.getPath(), e);
-            errors.labels(processor.getPlatformType().name()).inc();
+            errors.labelValues(processor.getPlatformType().name()).inc();
             failed.put(directory, Instant.now());
           }
           goodRuns.set(finishedWork.size());
           badRuns.set(failed.size());
           processTime
-              .labels(processor.getPlatformType().name(), instrumentName)
+              .labelValues(processor.getPlatformType().name(), instrumentName)
               .observe((System.nanoTime() - runStartTime) / 1e9);
           processing.remove(directory);
-          processingRuns.labels(processor.getPlatformType().name()).dec();
+          processingRuns.labelValues(processor.getPlatformType().name()).dec();
         });
   }
 
@@ -512,7 +512,7 @@ public class Scheduler {
                     destination.setIgnoreSubdirectories(source.getIgnoreSubdirectories());
                     // Create gauge metric to inform us if directory is valid or not
                     loadingRunDirectoryValid
-                        .labels(source.getPath())
+                        .labelValues(source.getPath())
                         .set(destination.isValid() ? 1 : 0);
 
                     return destination;
@@ -550,7 +550,7 @@ public class Scheduler {
                   readConfiguration();
                 }
                 scanLastStarted = Instant.now();
-                lastScanStartTime.setToCurrentTime();
+                lastScanStartTime.set(System.currentTimeMillis());
                 UnreadableDirectories newUnreadableDirectories = new UnreadableDirectories();
                 try (StreamCountSpy<Pair<File, Configuration>> newRuns =
                         new StreamCountSpy<>(newRunsScanned);

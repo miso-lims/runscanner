@@ -15,7 +15,7 @@ import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.Sets;
-import io.prometheus.client.Counter;
+import io.prometheus.metrics.core.metrics.Counter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -63,8 +63,9 @@ public final class DefaultIllumina extends RunProcessor {
           "The time to scan all the output files in a sequencer's directory to tell if it's finished.");
 
   private static final Counter completness_method_success =
-      Counter.build(
-              "runscanner_illumina_completness_check",
+      Counter.builder()
+          .name("runscanner_illumina_completness_check")
+          .help(
               "The number of times a method was used to determine a run's completeness after sequencing")
           .labelNames("method")
           .register();
@@ -393,7 +394,7 @@ public final class DefaultIllumina extends RunProcessor {
 
       // If we have RunCompletionStatus.xml, use that to grab the CompletionDate
       if (updatedHealth.isPresent()) {
-        completness_method_success.labels("xml").inc();
+        completness_method_success.labelValues("xml").inc();
         updateCompletionDateFromRunCompletionStatus(runDirectory, runCompletionStatus, dto);
       }
       // We don't have RunCompletionStatus.xml file, check other options
@@ -402,7 +403,7 @@ public final class DefaultIllumina extends RunProcessor {
         if (new File(runDirectory, "CopyComplete.txt").exists()) {
           // It's allegedly done.
           updatedHealth = Optional.of(HealthType.COMPLETED);
-          completness_method_success.labels("complete.txt").inc();
+          completness_method_success.labelValues("complete.txt").inc();
           updateCompletionDateFromFile(runDirectory, "CopyComplete.txt", dto);
         } else {
           // Well, that didn't work. Maybe there are netcopy files.
@@ -429,7 +430,7 @@ public final class DefaultIllumina extends RunProcessor {
                   String.format("Basecalling_Netcopy_complete_Read%d.txt", dto.getNumReads()),
                   dto);
             }
-            completness_method_success.labels("netcopy").inc();
+            completness_method_success.labelValues("netcopy").inc();
           }
         }
       }
@@ -449,7 +450,7 @@ public final class DefaultIllumina extends RunProcessor {
                   .allMatch(laneDir -> isLaneComplete(laneDir, dto));
           if (!dataCopied) {
             updatedHealth = Optional.of(HealthType.RUNNING);
-            completness_method_success.labels("dirscan").inc();
+            completness_method_success.labelValues("dirscan").inc();
           }
         } catch (Exception e) {
           throw new IOException(e);
