@@ -71,7 +71,7 @@ public class NovaseqXProcessor extends DefaultIllumina {
 
           // Phase 2: more workflows go here
 
-          // TODO: move manifest parsing here so maybe we can avoid looping over it several times
+          // TODO (Phase 2): move manifest parsing here so maybe we can avoid looping over it
 
           if (samplesheet.allWorkflowsCompleted()) {
             dto.setAnalysisStatus(AnalysisStatus.COMPLETED);

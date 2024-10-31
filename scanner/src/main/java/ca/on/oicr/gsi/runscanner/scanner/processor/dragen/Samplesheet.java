@@ -27,7 +27,8 @@ public class Samplesheet {
   }
 
   private void process(File rootDir) throws IOException {
-    // TODO: you will regret using this path in Phase 2, probably
+    // Both copies DRAGEN makes of the SampleSheet are within BCLConvert
+    // This is probably OK because we can't do any more analysis without it
     File sampleSheet = new File(rootDir, "Data/BCLConvert/SampleSheet.csv");
     this.mtime = Files.getLastModifiedTime(sampleSheet.toPath()).toInstant();
     if (sampleSheet.exists()) {
