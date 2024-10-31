@@ -56,17 +56,14 @@ public class BCLConvert {
         analysis.setIndex(index1, index2);
 
         // TODO: what's it look like when there's only 1 read?
-        AnalysisFile file1 = analysisFileFromFilename(rootDir, fastq[4]),
-            file2 = analysisFileFromFilename(rootDir, fastq[5]);
+        AnalysisFile file1 = analysisFileFromFilename(rootDir, fastq[4], 1),
+            file2 = analysisFileFromFilename(rootDir, fastq[5], 2);
 
-        file1.addInfoItem("read_number", 1);
-        file2.addInfoItem("read_number", 2);
+        if (file1 != null && file1.getModified().compareTo(max_date) > 0)
+          max_date = file1.getModified();
 
-        for (AnalysisFile f : new AnalysisFile[] {file1, file2}) {
-          if (f.getModified().compareTo(max_date) > 0) {
-            max_date = f.getModified();
-          }
-        }
+        if (file2 != null && file2.getModified().compareTo(max_date) > 0)
+          max_date = file2.getModified();
 
         analysis.addFile(file1);
         analysis.addFile(file2);
@@ -138,8 +135,6 @@ public class BCLConvert {
       log.info("No fastq_list.csv for {}, old DRAGEN version?", rootDir);
     }
 
-    // Use earliest and latest
-
     // Check against samplesheet for okayness
     isOk = true;
     for (JsonNode item : samplesheet.getInfo().get("BCLConvert").get("Data")) {
@@ -154,7 +149,8 @@ public class BCLConvert {
         break;
       } else {
         for (AnalysisFile itemFile : analysisItem.getFiles()) {
-          if (itemFile.getPath() == null
+          if (itemFile == null
+              || itemFile.getPath() == null
               || itemFile.getPath().toString().isBlank()
               || itemFile.getInfo() == null
               || itemFile.getChecksum() == null
@@ -169,14 +165,16 @@ public class BCLConvert {
     result = bclConvertAnalysis;
   }
 
-  private static AnalysisFile analysisFileFromFilename(File rootDir, String fileName)
-      throws IOException {
+  private static AnalysisFile analysisFileFromFilename(
+      File rootDir, String fileName, int readNumber) throws IOException {
     Path fullPath = Paths.get(rootDir.getPath(), "/Data/BCLConvert/fastq/", fileName);
+    if (!Files.exists(fullPath)) return null;
     AnalysisFile newFile = new AnalysisFile();
     newFile.setPath(fullPath);
     newFile.setSize(Files.size(fullPath));
     newFile.setCreated(Files.getLastModifiedTime(fullPath).toInstant());
     newFile.setModified(newFile.getCreated()); // Not perfect but f/s won't give us a created time
+    newFile.addInfoItem("read_number", readNumber);
     return newFile;
   }
 }
