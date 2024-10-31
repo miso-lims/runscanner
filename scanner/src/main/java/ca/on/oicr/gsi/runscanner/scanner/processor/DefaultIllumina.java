@@ -56,7 +56,7 @@ import org.w3c.dom.Document;
  *
  * <p>This should work for all sequencers except the Genome Analyzer and Genome Analyzer II.
  */
-public final class DefaultIllumina extends RunProcessor {
+public class DefaultIllumina extends RunProcessor {
   private static final LatencyHistogram directory_scan_time =
       new LatencyHistogram(
           "runscanner_illumina_file_completness_time",
@@ -153,7 +153,7 @@ public final class DefaultIllumina extends RunProcessor {
    * @param parameters ObjectNode possibly containing checkOutput parameter
    * @return true if checkOutput is true or null, false if checkOutput is explicitly false.
    */
-  private static boolean calculateCheckOutput(ObjectNode parameters) {
+  static boolean calculateCheckOutput(ObjectNode parameters) {
     return !parameters.hasNonNull("checkOutput") || parameters.get("checkOutput").asBoolean();
   }
 
@@ -244,7 +244,7 @@ public final class DefaultIllumina extends RunProcessor {
    * @param tz Time Zone to expect for datetime string
    * @return Module with custom Instant parsing
    */
-  private Module setUpCustomModule(TimeZone tz) {
+  Module setUpCustomModule(TimeZone tz) {
     SimpleModule module = new SimpleModule("customInstantParsingModule");
 
     module.addSerializer(
