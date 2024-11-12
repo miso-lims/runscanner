@@ -1,8 +1,6 @@
 package ca.on.oicr.gsi.runscanner.scanner.processor;
 
-import ca.on.oicr.gsi.runscanner.dto.IlluminaDragenNotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.IlluminaNotificationDto;
-import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.type.AnalysisStatus;
 import ca.on.oicr.gsi.runscanner.dto.type.DRAGENWorkflow;
 import ca.on.oicr.gsi.runscanner.scanner.processor.dragen.BCLConvert;
@@ -10,7 +8,6 @@ import ca.on.oicr.gsi.runscanner.scanner.processor.dragen.DragenAnalysis;
 import ca.on.oicr.gsi.runscanner.scanner.processor.dragen.Samplesheet;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
@@ -21,7 +18,7 @@ import org.slf4j.LoggerFactory;
 public class NovaseqXProcessor extends DefaultIllumina {
 
   private final String NUMERAL = "\\d+";
-  static ObjectMapper MAPPER;
+  static ObjectMapper MAPPER = RunProcessor.createObjectMapper();
   private static final Logger log = LoggerFactory.getLogger(NovaseqXProcessor.class);
 
   public NovaseqXProcessor(Builder builder, boolean checkOutput) {
@@ -29,14 +26,9 @@ public class NovaseqXProcessor extends DefaultIllumina {
   }
 
   @Override
-  public NotificationDto process(File runDirectory, TimeZone tz) throws IOException {
-    MAPPER =
-        new ObjectMapper()
-            .registerModule(super.setUpCustomModule(tz))
-            .registerModule(new JavaTimeModule());
+  public IlluminaNotificationDto analyse(
+      File runDirectory, TimeZone tz, IlluminaNotificationDto dto) throws IOException {
     ObjectNode json = MAPPER.createObjectNode();
-    IlluminaDragenNotificationDto dto = new IlluminaDragenNotificationDto();
-    dto.clone((IlluminaNotificationDto) super.process(runDirectory, tz));
     dto.setAnalysisStatus(AnalysisStatus.PENDING);
 
     File analysisDir = new File(runDirectory, "Analysis");

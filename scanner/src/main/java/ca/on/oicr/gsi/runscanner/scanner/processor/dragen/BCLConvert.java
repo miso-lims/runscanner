@@ -37,8 +37,13 @@ public class BCLConvert {
     DragenWorkflowAnalysis bclConvertAnalysis = new DragenWorkflowAnalysis();
     bclConvertAnalysis.setStartTime(samplesheet.getMtime());
     Instant max_date = Instant.MIN; // yes you read that right
-    // Get fastqs from root Analysis/#/Data/BCLConvert/fastq/Reports/fastq_list.csv
+    // Get fastq list
+    // For gz compression, root/Analysis/#/Data/BCLConvert/fastq/Reports/fastq_list.csv
+    // For ora compression, root/Analysis/#/Data/BCLConvert/ora_fastq/Reports/fastq_list.csv
     File fastqList = new File(rootDir, "Data/BCLConvert/fastq/Reports/fastq_list.csv");
+    if (!(fastqList.exists() && fastqList.isFile())) {
+      fastqList = new File(rootDir, "Data/BCLConvert/ora_fastq/Reports/fastq_list.csv");
+    }
     if (fastqList.exists() && fastqList.isFile()) {
       List<String[]> fastqLines =
           Files.readAllLines(fastqList.toPath()).stream().map(line -> line.split(",")).toList();
@@ -73,6 +78,7 @@ public class BCLConvert {
       bclConvertAnalysis.setCompletionTime(max_date);
 
       // Get file checksums from Analysis/#/Manifest.tsv
+      // TODO: Doesn't seem to exist for BCLConvert < 4.1.7 - skip?
       File manifest = new File(rootDir, "Manifest.tsv");
       if (manifest.exists() && manifest.isFile()) {
         List<String[]> manifestLines =
@@ -80,7 +86,7 @@ public class BCLConvert {
                 .stream()
                 .map(line -> line.split("\t"))
                 .filter(line -> line[0].startsWith("Data/BCLConvert"))
-                .filter(line -> line[0].endsWith(".fastq.gz"))
+                .filter(line -> (line[0].endsWith(".fastq.gz") || line[0].endsWith(".fastq.ora")))
                 .toList();
         for (String[] manifestLine : manifestLines) {
           // 0 = path, 1 = crc32 checksum
@@ -104,10 +110,16 @@ public class BCLConvert {
         log.info("No Manifest.tsv for {}", rootDir);
       }
 
-      // Get read counts from root
-      // Analysis/#/Data/BCLConvert/fastq/Reports/Demultiplex_Stats.csv
+      // Get read counts from Demultiplex Stats file
+      // for gz compression: root/Analysis/#/Data/BCLConvert/fastq/Reports/Demultiplex_Stats.csv
+      // for ora compression:
+      // root/Analysis/#/Data/BCLConvert/ora_fastq/Reports/Demultiplex_Stats.csv
       File demulitplexStats =
           new File(rootDir, "Data/BCLConvert/fastq/Reports/Demultiplex_Stats.csv");
+      if (!(demulitplexStats.exists() && demulitplexStats.isFile())) {
+        demulitplexStats =
+            new File(rootDir, "Data/BCLConvert/ora_fastq/Reports/Demultiplex_Stats.csv");
+      }
 
       if (demulitplexStats.exists() && demulitplexStats.isFile()) {
         List<String[]> demultiplexLines =
@@ -132,7 +144,7 @@ public class BCLConvert {
         log.info("No Demultiplex_Stats.csv for {}", rootDir);
       }
     } else {
-      log.info("No fastq_list.csv for {}, old DRAGEN version?", rootDir);
+      log.info("No fastq_list.csv for {}", rootDir);
     }
 
     // Check against samplesheet for okayness
@@ -168,6 +180,9 @@ public class BCLConvert {
   private static AnalysisFile analysisFileFromFilename(
       File rootDir, String fileName, int readNumber) throws IOException {
     Path fullPath = Paths.get(rootDir.getPath(), "/Data/BCLConvert/fastq/", fileName);
+    if (!Files.exists(fullPath)) {
+      fullPath = Paths.get(rootDir.getPath(), "/Data/BCLConvert/ora_fastq/", fileName);
+    }
     if (!Files.exists(fullPath)) return null;
     AnalysisFile newFile = new AnalysisFile();
     newFile.setPath(fullPath);

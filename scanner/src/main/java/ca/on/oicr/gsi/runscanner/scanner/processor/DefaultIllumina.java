@@ -2,6 +2,7 @@ package ca.on.oicr.gsi.runscanner.scanner.processor;
 
 import ca.on.oicr.gsi.runscanner.dto.IlluminaNotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
+import ca.on.oicr.gsi.runscanner.dto.type.AnalysisStatus;
 import ca.on.oicr.gsi.runscanner.dto.type.HealthType;
 import ca.on.oicr.gsi.runscanner.dto.type.IlluminaChemistry;
 import ca.on.oicr.gsi.runscanner.dto.type.IndexSequencing;
@@ -442,11 +443,12 @@ public class DefaultIllumina extends RunProcessor {
           Path baseCallDirectory =
               Paths.get(dto.getSequencerFolderPath(), "Data", "Intensities", "BaseCalls");
           // Check that each lane directory is complete
+          IlluminaNotificationDto finalDto = dto;
           boolean dataCopied =
               IntStream.rangeClosed(1, dto.getLaneCount()) //
                   .mapToObj(lane -> String.format("L%03d", lane)) //
                   .map(baseCallDirectory::resolve) //
-                  .allMatch(laneDir -> isLaneComplete(laneDir, dto));
+                  .allMatch(laneDir -> isLaneComplete(laneDir, finalDto));
           if (!dataCopied) {
             updatedHealth = Optional.of(HealthType.RUNNING);
             completness_method_success.labels("dirscan").inc();
@@ -457,7 +459,14 @@ public class DefaultIllumina extends RunProcessor {
       }
       updatedHealth.ifPresent(dto::setHealthType);
     }
+    dto = analyse(runDirectory, tz, dto);
+    return dto;
+  }
 
+  /** By default, no Analysis. */
+  protected IlluminaNotificationDto analyse(
+      File runDirectory, TimeZone tz, IlluminaNotificationDto dto) throws IOException {
+    dto.setAnalysisStatus(AnalysisStatus.NONE);
     return dto;
   }
 

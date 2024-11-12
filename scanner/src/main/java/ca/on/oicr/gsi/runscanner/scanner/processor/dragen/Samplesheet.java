@@ -30,13 +30,13 @@ public class Samplesheet {
     // Both copies DRAGEN makes of the SampleSheet are within BCLConvert
     // This is probably OK because we can't do any more analysis without it
     File sampleSheet = new File(rootDir, "Data/BCLConvert/SampleSheet.csv");
-    this.mtime = Files.getLastModifiedTime(sampleSheet.toPath()).toInstant();
     if (sampleSheet.exists()) {
+      this.mtime = Files.getLastModifiedTime(sampleSheet.toPath()).toInstant();
       List<String[]> lines =
           Files.readAllLines(sampleSheet.toPath())
               .stream()
               .map(line -> line.split(","))
-              .filter(line -> line.length != 0)
+              .filter(line -> !(line.length == 0 || line.length == 1 && line[0].isEmpty()))
               .toList();
 
       info = mapper.createObjectNode();
@@ -68,7 +68,9 @@ public class Samplesheet {
           case "[Cloud_Settings]": // Discard the cloud config
           case "[Cloud_Data]":
             break;
+          case "[Header]":
           default:
+            if (line[0].startsWith("[")) continue; // Skip header lines we don't recognize
             info.put(line[0], line[1]);
         }
       }
