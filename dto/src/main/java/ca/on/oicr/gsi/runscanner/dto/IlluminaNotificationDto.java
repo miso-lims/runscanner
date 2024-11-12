@@ -1,12 +1,27 @@
 package ca.on.oicr.gsi.runscanner.dto;
 
+import ca.on.oicr.gsi.runscanner.dto.type.AnalysisStatus;
 import ca.on.oicr.gsi.runscanner.dto.type.IlluminaChemistry;
 import ca.on.oicr.gsi.runscanner.dto.type.IndexSequencing;
 import ca.on.oicr.gsi.runscanner.dto.type.Platform;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.deser.std.JsonNodeDeserializer;
 import java.util.List;
 import java.util.Objects;
 
 public class IlluminaNotificationDto extends NotificationDto {
+
+  // This fixes a problem with testPartiallyPopulatedNotificationRoundTrip.
+  // The original object would have `null` but the deserialized version would have `NullNode`
+  // However I do not like it
+  public static final class JsonNullDeserializer extends JsonNodeDeserializer {
+    @Override
+    public JsonNode getNullValue(DeserializationContext dsc) {
+      return null;
+    }
+  }
 
   private int bclCount;
   private int callCycle;
@@ -21,6 +36,18 @@ public class IlluminaNotificationDto extends NotificationDto {
   private int scoreCycle;
   private String workflowType;
   private IndexSequencing indexSequencing;
+
+  @JsonDeserialize(using = JsonNullDeserializer.class)
+  private JsonNode analysis;
+
+  private AnalysisStatus analysisStatus;
+
+  @Override
+  public boolean isDone() {
+    return getHealthType().isDone()
+        && (analysisStatus.equals(AnalysisStatus.COMPLETED)
+            || analysisStatus.equals(AnalysisStatus.NONE));
+  }
 
   @Override
   public boolean equals(Object obj) {
@@ -41,7 +68,9 @@ public class IlluminaNotificationDto extends NotificationDto {
         && Objects.equals(this.readLengths, other.readLengths)
         && Objects.equals(this.scoreCycle, other.scoreCycle)
         && Objects.equals(this.workflowType, other.workflowType)
-        && Objects.equals(this.indexSequencing, other.indexSequencing);
+        && Objects.equals(this.indexSequencing, other.indexSequencing)
+        && Objects.equals(this.analysis, other.analysis)
+        && Objects.equals(this.analysisStatus, other.analysisStatus);
   }
 
   public int getBclCount() {
@@ -124,7 +153,9 @@ public class IlluminaNotificationDto extends NotificationDto {
         readLengths,
         scoreCycle,
         workflowType,
-        indexSequencing);
+        indexSequencing,
+        analysis,
+        analysisStatus);
   }
 
   public void setBclCount(int bclCount) {
@@ -179,6 +210,22 @@ public class IlluminaNotificationDto extends NotificationDto {
     this.indexSequencing = indexSequencing;
   }
 
+  public JsonNode getAnalysis() {
+    return analysis;
+  }
+
+  public AnalysisStatus getAnalysisStatus() {
+    return analysisStatus;
+  }
+
+  public void setAnalysis(JsonNode analysis) {
+    this.analysis = analysis;
+  }
+
+  public void setAnalysisStatus(AnalysisStatus analysisStatus) {
+    this.analysisStatus = analysisStatus;
+  }
+
   @Override
   public String toString() {
     return super.toString()
@@ -208,6 +255,10 @@ public class IlluminaNotificationDto extends NotificationDto {
         + workflowType
         + ", indexSequencing="
         + indexSequencing
+        + ", analysis="
+        + analysis
+        + ", analysisStatus="
+        + analysisStatus
         + "]";
   }
 }
