@@ -1,11 +1,11 @@
 package ca.on.oicr.gsi.runscanner.scanner.processor;
 
 import ca.on.oicr.gsi.runscanner.dto.IlluminaNotificationDto;
+import ca.on.oicr.gsi.runscanner.dto.dragen.BCLConvert;
+import ca.on.oicr.gsi.runscanner.dto.dragen.DragenAnalysis;
+import ca.on.oicr.gsi.runscanner.dto.dragen.samplesheet.Samplesheet;
 import ca.on.oicr.gsi.runscanner.dto.type.AnalysisStatus;
 import ca.on.oicr.gsi.runscanner.dto.type.DRAGENWorkflow;
-import ca.on.oicr.gsi.runscanner.scanner.processor.dragen.BCLConvert;
-import ca.on.oicr.gsi.runscanner.scanner.processor.dragen.DragenAnalysis;
-import ca.on.oicr.gsi.runscanner.scanner.processor.dragen.Samplesheet;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.File;
@@ -28,8 +28,8 @@ public class NovaseqXProcessor extends DefaultIllumina {
   @Override
   public IlluminaNotificationDto analyse(
       File runDirectory, TimeZone tz, IlluminaNotificationDto dto) throws IOException {
-    ObjectNode json = MAPPER.createObjectNode();
     dto.setAnalysisStatus(AnalysisStatus.PENDING);
+    DragenAnalysis dragenAnalysis = null;
 
     File analysisDir = new File(runDirectory, "Analysis");
 
@@ -51,7 +51,7 @@ public class NovaseqXProcessor extends DefaultIllumina {
             return dto;
           }
 
-          DragenAnalysis dragenAnalysis = new DragenAnalysis(MAPPER, samplesheet);
+          dragenAnalysis = new DragenAnalysis(MAPPER, samplesheet);
 
           if (samplesheet.isWorkflowExpected(DRAGENWorkflow.BCL_CONVERT)) {
             BCLConvert bclConvert = new BCLConvert(samplesheet, analysisAttempt);
@@ -68,13 +68,12 @@ public class NovaseqXProcessor extends DefaultIllumina {
           if (samplesheet.allWorkflowsCompleted()) {
             dto.setAnalysisStatus(AnalysisStatus.COMPLETED);
           }
-          json.set(attemptNum, dragenAnalysis.toJson());
         }
       }
     } else { // Analysis dir does not exist - we are not expecting DRAGEN for this run.
       dto.setAnalysisStatus(AnalysisStatus.NONE);
     }
-    dto.setAnalysis(json);
+    dto.setAnalysis(dragenAnalysis);
     return dto;
   }
 

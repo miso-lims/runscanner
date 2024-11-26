@@ -4,24 +4,20 @@ import ca.on.oicr.gsi.runscanner.dto.type.AnalysisStatus;
 import ca.on.oicr.gsi.runscanner.dto.type.IlluminaChemistry;
 import ca.on.oicr.gsi.runscanner.dto.type.IndexSequencing;
 import ca.on.oicr.gsi.runscanner.dto.type.Platform;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.deser.std.JsonNodeDeserializer;
 import java.util.List;
 import java.util.Objects;
 
 public class IlluminaNotificationDto extends NotificationDto {
 
-  // This fixes a problem with testPartiallyPopulatedNotificationRoundTrip.
-  // The original object would have `null` but the deserialized version would have `NullNode`
-  // However I do not like it
-  public static final class JsonNullDeserializer extends JsonNodeDeserializer {
-    @Override
-    public JsonNode getNullValue(DeserializationContext dsc) {
-      return null;
-    }
-  }
+  //  // This fixes a problem with testPartiallyPopulatedNotificationRoundTrip.
+  //  // The original object would have `null` but the deserialized version would have `NullNode`
+  //  // However I do not like it
+  //  public static final class JsonNullDeserializer extends JsonNodeDeserializer {
+  //    @Override
+  //    public JsonNode getNullValue(DeserializationContext dsc) {
+  //      return null;
+  //    }
+  //  }
 
   private int bclCount;
   private int callCycle;
@@ -37,8 +33,8 @@ public class IlluminaNotificationDto extends NotificationDto {
   private String workflowType;
   private IndexSequencing indexSequencing;
 
-  @JsonDeserialize(using = JsonNullDeserializer.class)
-  private JsonNode analysis;
+  // @JsonDeserialize(using = JsonNullDeserializer.class)
+  private Analysis analysis;
 
   private AnalysisStatus analysisStatus;
 
@@ -210,7 +206,7 @@ public class IlluminaNotificationDto extends NotificationDto {
     this.indexSequencing = indexSequencing;
   }
 
-  public JsonNode getAnalysis() {
+  public Analysis getAnalysis() {
     return analysis;
   }
 
@@ -218,7 +214,7 @@ public class IlluminaNotificationDto extends NotificationDto {
     return analysisStatus;
   }
 
-  public void setAnalysis(JsonNode analysis) {
+  public void setAnalysis(Analysis analysis) {
     this.analysis = analysis;
   }
 
