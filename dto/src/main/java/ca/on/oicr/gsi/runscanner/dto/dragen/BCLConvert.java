@@ -1,6 +1,8 @@
-package ca.on.oicr.gsi.runscanner.scanner.processor.dragen;
+package ca.on.oicr.gsi.runscanner.dto.dragen;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import ca.on.oicr.gsi.runscanner.dto.dragen.samplesheet.Samplesheet;
+import ca.on.oicr.gsi.runscanner.dto.dragen.samplesheet.SamplesheetBCLConvertSection;
+import ca.on.oicr.gsi.runscanner.dto.dragen.samplesheet.SamplesheetBCLConvertSection.SamplesheetBCLConvertDataEntry;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -55,10 +57,11 @@ public class BCLConvert {
         String index1 = splitRgid[0], index2 = splitRgid[1];
         int lane = Integer.parseInt(splitRgid[2]);
 
-        Analysis analysis = bclConvertAnalysis.get(fastq[1], lane, index1, index2);
-        analysis.setSample(fastq[1]);
-        analysis.setLane(Integer.parseInt(fastq[3]));
-        analysis.setIndex(index1, index2);
+        DragenAnalysisUnit dragenAnalysisUnit =
+            bclConvertAnalysis.get(fastq[1], lane, index1, index2);
+        dragenAnalysisUnit.setSample(fastq[1]);
+        dragenAnalysisUnit.setLane(Integer.parseInt(fastq[3]));
+        dragenAnalysisUnit.setIndex(index1, index2);
 
         // TODO: what's it look like when there's only 1 read?
         AnalysisFile file1 = analysisFileFromFilename(rootDir, fastq[4], 1),
@@ -70,10 +73,10 @@ public class BCLConvert {
         if (file2 != null && file2.getModified().compareTo(max_date) > 0)
           max_date = file2.getModified();
 
-        analysis.addFile(file1);
-        analysis.addFile(file2);
+        dragenAnalysisUnit.addFile(file1);
+        dragenAnalysisUnit.addFile(file2);
 
-        bclConvertAnalysis.put(analysis);
+        bclConvertAnalysis.put(dragenAnalysisUnit);
       }
       bclConvertAnalysis.setCompletionTime(max_date);
 
@@ -94,8 +97,8 @@ public class BCLConvert {
 
           // When this is null, it's often for an Undetermined read. We do not care.
           try {
-            Analysis analysis = bclConvertAnalysis.get(filename);
-            for (AnalysisFile file : analysis.getFiles()) {
+            DragenAnalysisUnit dragenAnalysisUnit = bclConvertAnalysis.get(filename);
+            for (AnalysisFile file : dragenAnalysisUnit.getFiles()) {
               if (file.getPath().equals(filename)) {
                 file.setChecksum(manifestLine[1]);
                 break;
@@ -134,11 +137,12 @@ public class BCLConvert {
           // 5 = # One Mismatch Index Reads, 6 = # Two Mismatch Index Reads, 7 = % Reads,
           // 8 = % Perfect Index Reads, 9 = % One Mismatch Index Reads,
           // 10 = % Two Mismatch Index Reads
-          Analysis analysis = bclConvertAnalysis.get(demuxLine[1], demuxLine[0], demuxLine[2]);
+          DragenAnalysisUnit dragenAnalysisUnit =
+              bclConvertAnalysis.get(demuxLine[1], demuxLine[0], demuxLine[2]);
           long readCount = Long.parseLong(demuxLine[3]);
           // Set the same read count for all files in analysis
-          analysis.getFiles().forEach(file -> file.addInfoItem("read_count", readCount));
-          bclConvertAnalysis.put(analysis);
+          dragenAnalysisUnit.getFiles().forEach(file -> file.addInfoItem("read_count", readCount));
+          bclConvertAnalysis.put(dragenAnalysisUnit);
         }
       } else {
         log.info("No Demultiplex_Stats.csv for {}", rootDir);
@@ -149,18 +153,16 @@ public class BCLConvert {
 
     // Check against samplesheet for okayness
     isOk = true;
-    for (JsonNode item : samplesheet.getInfo().get("BCLConvert").get("Data")) {
-      Analysis analysisItem =
+    for (SamplesheetBCLConvertDataEntry item :
+        ((SamplesheetBCLConvertSection) samplesheet.getByName("BCLConvert")).getData()) {
+      DragenAnalysisUnit dragenAnalysisUnitItem =
           bclConvertAnalysis.get(
-              item.get("Sample_ID").textValue(),
-              item.get("Lane").textValue(),
-              item.get("Index").textValue(),
-              item.get("Index2").textValue());
-      if (analysisItem == null || analysisItem.isEmpty()) {
+              item.getSampleId(), item.getLane(), item.getIndex(), item.getIndex2());
+      if (dragenAnalysisUnitItem == null || dragenAnalysisUnitItem.isEmpty()) {
         isOk = false;
         break;
       } else {
-        for (AnalysisFile itemFile : analysisItem.getFiles()) {
+        for (AnalysisFile itemFile : dragenAnalysisUnitItem.getFiles()) {
           if (itemFile == null
               || itemFile.getPath() == null
               || itemFile.getPath().toString().isBlank()

@@ -1,14 +1,13 @@
-package ca.on.oicr.gsi.runscanner.scanner.processor.dragen;
+package ca.on.oicr.gsi.runscanner.dto.dragen;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import ca.on.oicr.gsi.runscanner.dto.Analysis;
+import ca.on.oicr.gsi.runscanner.dto.dragen.samplesheet.Samplesheet;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 
 // Represents an entire attempt at a DRAGEN Pipeline
-public class DragenAnalysis {
+public class DragenAnalysis implements Analysis {
   Samplesheet samplesheet;
   Map<String, DragenWorkflowAnalysis> analyses = new HashMap<>();
   static ObjectMapper mapper;
@@ -28,14 +27,5 @@ public class DragenAnalysis {
 
   public void put(String name, DragenWorkflowAnalysis dwa) {
     analyses.put(name, dwa);
-  }
-
-  public JsonNode toJson() {
-    ObjectNode ret = mapper.createObjectNode();
-    ret.set("dragen_samplesheet", samplesheet.getInfo());
-    for (Entry<String, DragenWorkflowAnalysis> e : analyses.entrySet()) {
-      ret.set(e.getKey(), e.getValue().toJson());
-    }
-    return ret;
   }
 }

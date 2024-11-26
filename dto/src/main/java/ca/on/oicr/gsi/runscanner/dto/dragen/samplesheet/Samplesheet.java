@@ -1,21 +1,24 @@
-package ca.on.oicr.gsi.runscanner.scanner.processor.dragen;
+package ca.on.oicr.gsi.runscanner.dto.dragen.samplesheet;
 
+import ca.on.oicr.gsi.Pair;
 import ca.on.oicr.gsi.runscanner.dto.type.DRAGENWorkflow;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.time.Instant;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Samplesheet {
-  private ObjectNode info;
+  private final Pattern HEADER = Pattern.compile("(?:\\[)(.*)(?:\\])");
+  private List<SamplesheetSection> info;
   private Map<DRAGENWorkflow, Boolean> expectedWorkflows = new HashMap<>();
   static ObjectMapper mapper;
   private static final Logger log = LoggerFactory.getLogger(Samplesheet.class);
@@ -24,6 +27,22 @@ public class Samplesheet {
   public Samplesheet(ObjectMapper m, File rootDir) throws IOException {
     mapper = m;
     this.process(rootDir);
+  }
+
+  public SamplesheetSection getByName(String name) {
+    List<SamplesheetSection> found = info.stream().filter(i -> i.getName().equals(name)).toList();
+    if (found.isEmpty()) return null;
+    if (found.size() > 1)
+      throw new IllegalStateException("More than one section in Samplesheet with the same name.");
+    return found.get(0);
+  }
+
+  private void addToSamplesheet(SamplesheetSection section) {
+    SamplesheetSection potentiallyExtant = getByName(section.getName());
+    if (potentiallyExtant != null) {
+      info.remove(section);
+    }
+    info.add(section);
   }
 
   private void process(File rootDir) throws IOException {
@@ -39,51 +58,54 @@ public class Samplesheet {
               .filter(line -> !(line.length == 0 || line.length == 1 && line[0].isEmpty()))
               .toList();
 
-      info = mapper.createObjectNode();
-      ObjectNode sampleSheetBCLConvertSection = mapper.createObjectNode(),
-          sampleSheetBCLConvertData = mapper.createObjectNode(),
-          sampleSheetBCLConvertSettings = mapper.createObjectNode();
-      int s = 0;
+      info = new LinkedList<>();
+      SamplesheetBCLConvertSection bclConvertSection;
+      Matcher headerMatcher;
       String sectionName = "";
       for (String[] line : lines) {
         if (line[0].startsWith("[")) {
-          sectionName = line[0];
-          s = 0;
+          headerMatcher = HEADER.matcher(line[0]);
+          sectionName = headerMatcher.group(0);
           continue;
         }
         switch (sectionName) {
-          case "[BCLConvert_Data]":
+          case "BCLConvert_Data":
             if (line[0].equals("Lane")) break; // Skip column label line
-            s++;
-            ObjectNode nested = mapper.createObjectNode();
-            nested.put("Lane", line[0]);
-            nested.put("Sample_ID", line[1]);
-            nested.put("Index", line[2]);
-            nested.put("Index2", line[3]); // Some have a line[4] like "Y27;I10;I10;Y27"
-            sampleSheetBCLConvertData.set(Integer.toString(s), nested);
+            bclConvertSection = (SamplesheetBCLConvertSection) getByName("BCLConvert");
+            if (bclConvertSection == null) {
+              bclConvertSection = new SamplesheetBCLConvertSection();
+            }
+            bclConvertSection.addDatum(line[0], line[1], line[2], line[3]);
+            addToSamplesheet(bclConvertSection);
             break;
-          case "[BCLConvert_Settings]":
-            sampleSheetBCLConvertSettings.put(line[0], line[1]);
+          case "BCLConvert_Settings":
+            bclConvertSection = (SamplesheetBCLConvertSection) getByName("BCLConvert");
+            if (bclConvertSection == null) {
+              bclConvertSection = new SamplesheetBCLConvertSection();
+            }
+            bclConvertSection.addSetting(line[0], line[1]);
+            addToSamplesheet(bclConvertSection);
             expectedWorkflows.put(DRAGENWorkflow.BCL_CONVERT, Boolean.FALSE);
-          case "[Cloud_Settings]": // Discard the cloud config
-          case "[Cloud_Data]":
+          case "Cloud_Settings": // Discard the cloud config
+          case "Cloud_Data":
             break;
-          case "[Header]":
           default:
             if (line[0].startsWith("[")) continue; // Skip header lines we don't recognize
-            info.put(line[0], line[1]);
+            SamplesheetGenericSection section = (SamplesheetGenericSection) getByName(sectionName);
+            if (section == null) {
+              section = new SamplesheetGenericSection(sectionName);
+            }
+            section.addEntry(new Pair<>(line[0], line[1]));
+            addToSamplesheet(section);
         }
       }
-      sampleSheetBCLConvertSection.set("Data", sampleSheetBCLConvertData);
-      sampleSheetBCLConvertSection.set("Settings", sampleSheetBCLConvertSettings);
-      info.set("BCLConvert", sampleSheetBCLConvertSection);
     } else {
       // Samplesheet appears several hours after Analysis directory does
       log.info("No samplesheet for {}, will look again later", rootDir);
     }
   }
 
-  public JsonNode getInfo() {
+  public List<SamplesheetSection> getInfo() {
     return info;
   }
 

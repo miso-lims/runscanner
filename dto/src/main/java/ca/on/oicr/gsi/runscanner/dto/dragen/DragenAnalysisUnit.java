@@ -1,13 +1,11 @@
-package ca.on.oicr.gsi.runscanner.scanner.processor.dragen;
+package ca.on.oicr.gsi.runscanner.dto.dragen;
 
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.LinkedList;
 import java.util.List;
 
 // Represents one unit of analysis by a DRAGEN workflow, uniquely identified by sample name, lane,
 // and index. May have many files associated with it (eg, Read 1 and Read 2 for BCLConvert)
-public class Analysis {
+public class DragenAnalysisUnit {
   private String sample;
   private int lane;
   private String index;
@@ -51,18 +49,5 @@ public class Analysis {
 
   boolean isEmpty() {
     return sample == null && lane == 0 && index == null && files.isEmpty();
-  }
-
-  ObjectNode toJson() {
-    ObjectNode analysisJson = DragenAnalysis.mapper.createObjectNode();
-    analysisJson.put("Sample", sample);
-    analysisJson.put("Lane", lane);
-    analysisJson.put("Index", index);
-    ArrayNode filesArray = DragenAnalysis.mapper.createArrayNode();
-    for (AnalysisFile file : files) {
-      filesArray.add(file.toJson());
-    }
-    analysisJson.set("files", filesArray);
-    return analysisJson;
   }
 }
