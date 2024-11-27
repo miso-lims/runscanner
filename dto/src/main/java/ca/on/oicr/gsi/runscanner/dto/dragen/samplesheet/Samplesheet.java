@@ -1,6 +1,5 @@
 package ca.on.oicr.gsi.runscanner.dto.dragen.samplesheet;
 
-import ca.on.oicr.gsi.Pair;
 import ca.on.oicr.gsi.runscanner.dto.type.DRAGENWorkflow;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
@@ -89,17 +88,8 @@ public class Samplesheet {
             bclConvertSection.addSetting(line[0], line[1]);
             addToSamplesheet(bclConvertSection);
             expectedWorkflows.put(DRAGENWorkflow.BCL_CONVERT, Boolean.FALSE);
-          case "Cloud_Settings": // Discard the cloud config
-          case "Cloud_Data":
-            break;
           default:
-            if (line[0].startsWith("[")) continue; // Skip header lines we don't recognize
-            SamplesheetGenericSection section = (SamplesheetGenericSection) getByName(sectionName);
-            if (section == null) {
-              section = new SamplesheetGenericSection(sectionName);
-            }
-            section.addEntry(new Pair<>(line[0], line[1]));
-            addToSamplesheet(section);
+            break;
         }
       }
     } else {
