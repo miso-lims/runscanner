@@ -38,6 +38,7 @@ public class SamplesheetBCLConvertSection implements SamplesheetSection {
 
   public SamplesheetBCLConvertSection() {
     this.data = new LinkedList<>();
+    this.settings = new LinkedList<>();
   }
 
   public List<SamplesheetBCLConvertDataEntry> getData() {
