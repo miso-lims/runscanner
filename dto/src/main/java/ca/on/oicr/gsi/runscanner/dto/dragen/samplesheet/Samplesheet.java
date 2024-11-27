@@ -63,8 +63,8 @@ public class Samplesheet {
       Matcher headerMatcher;
       String sectionName = "";
       for (String[] line : lines) {
-        if (line[0].startsWith("[")) {
-          headerMatcher = HEADER.matcher(line[0]);
+        headerMatcher = HEADER.matcher(line[0]);
+        if (headerMatcher.matches()) {
           sectionName = headerMatcher.group(0);
           continue;
         }
