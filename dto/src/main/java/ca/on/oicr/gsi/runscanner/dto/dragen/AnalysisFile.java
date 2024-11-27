@@ -9,7 +9,7 @@ import java.util.Objects;
 // Represents one file output by DRAGEN
 public class AnalysisFile {
   private Path path;
-  private String checksum;
+  private String crc32Checksum;
   private long size;
   private Instant created;
   private Instant modified;
@@ -41,12 +41,12 @@ public class AnalysisFile {
     this.path = p;
   }
 
-  public String getChecksum() {
-    return checksum;
+  public String getCrc32Checksum() {
+    return crc32Checksum;
   }
 
-  public void setChecksum(String s) {
-    this.checksum = s;
+  public void setCrc32Checksum(String s) {
+    this.crc32Checksum = s;
   }
 
   public long getSize() {
@@ -72,7 +72,7 @@ public class AnalysisFile {
     AnalysisFile ao = (AnalysisFile) o;
 
     return Objects.equals(path, ao.getPath())
-        && Objects.equals(checksum, ao.getChecksum())
+        && Objects.equals(crc32Checksum, ao.getCrc32Checksum())
         && Objects.equals(size, ao.getSize())
         && Objects.equals(info, ao.getInfo())
         && Objects.equals(created, ao.getCreated())
@@ -80,6 +80,6 @@ public class AnalysisFile {
   }
 
   public int hashCode() {
-    return Objects.hash(path, checksum, size, info, created, modified);
+    return Objects.hash(path, crc32Checksum, size, info, created, modified);
   }
 }

@@ -100,7 +100,7 @@ public class BCLConvert {
             DragenAnalysisUnit dragenAnalysisUnit = bclConvertAnalysis.get(filename);
             for (AnalysisFile file : dragenAnalysisUnit.getFiles()) {
               if (file.getPath().equals(filename)) {
-                file.setChecksum(manifestLine[1]);
+                file.setCrc32Checksum(manifestLine[1]);
                 break;
               }
             }
@@ -167,8 +167,8 @@ public class BCLConvert {
               || itemFile.getPath() == null
               || itemFile.getPath().toString().isBlank()
               || itemFile.getInfo() == null
-              || itemFile.getChecksum() == null
-              || itemFile.getChecksum().isBlank()) {
+              || itemFile.getCrc32Checksum() == null
+              || itemFile.getCrc32Checksum().isBlank()) {
             isOk = false;
             break;
           }
