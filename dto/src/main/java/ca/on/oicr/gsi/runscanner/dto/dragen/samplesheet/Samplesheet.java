@@ -65,6 +65,8 @@ public class Samplesheet {
       for (String[] line : lines) {
         headerMatcher = HEADER.matcher(line[0]);
         if (headerMatcher.matches()) {
+          // "Capturing groups are indexed from left to right, starting at one.
+          // Group zero denotes the entire pattern"
           sectionName = headerMatcher.group(1);
           continue;
         }
@@ -77,6 +79,7 @@ public class Samplesheet {
             }
             bclConvertSection.addDatum(line[0], line[1], line[2], line[3]);
             addToSamplesheet(bclConvertSection);
+            expectedWorkflows.put(DRAGENWorkflow.BCL_CONVERT, Boolean.FALSE);
             break;
           case "BCLConvert_Settings":
             bclConvertSection = (SamplesheetBCLConvertSection) getByName("BCLConvert");
