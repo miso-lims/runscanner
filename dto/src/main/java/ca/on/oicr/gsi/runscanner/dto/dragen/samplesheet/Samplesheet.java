@@ -65,7 +65,7 @@ public class Samplesheet {
       for (String[] line : lines) {
         headerMatcher = HEADER.matcher(line[0]);
         if (headerMatcher.matches()) {
-          sectionName = headerMatcher.group(0);
+          sectionName = headerMatcher.group(1);
           continue;
         }
         switch (sectionName) {
