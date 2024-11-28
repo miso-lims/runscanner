@@ -47,7 +47,7 @@ public class DragenAnalysisUnit {
     files.add(file);
   }
 
-  boolean isEmpty() {
+  public boolean isEmpty() {
     return sample == null && lane == 0 && index == null && files.isEmpty();
   }
 }

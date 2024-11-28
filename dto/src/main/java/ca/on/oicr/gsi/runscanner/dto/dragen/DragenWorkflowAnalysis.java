@@ -6,23 +6,23 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class DragenWorkflowAnalysis {
-  List<DragenAnalysisUnit> analyses = new LinkedList<>();
-  Instant completionTime;
-  Instant startTime;
+  private List<DragenAnalysisUnit> analyses = new LinkedList<>();
+  private Instant completionTime;
+  private Instant startTime;
 
-  DragenAnalysisUnit get(String sample, String lane, String index1, String index2) {
+  public DragenAnalysisUnit get(String sample, String lane, String index1, String index2) {
     return get(sample, lane, new StringBuilder(index1).append("-").append(index2).toString());
   }
 
-  DragenAnalysisUnit get(String sample, int lane, String index1, String index2) {
+  public DragenAnalysisUnit get(String sample, int lane, String index1, String index2) {
     return get(sample, lane, new StringBuilder(index1).append("-").append(index2).toString());
   }
 
-  DragenAnalysisUnit get(String sample, String lane, String index) {
+  public DragenAnalysisUnit get(String sample, String lane, String index) {
     return get(sample, Integer.parseInt(lane), index);
   }
 
-  DragenAnalysisUnit get(String sample, int lane, String index) {
+  public DragenAnalysisUnit get(String sample, int lane, String index) {
     return analyses
         .stream()
         .filter(a -> a.getSample().equals(sample) && a.getLane() == lane)
@@ -30,7 +30,7 @@ public class DragenWorkflowAnalysis {
         .orElse(new DragenAnalysisUnit());
   }
 
-  DragenAnalysisUnit get(Path filePath) {
+  public DragenAnalysisUnit get(Path filePath) {
     List<DragenAnalysisUnit> list =
         analyses
             .stream()
@@ -46,7 +46,7 @@ public class DragenWorkflowAnalysis {
     return list.get(0);
   }
 
-  void put(DragenAnalysisUnit newDragenAnalysisUnit) {
+  public void put(DragenAnalysisUnit newDragenAnalysisUnit) {
     DragenAnalysisUnit oldDragenAnalysisUnit =
         get(
             newDragenAnalysisUnit.getSample(),

@@ -59,7 +59,7 @@ public class NovaseqXProcessor extends DefaultIllumina {
             return dto;
           }
 
-          dragenAnalysis = new DragenAnalysis(MAPPER, samplesheet);
+          dragenAnalysis = new DragenAnalysis(samplesheet);
 
           if (isWorkflowExpected(DRAGENWorkflow.BCL_CONVERT)) {
             BCLConvert bclConvert = new BCLConvert(samplesheet, analysisAttempt);
