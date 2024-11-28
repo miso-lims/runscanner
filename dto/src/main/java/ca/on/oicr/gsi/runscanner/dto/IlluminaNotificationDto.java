@@ -11,16 +11,6 @@ import java.util.Objects;
 
 public class IlluminaNotificationDto extends NotificationDto {
 
-  //  // This fixes a problem with testPartiallyPopulatedNotificationRoundTrip.
-  //  // The original object would have `null` but the deserialized version would have `NullNode`
-  //  // However I do not like it
-  //  public static final class JsonNullDeserializer extends JsonNodeDeserializer {
-  //    @Override
-  //    public JsonNode getNullValue(DeserializationContext dsc) {
-  //      return null;
-  //    }
-  //  }
-
   private int bclCount;
   private int callCycle;
   private IlluminaChemistry chemistry;
@@ -35,7 +25,6 @@ public class IlluminaNotificationDto extends NotificationDto {
   private String workflowType;
   private IndexSequencing indexSequencing;
 
-  // @JsonDeserialize(using = JsonNullDeserializer.class)
   private Map<Integer, Analysis> analysis = new HashMap<>();
 
   private AnalysisStatus analysisStatus;
