@@ -4,6 +4,7 @@ import ca.on.oicr.gsi.runscanner.dto.type.AnalysisStatus;
 import ca.on.oicr.gsi.runscanner.dto.type.IlluminaChemistry;
 import ca.on.oicr.gsi.runscanner.dto.type.IndexSequencing;
 import ca.on.oicr.gsi.runscanner.dto.type.Platform;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -35,7 +36,7 @@ public class IlluminaNotificationDto extends NotificationDto {
   private IndexSequencing indexSequencing;
 
   // @JsonDeserialize(using = JsonNullDeserializer.class)
-  private Map<Integer, Analysis> analysis;
+  private Map<Integer, Analysis> analysis = new HashMap<>();
 
   private AnalysisStatus analysisStatus;
 
