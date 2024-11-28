@@ -5,6 +5,7 @@ import ca.on.oicr.gsi.runscanner.dto.type.IlluminaChemistry;
 import ca.on.oicr.gsi.runscanner.dto.type.IndexSequencing;
 import ca.on.oicr.gsi.runscanner.dto.type.Platform;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public class IlluminaNotificationDto extends NotificationDto {
@@ -34,7 +35,7 @@ public class IlluminaNotificationDto extends NotificationDto {
   private IndexSequencing indexSequencing;
 
   // @JsonDeserialize(using = JsonNullDeserializer.class)
-  private Analysis analysis;
+  private Map<Integer, Analysis> analysis;
 
   private AnalysisStatus analysisStatus;
 
@@ -206,16 +207,16 @@ public class IlluminaNotificationDto extends NotificationDto {
     this.indexSequencing = indexSequencing;
   }
 
-  public Analysis getAnalysis() {
-    return analysis;
+  public Analysis getAnalysis(Integer i) {
+    return analysis.get(i);
   }
 
   public AnalysisStatus getAnalysisStatus() {
     return analysisStatus;
   }
 
-  public void setAnalysis(Analysis analysis) {
-    this.analysis = analysis;
+  public void addAnalysis(Integer i, Analysis a) {
+    analysis.put(i, a);
   }
 
   public void setAnalysisStatus(AnalysisStatus analysisStatus) {

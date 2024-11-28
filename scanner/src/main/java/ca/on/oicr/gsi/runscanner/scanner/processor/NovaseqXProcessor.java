@@ -47,7 +47,7 @@ public class NovaseqXProcessor extends DefaultIllumina {
       // Null pointer should never actually happen because of above checks
       for (File analysisAttempt : Objects.requireNonNull(analysisDir.listFiles())) {
         if (analysisAttempt.isDirectory() && analysisAttempt.getName().matches(NUMERAL)) {
-          String attemptNum = analysisAttempt.getName();
+          Integer attemptNum = Integer.valueOf(analysisAttempt.getName());
           Samplesheet samplesheet = createSamplesheet(analysisAttempt);
           if (samplesheet.getInfo() == null) { // no info populated if samplesheet doesn't yet exist
             dto.setAnalysisStatus(AnalysisStatus.PENDING);
@@ -76,12 +76,13 @@ public class NovaseqXProcessor extends DefaultIllumina {
           if (allWorkflowsCompleted()) {
             dto.setAnalysisStatus(AnalysisStatus.COMPLETED);
           }
+          dto.addAnalysis(attemptNum, dragenAnalysis);
         }
       }
     } else { // Analysis dir does not exist - we are not expecting DRAGEN for this run.
       dto.setAnalysisStatus(AnalysisStatus.NONE);
     }
-    dto.setAnalysis(dragenAnalysis);
+
     return dto;
   }
 
