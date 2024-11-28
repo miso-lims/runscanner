@@ -106,6 +106,8 @@ public class NovaseqXProcessor extends DefaultIllumina {
       SamplesheetBCLConvertSection bclConvertSection;
       Matcher headerMatcher;
       String sectionName = "";
+      boolean bclDataFirstLine = true;
+      int sampleIndex = 0, laneIndex = 0, indexIndex = 0, index2Index = 0;
       for (String[] line : lines) {
         headerMatcher = HEADER.matcher(line[0]);
         if (headerMatcher.matches()) {
@@ -116,12 +118,31 @@ public class NovaseqXProcessor extends DefaultIllumina {
         }
         switch (sectionName) {
           case "BCLConvert_Data":
-            if (line[0].equals("Lane")) break; // Skip column label line
+            if (bclDataFirstLine) {
+              for (int i = 0; i < line.length; i++) {
+                switch (line[i]) {
+                  case "Lane":
+                    laneIndex = i;
+                    break;
+                  case "Sample_ID":
+                    sampleIndex = i;
+                    break;
+                  case "Index":
+                    indexIndex = i;
+                    break;
+                  case "Index2":
+                    index2Index = i;
+                    break;
+                }
+              }
+              bclDataFirstLine = false;
+            }
             bclConvertSection = (SamplesheetBCLConvertSection) temp.getByName("BCLConvert");
             if (bclConvertSection == null) {
               bclConvertSection = new SamplesheetBCLConvertSection();
             }
-            bclConvertSection.addDatum(line[0], line[1], line[2], line[3]);
+            bclConvertSection.addDatum(
+                line[laneIndex], line[sampleIndex], line[indexIndex], line[index2Index]);
             temp.addToSamplesheet(bclConvertSection);
             expectedWorkflows.put(DRAGENWorkflow.BCL_CONVERT, Boolean.FALSE);
             break;
