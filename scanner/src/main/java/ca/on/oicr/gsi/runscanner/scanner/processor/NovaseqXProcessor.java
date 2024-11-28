@@ -137,6 +137,7 @@ public class NovaseqXProcessor extends DefaultIllumina {
                 }
               }
               bclDataFirstLine = false;
+              continue;
             }
             bclConvertSection = (SamplesheetBCLConvertSection) temp.getByName("BCLConvert");
             if (bclConvertSection == null) {
