@@ -25,7 +25,7 @@ public class IlluminaNotificationDto extends NotificationDto {
   private String workflowType;
   private IndexSequencing indexSequencing;
 
-  private Map<Integer, Analysis> analysis = new HashMap<>();
+  public Map<Integer, Analysis> analysis = new HashMap<>();
 
   private AnalysisStatus analysisStatus;
 
