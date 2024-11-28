@@ -6,7 +6,7 @@ import ca.on.oicr.gsi.runscanner.dto.dragen.DragenAnalysis;
 import ca.on.oicr.gsi.runscanner.dto.dragen.samplesheet.Samplesheet;
 import ca.on.oicr.gsi.runscanner.dto.dragen.samplesheet.SamplesheetBCLConvertSection;
 import ca.on.oicr.gsi.runscanner.dto.type.AnalysisStatus;
-import ca.on.oicr.gsi.runscanner.dto.type.DRAGENWorkflow;
+import ca.on.oicr.gsi.runscanner.dto.type.DragenWorkflow;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.File;
@@ -23,7 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class NovaseqXProcessor extends DefaultIllumina {
-  private Map<DRAGENWorkflow, Boolean> expectedWorkflows = new HashMap<>();
+  private Map<DragenWorkflow, Boolean> expectedWorkflows = new HashMap<>();
   private final Pattern HEADER = Pattern.compile("(?:\\[)(.*)(?:\\])");
   private final String NUMERAL = "\\d+";
   static ObjectMapper MAPPER = RunProcessor.createObjectMapper();
@@ -61,12 +61,12 @@ public class NovaseqXProcessor extends DefaultIllumina {
 
           dragenAnalysis = new DragenAnalysis(samplesheet);
 
-          if (isWorkflowExpected(DRAGENWorkflow.BCL_CONVERT)) {
+          if (isWorkflowExpected(DragenWorkflow.BCL_CONVERT)) {
             BCLConvert bclConvert = new BCLConvert(samplesheet, analysisAttempt);
             dragenAnalysis.put("BCLConvert", bclConvert.getResult());
 
             // TODO: Should we not put() anything if not OK?
-            if (bclConvert.isOk()) setWorkflowComplete(DRAGENWorkflow.BCL_CONVERT);
+            if (bclConvert.isOk()) setWorkflowComplete(DragenWorkflow.BCL_CONVERT);
           }
 
           // Phase 2: more workflows go here
@@ -146,7 +146,7 @@ public class NovaseqXProcessor extends DefaultIllumina {
             bclConvertSection.addDatum(
                 line[laneIndex], line[sampleIndex], line[indexIndex], line[index2Index]);
             temp.addToSamplesheet(bclConvertSection);
-            expectedWorkflows.put(DRAGENWorkflow.BCL_CONVERT, Boolean.FALSE);
+            expectedWorkflows.put(DragenWorkflow.BCL_CONVERT, Boolean.FALSE);
             break;
           case "BCLConvert_Settings":
             bclConvertSection = (SamplesheetBCLConvertSection) temp.getByName("BCLConvert");
@@ -155,7 +155,7 @@ public class NovaseqXProcessor extends DefaultIllumina {
             }
             bclConvertSection.addSetting(line[0], line[1]);
             temp.addToSamplesheet(bclConvertSection);
-            expectedWorkflows.put(DRAGENWorkflow.BCL_CONVERT, Boolean.FALSE);
+            expectedWorkflows.put(DragenWorkflow.BCL_CONVERT, Boolean.FALSE);
           default:
             break;
         }
@@ -167,12 +167,12 @@ public class NovaseqXProcessor extends DefaultIllumina {
     return temp;
   }
 
-  public void setWorkflowComplete(DRAGENWorkflow wf) {
+  public void setWorkflowComplete(DragenWorkflow wf) {
     throwForUnexpectedWorkflow(wf);
     expectedWorkflows.put(wf, Boolean.TRUE);
   }
 
-  public Boolean isWorkflowCompleted(DRAGENWorkflow wf) {
+  public Boolean isWorkflowCompleted(DragenWorkflow wf) {
     throwForUnexpectedWorkflow(wf);
     return expectedWorkflows.get(wf);
   }
@@ -181,7 +181,7 @@ public class NovaseqXProcessor extends DefaultIllumina {
     return expectedWorkflows.values().stream().allMatch(b -> b.equals(Boolean.TRUE));
   }
 
-  public boolean isWorkflowExpected(DRAGENWorkflow wf) {
+  public boolean isWorkflowExpected(DragenWorkflow wf) {
     return expectedWorkflows.containsKey(wf);
   }
 
@@ -189,7 +189,7 @@ public class NovaseqXProcessor extends DefaultIllumina {
     return expectedWorkflows.isEmpty();
   }
 
-  private void throwForUnexpectedWorkflow(DRAGENWorkflow wf) {
+  private void throwForUnexpectedWorkflow(DragenWorkflow wf) {
     if (!isWorkflowExpected(wf))
       throw new IllegalStateException(
           "Cannot perform operation for unexpected DRAGEN Workflow " + wf.name());
