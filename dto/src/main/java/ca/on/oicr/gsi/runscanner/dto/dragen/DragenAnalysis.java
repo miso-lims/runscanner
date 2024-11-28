@@ -2,7 +2,6 @@ package ca.on.oicr.gsi.runscanner.dto.dragen;
 
 import ca.on.oicr.gsi.runscanner.dto.Analysis;
 import ca.on.oicr.gsi.runscanner.dto.dragen.samplesheet.Samplesheet;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,10 +9,8 @@ import java.util.Map;
 public class DragenAnalysis implements Analysis {
   Samplesheet samplesheet;
   Map<String, DragenWorkflowAnalysis> analyses = new HashMap<>();
-  static ObjectMapper mapper;
 
-  public DragenAnalysis(ObjectMapper m, Samplesheet s) {
-    mapper = m;
+  public DragenAnalysis(Samplesheet s) {
     samplesheet = s;
   }
 
