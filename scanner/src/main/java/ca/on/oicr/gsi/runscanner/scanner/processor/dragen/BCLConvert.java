@@ -26,7 +26,7 @@ public class BCLConvert {
 
   public DragenWorkflowAnalysis process(Samplesheet samplesheet, File rootDir) throws IOException {
     DragenWorkflowAnalysis bclConvertAnalysis = new DragenWorkflowAnalysis("BCLConvert");
-    bclConvertAnalysis.setStartTime(samplesheet.getMtime());
+    bclConvertAnalysis.setStartTime(samplesheet.getModifiedTime());
     Instant max_date = Instant.MIN; // yes you read that right
     // Get fastq list
     // For gz compression, root/Analysis/#/Data/BCLConvert/fastq/Reports/fastq_list.csv
@@ -59,11 +59,11 @@ public class BCLConvert {
         AnalysisFile file1 = analysisFileFromFilename(rootDir, fastq[4], 1),
             file2 = analysisFileFromFilename(rootDir, fastq[5], 2);
 
-        if (file1 != null && file1.getModified().compareTo(max_date) > 0)
-          max_date = file1.getModified();
+        if (file1 != null && file1.getModifiedTime().compareTo(max_date) > 0)
+          max_date = file1.getModifiedTime();
 
-        if (file2 != null && file2.getModified().compareTo(max_date) > 0)
-          max_date = file2.getModified();
+        if (file2 != null && file2.getModifiedTime().compareTo(max_date) > 0)
+          max_date = file2.getModifiedTime();
 
         dragenAnalysisUnit.addFile(file1);
         dragenAnalysisUnit.addFile(file2);
@@ -181,8 +181,9 @@ public class BCLConvert {
     AnalysisFile newFile = new AnalysisFile();
     newFile.setPath(fullPath);
     newFile.setSize(Files.size(fullPath));
-    newFile.setCreated(Files.getLastModifiedTime(fullPath).toInstant());
-    newFile.setModified(newFile.getCreated()); // Not perfect but f/s won't give us a created time
+    newFile.setCreatedTime(Files.getLastModifiedTime(fullPath).toInstant());
+    newFile.setModifiedTime(
+        newFile.getCreatedTime()); // Not perfect but f/s won't give us a created time
     newFile.addInfoItem("read_number", readNumber);
     return newFile;
   }

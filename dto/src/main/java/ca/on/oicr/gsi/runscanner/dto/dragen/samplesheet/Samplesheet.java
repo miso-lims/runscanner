@@ -6,7 +6,7 @@ import java.util.List;
 
 public class Samplesheet {
   private List<SamplesheetSection> info;
-  private Instant mtime;
+  private Instant modifiedTime;
 
   public Samplesheet() {
     info = new LinkedList<>();
@@ -32,11 +32,11 @@ public class Samplesheet {
     return info;
   }
 
-  public Instant getMtime() {
-    return mtime;
+  public Instant getModifiedTime() {
+    return modifiedTime;
   }
 
-  public void setMtime(Instant mtime) {
-    this.mtime = mtime;
+  public void setModifiedTime(Instant modifiedTime) {
+    this.modifiedTime = modifiedTime;
   }
 }

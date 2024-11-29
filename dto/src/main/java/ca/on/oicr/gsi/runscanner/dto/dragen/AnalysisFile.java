@@ -11,30 +11,30 @@ public class AnalysisFile {
   private Path path;
   private String crc32Checksum;
   private long size;
-  private Instant created;
-  private Instant modified;
+  private Instant createdTime;
+  private Instant modifiedTime;
 
   // What will be in this map will be unique to the particular DRAGEN Workflow
   private Map<String, Object> info = new HashMap<>();
 
-  public Instant getCreated() {
-    return created;
+  public Instant getCreatedTime() {
+    return createdTime;
   }
 
-  public Instant getModified() {
-    return modified;
+  public Instant getModifiedTime() {
+    return modifiedTime;
   }
 
   public Path getPath() {
     return path;
   }
 
-  public void setCreated(Instant created) {
-    this.created = created;
+  public void setCreatedTime(Instant createdTime) {
+    this.createdTime = createdTime;
   }
 
-  public void setModified(Instant modified) {
-    this.modified = modified;
+  public void setModifiedTime(Instant modifiedTime) {
+    this.modifiedTime = modifiedTime;
   }
 
   public void setPath(Path p) {
@@ -75,11 +75,11 @@ public class AnalysisFile {
         && Objects.equals(crc32Checksum, ao.getCrc32Checksum())
         && Objects.equals(size, ao.getSize())
         && Objects.equals(info, ao.getInfo())
-        && Objects.equals(created, ao.getCreated())
-        && Objects.equals(modified, ao.getModified());
+        && Objects.equals(createdTime, ao.getCreatedTime())
+        && Objects.equals(modifiedTime, ao.getModifiedTime());
   }
 
   public int hashCode() {
-    return Objects.hash(path, crc32Checksum, size, info, created, modified);
+    return Objects.hash(path, crc32Checksum, size, info, createdTime, modifiedTime);
   }
 }
