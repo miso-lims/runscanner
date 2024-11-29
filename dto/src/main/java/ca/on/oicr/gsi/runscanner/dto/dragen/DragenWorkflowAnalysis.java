@@ -29,7 +29,7 @@ public class DragenWorkflowAnalysis extends WorkflowAnalysis {
         .stream()
         .filter(a -> a.getSample().equals(sample) && a.getLane() == lane)
         .findFirst()
-        .orElse(new DragenAnalysisUnit());
+        .orElse(null);
   }
 
   public DragenAnalysisUnit get(Path filePath) {
@@ -54,7 +54,7 @@ public class DragenWorkflowAnalysis extends WorkflowAnalysis {
             newDragenAnalysisUnit.getSample(),
             newDragenAnalysisUnit.getLane(),
             newDragenAnalysisUnit.getIndex());
-    if (!oldDragenAnalysisUnit.isEmpty()) {
+    if (oldDragenAnalysisUnit != null && !oldDragenAnalysisUnit.isEmpty()) {
       analyses.remove(oldDragenAnalysisUnit);
     }
     analyses.add(newDragenAnalysisUnit);
