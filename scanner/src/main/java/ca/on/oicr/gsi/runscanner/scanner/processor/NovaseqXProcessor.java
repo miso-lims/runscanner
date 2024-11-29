@@ -1,12 +1,12 @@
 package ca.on.oicr.gsi.runscanner.scanner.processor;
 
 import ca.on.oicr.gsi.runscanner.dto.IlluminaNotificationDto;
-import ca.on.oicr.gsi.runscanner.dto.dragen.BCLConvert;
 import ca.on.oicr.gsi.runscanner.dto.dragen.DragenAnalysis;
 import ca.on.oicr.gsi.runscanner.dto.dragen.samplesheet.Samplesheet;
 import ca.on.oicr.gsi.runscanner.dto.dragen.samplesheet.SamplesheetBCLConvertSection;
 import ca.on.oicr.gsi.runscanner.dto.type.AnalysisStatus;
 import ca.on.oicr.gsi.runscanner.dto.type.DragenWorkflow;
+import ca.on.oicr.gsi.runscanner.scanner.processor.dragen.BCLConvert;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.File;
@@ -47,7 +47,7 @@ public class NovaseqXProcessor extends DefaultIllumina {
       // Null pointer should never actually happen because of above checks
       for (File analysisAttempt : Objects.requireNonNull(analysisDir.listFiles())) {
         if (analysisAttempt.isDirectory() && analysisAttempt.getName().matches(NUMERAL)) {
-          Integer attemptNum = Integer.valueOf(analysisAttempt.getName());
+          String attemptNum = analysisAttempt.getName();
           Samplesheet samplesheet = createSamplesheet(analysisAttempt);
           if (samplesheet.getInfo() == null) { // no info populated if samplesheet doesn't yet exist
             dto.setAnalysisStatus(AnalysisStatus.PENDING);
@@ -62,8 +62,8 @@ public class NovaseqXProcessor extends DefaultIllumina {
           dragenAnalysis = new DragenAnalysis(samplesheet);
 
           if (isWorkflowExpected(DragenWorkflow.BCL_CONVERT)) {
-            BCLConvert bclConvert = new BCLConvert(samplesheet, analysisAttempt);
-            dragenAnalysis.put("BCLConvert", bclConvert.getResult());
+            BCLConvert bclConvert = new BCLConvert();
+            dragenAnalysis.put("BCLConvert", bclConvert.process(samplesheet, analysisAttempt));
 
             // TODO: Should we not put() anything if not OK?
             if (bclConvert.isOk()) setWorkflowComplete(DragenWorkflow.BCL_CONVERT);
