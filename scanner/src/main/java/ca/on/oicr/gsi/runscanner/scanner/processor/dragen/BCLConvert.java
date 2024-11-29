@@ -25,7 +25,7 @@ public class BCLConvert {
   }
 
   public DragenWorkflowAnalysis process(Samplesheet samplesheet, File rootDir) throws IOException {
-    DragenWorkflowAnalysis bclConvertAnalysis = new DragenWorkflowAnalysis();
+    DragenWorkflowAnalysis bclConvertAnalysis = new DragenWorkflowAnalysis("BCLConvert");
     bclConvertAnalysis.setStartTime(samplesheet.getMtime());
     Instant max_date = Instant.MIN; // yes you read that right
     // Get fastq list

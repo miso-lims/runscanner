@@ -1,14 +1,16 @@
 package ca.on.oicr.gsi.runscanner.dto.dragen;
 
+import ca.on.oicr.gsi.runscanner.dto.WorkflowAnalysis;
 import java.nio.file.Path;
-import java.time.Instant;
 import java.util.LinkedList;
 import java.util.List;
 
-public class DragenWorkflowAnalysis {
+public class DragenWorkflowAnalysis extends WorkflowAnalysis {
   private List<DragenAnalysisUnit> analyses = new LinkedList<>();
-  private Instant completionTime;
-  private Instant startTime;
+
+  public DragenWorkflowAnalysis(String name) {
+    super(name);
+  }
 
   public DragenAnalysisUnit get(String sample, String lane, String index1, String index2) {
     return get(sample, lane, new StringBuilder(index1).append("-").append(index2).toString());
@@ -56,21 +58,5 @@ public class DragenWorkflowAnalysis {
       analyses.remove(oldDragenAnalysisUnit);
     }
     analyses.add(newDragenAnalysisUnit);
-  }
-
-  public Instant getCompletionTime() {
-    return completionTime;
-  }
-
-  public void setCompletionTime(Instant i) {
-    this.completionTime = i;
-  }
-
-  public Instant getStartTime() {
-    return startTime;
-  }
-
-  public void setStartTime(Instant i) {
-    this.startTime = i;
   }
 }
