@@ -27,7 +27,8 @@ public class DragenWorkflowAnalysis extends WorkflowAnalysis {
   public DragenAnalysisUnit get(String sample, int lane, String index) {
     return analyses
         .stream()
-        .filter(a -> a.getSample().equals(sample) && a.getLane() == lane)
+        .filter(
+            a -> a.getSample().equals(sample) && a.getLane() == lane && a.getIndex().equals(index))
         .findFirst()
         .orElse(null);
   }
