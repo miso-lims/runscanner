@@ -48,6 +48,9 @@ public class BCLConvert {
 
         DragenAnalysisUnit dragenAnalysisUnit =
             bclConvertAnalysis.get(fastq[1], lane, index1, index2);
+        if (dragenAnalysisUnit == null) {
+          dragenAnalysisUnit = new DragenAnalysisUnit();
+        }
         dragenAnalysisUnit.setSample(fastq[1]);
         dragenAnalysisUnit.setLane(Integer.parseInt(fastq[3]));
         dragenAnalysisUnit.setIndex(index1, index2);
@@ -128,6 +131,7 @@ public class BCLConvert {
           // 10 = % Two Mismatch Index Reads
           DragenAnalysisUnit dragenAnalysisUnit =
               bclConvertAnalysis.get(demuxLine[1], demuxLine[0], demuxLine[2]);
+          if (dragenAnalysisUnit == null) dragenAnalysisUnit = new DragenAnalysisUnit();
           long readCount = Long.parseLong(demuxLine[3]);
           // Set the same read count for all files in analysis
           dragenAnalysisUnit.getFiles().forEach(file -> file.addInfoItem("read_count", readCount));
