@@ -96,7 +96,7 @@ public class NovaseqXProcessor extends DefaultIllumina {
     Samplesheet temp = new Samplesheet();
     File sampleSheet = new File(rootDir, "Data/BCLConvert/SampleSheet.csv");
     if (sampleSheet.exists()) {
-      temp.setMtime(Files.getLastModifiedTime(sampleSheet.toPath()).toInstant());
+      temp.setModifiedTime(Files.getLastModifiedTime(sampleSheet.toPath()).toInstant());
       List<String[]> lines =
           Files.readAllLines(sampleSheet.toPath())
               .stream()
