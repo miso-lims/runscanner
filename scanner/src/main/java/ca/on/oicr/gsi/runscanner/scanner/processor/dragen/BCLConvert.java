@@ -1,5 +1,8 @@
-package ca.on.oicr.gsi.runscanner.dto.dragen;
+package ca.on.oicr.gsi.runscanner.scanner.processor.dragen;
 
+import ca.on.oicr.gsi.runscanner.dto.dragen.AnalysisFile;
+import ca.on.oicr.gsi.runscanner.dto.dragen.DragenAnalysisUnit;
+import ca.on.oicr.gsi.runscanner.dto.dragen.DragenWorkflowAnalysis;
 import ca.on.oicr.gsi.runscanner.dto.dragen.samplesheet.Samplesheet;
 import ca.on.oicr.gsi.runscanner.dto.dragen.samplesheet.SamplesheetBCLConvertSection;
 import ca.on.oicr.gsi.runscanner.dto.dragen.samplesheet.SamplesheetBCLConvertSection.SamplesheetBCLConvertDataEntry;
@@ -15,27 +18,13 @@ import org.slf4j.LoggerFactory;
 
 public class BCLConvert {
   private static final Logger log = LoggerFactory.getLogger(BCLConvert.class);
-  private final Samplesheet samplesheet;
-  private final File rootDir;
-  private DragenWorkflowAnalysis result;
   private boolean isOk = false;
-
-  public BCLConvert(Samplesheet sheet, File dir) throws IOException {
-    this.samplesheet = sheet;
-    this.rootDir = dir;
-    process();
-  }
 
   public boolean isOk() {
     return isOk;
   }
 
-  public DragenWorkflowAnalysis getResult() throws IOException {
-    if (result == null) process();
-    return result;
-  }
-
-  private void process() throws IOException {
+  public DragenWorkflowAnalysis process(Samplesheet samplesheet, File rootDir) throws IOException {
     DragenWorkflowAnalysis bclConvertAnalysis = new DragenWorkflowAnalysis();
     bclConvertAnalysis.setStartTime(samplesheet.getMtime());
     Instant max_date = Instant.MIN; // yes you read that right
@@ -175,8 +164,7 @@ public class BCLConvert {
         }
       }
     }
-
-    result = bclConvertAnalysis;
+    return bclConvertAnalysis;
   }
 
   private static AnalysisFile analysisFileFromFilename(

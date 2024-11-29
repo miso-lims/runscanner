@@ -25,7 +25,7 @@ public class IlluminaNotificationDto extends NotificationDto {
   private String workflowType;
   private IndexSequencing indexSequencing;
 
-  public Map<Integer, Analysis> analysis = new HashMap<>();
+  public Map<String, Analysis> analysis = new HashMap<>();
 
   private AnalysisStatus analysisStatus;
 
@@ -205,7 +205,7 @@ public class IlluminaNotificationDto extends NotificationDto {
     return analysisStatus;
   }
 
-  public void addAnalysis(Integer i, Analysis a) {
+  public void addAnalysis(String i, Analysis a) {
     analysis.put(i, a);
   }
 
