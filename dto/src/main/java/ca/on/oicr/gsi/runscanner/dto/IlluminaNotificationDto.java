@@ -197,8 +197,8 @@ public class IlluminaNotificationDto extends NotificationDto {
     this.indexSequencing = indexSequencing;
   }
 
-  public Analysis getAnalysis(Integer i) {
-    return analysis.get(i);
+  public Analysis getAnalysis(String s) {
+    return analysis.get(s);
   }
 
   public AnalysisStatus getAnalysisStatus() {
