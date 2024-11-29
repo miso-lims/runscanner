@@ -40,7 +40,11 @@ public class DragenAnalysisUnit {
   }
 
   public void setIndex(String index1, String index2) {
-    this.setIndex(new StringBuilder(index1).append("-").append(index2).toString());
+    if (index2 == null) {
+      this.setIndex(index1);
+    } else {
+      this.setIndex(new StringBuilder(index1).append("-").append(index2).toString());
+    }
   }
 
   public void addFile(AnalysisFile file) {
