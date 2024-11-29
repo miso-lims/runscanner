@@ -40,7 +40,7 @@ public class DragenWorkflowAnalysis extends WorkflowAnalysis {
             .toList();
     if (list.size() > 1) {
       throw new IllegalStateException(
-          "Can't have more than one Analysis with same file " + filePath);
+          "Can't have more than one Analysis unit with same file " + filePath);
     }
     if (list.isEmpty()) {
       return null;
@@ -49,6 +49,9 @@ public class DragenWorkflowAnalysis extends WorkflowAnalysis {
   }
 
   public void put(DragenAnalysisUnit newDragenAnalysisUnit) {
+    for (AnalysisFile af : newDragenAnalysisUnit.getFiles()) {
+      get(af.getPath()); // throw out the result, we just want the file path validation
+    }
     DragenAnalysisUnit oldDragenAnalysisUnit =
         get(
             newDragenAnalysisUnit.getSample(),
