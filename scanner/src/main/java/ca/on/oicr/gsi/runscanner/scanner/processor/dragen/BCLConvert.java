@@ -96,6 +96,7 @@ public class BCLConvert {
                 break;
               }
             }
+            bclConvertAnalysis.put(dragenAnalysisUnit);
           } catch (NullPointerException npe) {
             log.info("Unable to map {} to an Analysis object", filename);
           }
