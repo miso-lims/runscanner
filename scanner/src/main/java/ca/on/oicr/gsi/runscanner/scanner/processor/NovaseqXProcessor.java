@@ -49,7 +49,7 @@ public class NovaseqXProcessor extends DefaultIllumina {
       for (File analysisAttempt : Objects.requireNonNull(analysisDir.listFiles())) {
         if (analysisAttempt.isDirectory() && analysisAttempt.getName().matches(NUMERAL)) {
           expectedWorkflows = new HashMap<>();
-          String attemptNum = analysisAttempt.getName();
+          int attemptNum = Integer.parseInt(analysisAttempt.getName());
           Samplesheet samplesheet = createSamplesheet(analysisAttempt);
           if (samplesheet.getInfo() == null) { // no info populated if samplesheet doesn't yet exist
             dto.setAnalysisStatus(AnalysisStatus.PENDING);
@@ -61,14 +61,14 @@ public class NovaseqXProcessor extends DefaultIllumina {
             return dto;
           }
 
-          dragenAnalysis = new DragenAnalysis(samplesheet);
+          dragenAnalysis = new DragenAnalysis(samplesheet, attemptNum);
 
           if (isWorkflowExpected(DragenWorkflow.BCL_CONVERT)) {
             BCLConvert bclConvert = new BCLConvert();
             DragenWorkflowAnalysis result = bclConvert.process(samplesheet, analysisAttempt);
 
             if (bclConvert.isOk()) {
-              dragenAnalysis.put("BCLConvert", result);
+              dragenAnalysis.put(result);
               setWorkflowComplete(DragenWorkflow.BCL_CONVERT);
             }
           }
@@ -80,7 +80,7 @@ public class NovaseqXProcessor extends DefaultIllumina {
           if (allWorkflowsCompleted()) {
             dto.setAnalysisStatus(AnalysisStatus.COMPLETED);
           }
-          dto.addAnalysis(attemptNum, dragenAnalysis);
+          dto.addAnalysis(dragenAnalysis);
         }
       }
     } else { // Analysis dir does not exist - we are not expecting DRAGEN for this run.

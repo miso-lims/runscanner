@@ -2,6 +2,7 @@ package ca.on.oicr.gsi.runscanner.dto;
 
 import java.time.Instant;
 
+// Represents one attempt at a workflow within a suite
 public abstract class WorkflowAnalysis {
   private Instant completionTime;
   private Instant startTime;
