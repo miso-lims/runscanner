@@ -2,6 +2,7 @@ package ca.on.oicr.gsi.runscanner.scanner.processor;
 
 import ca.on.oicr.gsi.runscanner.dto.IlluminaNotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.dragen.DragenAnalysis;
+import ca.on.oicr.gsi.runscanner.dto.dragen.DragenWorkflowAnalysis;
 import ca.on.oicr.gsi.runscanner.dto.dragen.samplesheet.Samplesheet;
 import ca.on.oicr.gsi.runscanner.dto.dragen.samplesheet.SamplesheetBCLConvertSection;
 import ca.on.oicr.gsi.runscanner.dto.type.AnalysisStatus;
@@ -63,10 +64,12 @@ public class NovaseqXProcessor extends DefaultIllumina {
 
           if (isWorkflowExpected(DragenWorkflow.BCL_CONVERT)) {
             BCLConvert bclConvert = new BCLConvert();
-            dragenAnalysis.put("BCLConvert", bclConvert.process(samplesheet, analysisAttempt));
+            DragenWorkflowAnalysis result = bclConvert.process(samplesheet, analysisAttempt);
 
-            // TODO: Should we not put() anything if not OK?
-            if (bclConvert.isOk()) setWorkflowComplete(DragenWorkflow.BCL_CONVERT);
+            if (bclConvert.isOk()) {
+              dragenAnalysis.put("BCLConvert", result);
+              setWorkflowComplete(DragenWorkflow.BCL_CONVERT);
+            }
           }
 
           // Phase 2: more workflows go here
