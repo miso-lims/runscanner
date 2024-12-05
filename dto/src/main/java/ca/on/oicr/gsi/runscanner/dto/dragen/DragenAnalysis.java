@@ -7,7 +7,8 @@ import ca.on.oicr.gsi.runscanner.dto.dragen.samplesheet.Samplesheet;
 public class DragenAnalysis extends Analysis<DragenWorkflowAnalysis> {
   Samplesheet samplesheet;
 
-  public DragenAnalysis(Samplesheet s) {
+  public DragenAnalysis(Samplesheet s, int attempt) {
+    super(attempt);
     samplesheet = s;
   }
 }

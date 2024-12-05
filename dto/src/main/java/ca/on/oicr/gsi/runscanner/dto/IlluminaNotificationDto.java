@@ -4,9 +4,8 @@ import ca.on.oicr.gsi.runscanner.dto.type.AnalysisStatus;
 import ca.on.oicr.gsi.runscanner.dto.type.IlluminaChemistry;
 import ca.on.oicr.gsi.runscanner.dto.type.IndexSequencing;
 import ca.on.oicr.gsi.runscanner.dto.type.Platform;
-import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 public class IlluminaNotificationDto extends NotificationDto {
@@ -25,7 +24,7 @@ public class IlluminaNotificationDto extends NotificationDto {
   private String workflowType;
   private IndexSequencing indexSequencing;
 
-  public Map<String, Analysis> analysis = new HashMap<>();
+  public List<Analysis> analysis = new LinkedList<>();
 
   private AnalysisStatus analysisStatus;
 
@@ -197,16 +196,16 @@ public class IlluminaNotificationDto extends NotificationDto {
     this.indexSequencing = indexSequencing;
   }
 
-  public Analysis getAnalysis(String s) {
-    return analysis.get(s);
+  public Analysis getAnalysis(int i) {
+    return analysis.get(i);
   }
 
   public AnalysisStatus getAnalysisStatus() {
     return analysisStatus;
   }
 
-  public void addAnalysis(String i, Analysis a) {
-    analysis.put(i, a);
+  public void addAnalysis(Analysis a) {
+    analysis.add(a);
   }
 
   public void setAnalysisStatus(AnalysisStatus analysisStatus) {
