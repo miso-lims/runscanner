@@ -1,8 +1,9 @@
 package ca.on.oicr.gsi.runscanner.dto.dragen.samplesheet;
 
-import ca.on.oicr.gsi.Pair;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public class SamplesheetBCLConvertSection implements SamplesheetSection {
   public class SamplesheetBCLConvertDataEntry {
@@ -34,11 +35,11 @@ public class SamplesheetBCLConvertSection implements SamplesheetSection {
   }
 
   List<SamplesheetBCLConvertDataEntry> data;
-  List<Pair<String, String>> settings;
+  Map<String, String> settings;
 
   public SamplesheetBCLConvertSection() {
     this.data = new LinkedList<>();
-    this.settings = new LinkedList<>();
+    this.settings = new HashMap<>();
   }
 
   public List<SamplesheetBCLConvertDataEntry> getData() {
@@ -49,12 +50,12 @@ public class SamplesheetBCLConvertSection implements SamplesheetSection {
     data.add(new SamplesheetBCLConvertDataEntry(lane, sampleId, index, index2));
   }
 
-  public List<Pair<String, String>> getSettings() {
+  public Map<String, String> getSettings() {
     return settings;
   }
 
   public void addSetting(String k, String v) {
-    settings.add(new Pair<>(k, v));
+    settings.put(k, v);
   }
 
   @Override
