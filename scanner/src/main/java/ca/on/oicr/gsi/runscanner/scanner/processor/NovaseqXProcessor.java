@@ -24,7 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class NovaseqXProcessor extends DefaultIllumina {
-  private Map<DragenWorkflow, Boolean> expectedWorkflows = new HashMap<>();
+  Map<DragenWorkflow, Boolean> expectedWorkflows;
   private final Pattern HEADER = Pattern.compile("(?:\\[)(.*)(?:\\])");
   private final String NUMERAL = "\\d+";
   static ObjectMapper MAPPER = RunProcessor.createObjectMapper();
@@ -48,6 +48,7 @@ public class NovaseqXProcessor extends DefaultIllumina {
       // Null pointer should never actually happen because of above checks
       for (File analysisAttempt : Objects.requireNonNull(analysisDir.listFiles())) {
         if (analysisAttempt.isDirectory() && analysisAttempt.getName().matches(NUMERAL)) {
+          expectedWorkflows = new HashMap<>();
           String attemptNum = analysisAttempt.getName();
           Samplesheet samplesheet = createSamplesheet(analysisAttempt);
           if (samplesheet.getInfo() == null) { // no info populated if samplesheet doesn't yet exist
