@@ -11,4 +11,8 @@ public class DragenAnalysis extends Analysis<DragenWorkflowAnalysis> {
     super(attempt);
     samplesheet = s;
   }
+
+  public Samplesheet getSamplesheet() {
+    return samplesheet;
+  }
 }
