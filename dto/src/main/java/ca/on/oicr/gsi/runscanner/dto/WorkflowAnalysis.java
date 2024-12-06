@@ -43,8 +43,4 @@ public abstract class WorkflowAnalysis {
   public void setStartTime(Instant i) {
     this.startTime = i;
   }
-
-  public String getSuite() {
-    return "DRAGEN";
-  }
 }
