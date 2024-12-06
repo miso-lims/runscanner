@@ -37,4 +37,8 @@ public abstract class Analysis<T extends WorkflowAnalysis> {
   public int getAttempt() {
     return attempt;
   }
+
+  public List<T> getAnalyses() {
+    return analyses;
+  }
 }
