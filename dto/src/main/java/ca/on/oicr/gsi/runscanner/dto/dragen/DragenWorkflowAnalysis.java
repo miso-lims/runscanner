@@ -1,6 +1,7 @@
 package ca.on.oicr.gsi.runscanner.dto.dragen;
 
 import ca.on.oicr.gsi.runscanner.dto.WorkflowAnalysis;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
@@ -8,8 +9,8 @@ import java.util.List;
 public class DragenWorkflowAnalysis extends WorkflowAnalysis {
   private List<DragenAnalysisUnit> analyses = new LinkedList<>();
 
-  public DragenWorkflowAnalysis(String name) {
-    super(name);
+  public DragenWorkflowAnalysis(@JsonProperty("workflowName") String workflowName) {
+    super(workflowName);
   }
 
   public List<DragenAnalysisUnit> getAnalyses() {
