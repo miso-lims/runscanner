@@ -59,9 +59,9 @@ public class ProcessDragen {
             DragenWorkflowAnalysis result = bclConvert.process(samplesheet, analysisAttempt);
 
             if (bclConvert.isOk()) {
-              dragenAnalysis.put(result);
               setWorkflowComplete(DragenWorkflow.BCL_CONVERT);
             }
+            dragenAnalysis.put(result);
           }
 
           // Phase 2: more workflows go here
