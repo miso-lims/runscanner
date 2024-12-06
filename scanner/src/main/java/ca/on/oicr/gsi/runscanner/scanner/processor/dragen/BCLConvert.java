@@ -151,7 +151,10 @@ public class BCLConvert {
         ((SamplesheetBCLConvertSection) samplesheet.getByName("BCLConvert")).getData()) {
       DragenAnalysisUnit dragenAnalysisUnitItem =
           bclConvertAnalysis.get(
-              item.getSampleId(), item.getLane(), item.getIndex(), item.getIndex2());
+              item.getSampleId(),
+              item.getLane(),
+              item.getIndex(),
+              reverseComplement(item.getIndex2()));
       if (dragenAnalysisUnitItem == null || dragenAnalysisUnitItem.isEmpty()) {
         isOk = false;
         break;
@@ -187,5 +190,58 @@ public class BCLConvert {
         newFile.getCreatedTime()); // Not perfect but f/s won't give us a created time
     newFile.addInfoItem("read_number", readNumber);
     return newFile;
+  }
+
+  private static char complement(char nt) {
+    switch (nt) {
+      case 'A':
+        return 'T';
+      case 'C':
+        return 'G';
+      case 'G':
+        return 'C';
+      case 'T':
+      case 'U':
+        return 'A';
+        // Below are all the degenerate nucleotides. I hope we never need these and if we had one,
+        // the index
+        // mismatches calculations would have
+        // to be the changed.
+      case 'R': // AG
+        return 'Y';
+      case 'Y': // CT
+        return 'R';
+      case 'S': // CG
+        return 'S';
+      case 'W': // AT
+        return 'W';
+      case 'K': // GT
+        return 'M';
+      case 'M': // AC
+        return 'K';
+      case 'B': // CGT
+        return 'V';
+      case 'D': // AGT
+        return 'H';
+      case 'H': // ACT
+        return 'D';
+      case 'V': // ACG
+        return 'B';
+      case 'N':
+        return 'N';
+      default:
+        return nt;
+    }
+  }
+
+  public static String reverseComplement(String index) {
+    if (index == null) {
+      return null;
+    }
+    final StringBuilder buffer = new StringBuilder(index.length());
+    for (int i = index.length() - 1; i >= 0; i--) {
+      buffer.append(complement(Character.toUpperCase(index.charAt(i))));
+    }
+    return buffer.toString();
   }
 }
