@@ -1,6 +1,7 @@
 package ca.on.oicr.gsi.runscanner.dto;
 
 import ca.on.oicr.gsi.runscanner.dto.dragen.DragenWorkflowAnalysis;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -13,13 +14,14 @@ import java.time.Instant;
 @JsonSubTypes({ //
   @Type(value = DragenWorkflowAnalysis.class, name = "DRAGEN") //
 }) //
+@JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class WorkflowAnalysis {
   private Instant completionTime;
   private Instant startTime;
   private final String workflowName;
 
-  public WorkflowAnalysis(String name) {
-    this.workflowName = name;
+  public WorkflowAnalysis(String workflowName) {
+    this.workflowName = workflowName;
   }
 
   public Instant getCompletionTime() {
@@ -40,5 +42,9 @@ public abstract class WorkflowAnalysis {
 
   public void setStartTime(Instant i) {
     this.startTime = i;
+  }
+
+  public String getSuite() {
+    return "DRAGEN";
   }
 }

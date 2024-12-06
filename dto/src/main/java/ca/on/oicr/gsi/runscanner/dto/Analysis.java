@@ -1,6 +1,7 @@
 package ca.on.oicr.gsi.runscanner.dto;
 
 import ca.on.oicr.gsi.runscanner.dto.dragen.DragenAnalysis;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -14,6 +15,7 @@ import java.util.List;
 @JsonSubTypes({ //
   @Type(value = DragenAnalysis.class, name = "DRAGEN") //
 }) //
+@JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class Analysis<T extends WorkflowAnalysis> {
   private List<T> analyses = new LinkedList<>();
   private final int attempt;

@@ -1,16 +1,20 @@
 package ca.on.oicr.gsi.runscanner.dto.dragen.samplesheet;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 public class SamplesheetBCLConvertSection implements SamplesheetSection {
-  public class SamplesheetBCLConvertDataEntry {
+  public static class SamplesheetBCLConvertDataEntry {
     private final String lane, sampleId, index, index2;
 
     public SamplesheetBCLConvertDataEntry(
-        String lane, String sampleId, String index, String index2) {
+        @JsonProperty("lane") String lane,
+        @JsonProperty("sampleId") String sampleId,
+        @JsonProperty("index") String index,
+        @JsonProperty("index2") String index2) {
       this.lane = lane;
       this.sampleId = sampleId;
       this.index = index;
