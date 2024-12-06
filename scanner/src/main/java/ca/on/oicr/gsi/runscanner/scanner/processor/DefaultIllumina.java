@@ -2,11 +2,11 @@ package ca.on.oicr.gsi.runscanner.scanner.processor;
 
 import ca.on.oicr.gsi.runscanner.dto.IlluminaNotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
-import ca.on.oicr.gsi.runscanner.dto.type.AnalysisStatus;
 import ca.on.oicr.gsi.runscanner.dto.type.HealthType;
 import ca.on.oicr.gsi.runscanner.dto.type.IlluminaChemistry;
 import ca.on.oicr.gsi.runscanner.dto.type.IndexSequencing;
 import ca.on.oicr.gsi.runscanner.scanner.LatencyHistogram;
+import ca.on.oicr.gsi.runscanner.scanner.processor.dragen.ProcessDragen;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
@@ -139,16 +139,27 @@ public class DefaultIllumina extends RunProcessor {
   }
 
   public static DefaultIllumina create(Builder builder, ObjectNode parameters) {
-    return new DefaultIllumina(builder, calculateCheckOutput(parameters));
+    return new DefaultIllumina(
+        builder, calculateCheckOutput(parameters), calculateScanDragen(parameters));
   }
 
+  /**
+   * Calculates whether to scan DRAGEN analysis output.
+   *
+   * <p>If scanDragen is specified and set to true, scan analysis. If it is false or nonspecified,
+   * do not.
+   *
+   * @param parameters ObjectNode possibly containing scanDragen parameter
+   * @return true if scanDragen is true, false if scanDragen is null or false
+   */
+  static boolean calculateScanDragen(ObjectNode parameters) {
+    return parameters.hasNonNull("scanDragen") && parameters.get("scanDragen").asBoolean();
+  }
   /**
    * Calculates whether or not to check output based on parameter.
    *
    * <p>If checkOutput is not specified (i.e., is null), check output. (If checkOutput is not
    * non-null, return true) If checkOutput is specified, use its value.
-   *
-   * <p>checkOutput | return ==================== null | T T | T F | F
    *
    * @param parameters ObjectNode possibly containing checkOutput parameter
    * @return true if checkOutput is true or null, false if checkOutput is explicitly false.
@@ -182,10 +193,12 @@ public class DefaultIllumina extends RunProcessor {
   }
 
   private final boolean checkOutput;
+  private final boolean scanDragen;
 
-  public DefaultIllumina(Builder builder, boolean checkOutput) {
+  public DefaultIllumina(Builder builder, boolean checkOutput, boolean scanDragen) {
     super(builder);
     this.checkOutput = checkOutput;
+    this.scanDragen = scanDragen;
   }
 
   @Override
@@ -459,14 +472,7 @@ public class DefaultIllumina extends RunProcessor {
       }
       updatedHealth.ifPresent(dto::setHealthType);
     }
-    dto = analyse(runDirectory, tz, dto);
-    return dto;
-  }
-
-  /** By default, no Analysis. */
-  protected IlluminaNotificationDto analyse(
-      File runDirectory, TimeZone tz, IlluminaNotificationDto dto) throws IOException {
-    dto.setAnalysisStatus(AnalysisStatus.NONE);
+    if (scanDragen) dto = new ProcessDragen().analyse(runDirectory, tz, dto);
     return dto;
   }
 
