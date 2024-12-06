@@ -2,6 +2,7 @@ package ca.on.oicr.gsi.runscanner.scanner.processor;
 
 import ca.on.oicr.gsi.runscanner.dto.IlluminaNotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
+import ca.on.oicr.gsi.runscanner.dto.type.AnalysisStatus;
 import ca.on.oicr.gsi.runscanner.dto.type.HealthType;
 import ca.on.oicr.gsi.runscanner.dto.type.IlluminaChemistry;
 import ca.on.oicr.gsi.runscanner.dto.type.IndexSequencing;
@@ -472,7 +473,11 @@ public class DefaultIllumina extends RunProcessor {
       }
       updatedHealth.ifPresent(dto::setHealthType);
     }
-    if (scanDragen) dto = new ProcessDragen().analyse(runDirectory, tz, dto);
+    if (scanDragen) {
+      dto = new ProcessDragen().analyse(runDirectory, tz, dto);
+    } else {
+      dto.setAnalysisStatus(AnalysisStatus.NONE);
+    }
     return dto;
   }
 
