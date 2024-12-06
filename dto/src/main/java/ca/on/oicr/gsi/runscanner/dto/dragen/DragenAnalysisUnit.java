@@ -1,5 +1,6 @@
 package ca.on.oicr.gsi.runscanner.dto.dragen;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -51,6 +52,7 @@ public class DragenAnalysisUnit {
     files.add(file);
   }
 
+  @JsonIgnore
   public boolean isEmpty() {
     return sample == null && lane == 0 && index == null && files.isEmpty();
   }
