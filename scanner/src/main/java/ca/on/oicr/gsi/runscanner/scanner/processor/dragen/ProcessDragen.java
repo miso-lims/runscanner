@@ -1,4 +1,4 @@
-package ca.on.oicr.gsi.runscanner.scanner.processor;
+package ca.on.oicr.gsi.runscanner.scanner.processor.dragen;
 
 import ca.on.oicr.gsi.runscanner.dto.IlluminaNotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.dragen.DragenAnalysis;
@@ -7,9 +7,6 @@ import ca.on.oicr.gsi.runscanner.dto.dragen.samplesheet.Samplesheet;
 import ca.on.oicr.gsi.runscanner.dto.dragen.samplesheet.SamplesheetBCLConvertSection;
 import ca.on.oicr.gsi.runscanner.dto.type.AnalysisStatus;
 import ca.on.oicr.gsi.runscanner.dto.type.DragenWorkflow;
-import ca.on.oicr.gsi.runscanner.scanner.processor.dragen.BCLConvert;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -23,18 +20,12 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class NovaseqXProcessor extends DefaultIllumina {
+public class ProcessDragen {
   Map<DragenWorkflow, Boolean> expectedWorkflows;
   private final Pattern HEADER = Pattern.compile("(?:\\[)(.*)(?:\\])");
   private final String NUMERAL = "\\d+";
-  static ObjectMapper MAPPER = RunProcessor.createObjectMapper();
-  private static final Logger log = LoggerFactory.getLogger(NovaseqXProcessor.class);
+  private static final Logger log = LoggerFactory.getLogger(ProcessDragen.class);
 
-  public NovaseqXProcessor(Builder builder, boolean checkOutput) {
-    super(builder, checkOutput);
-  }
-
-  @Override
   public IlluminaNotificationDto analyse(
       File runDirectory, TimeZone tz, IlluminaNotificationDto dto) throws IOException {
     dto.setAnalysisStatus(AnalysisStatus.PENDING);
@@ -88,10 +79,6 @@ public class NovaseqXProcessor extends DefaultIllumina {
     }
 
     return dto;
-  }
-
-  public static NovaseqXProcessor create(Builder builder, ObjectNode parameters) {
-    return new NovaseqXProcessor(builder, calculateCheckOutput(parameters));
   }
 
   private Samplesheet createSamplesheet(File rootDir) throws IOException {
