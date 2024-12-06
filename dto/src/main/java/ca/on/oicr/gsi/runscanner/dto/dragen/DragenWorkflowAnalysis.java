@@ -12,6 +12,10 @@ public class DragenWorkflowAnalysis extends WorkflowAnalysis {
     super(name);
   }
 
+  public List<DragenAnalysisUnit> getAnalyses() {
+    return analyses;
+  }
+
   public DragenAnalysisUnit get(String sample, String lane, String index1, String index2) {
     return get(sample, lane, new StringBuilder(index1).append("-").append(index2).toString());
   }
