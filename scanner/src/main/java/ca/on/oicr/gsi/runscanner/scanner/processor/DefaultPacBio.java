@@ -273,7 +273,7 @@ public class DefaultPacBio extends RunProcessor {
   public NotificationDto process(File runDirectory, TimeZone tz) throws IOException {
     // We create one DTO for a run, but there are going to be many wells with
     // independent and
-    // duplicate metadata that will will simply
+    // duplicate metadata that we will simply
     // overwrite in the shared DTO. If the data differs, the last well wins.
     PacBioNotificationDto dto = new PacBioNotificationDto();
     dto.setPairedEndRun(false);
@@ -293,14 +293,12 @@ public class DefaultPacBio extends RunProcessor {
         .filter(Optional::isPresent)
         .forEach(metadata -> processMetadata(metadata.get(), dto, tz));
 
-    // The current job state is not available from the metadata files, so contact
-    // the PacBio
+    // The current job state is not available from the metadata files, so contact the PacBio
     // instrument's web service.
     String plateUrl = dto.getContainerSerialNumber();
     dto.setHealthType(
         getStatus(String.format("%s/Jobs/Plate/%s/Status", address, plateUrl)).translateStatus());
-    // If the metadata gave us a completion date, but the web service told us the
-    // run isn't
+    // If the metadata gave us a completion date, but the web service told us the run isn't
     // complete, delete the completion date of lies.
     if (!dto.getHealthType().isDone()) {
       dto.setCompletionDate(null);
