@@ -12,8 +12,10 @@ import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -29,7 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
-/** Scan PacBio Revio runs from a directory. The address */
+/** Scan PacBio Revio runs from a directory. */
 public class RevioPacBioProcessor extends RunProcessor {
 
   /** Extract data from an XML metadata file and put it in the DTO. */
@@ -39,14 +41,13 @@ public class RevioPacBioProcessor extends RunProcessor {
   }
 
   private static final Predicate<String> REVIO_CELL_DIRECTORY =
-      Pattern.compile("[0-9]{1}_[A-Z]{1}[0-9]{2}").asPredicate();
+      Pattern.compile("[0-9]_[A-Z][0-9]{2}").asPredicate();
 
   private static final Predicate<String> TRANSFER_TEST =
       Pattern.compile("Transfer_Test_[0-9]{6}_[0-9]{6}.txt").asPredicate();
 
   private static final Predicate<String> TRANSFER_DONE =
-      Pattern.compile("[a-z]{1}[0-9]{5}_[0-9]{6}_[0-9]{6}_[a-z]{1}[0-9]{1}.transferdone")
-          .asPredicate();
+      Pattern.compile("[a-z][0-9]{5}_[0-9]{6}_[0-9]{6}_s[0-9].transferdone").asPredicate();
 
   private static final Logger log = LoggerFactory.getLogger(RevioPacBioProcessor.class);
 
@@ -100,33 +101,41 @@ public class RevioPacBioProcessor extends RunProcessor {
     };
   }
 
-  // Revio Samples (copied from DefaultPacBio, )
+  // Revio Samples
   private static RevioPacBioProcessor.ProcessMetadata processSampleInformation() {
-    XPathExpression[] expr = RunProcessor.compileXPath("//WellSample/@Name", "//WellSample/Name");
+    XPathExpression[] expr =
+        RunProcessor.compileXPath(
+            "//WellSample/WellName",
+            "//SubreadSet/@UniqueId",
+            "//ResultsFolder",
+            "//WellSample/@Name");
     return (document, dto, timeZone) -> {
-      String well = (String) expr[0].evaluate(document, XPathConstants.STRING);
-      String name = (String) expr[1].evaluate(document, XPathConstants.STRING);
-      if (isStringBlankOrNull(name) || isStringBlankOrNull(well)) {
+      String position = (String) expr[0].evaluate(document, XPathConstants.STRING);
+      String containerSerialNumber = (String) expr[1].evaluate(document, XPathConstants.STRING);
+      String resultFolder = (String) expr[2].evaluate(document, XPathConstants.STRING);
+      String poolName = (String) expr[3].evaluate(document, XPathConstants.STRING);
+
+      // From DefaultPacBio checking to make sure string is valid
+      if (isStringBlankOrNull(position)
+          || isStringBlankOrNull(resultFolder)
+          || isStringBlankOrNull(containerSerialNumber)
+          || isStringBlankOrNull(poolName)) {
         return;
       }
-      Map<String, String> poolInfo = dto.getPoolNames();
-      if (poolInfo == null) {
-        poolInfo = new HashMap<>();
-        dto.setPoolNames(poolInfo);
-      } else if (poolInfo.containsKey(well)) {
-        // If there are multiple things assigned to this well in the sample sheet, then
-        // MISO will
-        // not be able to figure out a single pool to
-        // assign to this well. In this case, we set the pool to be the empty string so
-        // that nothing
-        // will be automatically assigned.
-        log.warn(
-            String.format(
-                "Multiple pools in well %s on run %s; abandoning automatic pool assignment",
-                well, dto.getRunAlias()));
-        name = "";
+      // Container represents one SRT Cell
+      Map<String, String> containerInfo = new HashMap<>();
+      containerInfo.put("ResultFolder", resultFolder);
+      containerInfo.put("Position", position);
+      containerInfo.put("ContainerSerialNumber", containerSerialNumber);
+      containerInfo.put("PoolName", poolName);
+
+      // Add container to SMRT cell positionList
+      List<Map<String, String>> tempPositionList = dto.getPositionList();
+      if (dto.getPositionList() == null) {
+        tempPositionList = new ArrayList<>();
       }
-      poolInfo.put(well, name);
+      tempPositionList.add(containerInfo);
+      dto.setPositionList(tempPositionList);
     };
   }
 
@@ -174,8 +183,9 @@ public class RevioPacBioProcessor extends RunProcessor {
     PacBioNotificationDto dto = new PacBioNotificationDto();
     dto.setPairedEndRun(false);
     dto.setSequencerFolderPath(runDirectory.getAbsolutePath());
-    // This will be incremented during the metadata scan
-    dto.setLaneCount(0);
+
+    // This will get number of SMRT Cells in the run directory
+    dto.setLaneCount((int) getCellDirectory(runDirectory).count());
 
     // Presence of transfer_Test_*.txt indicates the run has started, get the creation time
     getMetadataDirectory(runDirectory)
@@ -188,7 +198,11 @@ public class RevioPacBioProcessor extends RunProcessor {
               try {
                 FileTime fileTime =
                     (FileTime) Files.getAttribute(Path.of(s.getAbsolutePath()), "creationTime");
-                dto.setStartDate(fileTime.toInstant());
+                // Get the earliest time to use as run start date
+                if (dto.getStartDate() == null
+                    || fileTime.toInstant().isBefore(dto.getStartDate())) {
+                  dto.setStartDate(fileTime.toInstant());
+                }
               } catch (IOException e) {
                 throw new RuntimeException(e);
               }
@@ -204,7 +218,7 @@ public class RevioPacBioProcessor extends RunProcessor {
         .filter(Optional::isPresent)
         .forEach(metadata -> processMetadata(metadata.get(), dto, tz));
 
-    // Check for .transferdone and Transfer_Test in all SMRT Cells to consider run complete
+    // Check for .transferdone and Transfer_Test in all SMRT Cells to consider the run complete
     if (getMetadataDirectory(runDirectory)
                 .flatMap(
                     metadataDirectory ->
@@ -233,7 +247,11 @@ public class RevioPacBioProcessor extends RunProcessor {
                 try {
                   FileTime fileTime =
                       (FileTime) Files.getAttribute(Path.of(s.getAbsolutePath()), "creationTime");
-                  dto.setCompletionDate(fileTime.toInstant());
+                  // Get the latest file creation time for completion date
+                  if (dto.getCompletionDate() == null
+                      || fileTime.toInstant().isAfter(dto.getCompletionDate())) {
+                    dto.setCompletionDate(fileTime.toInstant());
+                  }
                 } catch (IOException e) {
                   throw new RuntimeException(e);
                 }
@@ -302,30 +320,16 @@ public class RevioPacBioProcessor extends RunProcessor {
    */
   private Stream<File> getMetadataDirectory(File runDirectory) {
     return Arrays.stream(
-            Objects.requireNonNull(
-                runDirectory.listFiles(
-                    cellDirectory ->
-                        cellDirectory.isDirectory()
-                            && REVIO_CELL_DIRECTORY.test(cellDirectory.getName()))))
+            runDirectory.listFiles(
+                cellDirectory ->
+                    cellDirectory.isDirectory()
+                        && REVIO_CELL_DIRECTORY.test(cellDirectory.getName())))
         .flatMap(
             cellDirectory ->
                 Arrays.stream(
-                    Objects.requireNonNull(
-                        cellDirectory.listFiles(
-                            metadataDirectory ->
-                                metadataDirectory.isDirectory()
-                                    && metadataDirectory.getName().equals("metadata")))));
-
-    // Without requireNonNull IDE suggestion
-    /*
-    return  Arrays.stream(
-            runDirectory.listFiles(
-                cellDirectory ->
-                    cellDirectory.isDirectory() && REVIO_CELL_DIRECTORY.test(cellDirectory.getName())))
-    .flatMap(
-            cellDirectory ->
-                Arrays.stream(cellDirectory.listFiles(metadataDirectory -> metadataDirectory.isDirectory() &&
-                    metadataDirectory.getName().equals("metadata"))));
-     */
+                    cellDirectory.listFiles(
+                        metadataDirectory ->
+                            metadataDirectory.isDirectory()
+                                && metadataDirectory.getName().equals("metadata"))));
   }
 }
