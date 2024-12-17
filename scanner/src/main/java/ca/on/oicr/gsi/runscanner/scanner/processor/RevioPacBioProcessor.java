@@ -41,7 +41,7 @@ public class RevioPacBioProcessor extends RunProcessor {
   }
 
   private static final Predicate<String> REVIO_CELL_DIRECTORY =
-      Pattern.compile("[0-9]_[A-Z][0-9]{2}").asPredicate();
+      Pattern.compile("[0-9]{1}_[A-Z]{1}[0-9]{2}").asPredicate();
 
   private static final Predicate<String> TRANSFER_TEST =
       Pattern.compile("Transfer_Test_[0-9]{6}_[0-9]{6}.txt").asPredicate();
@@ -122,7 +122,7 @@ public class RevioPacBioProcessor extends RunProcessor {
           || isStringBlankOrNull(poolName)) {
         return;
       }
-      // Container represents one SRT Cell
+      // Container represents one SMRT Cell
       Map<String, String> containerInfo = new HashMap<>();
       containerInfo.put("ResultFolder", resultFolder);
       containerInfo.put("Position", position);
@@ -184,10 +184,10 @@ public class RevioPacBioProcessor extends RunProcessor {
     dto.setPairedEndRun(false);
     dto.setSequencerFolderPath(runDirectory.getAbsolutePath());
 
-    // This will get number of SMRT Cells in the run directory
+    // Get the number of SMRT Cells in the run directory
     dto.setLaneCount((int) getCellDirectory(runDirectory).count());
 
-    // Presence of transfer_Test_*.txt indicates the run has started, get the creation time
+    // Presence of Transfer_Test_*.txt indicates the run has started, get the creation time
     getMetadataDirectory(runDirectory)
         .flatMap(
             metadataDirectory ->
