@@ -1,5 +1,8 @@
 # Unreleased
 
+Changes:
+    * Fixed Run Scanner's interactive Swagger docs generating incorrect URLs in some configurations
+
 # 2.0.1
 
 Changes:
