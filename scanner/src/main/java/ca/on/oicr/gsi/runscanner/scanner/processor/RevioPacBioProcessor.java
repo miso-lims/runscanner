@@ -2,6 +2,7 @@ package ca.on.oicr.gsi.runscanner.scanner.processor;
 
 import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.PacBioNotificationDto;
+import ca.on.oicr.gsi.runscanner.dto.PacBioNotificationDto.SMRTCellPosition;
 import ca.on.oicr.gsi.runscanner.dto.type.HealthType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -14,9 +15,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.TimeZone;
@@ -122,15 +121,12 @@ public class RevioPacBioProcessor extends RunProcessor {
           || isStringBlankOrNull(poolName)) {
         return;
       }
-      // Container represents one SMRT Cell
-      Map<String, String> containerInfo = new HashMap<>();
-      containerInfo.put("ResultFolder", resultFolder);
-      containerInfo.put("Position", position);
-      containerInfo.put("ContainerSerialNumber", containerSerialNumber);
-      containerInfo.put("PoolName", poolName);
+      // SMRTCellPosition is a Java Record and represents one SMRT Cell
+      SMRTCellPosition containerInfo =
+          new SMRTCellPosition(resultFolder, position, containerSerialNumber, poolName);
 
       // Add container to SMRT cell positionList
-      List<Map<String, String>> tempPositionList = dto.getPositionList();
+      List<SMRTCellPosition> tempPositionList = dto.getPositionList();
       if (dto.getPositionList() == null) {
         tempPositionList = new ArrayList<>();
       }
@@ -185,7 +181,8 @@ public class RevioPacBioProcessor extends RunProcessor {
     dto.setSequencerFolderPath(runDirectory.getAbsolutePath());
 
     // Get the number of SMRT Cells in the run directory
-    dto.setLaneCount((int) getCellDirectory(runDirectory).count());
+    int smrtCellCount = (int) getCellDirectory(runDirectory).count();
+    dto.setLaneCount(smrtCellCount);
 
     // Presence of Transfer_Test_*.txt indicates the run has started, get the creation time
     getMetadataDirectory(runDirectory)
@@ -226,7 +223,7 @@ public class RevioPacBioProcessor extends RunProcessor {
                             metadataDirectory.listFiles(
                                 file -> TRANSFER_DONE.test(file.getName()))))
                 .count()
-            == getCellDirectory(runDirectory).count()
+            == smrtCellCount
         && getMetadataDirectory(runDirectory)
                 .flatMap(
                     metadataDirectory ->
@@ -234,7 +231,7 @@ public class RevioPacBioProcessor extends RunProcessor {
                             metadataDirectory.listFiles(
                                 file -> TRANSFER_TEST.test(file.getName()))))
                 .count()
-            == getCellDirectory(runDirectory).count()) {
+            == smrtCellCount) {
       // We have all the expected files, the run is considered finished, get the completion time
       dto.setHealthType(HealthType.COMPLETED);
       getMetadataDirectory(runDirectory)
