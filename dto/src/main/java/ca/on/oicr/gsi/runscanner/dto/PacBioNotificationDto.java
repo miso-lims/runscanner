@@ -10,7 +10,10 @@ public class PacBioNotificationDto extends NotificationDto {
 
   private Map<String, String> poolNames;
 
-  private List<Map<String, String>> positionList;
+  public record SMRTCellPosition(
+      String resultFolder, String position, String containerSerialNumber, String poolName) {}
+
+  private List<SMRTCellPosition> positionList;
 
   @Override
   public boolean equals(Object obj) {
@@ -39,7 +42,7 @@ public class PacBioNotificationDto extends NotificationDto {
     return poolNames;
   }
 
-  public List<Map<String, String>> getPositionList() {
+  public List<SMRTCellPosition> getPositionList() {
     return positionList;
   }
 
@@ -52,7 +55,7 @@ public class PacBioNotificationDto extends NotificationDto {
     this.poolNames = poolNames;
   }
 
-  public void setPositionList(List<Map<String, String>> positionList) {
+  public void setPositionList(List<SMRTCellPosition> positionList) {
     this.positionList = positionList;
   }
 
