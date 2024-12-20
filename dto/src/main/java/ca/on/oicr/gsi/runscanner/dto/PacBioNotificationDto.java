@@ -1,6 +1,7 @@
 package ca.on.oicr.gsi.runscanner.dto;
 
 import ca.on.oicr.gsi.runscanner.dto.type.Platform;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -8,6 +9,11 @@ import java.util.Optional;
 public class PacBioNotificationDto extends NotificationDto {
 
   private Map<String, String> poolNames;
+
+  public record SMRTCellPosition(
+      String resultFolder, String position, String containerSerialNumber, String poolName) {}
+
+  private List<SMRTCellPosition> positionList;
 
   @Override
   public boolean equals(Object obj) {
@@ -36,6 +42,10 @@ public class PacBioNotificationDto extends NotificationDto {
     return poolNames;
   }
 
+  public List<SMRTCellPosition> getPositionList() {
+    return positionList;
+  }
+
   @Override
   public int hashCode() {
     return Objects.hash(super.hashCode(), poolNames);
@@ -45,8 +55,19 @@ public class PacBioNotificationDto extends NotificationDto {
     this.poolNames = poolNames;
   }
 
+  public void setPositionList(List<SMRTCellPosition> positionList) {
+    this.positionList = positionList;
+  }
+
   @Override
   public String toString() {
-    return super.toString() + ", PacBioNotificationDto [poolNames = " + poolNames + "]";
+    return super.toString()
+        + ", PacBioNotificationDto [poolNames = "
+        + poolNames
+        + "]"
+        + ", "
+        + "PacBioNotificationDto [positionList = "
+        + positionList
+        + "]";
   }
 }
