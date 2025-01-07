@@ -62,11 +62,9 @@ public class PacBioNotificationDto extends NotificationDto {
   @Override
   public String toString() {
     return super.toString()
-        + ", PacBioNotificationDto [poolNames = "
+        + ", PacBioNotificationDto [poolNames= "
         + poolNames
-        + "]"
-        + ", "
-        + "PacBioNotificationDto [positionList = "
+        + ", positionList= "
         + positionList
         + "]";
   }
