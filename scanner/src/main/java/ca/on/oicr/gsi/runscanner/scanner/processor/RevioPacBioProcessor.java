@@ -89,7 +89,6 @@ public class RevioPacBioProcessor extends RunProcessor {
    *
    * @param expression the XPath expression yielding the number
    * @param setter the writer for the number
-   * @return
    */
   private static RevioPacBioProcessor.ProcessMetadata processNumber(
       String expression, BiConsumer<PacBioNotificationDto, Double> setter) {
@@ -197,6 +196,10 @@ public class RevioPacBioProcessor extends RunProcessor {
                             metadataDirectory.listFiles(
                                 file -> TRANSFER_TEST.test(file.getName())))))
             .min(Comparator.comparing(RevioPacBioProcessor::getFileCreationTime));
+
+    // Set completion time based on most recently created .Transfer_Test file
+    dto.setStartDate(
+        getFileCreationTime(Objects.requireNonNull(mostRecentTransferTestFile.orElse(null))));
 
     // Set completion time based on most recently created .Transfer_Test file
     dto.setStartDate(
