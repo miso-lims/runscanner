@@ -15,6 +15,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -35,12 +36,13 @@ public class RevioPacBioProcessor extends RunProcessor {
 
   /** Extract data from an XML metadata file and put it in the DTO. */
   interface ProcessMetadata {
+
     public void accept(Document document, PacBioNotificationDto dto, TimeZone timeZone)
         throws XPathException;
   }
 
   private static final Predicate<String> REVIO_CELL_DIRECTORY =
-      Pattern.compile("[0-9]{1}_[A-Z]{1}[0-9]{2}").asPredicate();
+      Pattern.compile("[0-9]_[A-Z][0-9]{2}").asPredicate();
 
   private static final Predicate<String> TRANSFER_TEST =
       Pattern.compile("Transfer_Test_[0-9]{6}_[0-9]{6}.txt").asPredicate();
@@ -114,7 +116,7 @@ public class RevioPacBioProcessor extends RunProcessor {
       String resultFolder = (String) expr[2].evaluate(document, XPathConstants.STRING);
       String poolName = (String) expr[3].evaluate(document, XPathConstants.STRING);
 
-      // From DefaultPacBio checking to make sure string is valid
+      // From DefaultPacBio, checking to make sure string is valid
       if (isStringBlankOrNull(position)
           || isStringBlankOrNull(resultFolder)
           || isStringBlankOrNull(containerSerialNumber)
@@ -153,7 +155,7 @@ public class RevioPacBioProcessor extends RunProcessor {
     };
   }
 
-  public RevioPacBioProcessor(Builder builder, String s) {
+  public RevioPacBioProcessor(Builder builder, String address) {
     super(builder);
   }
 
@@ -167,7 +169,8 @@ public class RevioPacBioProcessor extends RunProcessor {
   @Override
   public Stream<File> getRunsFromRoot(File root) {
     return Arrays.stream(
-        root.listFiles(f -> f.isDirectory() && RUN_DIRECTORY.matcher(f.getName()).matches()));
+        Objects.requireNonNull(
+            root.listFiles(f -> f.isDirectory() && RUN_DIRECTORY.matcher(f.getName()).matches())));
   }
 
   @Override
@@ -185,74 +188,47 @@ public class RevioPacBioProcessor extends RunProcessor {
     dto.setLaneCount(smrtCellCount);
 
     // Presence of Transfer_Test_*.txt indicates the run has started, get the creation time
-    getMetadataDirectory(runDirectory)
-        .flatMap(
-            metadataDirectory ->
-                Arrays.stream(
-                    metadataDirectory.listFiles(file -> TRANSFER_TEST.test(file.getName()))))
-        .forEach(
-            s -> {
-              try {
-                FileTime fileTime =
-                    (FileTime) Files.getAttribute(Path.of(s.getAbsolutePath()), "creationTime");
-                // Get the earliest time to use as run start date
-                if (dto.getStartDate() == null
-                    || fileTime.toInstant().isBefore(dto.getStartDate())) {
-                  dto.setStartDate(fileTime.toInstant());
-                }
-              } catch (IOException e) {
-                throw new RuntimeException(e);
-              }
-            });
+    Optional<File> mostRecentTransferTestFile =
+        getMetadataDirectory(runDirectory)
+            .flatMap(
+                metadataDirectory ->
+                    Stream.of(
+                        Objects.requireNonNull(
+                            metadataDirectory.listFiles(
+                                file -> TRANSFER_TEST.test(file.getName())))))
+            .min(Comparator.comparing(RevioPacBioProcessor::getFileCreationTime));
 
-    // We are good to process this run
+    // Set completion time based on most recently created .Transfer_Test file
+    dto.setStartDate(
+        getFileCreationTime(Objects.requireNonNull(mostRecentTransferTestFile.orElse(null))));
+
+    // Grab the .metadata.xml and begin processing
     getMetadataDirectory(runDirectory)
         .flatMap(
             metadataDirectory ->
-                Arrays.stream(
-                    metadataDirectory.listFiles(file -> file.getName().endsWith(".metadata.xml"))))
+                Stream.of(Objects.requireNonNull(metadataDirectory.listFiles()))
+                    .filter(file -> file.getName().endsWith(".metadata.xml")))
         .map(RunProcessor::parseXml)
         .filter(Optional::isPresent)
         .forEach(metadata -> processMetadata(metadata.get(), dto, tz));
 
     // Check for .transferdone and Transfer_Test in all SMRT Cells to consider the run complete
-    if (getMetadataDirectory(runDirectory)
-                .flatMap(
-                    metadataDirectory ->
-                        Arrays.stream(
-                            metadataDirectory.listFiles(
-                                file -> TRANSFER_DONE.test(file.getName()))))
-                .count()
-            == smrtCellCount
-        && getMetadataDirectory(runDirectory)
-                .flatMap(
-                    metadataDirectory ->
-                        Arrays.stream(
-                            metadataDirectory.listFiles(
-                                file -> TRANSFER_TEST.test(file.getName()))))
-                .count()
-            == smrtCellCount) {
+    if (isRunComplete(runDirectory, smrtCellCount)) {
       // We have all the expected files, the run is considered finished, get the completion time
       dto.setHealthType(HealthType.COMPLETED);
-      getMetadataDirectory(runDirectory)
-          .flatMap(
-              metadataDirectory ->
-                  Arrays.stream(
-                      metadataDirectory.listFiles(file -> TRANSFER_DONE.test(file.getName()))))
-          .forEach(
-              s -> {
-                try {
-                  FileTime fileTime =
-                      (FileTime) Files.getAttribute(Path.of(s.getAbsolutePath()), "creationTime");
-                  // Get the latest file creation time for completion date
-                  if (dto.getCompletionDate() == null
-                      || fileTime.toInstant().isAfter(dto.getCompletionDate())) {
-                    dto.setCompletionDate(fileTime.toInstant());
-                  }
-                } catch (IOException e) {
-                  throw new RuntimeException(e);
-                }
-              });
+      Optional<File> mostRecentDoneFile =
+          getMetadataDirectory(runDirectory)
+              .flatMap(
+                  metadataDirectory ->
+                      Stream.of(
+                          Objects.requireNonNull(
+                              metadataDirectory.listFiles(
+                                  file -> TRANSFER_DONE.test(file.getName())))))
+              .max(Comparator.comparing(RevioPacBioProcessor::getFileCreationTime));
+
+      // Set completion time based on most recently created .transferdone file
+      dto.setCompletionDate(
+          getFileCreationTime(Objects.requireNonNull(mostRecentDoneFile.orElse(null))));
     } else {
       // There are some missing files, the run may not be complete
       dto.setHealthType(HealthType.RUNNING);
@@ -285,7 +261,7 @@ public class RevioPacBioProcessor extends RunProcessor {
    * @return true if blank or null String provided
    */
   private static boolean isStringBlankOrNull(String s) {
-    return s == null || "".equals(s.trim());
+    return s == null || s.trim().isEmpty();
   }
 
   @Override
@@ -300,13 +276,10 @@ public class RevioPacBioProcessor extends RunProcessor {
    * @return Stream from Cell directory level
    */
   private Stream<File> getCellDirectory(File runDirectory) {
-    return Arrays.stream(
-        Objects.requireNonNull(
-            runDirectory.listFiles(
-                cellDirectory ->
-                    cellDirectory.isDirectory()
-                        && RevioPacBioProcessor.REVIO_CELL_DIRECTORY.test(
-                            cellDirectory.getName()))));
+    return Stream.of(Objects.requireNonNull(runDirectory.listFiles()))
+        .filter(
+            cellDirectory ->
+                cellDirectory.isDirectory() && REVIO_CELL_DIRECTORY.test(cellDirectory.getName()));
   }
 
   /**
@@ -316,17 +289,55 @@ public class RevioPacBioProcessor extends RunProcessor {
    * @return Stream from Metadata directory level
    */
   private Stream<File> getMetadataDirectory(File runDirectory) {
-    return Arrays.stream(
-            runDirectory.listFiles(
-                cellDirectory ->
-                    cellDirectory.isDirectory()
-                        && REVIO_CELL_DIRECTORY.test(cellDirectory.getName())))
+    return getCellDirectory(runDirectory)
         .flatMap(
             cellDirectory ->
-                Arrays.stream(
-                    cellDirectory.listFiles(
+                Stream.of(Objects.requireNonNull(cellDirectory.listFiles()))
+                    .filter(
                         metadataDirectory ->
                             metadataDirectory.isDirectory()
-                                && metadataDirectory.getName().equals("metadata"))));
+                                && metadataDirectory.getName().equals("metadata")));
+  }
+
+  /**
+   * Returns the time a file was created
+   *
+   * @param file which we are currently processing
+   * @return Instant point in time
+   */
+  private static Instant getFileCreationTime(File file) {
+    try {
+      FileTime fileTime =
+          (FileTime) Files.getAttribute(Path.of(file.getAbsolutePath()), "creationTime");
+      return fileTime.toInstant();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * @param runDirectory which we are currently processing
+   * @param smrtCellCount total number of SMRT cells in runDirectory
+   * @return true or false
+   */
+  private boolean isRunComplete(File runDirectory, int smrtCellCount) {
+    return getMetadataDirectory(runDirectory)
+                .flatMap(
+                    metadataDirectory ->
+                        Arrays.stream(
+                            Objects.requireNonNull(
+                                metadataDirectory.listFiles(
+                                    file -> TRANSFER_DONE.test(file.getName())))))
+                .count()
+            == smrtCellCount
+        && getMetadataDirectory(runDirectory)
+                .flatMap(
+                    metadataDirectory ->
+                        Arrays.stream(
+                            Objects.requireNonNull(
+                                metadataDirectory.listFiles(
+                                    file -> TRANSFER_TEST.test(file.getName())))))
+                .count()
+            == smrtCellCount;
   }
 }
