@@ -186,8 +186,8 @@ public class RevioPacBioProcessor extends RunProcessor {
     int smrtCellCount = (int) getCellDirectory(runDirectory).count();
     dto.setLaneCount(smrtCellCount);
 
-    // Presence of Transfer_Test_*.txt indicates the run has started, get the creation time
-    Optional<File> mostRecentTransferTestFile =
+    // Presence of earliest Transfer_Test_*.txt indicates the run has started, get the creation time
+    Optional<File> firstTransferTestFile =
         getMetadataDirectory(runDirectory)
             .flatMap(
                 metadataDirectory ->
@@ -199,11 +199,7 @@ public class RevioPacBioProcessor extends RunProcessor {
 
     // Set completion time based on most recently created .Transfer_Test file
     dto.setStartDate(
-        getFileCreationTime(Objects.requireNonNull(mostRecentTransferTestFile.orElse(null))));
-
-    // Set completion time based on most recently created .Transfer_Test file
-    dto.setStartDate(
-        getFileCreationTime(Objects.requireNonNull(mostRecentTransferTestFile.orElse(null))));
+        getFileCreationTime(Objects.requireNonNull(firstTransferTestFile.orElse(null))));
 
     // Grab the .metadata.xml and begin processing
     getMetadataDirectory(runDirectory)
