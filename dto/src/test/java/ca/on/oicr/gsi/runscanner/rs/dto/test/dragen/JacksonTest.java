@@ -3,9 +3,9 @@ package ca.on.oicr.gsi.runscanner.rs.dto.test.dragen;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import ca.on.oicr.gsi.runscanner.dto.dragen.AnalysisFile;
-import ca.on.oicr.gsi.runscanner.dto.dragen.DragenAnalysis;
 import ca.on.oicr.gsi.runscanner.dto.dragen.DragenAnalysisUnit;
-import ca.on.oicr.gsi.runscanner.dto.dragen.DragenWorkflowAnalysis;
+import ca.on.oicr.gsi.runscanner.dto.dragen.DragenPipelineRun;
+import ca.on.oicr.gsi.runscanner.dto.dragen.DragenWorkflowRun;
 import ca.on.oicr.gsi.runscanner.dto.dragen.samplesheet.Samplesheet;
 import ca.on.oicr.gsi.runscanner.dto.dragen.samplesheet.SamplesheetBCLConvertSection;
 import ca.on.oicr.gsi.runscanner.dto.dragen.samplesheet.SamplesheetBCLConvertSection.SamplesheetBCLConvertDataEntry;
@@ -64,21 +64,22 @@ public class JacksonTest {
 
   @Test
   public void testDragenWorkflowAnalysisSerializeDeserialize() throws Exception {
-    DragenWorkflowAnalysis dwa = makeDragenWorkflowAnalysis();
+    DragenWorkflowRun dwr = makeDragenWorkflowAnalysis();
 
-    String serialized = mapper.writeValueAsString(dwa);
-    DragenWorkflowAnalysis deserialized =
-        mapper.readerFor(DragenWorkflowAnalysis.class).readValue(serialized);
-    assertDragenWorkflowAnalysisEqual(dwa, deserialized);
+    String serialized = mapper.writeValueAsString(dwr);
+    DragenWorkflowRun deserialized =
+        mapper.readerFor(DragenWorkflowRun.class).readValue(serialized);
+    assertDragenWorkflowAnalysisEqual(dwr, deserialized);
   }
 
   @Test
   public void testDragenAnalysisSerializeDeserialize() throws Exception {
-    DragenAnalysis da = makeDragenAnalysis();
+    DragenPipelineRun dpr = makeDragenAnalysis();
 
-    String serialized = mapper.writeValueAsString(da);
-    DragenAnalysis deserialized = mapper.readerFor(DragenAnalysis.class).readValue(serialized);
-    assertDragenAnalysisEqual(da, deserialized);
+    String serialized = mapper.writeValueAsString(dpr);
+    DragenPipelineRun deserialized =
+        mapper.readerFor(DragenPipelineRun.class).readValue(serialized);
+    assertDragenAnalysisEqual(dpr, deserialized);
   }
 
   private AnalysisFile makeAnalysisFile() {
@@ -100,18 +101,18 @@ public class JacksonTest {
     return dau;
   }
 
-  private DragenWorkflowAnalysis makeDragenWorkflowAnalysis() {
-    DragenWorkflowAnalysis dwa = new DragenWorkflowAnalysis("TEST");
-    dwa.setCompletionTime(Instant.MAX);
-    dwa.setStartTime(Instant.MIN);
-    dwa.put(makeDragenAnalysisUnit());
-    return dwa;
+  private DragenWorkflowRun makeDragenWorkflowAnalysis() {
+    DragenWorkflowRun dwr = new DragenWorkflowRun("TEST");
+    dwr.setCompletionTime(Instant.MAX);
+    dwr.setStartTime(Instant.MIN);
+    dwr.put(makeDragenAnalysisUnit());
+    return dwr;
   }
 
-  private DragenAnalysis makeDragenAnalysis() {
-    DragenAnalysis da = new DragenAnalysis(makeSamplesheet(), 1);
-    da.put(makeDragenWorkflowAnalysis());
-    return da;
+  private DragenPipelineRun makeDragenAnalysis() {
+    DragenPipelineRun dpr = new DragenPipelineRun(makeSamplesheet(), 1);
+    dpr.put(makeDragenWorkflowAnalysis());
+    return dpr;
   }
 
   private Samplesheet makeSamplesheet() {
@@ -172,16 +173,16 @@ public class JacksonTest {
   }
 
   private static void assertDragenWorkflowAnalysisEqual(
-      DragenWorkflowAnalysis one, DragenWorkflowAnalysis two) {
+      DragenWorkflowRun one, DragenWorkflowRun two) {
     assertEquals(one.getWorkflowName(), two.getWorkflowName());
     assertEquals(one.getStartTime(), two.getStartTime());
     assertEquals(one.getCompletionTime(), two.getCompletionTime());
-    assertDragenAnalysisUnitEqual(one.getAnalyses().get(0), two.getAnalyses().get(0));
+    assertDragenAnalysisUnitEqual(one.getAnalysisOutputs().get(0), two.getAnalysisOutputs().get(0));
   }
 
-  private static void assertDragenAnalysisEqual(DragenAnalysis one, DragenAnalysis two) {
+  private static void assertDragenAnalysisEqual(DragenPipelineRun one, DragenPipelineRun two) {
     assertEquals(one.getAttempt(), two.getAttempt());
     assertSamplesheetEqual(one.getSamplesheet(), two.getSamplesheet());
-    assertDragenWorkflowAnalysisEqual(one.getAnalyses().get(0), two.getAnalyses().get(0));
+    assertDragenWorkflowAnalysisEqual(one.getWorkflowRuns().get(0), two.getWorkflowRuns().get(0));
   }
 }

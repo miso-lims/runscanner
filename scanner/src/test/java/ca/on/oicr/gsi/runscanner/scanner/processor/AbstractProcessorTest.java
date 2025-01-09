@@ -3,15 +3,15 @@ package ca.on.oicr.gsi.runscanner.scanner.processor;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-import ca.on.oicr.gsi.runscanner.dto.Analysis;
 import ca.on.oicr.gsi.runscanner.dto.IlluminaNotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.OxfordNanoporeNotificationDto;
-import ca.on.oicr.gsi.runscanner.dto.WorkflowAnalysis;
+import ca.on.oicr.gsi.runscanner.dto.PipelineRun;
+import ca.on.oicr.gsi.runscanner.dto.WorkflowRun;
 import ca.on.oicr.gsi.runscanner.dto.dragen.AnalysisFile;
-import ca.on.oicr.gsi.runscanner.dto.dragen.DragenAnalysis;
 import ca.on.oicr.gsi.runscanner.dto.dragen.DragenAnalysisUnit;
-import ca.on.oicr.gsi.runscanner.dto.dragen.DragenWorkflowAnalysis;
+import ca.on.oicr.gsi.runscanner.dto.dragen.DragenPipelineRun;
+import ca.on.oicr.gsi.runscanner.dto.dragen.DragenWorkflowRun;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -30,7 +30,6 @@ public abstract class AbstractProcessorTest {
     this.clazz = clazz;
   }
 
-  // TODO strip out path before runscanner/
   protected final void checkDirectory(String root)
       throws JsonParseException, JsonMappingException, IOException {
     ObjectMapper mapper = RunProcessor.createObjectMapper();
@@ -63,16 +62,16 @@ public abstract class AbstractProcessorTest {
       // TODO this is a ratking of a for loop
       if (clazz.equals(IlluminaNotificationDto.class)) {
         IlluminaNotificationDto illuminaResult = (IlluminaNotificationDto) result;
-        if (!illuminaResult.analysis.isEmpty()) {
-          for (Analysis<?> a : illuminaResult.analysis) {
-            if (a instanceof DragenAnalysis) {
-              ((DragenAnalysis) a).getSamplesheet().setModifiedTime(Instant.EPOCH);
+        if (!illuminaResult.pipelineRuns.isEmpty()) {
+          for (PipelineRun<?> pr : illuminaResult.pipelineRuns) {
+            if (pr instanceof DragenPipelineRun) {
+              ((DragenPipelineRun) pr).getSamplesheet().setModifiedTime(Instant.EPOCH);
             }
-            for (WorkflowAnalysis wa : a.getAnalyses()) {
-              wa.setCompletionTime(Instant.EPOCH);
-              wa.setStartTime(Instant.EPOCH);
-              if (wa instanceof DragenWorkflowAnalysis) {
-                for (DragenAnalysisUnit dau : ((DragenWorkflowAnalysis) wa).getAnalyses()) {
+            for (WorkflowRun wr : pr.getWorkflowRuns()) {
+              wr.setCompletionTime(Instant.EPOCH);
+              wr.setStartTime(Instant.EPOCH);
+              if (wr instanceof DragenWorkflowRun) {
+                for (DragenAnalysisUnit dau : ((DragenWorkflowRun) wr).getAnalysisOutputs()) {
                   for (AnalysisFile af : dau.getFiles()) {
                     af.setCreatedTime(Instant.EPOCH);
                     af.setModifiedTime(Instant.EPOCH);

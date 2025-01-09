@@ -24,7 +24,7 @@ public class IlluminaNotificationDto extends NotificationDto {
   private String workflowType;
   private IndexSequencing indexSequencing;
 
-  public List<Analysis> analysis = new LinkedList<>();
+  public List<PipelineRun> pipelineRuns = new LinkedList<>();
 
   private AnalysisStatus analysisStatus; // TODO move me to per-Analysis
 
@@ -55,7 +55,7 @@ public class IlluminaNotificationDto extends NotificationDto {
         && Objects.equals(this.scoreCycle, other.scoreCycle)
         && Objects.equals(this.workflowType, other.workflowType)
         && Objects.equals(this.indexSequencing, other.indexSequencing)
-        && Objects.equals(this.analysis, other.analysis)
+        && Objects.equals(this.pipelineRuns, other.pipelineRuns)
         && Objects.equals(this.analysisStatus, other.analysisStatus);
   }
 
@@ -140,7 +140,7 @@ public class IlluminaNotificationDto extends NotificationDto {
         scoreCycle,
         workflowType,
         indexSequencing,
-        analysis,
+        pipelineRuns,
         analysisStatus);
   }
 
@@ -196,16 +196,16 @@ public class IlluminaNotificationDto extends NotificationDto {
     this.indexSequencing = indexSequencing;
   }
 
-  public Analysis getAnalysis(int i) {
-    return analysis.get(i);
+  public PipelineRun getPipelineRun(int i) {
+    return pipelineRuns.get(i);
   }
 
   public AnalysisStatus getAnalysisStatus() {
     return analysisStatus;
   }
 
-  public void addAnalysis(Analysis a) {
-    analysis.add(a);
+  public void addPipelineRun(PipelineRun a) {
+    pipelineRuns.add(a);
   }
 
   public void setAnalysisStatus(AnalysisStatus analysisStatus) {
@@ -241,8 +241,8 @@ public class IlluminaNotificationDto extends NotificationDto {
         + workflowType
         + ", indexSequencing="
         + indexSequencing
-        + ", analysis="
-        + analysis
+        + ", pipelineRuns="
+        + pipelineRuns
         + ", analysisStatus="
         + analysisStatus
         + "]";

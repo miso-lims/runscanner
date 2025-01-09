@@ -1,21 +1,21 @@
 package ca.on.oicr.gsi.runscanner.dto.dragen;
 
-import ca.on.oicr.gsi.runscanner.dto.WorkflowAnalysis;
+import ca.on.oicr.gsi.runscanner.dto.WorkflowRun;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
-public class DragenWorkflowAnalysis extends WorkflowAnalysis {
-  private List<DragenAnalysisUnit> analyses = new LinkedList<>();
+public class DragenWorkflowRun extends WorkflowRun {
+  private List<DragenAnalysisUnit> analysisOutputs = new LinkedList<>();
 
-  public DragenWorkflowAnalysis(@JsonProperty("workflowName") String workflowName) {
+  public DragenWorkflowRun(@JsonProperty("workflowName") String workflowName) {
     super(workflowName);
   }
 
-  public List<DragenAnalysisUnit> getAnalyses() {
-    return analyses;
+  public List<DragenAnalysisUnit> getAnalysisOutputs() {
+    return analysisOutputs;
   }
 
   public DragenAnalysisUnit get(String sample, String lane, String index1, String index2) {
@@ -31,7 +31,7 @@ public class DragenWorkflowAnalysis extends WorkflowAnalysis {
   }
 
   public DragenAnalysisUnit get(String sample, int lane, String index) {
-    return analyses
+    return analysisOutputs
         .stream()
         .filter(
             a -> a.getSample().equals(sample) && a.getLane() == lane && a.getIndex().equals(index))
@@ -41,7 +41,7 @@ public class DragenWorkflowAnalysis extends WorkflowAnalysis {
 
   public DragenAnalysisUnit get(Path filePath) {
     List<DragenAnalysisUnit> list =
-        analyses
+        analysisOutputs
             .stream()
             .filter(a -> a.getFiles().stream().anyMatch(f -> f.getPath().equals(filePath)))
             .toList();
@@ -65,25 +65,25 @@ public class DragenWorkflowAnalysis extends WorkflowAnalysis {
             newDragenAnalysisUnit.getLane(),
             newDragenAnalysisUnit.getIndex());
     if (oldDragenAnalysisUnit != null && !oldDragenAnalysisUnit.isEmpty()) {
-      analyses.remove(oldDragenAnalysisUnit);
+      analysisOutputs.remove(oldDragenAnalysisUnit);
     }
-    analyses.add(newDragenAnalysisUnit);
+    analysisOutputs.add(newDragenAnalysisUnit);
   }
 
   public String toString() {
-    return super.toString() + ", DragenWorkflowAnalysis [analyses=" + analyses + "]";
+    return super.toString() + ", DragenWorkflowRun [analysisOutputs=" + analysisOutputs + "]";
   }
 
   public boolean equals(Object obj) {
     if (this == obj) return true;
     if (!super.equals(obj)) return false;
     if (getClass() != obj.getClass()) return false;
-    DragenWorkflowAnalysis other = (DragenWorkflowAnalysis) obj;
+    DragenWorkflowRun other = (DragenWorkflowRun) obj;
 
-    return Objects.equals(this.analyses, other.analyses);
+    return Objects.equals(this.analysisOutputs, other.analysisOutputs);
   }
 
   public int hashCode() {
-    return Objects.hash(super.hashCode(), this.analyses);
+    return Objects.hash(super.hashCode(), this.analysisOutputs);
   }
 }

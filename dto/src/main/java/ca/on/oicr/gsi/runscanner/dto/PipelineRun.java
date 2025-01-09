@@ -1,6 +1,6 @@
 package ca.on.oicr.gsi.runscanner.dto;
 
-import ca.on.oicr.gsi.runscanner.dto.dragen.DragenAnalysis;
+import ca.on.oicr.gsi.runscanner.dto.dragen.DragenPipelineRun;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
@@ -14,19 +14,19 @@ import java.util.Objects;
 // Represents one attempt at an analysis suite.
 @JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "suite")
 @JsonSubTypes({ //
-  @Type(value = DragenAnalysis.class, name = "DRAGEN") //
+  @Type(value = DragenPipelineRun.class, name = "DRAGEN") //
 }) //
 @JsonIgnoreProperties(ignoreUnknown = true)
-public abstract class Analysis<T extends WorkflowAnalysis> {
-  private List<T> analyses = new LinkedList<>();
+public abstract class PipelineRun<T extends WorkflowRun> {
+  private List<T> workflowRuns = new LinkedList<>();
   private final int attempt;
 
-  protected Analysis(int attempt) {
+  protected PipelineRun(int attempt) {
     this.attempt = attempt;
   }
 
   public T get(String workflowName) {
-    return analyses
+    return workflowRuns
         .stream()
         .filter(a -> a.getWorkflowName().equals(workflowName))
         .findFirst()
@@ -34,32 +34,32 @@ public abstract class Analysis<T extends WorkflowAnalysis> {
   }
 
   public void put(T t) {
-    analyses.add(t);
+    workflowRuns.add(t);
   }
 
   public int getAttempt() {
     return attempt;
   }
 
-  public List<T> getAnalyses() {
-    return analyses;
+  public List<T> getWorkflowRuns() {
+    return workflowRuns;
   }
 
   public String toString() {
-    return "Analysis [analyses=" + analyses + ", attempt=" + attempt + "]";
+    return "PipelineRun [workflowRuns=" + workflowRuns + ", attempt=" + attempt + "]";
   }
 
   public boolean equals(Object obj) {
     if (this == obj) return true;
     if (obj == null) return false;
     if (getClass() != obj.getClass()) return false;
-    Analysis<T> other = (Analysis<T>) obj;
+    PipelineRun<T> other = (PipelineRun<T>) obj;
 
-    return Objects.equals(this.analyses, other.analyses)
+    return Objects.equals(this.workflowRuns, other.workflowRuns)
         && Objects.equals(this.attempt, other.attempt);
   }
 
   public int hashCode() {
-    return Objects.hash(this.analyses, this.attempt);
+    return Objects.hash(this.workflowRuns, this.attempt);
   }
 }

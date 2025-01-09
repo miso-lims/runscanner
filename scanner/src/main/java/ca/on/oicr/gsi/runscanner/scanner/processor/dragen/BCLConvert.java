@@ -2,7 +2,7 @@ package ca.on.oicr.gsi.runscanner.scanner.processor.dragen;
 
 import ca.on.oicr.gsi.runscanner.dto.dragen.AnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.dragen.DragenAnalysisUnit;
-import ca.on.oicr.gsi.runscanner.dto.dragen.DragenWorkflowAnalysis;
+import ca.on.oicr.gsi.runscanner.dto.dragen.DragenWorkflowRun;
 import ca.on.oicr.gsi.runscanner.dto.dragen.samplesheet.Samplesheet;
 import ca.on.oicr.gsi.runscanner.dto.dragen.samplesheet.SamplesheetBCLConvertSection;
 import ca.on.oicr.gsi.runscanner.dto.dragen.samplesheet.SamplesheetBCLConvertSection.SamplesheetBCLConvertDataEntry;
@@ -24,9 +24,9 @@ public class BCLConvert {
     return isOk;
   }
 
-  public DragenWorkflowAnalysis process(Samplesheet samplesheet, File rootDir) throws IOException {
-    DragenWorkflowAnalysis bclConvertAnalysis = new DragenWorkflowAnalysis("BCLConvert");
-    bclConvertAnalysis.setStartTime(samplesheet.getModifiedTime());
+  public DragenWorkflowRun process(Samplesheet samplesheet, File rootDir) throws IOException {
+    DragenWorkflowRun bclConvertWorkflowRun = new DragenWorkflowRun("BCLConvert");
+    bclConvertWorkflowRun.setStartTime(samplesheet.getModifiedTime());
     Instant max_date = Instant.MIN; // yes you read that right
     // Get fastq list
     // For gz compression, root/Analysis/#/Data/BCLConvert/fastq/Reports/fastq_list.csv
@@ -47,7 +47,7 @@ public class BCLConvert {
         int lane = Integer.parseInt(splitRgid[2]);
 
         DragenAnalysisUnit dragenAnalysisUnit =
-            bclConvertAnalysis.get(fastq[1], lane, index1, index2);
+            bclConvertWorkflowRun.get(fastq[1], lane, index1, index2);
         if (dragenAnalysisUnit == null) {
           dragenAnalysisUnit = new DragenAnalysisUnit();
         }
@@ -68,9 +68,9 @@ public class BCLConvert {
         dragenAnalysisUnit.addFile(file1);
         dragenAnalysisUnit.addFile(file2);
 
-        bclConvertAnalysis.put(dragenAnalysisUnit);
+        bclConvertWorkflowRun.put(dragenAnalysisUnit);
       }
-      bclConvertAnalysis.setCompletionTime(max_date);
+      bclConvertWorkflowRun.setCompletionTime(max_date);
 
       // Get file checksums from Analysis/#/Manifest.tsv
       // TODO: Doesn't seem to exist for BCLConvert < 4.1.7 - skip?
@@ -89,14 +89,14 @@ public class BCLConvert {
 
           // When this is null, it's often for an Undetermined read. We do not care.
           try {
-            DragenAnalysisUnit dragenAnalysisUnit = bclConvertAnalysis.get(filename);
+            DragenAnalysisUnit dragenAnalysisUnit = bclConvertWorkflowRun.get(filename);
             for (AnalysisFile file : dragenAnalysisUnit.getFiles()) {
               if (file.getPath().equals(filename)) {
                 file.setCrc32Checksum(manifestLine[1]);
                 break;
               }
             }
-            bclConvertAnalysis.put(dragenAnalysisUnit);
+            bclConvertWorkflowRun.put(dragenAnalysisUnit);
           } catch (NullPointerException npe) {
             log.info("Unable to map {} to an Analysis object", filename);
           }
@@ -131,12 +131,12 @@ public class BCLConvert {
           // 8 = % Perfect Index Reads, 9 = % One Mismatch Index Reads,
           // 10 = % Two Mismatch Index Reads
           DragenAnalysisUnit dragenAnalysisUnit =
-              bclConvertAnalysis.get(demuxLine[1], demuxLine[0], demuxLine[2]);
+              bclConvertWorkflowRun.get(demuxLine[1], demuxLine[0], demuxLine[2]);
           if (dragenAnalysisUnit == null) dragenAnalysisUnit = new DragenAnalysisUnit();
           int readCount = Integer.parseInt(demuxLine[3]);
           // Set the same read count for all files in analysis
           dragenAnalysisUnit.getFiles().forEach(file -> file.addInfoItem("read_count", readCount));
-          bclConvertAnalysis.put(dragenAnalysisUnit);
+          bclConvertWorkflowRun.put(dragenAnalysisUnit);
         }
       } else {
         log.info("No Demultiplex_Stats.csv for {}", rootDir);
@@ -150,7 +150,7 @@ public class BCLConvert {
     for (SamplesheetBCLConvertDataEntry item :
         ((SamplesheetBCLConvertSection) samplesheet.getByName("BCLConvert")).getData()) {
       DragenAnalysisUnit dragenAnalysisUnitItem =
-          bclConvertAnalysis.get(
+          bclConvertWorkflowRun.get(
               item.sampleId(), item.lane(), item.index(), reverseComplement(item.index2()));
       if (dragenAnalysisUnitItem == null || dragenAnalysisUnitItem.isEmpty()) {
         isOk = false;
@@ -169,7 +169,7 @@ public class BCLConvert {
         }
       }
     }
-    return bclConvertAnalysis;
+    return bclConvertWorkflowRun;
   }
 
   private static AnalysisFile analysisFileFromFilename(

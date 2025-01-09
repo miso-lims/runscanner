@@ -1,6 +1,6 @@
 package ca.on.oicr.gsi.runscanner.dto;
 
-import ca.on.oicr.gsi.runscanner.dto.dragen.DragenWorkflowAnalysis;
+import ca.on.oicr.gsi.runscanner.dto.dragen.DragenWorkflowRun;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
@@ -13,15 +13,15 @@ import java.util.Objects;
 // Represents one attempt at a workflow within a suite
 @JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "suite")
 @JsonSubTypes({ //
-  @Type(value = DragenWorkflowAnalysis.class, name = "DRAGEN") //
+  @Type(value = DragenWorkflowRun.class, name = "DRAGEN") //
 }) //
 @JsonIgnoreProperties(ignoreUnknown = true)
-public abstract class WorkflowAnalysis {
+public abstract class WorkflowRun {
   private Instant completionTime;
   private Instant startTime;
   private final String workflowName;
 
-  public WorkflowAnalysis(String workflowName) {
+  public WorkflowRun(String workflowName) {
     this.workflowName = workflowName;
   }
 
@@ -46,7 +46,7 @@ public abstract class WorkflowAnalysis {
   }
 
   public String toString() {
-    return "WorkflowAnalysis [completionTime="
+    return "WorkflowRun [completionTime="
         + completionTime
         + ", startTime="
         + startTime
@@ -59,7 +59,7 @@ public abstract class WorkflowAnalysis {
     if (this == obj) return true;
     if (obj == null) return false;
     if (getClass() != obj.getClass()) return false;
-    WorkflowAnalysis other = (WorkflowAnalysis) obj;
+    WorkflowRun other = (WorkflowRun) obj;
 
     return Objects.equals(this.completionTime, other.completionTime)
         && Objects.equals(this.workflowName, other.workflowName)

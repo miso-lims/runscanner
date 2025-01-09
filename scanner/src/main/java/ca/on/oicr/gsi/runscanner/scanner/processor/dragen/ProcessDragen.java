@@ -1,8 +1,8 @@
 package ca.on.oicr.gsi.runscanner.scanner.processor.dragen;
 
 import ca.on.oicr.gsi.runscanner.dto.IlluminaNotificationDto;
-import ca.on.oicr.gsi.runscanner.dto.dragen.DragenAnalysis;
-import ca.on.oicr.gsi.runscanner.dto.dragen.DragenWorkflowAnalysis;
+import ca.on.oicr.gsi.runscanner.dto.dragen.DragenPipelineRun;
+import ca.on.oicr.gsi.runscanner.dto.dragen.DragenWorkflowRun;
 import ca.on.oicr.gsi.runscanner.dto.dragen.samplesheet.Samplesheet;
 import ca.on.oicr.gsi.runscanner.dto.dragen.samplesheet.SamplesheetBCLConvertSection;
 import ca.on.oicr.gsi.runscanner.dto.type.AnalysisStatus;
@@ -29,7 +29,7 @@ public class ProcessDragen {
   public IlluminaNotificationDto analyse(
       File runDirectory, TimeZone tz, IlluminaNotificationDto dto) throws IOException {
     dto.setAnalysisStatus(AnalysisStatus.PENDING);
-    DragenAnalysis dragenAnalysis = null;
+    DragenPipelineRun dragenPipelineRun = null;
 
     File analysisDir = new File(runDirectory, "Analysis");
 
@@ -52,14 +52,14 @@ public class ProcessDragen {
             return dto;
           }
 
-          dragenAnalysis = new DragenAnalysis(samplesheet, attemptNum);
+          dragenPipelineRun = new DragenPipelineRun(samplesheet, attemptNum);
 
           if (isWorkflowExpected(DragenWorkflow.BCL_CONVERT)) {
             BCLConvert bclConvert = new BCLConvert();
-            DragenWorkflowAnalysis result = bclConvert.process(samplesheet, analysisAttempt);
+            DragenWorkflowRun result = bclConvert.process(samplesheet, analysisAttempt);
 
             if (bclConvert.isOk()) {
-              dragenAnalysis.put(result);
+              dragenPipelineRun.put(result);
               setWorkflowComplete(DragenWorkflow.BCL_CONVERT);
             }
           }
@@ -71,7 +71,7 @@ public class ProcessDragen {
           if (allWorkflowsCompleted()) {
             dto.setAnalysisStatus(AnalysisStatus.COMPLETED);
           }
-          dto.addAnalysis(dragenAnalysis);
+          dto.addPipelineRun(dragenPipelineRun);
         }
       }
     } else { // Analysis dir does not exist - we are not expecting DRAGEN for this run.

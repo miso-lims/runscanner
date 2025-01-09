@@ -9,7 +9,7 @@ import java.util.Objects;
 // Represents one file output by DRAGEN
 public class AnalysisFile {
   private Path path;
-  private String crc32Checksum; // TODO jackson isn't deserializing this one
+  private String crc32Checksum;
   private long size;
   private Instant createdTime;
   private Instant modifiedTime;

@@ -1,15 +1,15 @@
 package ca.on.oicr.gsi.runscanner.dto.dragen;
 
-import ca.on.oicr.gsi.runscanner.dto.Analysis;
+import ca.on.oicr.gsi.runscanner.dto.PipelineRun;
 import ca.on.oicr.gsi.runscanner.dto.dragen.samplesheet.Samplesheet;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Objects;
 
 // Represents an entire attempt at a DRAGEN Pipeline
-public class DragenAnalysis extends Analysis<DragenWorkflowAnalysis> {
+public class DragenPipelineRun extends PipelineRun<DragenWorkflowRun> {
   Samplesheet samplesheet;
 
-  public DragenAnalysis(
+  public DragenPipelineRun(
       @JsonProperty("samplesheet") Samplesheet samplesheet, @JsonProperty("attempt") int attempt) {
     super(attempt);
     this.samplesheet = samplesheet;
@@ -20,14 +20,14 @@ public class DragenAnalysis extends Analysis<DragenWorkflowAnalysis> {
   }
 
   public String toString() {
-    return super.toString() + ", DragenAnalysis [samplesheet=" + samplesheet + "]";
+    return super.toString() + ", DragenPipelineRun [samplesheet=" + samplesheet + "]";
   }
 
   public boolean equals(Object obj) {
     if (this == obj) return true;
     if (!super.equals(obj)) return false;
     if (getClass() != obj.getClass()) return false;
-    DragenAnalysis other = (DragenAnalysis) obj;
+    DragenPipelineRun other = (DragenPipelineRun) obj;
 
     return Objects.equals(this.samplesheet, other.samplesheet);
   }
