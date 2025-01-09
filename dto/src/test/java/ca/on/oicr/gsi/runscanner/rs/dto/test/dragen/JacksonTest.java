@@ -135,10 +135,10 @@ public class JacksonTest {
 
   private static void assertSamplesheetBCLConvertDataEntryEqual(
       SamplesheetBCLConvertDataEntry one, SamplesheetBCLConvertDataEntry two) {
-    assertEquals(one.getLane(), two.getLane());
-    assertEquals(one.getSampleId(), two.getSampleId());
-    assertEquals(one.getIndex(), two.getIndex());
-    assertEquals(one.getIndex2(), two.getIndex2());
+    assertEquals(one.lane(), two.lane());
+    assertEquals(one.sampleId(), two.sampleId());
+    assertEquals(one.index(), two.index());
+    assertEquals(one.index2(), two.index2());
   }
 
   private static void assertSamplesheetBCLConvertSectionEqual(

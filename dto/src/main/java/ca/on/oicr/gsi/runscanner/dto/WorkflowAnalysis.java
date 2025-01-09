@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import java.time.Instant;
+import java.util.Objects;
 
 // Represents one attempt at a workflow within a suite
 @JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "suite")
@@ -42,5 +43,30 @@ public abstract class WorkflowAnalysis {
 
   public void setStartTime(Instant i) {
     this.startTime = i;
+  }
+
+  public String toString() {
+    return "WorkflowAnalysis [completionTime="
+        + completionTime
+        + ", startTime="
+        + startTime
+        + ", workflowName="
+        + workflowName
+        + "]";
+  }
+
+  public boolean equals(Object obj) {
+    if (this == obj) return true;
+    if (obj == null) return false;
+    if (getClass() != obj.getClass()) return false;
+    WorkflowAnalysis other = (WorkflowAnalysis) obj;
+
+    return Objects.equals(this.completionTime, other.completionTime)
+        && Objects.equals(this.workflowName, other.workflowName)
+        && Objects.equals(this.startTime, other.startTime);
+  }
+
+  public int hashCode() {
+    return Objects.hash(completionTime, workflowName, startTime);
   }
 }

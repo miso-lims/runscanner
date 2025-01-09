@@ -3,6 +3,7 @@ package ca.on.oicr.gsi.runscanner.dto.dragen.samplesheet;
 import java.time.Instant;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 public class Samplesheet {
   private List<SamplesheetSection> info;
@@ -38,5 +39,23 @@ public class Samplesheet {
 
   public void setModifiedTime(Instant modifiedTime) {
     this.modifiedTime = modifiedTime;
+  }
+
+  public String toString() {
+    return "Samplesheet [info=" + info + ", modifiedTime=" + modifiedTime + "]";
+  }
+
+  public boolean equals(Object obj) {
+    if (this == obj) return true;
+    if (obj == null) return false;
+    if (getClass() != obj.getClass()) return false;
+    Samplesheet other = (Samplesheet) obj;
+
+    return Objects.equals(this.info, other.info)
+        && Objects.equals(this.modifiedTime, other.modifiedTime);
+  }
+
+  public int hashCode() {
+    return Objects.hash(this.info, this.modifiedTime);
   }
 }

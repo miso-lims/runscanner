@@ -26,7 +26,7 @@ public class IlluminaNotificationDto extends NotificationDto {
 
   public List<Analysis> analysis = new LinkedList<>();
 
-  private AnalysisStatus analysisStatus;
+  private AnalysisStatus analysisStatus; // TODO move me to per-Analysis
 
   @Override
   public boolean isDone() {

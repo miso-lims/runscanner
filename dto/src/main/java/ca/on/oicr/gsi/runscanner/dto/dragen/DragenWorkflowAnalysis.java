@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 public class DragenWorkflowAnalysis extends WorkflowAnalysis {
   private List<DragenAnalysisUnit> analyses = new LinkedList<>();
@@ -67,5 +68,22 @@ public class DragenWorkflowAnalysis extends WorkflowAnalysis {
       analyses.remove(oldDragenAnalysisUnit);
     }
     analyses.add(newDragenAnalysisUnit);
+  }
+
+  public String toString() {
+    return super.toString() + ", DragenWorkflowAnalysis [analyses=" + analyses + "]";
+  }
+
+  public boolean equals(Object obj) {
+    if (this == obj) return true;
+    if (!super.equals(obj)) return false;
+    if (getClass() != obj.getClass()) return false;
+    DragenWorkflowAnalysis other = (DragenWorkflowAnalysis) obj;
+
+    return Objects.equals(this.analyses, other.analyses);
+  }
+
+  public int hashCode() {
+    return Objects.hash(super.hashCode(), this.analyses);
   }
 }

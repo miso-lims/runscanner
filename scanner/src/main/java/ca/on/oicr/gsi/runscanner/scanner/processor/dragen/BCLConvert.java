@@ -133,7 +133,7 @@ public class BCLConvert {
           DragenAnalysisUnit dragenAnalysisUnit =
               bclConvertAnalysis.get(demuxLine[1], demuxLine[0], demuxLine[2]);
           if (dragenAnalysisUnit == null) dragenAnalysisUnit = new DragenAnalysisUnit();
-          long readCount = Long.parseLong(demuxLine[3]);
+          int readCount = Integer.parseInt(demuxLine[3]);
           // Set the same read count for all files in analysis
           dragenAnalysisUnit.getFiles().forEach(file -> file.addInfoItem("read_count", readCount));
           bclConvertAnalysis.put(dragenAnalysisUnit);
@@ -151,10 +151,7 @@ public class BCLConvert {
         ((SamplesheetBCLConvertSection) samplesheet.getByName("BCLConvert")).getData()) {
       DragenAnalysisUnit dragenAnalysisUnitItem =
           bclConvertAnalysis.get(
-              item.getSampleId(),
-              item.getLane(),
-              item.getIndex(),
-              reverseComplement(item.getIndex2()));
+              item.sampleId(), item.lane(), item.index(), reverseComplement(item.index2()));
       if (dragenAnalysisUnitItem == null || dragenAnalysisUnitItem.isEmpty()) {
         isOk = false;
         break;

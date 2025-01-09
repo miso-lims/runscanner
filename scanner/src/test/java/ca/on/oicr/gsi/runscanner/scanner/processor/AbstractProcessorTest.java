@@ -3,14 +3,23 @@ package ca.on.oicr.gsi.runscanner.scanner.processor;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
+import ca.on.oicr.gsi.runscanner.dto.Analysis;
+import ca.on.oicr.gsi.runscanner.dto.IlluminaNotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.OxfordNanoporeNotificationDto;
+import ca.on.oicr.gsi.runscanner.dto.WorkflowAnalysis;
+import ca.on.oicr.gsi.runscanner.dto.dragen.AnalysisFile;
+import ca.on.oicr.gsi.runscanner.dto.dragen.DragenAnalysis;
+import ca.on.oicr.gsi.runscanner.dto.dragen.DragenAnalysisUnit;
+import ca.on.oicr.gsi.runscanner.dto.dragen.DragenWorkflowAnalysis;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.time.Instant;
 import org.junit.Test;
 
 public abstract class AbstractProcessorTest {
@@ -21,6 +30,7 @@ public abstract class AbstractProcessorTest {
     this.clazz = clazz;
   }
 
+  // TODO strip out path before runscanner/
   protected final void checkDirectory(String root)
       throws JsonParseException, JsonMappingException, IOException {
     ObjectMapper mapper = RunProcessor.createObjectMapper();
@@ -46,6 +56,39 @@ public abstract class AbstractProcessorTest {
       // For only Oxford Nanopore processors
       if (clazz.equals(OxfordNanoporeNotificationDto.class)) {
         ((OxfordNanoporeNotificationDto) result).setProtocolVersion(null);
+      }
+
+      // For only Illumina runs with DRAGEN analysis, strip out times in the DRAGEN analysis
+      // Because git is liable to change each files mtime
+      // TODO this is a ratking of a for loop
+      if (clazz.equals(IlluminaNotificationDto.class)) {
+        IlluminaNotificationDto illuminaResult = (IlluminaNotificationDto) result;
+        if (!illuminaResult.analysis.isEmpty()) {
+          for (Analysis<?> a : illuminaResult.analysis) {
+            if (a instanceof DragenAnalysis) {
+              ((DragenAnalysis) a).getSamplesheet().setModifiedTime(Instant.EPOCH);
+            }
+            for (WorkflowAnalysis wa : a.getAnalyses()) {
+              wa.setCompletionTime(Instant.EPOCH);
+              wa.setStartTime(Instant.EPOCH);
+              if (wa instanceof DragenWorkflowAnalysis) {
+                for (DragenAnalysisUnit dau : ((DragenWorkflowAnalysis) wa).getAnalyses()) {
+                  for (AnalysisFile af : dau.getFiles()) {
+                    af.setCreatedTime(Instant.EPOCH);
+                    af.setModifiedTime(Instant.EPOCH);
+
+                    // Strip away /home/user/workspace/etc from path to match reference
+                    Path pathToCut = af.getPath();
+                    while (!pathToCut.getName(0).equals(Path.of("runscanner"))) {
+                      pathToCut = pathToCut.subpath(1, pathToCut.getNameCount());
+                    }
+                    af.setPath(pathToCut);
+                  }
+                }
+              }
+            }
+          }
+        }
       }
 
       // For all processors
