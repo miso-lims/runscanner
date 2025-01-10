@@ -36,16 +36,13 @@ necessary, and populate it with the following information:
 
     <Context>
         <Parameter name="runscanner.configFile" value="/etc/runscanner.json" override="false"/>
-        <Parameter name="swagger.baseUrl" value="http://runscanner:8080"/>
     </Context>
 
-Base URL can usually be determined automatically, but may need manual setting if behind a reverse
-proxy, depending on its configuration:
-`swagger.baseUrl=http://runscanner:8080`
+OPTIONAL: Base URL can usually be determined automatically, but may need manual setting if behind a 
+reverse proxy, depending on its configuration:
+If needed, add this additional parameter to `${CONTEXT}.xml` 
+`<Parameter name="swagger.baseUrl" value="http://runscanner:8080"/>`
 
-If you're deploying Run Scanner to a non-root context, then the property 
-should be:
-`swagger.baseUrl=http://runscanner:8080/${CONTEXT}`
 
 `/etc/runscanner.json` is the default location of the instrument
 descriptions, however this can be changed if necessary. Create this file,
