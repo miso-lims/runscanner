@@ -40,8 +40,9 @@ necessary, and populate it with the following information:
 
 OPTIONAL: Base URL can usually be determined automatically, but may need manual setting if behind a 
 reverse proxy, depending on its configuration:
-If needed, add this additional parameter to `${CONTEXT}.xml` 
-`<Parameter name="swagger.baseUrl" value="http://runscanner:8080"/>`
+If needed, add this additional parameter to `${CONTEXT}.xml`
+
+    <Parameter name="swagger.baseUrl" value="http://runscanner:8080"/>
 
 
 `/etc/runscanner.json` is the default location of the instrument
