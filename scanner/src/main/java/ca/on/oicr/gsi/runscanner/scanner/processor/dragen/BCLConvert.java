@@ -18,13 +18,9 @@ import org.slf4j.LoggerFactory;
 
 public class BCLConvert {
   private static final Logger log = LoggerFactory.getLogger(BCLConvert.class);
-  private boolean isOk = false;
 
-  public boolean isOk() {
-    return isOk;
-  }
-
-  public DragenWorkflowRun process(Samplesheet samplesheet, File rootDir) throws IOException {
+  public static DragenWorkflowRun process(Samplesheet samplesheet, File rootDir)
+      throws IOException {
     DragenWorkflowRun bclConvertWorkflowRun = new DragenWorkflowRun("BCLConvert");
     bclConvertWorkflowRun.setStartTime(samplesheet.getModifiedTime());
     Instant max_date = Instant.MIN; // yes you read that right
@@ -146,7 +142,7 @@ public class BCLConvert {
     }
 
     // Check against samplesheet for okayness
-    isOk = true;
+    boolean isOk = true;
     for (SamplesheetBCLConvertDataEntry item :
         ((SamplesheetBCLConvertSection) samplesheet.getByName("BCLConvert")).getData()) {
       DragenAnalysisUnit dragenAnalysisUnitItem =
@@ -169,6 +165,7 @@ public class BCLConvert {
         }
       }
     }
+    if (isOk) bclConvertWorkflowRun.complete();
     return bclConvertWorkflowRun;
   }
 

@@ -2,18 +2,17 @@ package ca.on.oicr.gsi.runscanner.scanner.processor.dragen;
 
 import ca.on.oicr.gsi.runscanner.dto.IlluminaNotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.dragen.DragenPipelineRun;
-import ca.on.oicr.gsi.runscanner.dto.dragen.DragenWorkflowRun;
 import ca.on.oicr.gsi.runscanner.dto.dragen.samplesheet.Samplesheet;
 import ca.on.oicr.gsi.runscanner.dto.dragen.samplesheet.SamplesheetBCLConvertSection;
-import ca.on.oicr.gsi.runscanner.dto.type.AnalysisStatus;
 import ca.on.oicr.gsi.runscanner.dto.type.DragenWorkflow;
+import ca.on.oicr.gsi.runscanner.dto.type.PipelineStatus;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -21,14 +20,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ProcessDragen {
-  Map<DragenWorkflow, Boolean> expectedWorkflows;
-  private final Pattern HEADER = Pattern.compile("(?:\\[)(.*)(?:\\])");
-  private final String NUMERAL = "\\d+";
+  private static Set<DragenWorkflow> expectedWorkflows;
+  private static final Pattern HEADER = Pattern.compile("(?:\\[)(.*)(?:\\])");
+  private static final String NUMERAL = "\\d+";
   private static final Logger log = LoggerFactory.getLogger(ProcessDragen.class);
 
-  public IlluminaNotificationDto analyse(
+  public static IlluminaNotificationDto analyse(
       File runDirectory, TimeZone tz, IlluminaNotificationDto dto) throws IOException {
-    dto.setAnalysisStatus(AnalysisStatus.PENDING);
     DragenPipelineRun dragenPipelineRun = null;
 
     File analysisDir = new File(runDirectory, "Analysis");
@@ -36,52 +34,50 @@ public class ProcessDragen {
     // For n in Analysis/n/Data (accommodate reruns, ish. if more reruns appear, they won't be
     // scanned. Someone will need to invalidate the run with the API.)
     if (analysisDir.exists() && analysisDir.isDirectory()) {
+      dto.setAnalysisExpected(true);
+      expectedWorkflows = new HashSet<>();
       // Null pointer should never actually happen because of above checks
       for (File analysisAttempt : Objects.requireNonNull(analysisDir.listFiles())) {
         if (analysisAttempt.isDirectory() && analysisAttempt.getName().matches(NUMERAL)) {
-          expectedWorkflows = new HashMap<>();
           int attemptNum = Integer.parseInt(analysisAttempt.getName());
           Samplesheet samplesheet = createSamplesheet(analysisAttempt);
-          if (samplesheet.getInfo() == null) { // no info populated if samplesheet doesn't yet exist
-            dto.setAnalysisStatus(AnalysisStatus.PENDING);
+          if (samplesheet.getInfo() == null) {
+            // no info populated if samplesheet doesn't yet exist
+            // however samplesheet doesn't drop immediately. return DTO still pending for another
+            // go-around
             return dto;
           }
 
-          if (noWorkflowsExpected()) {
-            dto.setAnalysisStatus(AnalysisStatus.COMPLETED);
-            return dto;
-          }
+          // TODO does the new model account for this case?
+          //          if (expectedWorkflows.isEmpty()) {
+          //            dto.setAnalysisStatus(PipelineStatus.COMPLETED);
+          //            return dto;
+          //          }
 
           dragenPipelineRun = new DragenPipelineRun(samplesheet, attemptNum);
 
-          if (isWorkflowExpected(DragenWorkflow.BCL_CONVERT)) {
-            BCLConvert bclConvert = new BCLConvert();
-            DragenWorkflowRun result = bclConvert.process(samplesheet, analysisAttempt);
-
-            if (bclConvert.isOk()) {
-              dragenPipelineRun.put(result);
-              setWorkflowComplete(DragenWorkflow.BCL_CONVERT);
-            }
+          if (expectedWorkflows.contains(DragenWorkflow.BCL_CONVERT)) {
+            dragenPipelineRun.put(BCLConvert.process(samplesheet, analysisAttempt));
           }
 
           // Phase 2: more workflows go here
 
           // TODO (Phase 2): move manifest parsing here so maybe we can avoid looping over it
 
-          if (allWorkflowsCompleted()) {
-            dto.setAnalysisStatus(AnalysisStatus.COMPLETED);
+          dragenPipelineRun.tryComplete();
+          if (dragenPipelineRun.getPipelineStatus().equals(PipelineStatus.COMPLETE)) {
+            dto.addPipelineRun(dragenPipelineRun);
           }
-          dto.addPipelineRun(dragenPipelineRun);
         }
       }
     } else { // Analysis dir does not exist - we are not expecting DRAGEN for this run.
-      dto.setAnalysisStatus(AnalysisStatus.NONE);
+      dto.setAnalysisExpected(false);
     }
 
     return dto;
   }
 
-  private Samplesheet createSamplesheet(File rootDir) throws IOException {
+  private static Samplesheet createSamplesheet(File rootDir) throws IOException {
     // Both copies DRAGEN makes of the SampleSheet are within BCLConvert
     // This is probably OK because we can't do any more analysis without it
     Samplesheet temp = new Samplesheet();
@@ -137,7 +133,7 @@ public class ProcessDragen {
             bclConvertSection.addDatum(
                 line[laneIndex], line[sampleIndex], line[indexIndex], line[index2Index]);
             temp.addToSamplesheet(bclConvertSection);
-            expectedWorkflows.put(DragenWorkflow.BCL_CONVERT, Boolean.FALSE);
+            expectedWorkflows.add(DragenWorkflow.BCL_CONVERT);
             break;
           case "BCLConvert_Settings":
             bclConvertSection = (SamplesheetBCLConvertSection) temp.getByName("BCLConvert");
@@ -146,7 +142,7 @@ public class ProcessDragen {
             }
             bclConvertSection.addSetting(line[0], line[1]);
             temp.addToSamplesheet(bclConvertSection);
-            expectedWorkflows.put(DragenWorkflow.BCL_CONVERT, Boolean.FALSE);
+            expectedWorkflows.add(DragenWorkflow.BCL_CONVERT);
           default:
             break;
         }
@@ -156,33 +152,5 @@ public class ProcessDragen {
       log.info("No samplesheet for {}, will look again later", rootDir);
     }
     return temp;
-  }
-
-  public void setWorkflowComplete(DragenWorkflow wf) {
-    throwForUnexpectedWorkflow(wf);
-    expectedWorkflows.put(wf, Boolean.TRUE);
-  }
-
-  public Boolean isWorkflowCompleted(DragenWorkflow wf) {
-    throwForUnexpectedWorkflow(wf);
-    return expectedWorkflows.get(wf);
-  }
-
-  public boolean allWorkflowsCompleted() {
-    return expectedWorkflows.values().stream().allMatch(b -> b.equals(Boolean.TRUE));
-  }
-
-  public boolean isWorkflowExpected(DragenWorkflow wf) {
-    return expectedWorkflows.containsKey(wf);
-  }
-
-  public boolean noWorkflowsExpected() {
-    return expectedWorkflows.isEmpty();
-  }
-
-  private void throwForUnexpectedWorkflow(DragenWorkflow wf) {
-    if (!isWorkflowExpected(wf))
-      throw new IllegalStateException(
-          "Cannot perform operation for unexpected DRAGEN Workflow " + wf.name());
   }
 }

@@ -1,8 +1,8 @@
 package ca.on.oicr.gsi.runscanner.dto;
 
-import ca.on.oicr.gsi.runscanner.dto.type.AnalysisStatus;
 import ca.on.oicr.gsi.runscanner.dto.type.IlluminaChemistry;
 import ca.on.oicr.gsi.runscanner.dto.type.IndexSequencing;
+import ca.on.oicr.gsi.runscanner.dto.type.PipelineStatus;
 import ca.on.oicr.gsi.runscanner.dto.type.Platform;
 import java.util.LinkedList;
 import java.util.List;
@@ -26,13 +26,22 @@ public class IlluminaNotificationDto extends NotificationDto {
 
   public List<PipelineRun> pipelineRuns = new LinkedList<>();
 
-  private AnalysisStatus analysisStatus; // TODO move me to per-Analysis
+  private boolean analysisExpected;
 
   @Override
   public boolean isDone() {
-    return getHealthType().isDone()
-        && (analysisStatus.equals(AnalysisStatus.COMPLETED)
-            || analysisStatus.equals(AnalysisStatus.NONE));
+    boolean analysisDoneIfExpected = true;
+    if (analysisExpected) {
+      if (pipelineRuns.isEmpty()) {
+        analysisDoneIfExpected = false;
+      }
+      for (PipelineRun pr : pipelineRuns) {
+        if (!pr.getPipelineStatus().equals(PipelineStatus.COMPLETE)) {
+          analysisDoneIfExpected = false;
+        }
+      }
+    }
+    return getHealthType().isDone() && analysisDoneIfExpected;
   }
 
   @Override
@@ -56,7 +65,7 @@ public class IlluminaNotificationDto extends NotificationDto {
         && Objects.equals(this.workflowType, other.workflowType)
         && Objects.equals(this.indexSequencing, other.indexSequencing)
         && Objects.equals(this.pipelineRuns, other.pipelineRuns)
-        && Objects.equals(this.analysisStatus, other.analysisStatus);
+        && Objects.equals(this.analysisExpected, other.analysisExpected);
   }
 
   public int getBclCount() {
@@ -141,7 +150,7 @@ public class IlluminaNotificationDto extends NotificationDto {
         workflowType,
         indexSequencing,
         pipelineRuns,
-        analysisStatus);
+        analysisExpected);
   }
 
   public void setBclCount(int bclCount) {
@@ -200,16 +209,16 @@ public class IlluminaNotificationDto extends NotificationDto {
     return pipelineRuns.get(i);
   }
 
-  public AnalysisStatus getAnalysisStatus() {
-    return analysisStatus;
+  public boolean isAnalysisExpected() {
+    return analysisExpected;
   }
 
   public void addPipelineRun(PipelineRun a) {
     pipelineRuns.add(a);
   }
 
-  public void setAnalysisStatus(AnalysisStatus analysisStatus) {
-    this.analysisStatus = analysisStatus;
+  public void setAnalysisExpected(boolean b) {
+    this.analysisExpected = b;
   }
 
   @Override
@@ -243,8 +252,8 @@ public class IlluminaNotificationDto extends NotificationDto {
         + indexSequencing
         + ", pipelineRuns="
         + pipelineRuns
-        + ", analysisStatus="
-        + analysisStatus
+        + ", analysisExpected="
+        + analysisExpected
         + "]";
   }
 }

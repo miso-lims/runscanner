@@ -1,7 +1,7 @@
 package ca.on.oicr.gsi.runscanner.dto.type;
 
-public enum AnalysisStatus {
+public enum WorkflowRunStatus {
   PENDING,
-  COMPLETED,
-  NONE
+  COMPLETE,
+  FAILED
 }

@@ -1,6 +1,7 @@
 package ca.on.oicr.gsi.runscanner.dto;
 
 import ca.on.oicr.gsi.runscanner.dto.dragen.DragenWorkflowRun;
+import ca.on.oicr.gsi.runscanner.dto.type.WorkflowRunStatus;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
@@ -20,9 +21,11 @@ public abstract class WorkflowRun {
   private Instant completionTime;
   private Instant startTime;
   private final String workflowName;
+  private WorkflowRunStatus workflowRunStatus;
 
   public WorkflowRun(String workflowName) {
     this.workflowName = workflowName;
+    this.workflowRunStatus = WorkflowRunStatus.PENDING;
   }
 
   public Instant getCompletionTime() {
@@ -31,6 +34,10 @@ public abstract class WorkflowRun {
 
   public String getWorkflowName() {
     return workflowName;
+  }
+
+  public WorkflowRunStatus getWorkflowRunStatus() {
+    return workflowRunStatus;
   }
 
   public void setCompletionTime(Instant i) {
@@ -45,6 +52,14 @@ public abstract class WorkflowRun {
     this.startTime = i;
   }
 
+  public void complete() {
+    this.workflowRunStatus = WorkflowRunStatus.COMPLETE;
+  }
+
+  public void fail() {
+    this.workflowRunStatus = WorkflowRunStatus.FAILED;
+  }
+
   public String toString() {
     return "WorkflowRun [completionTime="
         + completionTime
@@ -52,6 +67,8 @@ public abstract class WorkflowRun {
         + startTime
         + ", workflowName="
         + workflowName
+        + ", workflowRunStatus="
+        + workflowRunStatus
         + "]";
   }
 
@@ -63,10 +80,11 @@ public abstract class WorkflowRun {
 
     return Objects.equals(this.completionTime, other.completionTime)
         && Objects.equals(this.workflowName, other.workflowName)
-        && Objects.equals(this.startTime, other.startTime);
+        && Objects.equals(this.startTime, other.startTime)
+        && Objects.equals(this.workflowRunStatus, other.workflowRunStatus);
   }
 
   public int hashCode() {
-    return Objects.hash(completionTime, workflowName, startTime);
+    return Objects.hash(completionTime, workflowName, startTime, workflowRunStatus);
   }
 }
