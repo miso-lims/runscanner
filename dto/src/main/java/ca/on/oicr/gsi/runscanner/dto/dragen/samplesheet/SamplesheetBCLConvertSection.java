@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Objects;
 
 public class SamplesheetBCLConvertSection implements SamplesheetSection {
-  // This could be a record, but the code formatter crashes if i try
+  // TODO: This could be a record, but the code formatter crashes if i try
   public static final class SamplesheetBCLConvertDataEntry {
 
     private final String lane;
@@ -27,19 +27,19 @@ public class SamplesheetBCLConvertSection implements SamplesheetSection {
       this.index2 = index2;
     }
 
-    public String lane() {
+    public String getLane() {
       return lane;
     }
 
-    public String sampleId() {
+    public String getSampleId() {
       return sampleId;
     }
 
-    public String index() {
+    public String getIndex() {
       return index;
     }
 
-    public String index2() {
+    public String getIndex2() {
       return index2;
     }
 

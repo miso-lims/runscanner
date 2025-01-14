@@ -147,7 +147,10 @@ public class BCLConvert {
         ((SamplesheetBCLConvertSection) samplesheet.getByName("BCLConvert")).getData()) {
       DragenAnalysisUnit dragenAnalysisUnitItem =
           bclConvertWorkflowRun.get(
-              item.sampleId(), item.lane(), item.index(), reverseComplement(item.index2()));
+              item.getSampleId(),
+              item.getLane(),
+              item.getIndex(),
+              reverseComplement(item.getIndex2()));
       if (dragenAnalysisUnitItem == null || dragenAnalysisUnitItem.isEmpty()) {
         isOk = false;
         break;

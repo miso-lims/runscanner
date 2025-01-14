@@ -15,6 +15,7 @@ import java.nio.file.Path;
 import java.time.Instant;
 import org.junit.jupiter.api.Test;
 
+// TODO this isn't running on build
 public class JacksonTest {
   private final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
@@ -136,10 +137,10 @@ public class JacksonTest {
 
   private static void assertSamplesheetBCLConvertDataEntryEqual(
       SamplesheetBCLConvertDataEntry one, SamplesheetBCLConvertDataEntry two) {
-    assertEquals(one.lane(), two.lane());
-    assertEquals(one.sampleId(), two.sampleId());
-    assertEquals(one.index(), two.index());
-    assertEquals(one.index2(), two.index2());
+    assertEquals(one.getLane(), two.getLane());
+    assertEquals(one.getSampleId(), two.getSampleId());
+    assertEquals(one.getIndex(), two.getIndex());
+    assertEquals(one.getIndex2(), two.getIndex2());
   }
 
   private static void assertSamplesheetBCLConvertSectionEqual(

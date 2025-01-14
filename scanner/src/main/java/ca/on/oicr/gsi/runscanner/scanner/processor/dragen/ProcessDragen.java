@@ -96,7 +96,7 @@ public class ProcessDragen {
       String sectionName = "";
       boolean bclDataFirstLine = true;
       int sampleIndex = 0, laneIndex = 0, indexIndex = 0, index2Index = 0;
-      for (String[] line : lines) {
+      for (String[] line : lines) { // TODO Header and Reads sections
         headerMatcher = HEADER.matcher(line[0]);
         if (headerMatcher.matches()) {
           // "Capturing groups are indexed from left to right, starting at one.
