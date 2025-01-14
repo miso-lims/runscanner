@@ -54,7 +54,7 @@ public class DragenWorkflowRun extends WorkflowRun {
     }
     return list.get(0);
   }
-  // TODO all this might be unneccessary
+  // TODO all this might be unneccessary? Memory addresses seem consistent when getting
   public void put(DragenAnalysisUnit newDragenAnalysisUnit) {
     for (AnalysisFile af : newDragenAnalysisUnit.getFiles()) {
       get(af.getPath()); // throw out the result, we just want the file path validation

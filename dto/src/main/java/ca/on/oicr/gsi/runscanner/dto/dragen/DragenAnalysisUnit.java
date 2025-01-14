@@ -76,8 +76,7 @@ public class DragenAnalysisUnit {
     if (getClass() != obj.getClass()) return false;
     DragenAnalysisUnit other = (DragenAnalysisUnit) obj;
 
-    return Objects.equals(
-            this.files, other.files) // TODO when we remove() in linkedlist, this might be a problem
+    return Objects.equals(this.files, other.files)
         && Objects.equals(this.index, other.index)
         && Objects.equals(this.lane, other.lane)
         && Objects.equals(this.sample, other.sample);

@@ -49,14 +49,13 @@ public class ProcessDragen {
             // go-around
             return dto;
           }
-
-          // TODO does the new model account for this case?
-          //          if (expectedWorkflows.isEmpty()) {
-          //            dto.setAnalysisStatus(PipelineStatus.COMPLETED);
-          //            return dto;
-          //          }
-
           dragenPipelineRun = new DragenPipelineRun(samplesheet, attemptNum);
+
+          if (expectedWorkflows.isEmpty()) {
+            dragenPipelineRun.setPipelineStatus(PipelineStatus.UNSUPPORTED);
+            dto.addPipelineRun(dragenPipelineRun);
+            return dto;
+          }
 
           if (expectedWorkflows.contains(DragenWorkflow.BCL_CONVERT)) {
             dragenPipelineRun.put(BCLConvert.process(samplesheet, analysisAttempt));
@@ -117,7 +116,7 @@ public class ProcessDragen {
       String sectionName = "";
       boolean bclDataFirstLine = true;
       int sampleIndex = 0, laneIndex = 0, indexIndex = 0, index2Index = 0;
-      for (String[] line : lines) { // TODO Header and Reads sections
+      for (String[] line : lines) { // TODO do we want anything from Header and Reads sections?
         headerMatcher = HEADER.matcher(line[0]);
         if (headerMatcher.matches()) {
           // "Capturing groups are indexed from left to right, starting at one.

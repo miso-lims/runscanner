@@ -59,9 +59,10 @@ public abstract class AbstractProcessorTest {
 
       // For only Illumina runs with DRAGEN analysis, strip out times in the DRAGEN analysis
       // Because git is liable to change each files mtime
-      // TODO this is a ratking of a for loop
+      // This is a ratking of a for loop, but I can't get streams to cooperate
       if (clazz.equals(IlluminaNotificationDto.class)) {
         IlluminaNotificationDto illuminaResult = (IlluminaNotificationDto) result;
+
         if (!illuminaResult.pipelineRuns.isEmpty()) {
           for (PipelineRun<?> pr : illuminaResult.pipelineRuns) {
             if (pr instanceof DragenPipelineRun) {

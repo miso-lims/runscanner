@@ -56,7 +56,6 @@ public abstract class PipelineRun<T extends WorkflowRun> {
     this.pipelineStatus = pipelineStatus;
   }
 
-  // TODO: convert all toString to use Stringbuilder
   public String toString() {
     return "PipelineRun [workflowRuns="
         + workflowRuns
