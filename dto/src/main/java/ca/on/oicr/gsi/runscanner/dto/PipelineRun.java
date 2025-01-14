@@ -2,7 +2,6 @@ package ca.on.oicr.gsi.runscanner.dto;
 
 import ca.on.oicr.gsi.runscanner.dto.dragen.DragenPipelineRun;
 import ca.on.oicr.gsi.runscanner.dto.type.PipelineStatus;
-import ca.on.oicr.gsi.runscanner.dto.type.WorkflowRunStatus;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
@@ -53,14 +52,8 @@ public abstract class PipelineRun<T extends WorkflowRun> {
     return workflowRuns;
   }
 
-  public void tryComplete() {
-    for (WorkflowRun wr : workflowRuns) {
-      if (wr.getWorkflowRunStatus().equals(WorkflowRunStatus.PENDING)
-          || wr.getWorkflowRunStatus().equals(WorkflowRunStatus.FAILED)) { // TODO: yeah?
-        return;
-      }
-    }
-    this.pipelineStatus = PipelineStatus.COMPLETE;
+  public void setPipelineStatus(PipelineStatus pipelineStatus) {
+    this.pipelineStatus = pipelineStatus;
   }
 
   // TODO: convert all toString to use Stringbuilder

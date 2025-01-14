@@ -1,11 +1,13 @@
 package ca.on.oicr.gsi.runscanner.scanner.processor.dragen;
 
 import ca.on.oicr.gsi.runscanner.dto.IlluminaNotificationDto;
+import ca.on.oicr.gsi.runscanner.dto.WorkflowRun;
 import ca.on.oicr.gsi.runscanner.dto.dragen.DragenPipelineRun;
 import ca.on.oicr.gsi.runscanner.dto.dragen.samplesheet.Samplesheet;
 import ca.on.oicr.gsi.runscanner.dto.dragen.samplesheet.SamplesheetBCLConvertSection;
 import ca.on.oicr.gsi.runscanner.dto.type.DragenWorkflow;
 import ca.on.oicr.gsi.runscanner.dto.type.PipelineStatus;
+import ca.on.oicr.gsi.runscanner.dto.type.WorkflowRunStatus;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -64,8 +66,27 @@ public class ProcessDragen {
 
           // TODO (Phase 2): move manifest parsing here so maybe we can avoid looping over it
 
-          dragenPipelineRun.tryComplete();
-          if (dragenPipelineRun.getPipelineStatus().equals(PipelineStatus.COMPLETE)) {
+          // WorkflowRuns that appear to be still pending when Secondary_Analysis_Complete
+          // is created are actually failed.
+          // Truly pending WorkflowRuns keep a PipelineRun from being complete, but
+          // failed jobs do not - downstream consumers must check WorkflowRunStatus
+          File secondaryAnalysisComplete =
+              new File(analysisAttempt, "Data/Secondary_Analysis_Complete.txt");
+          boolean secondaryAnalysisCompletePresent =
+              (secondaryAnalysisComplete.exists() && secondaryAnalysisComplete.isFile());
+          boolean allComplete = true;
+
+          for (WorkflowRun wr : dragenPipelineRun.getWorkflowRuns()) {
+            if (wr.getWorkflowRunStatus() == WorkflowRunStatus.PENDING) {
+              if (secondaryAnalysisCompletePresent) {
+                wr.fail();
+              } else {
+                allComplete = false;
+              }
+            }
+          }
+          if (allComplete) {
+            dragenPipelineRun.setPipelineStatus(PipelineStatus.COMPLETE);
             dto.addPipelineRun(dragenPipelineRun);
           }
         }
