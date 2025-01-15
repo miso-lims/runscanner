@@ -2,6 +2,9 @@ package ca.on.oicr.gsi.runscanner.scanner;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.servers.Server;
+import jakarta.servlet.ServletContext;
+import java.util.Collections;
 import org.springdoc.core.configuration.SpringDocConfiguration;
 import org.springdoc.core.configuration.SpringDocSpecPropertiesConfiguration;
 import org.springdoc.core.configuration.SpringDocUIConfiguration;
@@ -45,7 +48,14 @@ public class SwaggerConfig {
   }
 
   @Bean
-  public OpenAPI openApi() {
-    return new OpenAPI().info(new Info().title(projectName).version(projectVersion));
+  public OpenAPI openApi(
+      ServletContext servletContext, @Value("${swagger.baseUrl:#{null}") String baseUrl) {
+    Server server =
+        new Server()
+            .url(baseUrl != null ? baseUrl : servletContext.getContextPath())
+            .description("Default server URL");
+    return new OpenAPI()
+        .info(new Info().title(projectName).version(projectVersion))
+        .servers(Collections.singletonList(server));
   }
 }

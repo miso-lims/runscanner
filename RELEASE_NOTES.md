@@ -2,7 +2,8 @@
 
 Changes:
 
-  * Update clang in CI from 12 to 14
+  * Update clang in CI from 12 to 14 
+  * Fixed Run Scanner's interactive Swagger docs generating incorrect URLs in some configurations
 
 # 2.0.1
 
