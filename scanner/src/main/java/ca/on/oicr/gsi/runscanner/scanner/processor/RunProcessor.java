@@ -6,13 +6,20 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.TimeZone;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Stream;
+import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;
@@ -22,6 +29,7 @@ import javax.xml.xpath.XPathFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 /**
@@ -121,8 +129,17 @@ public abstract class RunProcessor {
 
   public static Optional<Document> parseXml(File file) {
     try {
-      return Optional.of(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(file));
-    } catch (SAXException | ParserConfigurationException | IOException e) {
+      DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+      // Parse using an InputStreamReader with UTF-8
+      try (InputStream inputStream = new FileInputStream(file);
+          Reader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
+        return Optional.of(builder.parse(new InputSource(reader)));
+      } catch (FileNotFoundException | SAXException e) {
+        log.error("Failed to parse XML", e);
+        return Optional.empty();
+      }
+
+    } catch (ParserConfigurationException | IOException e) {
       log.error("Failed to parse XML", e);
       return Optional.empty();
     }
