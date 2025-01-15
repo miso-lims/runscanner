@@ -1,5 +1,9 @@
 # Unreleased
 
+Changes:
+
+  * Update clang in CI from 12 to 14
+
 # 2.0.1
 
 Changes:

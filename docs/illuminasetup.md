@@ -3,7 +3,7 @@ _runscanner-illumina_ must be built.
 
 You will need a copy of [jsoncpp](https://github.com/open-source-parsers/jsoncpp) and an AutoTools-capable build environment with libstdc++ 5 or later. On Debian/Ubuntu:
 
-    sudo apt-get install pkg-config cmake libjsoncpp-dev autoconf libtool build-essential clang-12
+    sudo apt-get install pkg-config cmake libjsoncpp-dev autoconf libtool build-essential clang-14
 
 On Fedora/Red Hat:
 
