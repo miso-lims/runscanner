@@ -79,7 +79,7 @@ public abstract class AbstractProcessorTest {
 
                     // Strip away /home/user/workspace/etc from path to match reference
                     Path pathToCut = af.getPath();
-                    while (!pathToCut.getName(0).equals(Path.of("runscanner"))) {
+                    while (!pathToCut.getName(0).equals(Path.of("scanner"))) {
                       pathToCut = pathToCut.subpath(1, pathToCut.getNameCount());
                     }
                     af.setPath(pathToCut);
