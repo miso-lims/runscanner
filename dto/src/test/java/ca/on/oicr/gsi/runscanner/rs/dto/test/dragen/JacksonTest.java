@@ -1,7 +1,5 @@
 package ca.on.oicr.gsi.runscanner.rs.dto.test.dragen;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import ca.on.oicr.gsi.runscanner.dto.dragen.AnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.dragen.DragenAnalysisUnit;
 import ca.on.oicr.gsi.runscanner.dto.dragen.DragenPipelineRun;
@@ -13,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.nio.file.Path;
 import java.time.Instant;
+import org.junit.Assert;
 import org.junit.Test;
 
 public class JacksonTest {
@@ -136,52 +135,52 @@ public class JacksonTest {
 
   private static void assertSamplesheetBCLConvertDataEntryEqual(
       SamplesheetBCLConvertDataEntry one, SamplesheetBCLConvertDataEntry two) {
-    assertEquals(one.getLane(), two.getLane());
-    assertEquals(one.getSampleId(), two.getSampleId());
-    assertEquals(one.getIndex(), two.getIndex());
-    assertEquals(one.getIndex2(), two.getIndex2());
+    Assert.assertEquals(one.getLane(), two.getLane());
+    Assert.assertEquals(one.getSampleId(), two.getSampleId());
+    Assert.assertEquals(one.getIndex(), two.getIndex());
+    Assert.assertEquals(one.getIndex2(), two.getIndex2());
   }
 
   private static void assertSamplesheetBCLConvertSectionEqual(
       SamplesheetBCLConvertSection one, SamplesheetBCLConvertSection two) {
-    assertEquals(one.getName(), two.getName());
-    assertEquals(one.getSettings(), two.getSettings());
+    Assert.assertEquals(one.getName(), two.getName());
+    Assert.assertEquals(one.getSettings(), two.getSettings());
     assertSamplesheetBCLConvertDataEntryEqual(one.getData().get(0), two.getData().get(0));
   }
 
   private static void assertSamplesheetEqual(Samplesheet one, Samplesheet two) {
-    assertEquals(one.getModifiedTime(), two.getModifiedTime());
+    Assert.assertEquals(one.getModifiedTime(), two.getModifiedTime());
     assertSamplesheetBCLConvertSectionEqual(
         (SamplesheetBCLConvertSection) one.getByName("BCLConvert"),
         (SamplesheetBCLConvertSection) two.getByName("BCLConvert"));
   }
 
   private static void assertAnalysisFileEqual(AnalysisFile one, AnalysisFile two) {
-    assertEquals(one.getPath(), two.getPath());
-    assertEquals(one.getCrc32Checksum(), two.getCrc32Checksum());
-    assertEquals(one.getModifiedTime(), two.getModifiedTime());
-    assertEquals(one.getCreatedTime(), two.getCreatedTime());
-    assertEquals(one.getSize(), two.getSize());
+    Assert.assertEquals(one.getPath(), two.getPath());
+    Assert.assertEquals(one.getCrc32Checksum(), two.getCrc32Checksum());
+    Assert.assertEquals(one.getModifiedTime(), two.getModifiedTime());
+    Assert.assertEquals(one.getCreatedTime(), two.getCreatedTime());
+    Assert.assertEquals(one.getSize(), two.getSize());
   }
 
   private static void assertDragenAnalysisUnitEqual(
       DragenAnalysisUnit one, DragenAnalysisUnit two) {
-    assertEquals(one.getSample(), two.getSample());
-    assertEquals(one.getLane(), two.getLane());
-    assertEquals(one.getIndex(), two.getIndex());
+    Assert.assertEquals(one.getSample(), two.getSample());
+    Assert.assertEquals(one.getLane(), two.getLane());
+    Assert.assertEquals(one.getIndex(), two.getIndex());
     assertAnalysisFileEqual(one.getFiles().get(0), two.getFiles().get(0));
   }
 
   private static void assertDragenWorkflowAnalysisEqual(
       DragenWorkflowRun one, DragenWorkflowRun two) {
-    assertEquals(one.getWorkflowName(), two.getWorkflowName());
-    assertEquals(one.getStartTime(), two.getStartTime());
-    assertEquals(one.getCompletionTime(), two.getCompletionTime());
+    Assert.assertEquals(one.getWorkflowName(), two.getWorkflowName());
+    Assert.assertEquals(one.getStartTime(), two.getStartTime());
+    Assert.assertEquals(one.getCompletionTime(), two.getCompletionTime());
     assertDragenAnalysisUnitEqual(one.getAnalysisOutputs().get(0), two.getAnalysisOutputs().get(0));
   }
 
   private static void assertDragenAnalysisEqual(DragenPipelineRun one, DragenPipelineRun two) {
-    assertEquals(one.getAttempt(), two.getAttempt());
+    Assert.assertEquals(one.getAttempt(), two.getAttempt());
     assertSamplesheetEqual(one.getSamplesheet(), two.getSamplesheet());
     assertDragenWorkflowAnalysisEqual(one.getWorkflowRuns().get(0), two.getWorkflowRuns().get(0));
   }

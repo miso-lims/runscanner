@@ -153,7 +153,7 @@ public final class DefaultIllumina extends RunProcessor {
    * @param parameters ObjectNode possibly containing scanDragen parameter
    * @return true if scanDragen is true, false if scanDragen is null or false
    */
-  static boolean calculateScanDragen(ObjectNode parameters) {
+  private static boolean calculateScanDragen(ObjectNode parameters) {
     return parameters.hasNonNull("scanDragen") && parameters.get("scanDragen").asBoolean();
   }
   /**
@@ -165,7 +165,7 @@ public final class DefaultIllumina extends RunProcessor {
    * @param parameters ObjectNode possibly containing checkOutput parameter
    * @return true if checkOutput is true or null, false if checkOutput is explicitly false.
    */
-  static boolean calculateCheckOutput(ObjectNode parameters) {
+  private static boolean calculateCheckOutput(ObjectNode parameters) {
     return !parameters.hasNonNull("checkOutput") || parameters.get("checkOutput").asBoolean();
   }
 
@@ -261,7 +261,7 @@ public final class DefaultIllumina extends RunProcessor {
    * @param tz Time Zone to expect for datetime string
    * @return Module with custom Instant parsing
    */
-  Module setUpCustomModule(TimeZone tz) {
+  private Module setUpCustomModule(TimeZone tz) {
     SimpleModule module = new SimpleModule("customInstantParsingModule");
 
     module.addSerializer(
@@ -460,12 +460,11 @@ public final class DefaultIllumina extends RunProcessor {
           Path baseCallDirectory =
               Paths.get(dto.getSequencerFolderPath(), "Data", "Intensities", "BaseCalls");
           // Check that each lane directory is complete
-          IlluminaNotificationDto finalDto = dto;
           boolean dataCopied =
               IntStream.rangeClosed(1, dto.getLaneCount()) //
                   .mapToObj(lane -> String.format("L%03d", lane)) //
                   .map(baseCallDirectory::resolve) //
-                  .allMatch(laneDir -> isLaneComplete(laneDir, finalDto));
+                  .allMatch(laneDir -> isLaneComplete(laneDir, dto));
           if (!dataCopied) {
             updatedHealth = Optional.of(HealthType.RUNNING);
             completness_method_success.labelValues("dirscan").inc();
