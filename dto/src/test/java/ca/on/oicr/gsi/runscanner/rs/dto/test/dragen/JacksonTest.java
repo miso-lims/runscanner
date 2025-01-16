@@ -13,9 +13,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.nio.file.Path;
 import java.time.Instant;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
-// TODO this isn't running on build
 public class JacksonTest {
   private final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
