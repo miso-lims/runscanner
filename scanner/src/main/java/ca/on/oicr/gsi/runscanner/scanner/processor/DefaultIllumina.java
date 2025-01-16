@@ -57,7 +57,7 @@ import org.w3c.dom.Document;
  *
  * <p>This should work for all sequencers except the Genome Analyzer and Genome Analyzer II.
  */
-public class DefaultIllumina extends RunProcessor {
+public final class DefaultIllumina extends RunProcessor {
   private static final LatencyHistogram directory_scan_time =
       new LatencyHistogram(
           "runscanner_illumina_file_completness_time",
