@@ -460,11 +460,12 @@ public final class DefaultIllumina extends RunProcessor {
           Path baseCallDirectory =
               Paths.get(dto.getSequencerFolderPath(), "Data", "Intensities", "BaseCalls");
           // Check that each lane directory is complete
+          IlluminaNotificationDto finalDto = dto;
           boolean dataCopied =
               IntStream.rangeClosed(1, dto.getLaneCount()) //
                   .mapToObj(lane -> String.format("L%03d", lane)) //
                   .map(baseCallDirectory::resolve) //
-                  .allMatch(laneDir -> isLaneComplete(laneDir, dto));
+                  .allMatch(laneDir -> isLaneComplete(laneDir, finalDto));
           if (!dataCopied) {
             updatedHealth = Optional.of(HealthType.RUNNING);
             completness_method_success.labelValues("dirscan").inc();
