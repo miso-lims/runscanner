@@ -4,6 +4,7 @@ import ca.on.oicr.gsi.runscanner.dto.dragen.AnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.dragen.DragenAnalysisUnit;
 import ca.on.oicr.gsi.runscanner.dto.dragen.DragenPipelineRun;
 import ca.on.oicr.gsi.runscanner.dto.dragen.DragenWorkflowRun;
+import ca.on.oicr.gsi.runscanner.dto.dragen.FastqAnalysisFile;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.nio.file.Path;
@@ -18,7 +19,7 @@ public class JacksonTest {
   public void testAnalysisFileSerializeDeserialize() throws Exception {
     AnalysisFile file = makeAnalysisFile();
     String serialized = mapper.writeValueAsString(file);
-    AnalysisFile deserialized = mapper.readerFor(AnalysisFile.class).readValue(serialized);
+    AnalysisFile deserialized = mapper.readerFor(FastqAnalysisFile.class).readValue(serialized);
     assertAnalysisFileEqual(file, deserialized);
   }
 
@@ -53,7 +54,7 @@ public class JacksonTest {
   }
 
   private AnalysisFile makeAnalysisFile() {
-    AnalysisFile file = new AnalysisFile();
+    AnalysisFile file = new FastqAnalysisFile();
     file.setPath(Path.of("/", "path", "to", "file"));
     file.setCrc32Checksum("abcdefg");
     file.setModifiedTime(Instant.EPOCH);

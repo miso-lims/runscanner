@@ -133,7 +133,7 @@ public class ProcessDragen {
             if (bclDataFirstLine) {
               for (int i = 0; i < line.length; i++) {
                 // TODO BarcodeMismatchesIndex1 and 2
-                // TODO a couple samplesheets only have Lane and Sample_ID, should we support that?
+                // TODO a couple samplesheets only have Lane and Sample_ID, this needs support
                 // TODO there is almost certainly a better way to do this lol
                 switch (line[i]) {
                   case "Lane":

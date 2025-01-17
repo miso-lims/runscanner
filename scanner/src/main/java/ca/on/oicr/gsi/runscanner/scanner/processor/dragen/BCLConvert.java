@@ -3,6 +3,7 @@ package ca.on.oicr.gsi.runscanner.scanner.processor.dragen;
 import ca.on.oicr.gsi.runscanner.dto.dragen.AnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.dragen.DragenAnalysisUnit;
 import ca.on.oicr.gsi.runscanner.dto.dragen.DragenWorkflowRun;
+import ca.on.oicr.gsi.runscanner.dto.dragen.FastqAnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.dragen.samplesheet.Samplesheet;
 import ca.on.oicr.gsi.runscanner.dto.dragen.samplesheet.SamplesheetBCLConvertSection;
 import ca.on.oicr.gsi.runscanner.dto.dragen.samplesheet.SamplesheetBCLConvertSection.SamplesheetBCLConvertDataEntry;
@@ -53,8 +54,8 @@ public class BCLConvert {
         dragenAnalysisUnit.setIndex2(index2);
 
         // TODO: what's it look like when there's only 1 read?
-        AnalysisFile file1 = analysisFileFromFilename(rootDir, fastq[4], 1),
-            file2 = analysisFileFromFilename(rootDir, fastq[5], 2);
+        AnalysisFile file1 = fastqFromFilename(rootDir, fastq[4], 1),
+            file2 = fastqFromFilename(rootDir, fastq[5], 2);
 
         if (file1 != null && file1.getModifiedTime().compareTo(max_date) > 0)
           max_date = file1.getModifiedTime();
@@ -144,7 +145,9 @@ public class BCLConvert {
           if (dragenAnalysisUnit == null) dragenAnalysisUnit = new DragenAnalysisUnit();
           int readCount = Integer.parseInt(demuxLine[3]);
           // Set the same read count for all files in analysis
-          dragenAnalysisUnit.getFiles().forEach(file -> file.addInfoItem("read_count", readCount));
+          dragenAnalysisUnit
+              .getFiles()
+              .forEach(file -> ((FastqAnalysisFile) file).setReadCount(readCount));
           bclConvertWorkflowRun.put(dragenAnalysisUnit);
         }
       } else {
@@ -169,12 +172,15 @@ public class BCLConvert {
         break;
       } else {
         for (AnalysisFile itemFile : dragenAnalysisUnitItem.getFiles()) {
-          if (itemFile == null
-              || itemFile.getPath() == null
+          // TODO there might be the override cycles in a better source
+          ((FastqAnalysisFile) itemFile).setOverrideCycles(item.getOverrideCycles());
+          if (itemFile.getPath() == null
               || itemFile.getPath().toString().isBlank()
-              || itemFile.getInfo() == null
               || itemFile.getCrc32Checksum() == null
-              || itemFile.getCrc32Checksum().isBlank()) {
+              || itemFile.getCrc32Checksum().isBlank()
+              || ((FastqAnalysisFile) itemFile).getOverrideCycles() == null
+              || ((FastqAnalysisFile) itemFile).getReadCount() == null
+              || ((FastqAnalysisFile) itemFile).getReadNumber() == null) {
             isOk = false;
             break;
           }
@@ -185,20 +191,20 @@ public class BCLConvert {
     return bclConvertWorkflowRun;
   }
 
-  private static AnalysisFile analysisFileFromFilename(
-      File rootDir, String fileName, int readNumber) throws IOException {
+  private static AnalysisFile fastqFromFilename(File rootDir, String fileName, int readNumber)
+      throws IOException {
     Path fullPath = Paths.get(rootDir.getPath(), "/Data/BCLConvert/fastq/", fileName);
     if (!Files.exists(fullPath)) {
       fullPath = Paths.get(rootDir.getPath(), "/Data/BCLConvert/ora_fastq/", fileName);
     }
     if (!Files.exists(fullPath)) return null;
-    AnalysisFile newFile = new AnalysisFile();
+    FastqAnalysisFile newFile = new FastqAnalysisFile();
     newFile.setPath(fullPath);
     newFile.setSize(Files.size(fullPath));
     newFile.setCreatedTime(Files.getLastModifiedTime(fullPath).toInstant());
     newFile.setModifiedTime(
         newFile.getCreatedTime()); // Not perfect but f/s won't give us a created time
-    newFile.addInfoItem("read_number", readNumber);
+    newFile.setReadNumber(readNumber);
     return newFile;
   }
 

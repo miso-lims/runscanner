@@ -1,21 +1,25 @@
 package ca.on.oicr.gsi.runscanner.dto.dragen;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import java.nio.file.Path;
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 
 // Represents one file output by DRAGEN
-public class AnalysisFile {
+@JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "format")
+@JsonSubTypes({ //
+  @Type(value = FastqAnalysisFile.class, name = "fastq"), //
+}) //
+public abstract class AnalysisFile {
   private Path path;
   private String crc32Checksum;
   private long size;
   private Instant createdTime;
   private Instant modifiedTime;
-
-  // What will be in this map will be unique to the particular DRAGEN Workflow
-  private Map<String, Object> info = new HashMap<>();
 
   public Instant getCreatedTime() {
     return createdTime;
@@ -57,14 +61,6 @@ public class AnalysisFile {
     this.size = l;
   }
 
-  public Map<String, Object> getInfo() {
-    return info;
-  }
-
-  public void addInfoItem(String k, Object v) {
-    info.put(k, v);
-  }
-
   public String toString() {
     return "AnalysisFile [path="
         + path
@@ -72,8 +68,6 @@ public class AnalysisFile {
         + crc32Checksum
         + ", size="
         + size
-        + ", info="
-        + info
         + ", createdTime="
         + createdTime
         + ", modifiedTime="
@@ -90,12 +84,11 @@ public class AnalysisFile {
     return Objects.equals(path, ao.getPath())
         && Objects.equals(crc32Checksum, ao.getCrc32Checksum())
         && Objects.equals(size, ao.getSize())
-        && Objects.equals(info, ao.getInfo())
         && Objects.equals(createdTime, ao.getCreatedTime())
         && Objects.equals(modifiedTime, ao.getModifiedTime());
   }
 
   public int hashCode() {
-    return Objects.hash(path, crc32Checksum, size, info, createdTime, modifiedTime);
+    return Objects.hash(path, crc32Checksum, size, createdTime, modifiedTime);
   }
 }
