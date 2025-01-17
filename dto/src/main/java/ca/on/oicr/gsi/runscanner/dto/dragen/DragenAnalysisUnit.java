@@ -8,10 +8,17 @@ import java.util.Objects;
 // Represents one unit of analysis by a DRAGEN workflow, uniquely identified by sample name, lane,
 // and index. May have many files associated with it (eg, Read 1 and Read 2 for BCLConvert)
 public class DragenAnalysisUnit {
-  private String sample;
+  private String sample, index1, index2;
   private int lane;
-  private String index;
   private List<AnalysisFile> files = new LinkedList<>();
+
+  public String getIndex1() {
+    return index1;
+  }
+
+  public String getIndex2() {
+    return index2;
+  }
 
   public String getSample() {
     return sample;
@@ -21,12 +28,16 @@ public class DragenAnalysisUnit {
     return lane;
   }
 
-  public String getIndex() {
-    return index;
-  }
-
   public List<AnalysisFile> getFiles() {
     return files;
+  }
+
+  public void setIndex1(String index1) {
+    this.index1 = index1;
+  }
+
+  public void setIndex2(String index2) {
+    this.index2 = index2;
   }
 
   public void setSample(String str) {
@@ -37,32 +48,22 @@ public class DragenAnalysisUnit {
     this.lane = i;
   }
 
-  public void setIndex(String str) {
-    this.index = str;
-  }
-
-  public void setIndex(String index1, String index2) {
-    if (index2 == null) {
-      this.setIndex(index1);
-    } else {
-      this.setIndex(new StringBuilder(index1).append("-").append(index2).toString());
-    }
-  }
-
   public void addFile(AnalysisFile file) {
     files.add(file);
   }
 
   @JsonIgnore
   public boolean isEmpty() {
-    return sample == null && lane == 0 && index == null && files.isEmpty();
+    return sample == null && lane == 0 && index1 == null && index2 == null && files.isEmpty();
   }
 
   public String toString() {
     return "DragenAnalysisUnit [files="
         + files
-        + ", index="
-        + index
+        + ", index1="
+        + index1
+        + ", index2="
+        + index2
         + ", lane="
         + lane
         + ", sample="
@@ -77,12 +78,13 @@ public class DragenAnalysisUnit {
     DragenAnalysisUnit other = (DragenAnalysisUnit) obj;
 
     return Objects.equals(this.files, other.files)
-        && Objects.equals(this.index, other.index)
+        && Objects.equals(this.index1, other.index1)
+        && Objects.equals(this.index2, other.index2)
         && Objects.equals(this.lane, other.lane)
         && Objects.equals(this.sample, other.sample);
   }
 
   public int hashCode() {
-    return Objects.hash(files, index, lane, sample);
+    return Objects.hash(files, index1, index2, lane, sample);
   }
 }

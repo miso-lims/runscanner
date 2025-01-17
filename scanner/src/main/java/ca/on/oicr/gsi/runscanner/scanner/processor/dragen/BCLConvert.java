@@ -49,7 +49,8 @@ public class BCLConvert {
         }
         dragenAnalysisUnit.setSample(fastq[1]);
         dragenAnalysisUnit.setLane(Integer.parseInt(fastq[3]));
-        dragenAnalysisUnit.setIndex(index1, index2);
+        dragenAnalysisUnit.setIndex1(index1);
+        dragenAnalysisUnit.setIndex2(index2);
 
         // TODO: what's it look like when there's only 1 read?
         AnalysisFile file1 = analysisFileFromFilename(rootDir, fastq[4], 1),
@@ -126,8 +127,20 @@ public class BCLConvert {
           // 5 = # One Mismatch Index Reads, 6 = # Two Mismatch Index Reads, 7 = % Reads,
           // 8 = % Perfect Index Reads, 9 = % One Mismatch Index Reads,
           // 10 = % Two Mismatch Index Reads
-          DragenAnalysisUnit dragenAnalysisUnit =
-              bclConvertWorkflowRun.get(demuxLine[1], demuxLine[0], demuxLine[2]);
+          // TODO: given the wwwwwwww-wwwwwwww format of this file, what does only having index2
+          // look like?
+          String[] indices = demuxLine[2].split("-");
+          DragenAnalysisUnit dragenAnalysisUnit;
+          if (indices.length == 2) {
+            dragenAnalysisUnit =
+                bclConvertWorkflowRun.get(demuxLine[1], demuxLine[0], indices[0], indices[1]);
+          } else if (indices.length == 1) {
+            dragenAnalysisUnit =
+                bclConvertWorkflowRun.get(demuxLine[1], demuxLine[0], indices[0], null);
+          } else {
+            throw new IllegalStateException(
+                "Demux indices length for " + demuxLine[1] + " is " + indices.length);
+          }
           if (dragenAnalysisUnit == null) dragenAnalysisUnit = new DragenAnalysisUnit();
           int readCount = Integer.parseInt(demuxLine[3]);
           // Set the same read count for all files in analysis

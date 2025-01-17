@@ -95,7 +95,8 @@ public class JacksonTest {
     DragenAnalysisUnit dau = new DragenAnalysisUnit();
     dau.setSample("TEST_SAMPLE");
     dau.setLane(1);
-    dau.setIndex("AAAAAA-TTTTTT");
+    dau.setIndex1("AAAAAA");
+    dau.setIndex2("TTTTTT");
     dau.addFile(makeAnalysisFile());
     return dau;
   }
@@ -167,7 +168,8 @@ public class JacksonTest {
       DragenAnalysisUnit one, DragenAnalysisUnit two) {
     Assert.assertEquals(one.getSample(), two.getSample());
     Assert.assertEquals(one.getLane(), two.getLane());
-    Assert.assertEquals(one.getIndex(), two.getIndex());
+    Assert.assertEquals(one.getIndex1(), two.getIndex1());
+    Assert.assertEquals(one.getIndex2(), two.getIndex2());
     assertAnalysisFileEqual(one.getFiles().get(0), two.getFiles().get(0));
   }
 

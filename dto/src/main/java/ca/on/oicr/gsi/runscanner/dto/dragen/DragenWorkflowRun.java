@@ -19,22 +19,18 @@ public class DragenWorkflowRun extends WorkflowRun {
   }
 
   public DragenAnalysisUnit get(String sample, String lane, String index1, String index2) {
-    return get(sample, lane, new StringBuilder(index1).append("-").append(index2).toString());
+    return get(sample, Integer.parseInt(lane), index1, index2);
   }
 
   public DragenAnalysisUnit get(String sample, int lane, String index1, String index2) {
-    return get(sample, lane, new StringBuilder(index1).append("-").append(index2).toString());
-  }
-
-  public DragenAnalysisUnit get(String sample, String lane, String index) {
-    return get(sample, Integer.parseInt(lane), index);
-  }
-
-  public DragenAnalysisUnit get(String sample, int lane, String index) {
     return analysisOutputs
         .stream()
         .filter(
-            a -> a.getSample().equals(sample) && a.getLane() == lane && a.getIndex().equals(index))
+            a ->
+                a.getSample().equals(sample)
+                    && a.getLane() == lane
+                    && a.getIndex1().equals(index1)
+                    && a.getIndex2().equals(index2))
         .findFirst()
         .orElse(null);
   }
@@ -63,7 +59,8 @@ public class DragenWorkflowRun extends WorkflowRun {
         get(
             newDragenAnalysisUnit.getSample(),
             newDragenAnalysisUnit.getLane(),
-            newDragenAnalysisUnit.getIndex());
+            newDragenAnalysisUnit.getIndex1(),
+            newDragenAnalysisUnit.getIndex2());
     if (oldDragenAnalysisUnit != null && !oldDragenAnalysisUnit.isEmpty()) {
       analysisOutputs.remove(oldDragenAnalysisUnit);
     }
