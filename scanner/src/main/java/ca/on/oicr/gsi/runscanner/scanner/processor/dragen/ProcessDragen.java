@@ -5,14 +5,17 @@ import ca.on.oicr.gsi.runscanner.dto.WorkflowRun;
 import ca.on.oicr.gsi.runscanner.dto.dragen.DragenPipelineRun;
 import ca.on.oicr.gsi.runscanner.dto.dragen.samplesheet.Samplesheet;
 import ca.on.oicr.gsi.runscanner.dto.dragen.samplesheet.SamplesheetBCLConvertSection;
+import ca.on.oicr.gsi.runscanner.dto.dragen.samplesheet.SamplesheetBCLConvertSection.SamplesheetBCLConvertDataEntry;
 import ca.on.oicr.gsi.runscanner.dto.type.DragenWorkflow;
 import ca.on.oicr.gsi.runscanner.dto.type.PipelineStatus;
 import ca.on.oicr.gsi.runscanner.dto.type.WorkflowRunStatus;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TimeZone;
@@ -49,7 +52,7 @@ public class ProcessDragen {
             // go-around
             return dto;
           }
-          dragenPipelineRun = new DragenPipelineRun(samplesheet, attemptNum);
+          dragenPipelineRun = new DragenPipelineRun(attemptNum);
 
           if (expectedWorkflows.isEmpty()) {
             dragenPipelineRun.setPipelineStatus(PipelineStatus.UNSUPPORTED);
@@ -111,12 +114,13 @@ public class ProcessDragen {
               .filter(line -> !(line.length == 0 || line.length == 1 && line[0].isEmpty()))
               .toList();
 
-      SamplesheetBCLConvertSection bclConvertSection;
+      SamplesheetBCLConvertSection bclConvertSection = null;
       Matcher headerMatcher;
       String sectionName = "";
       boolean bclDataFirstLine = true;
-      int sampleIndex = 0, laneIndex = 0, indexIndex = 0, index2Index = 0;
-      for (String[] line : lines) { // TODO do we want anything from Header and Reads sections?
+      Map<String, Integer> lineIndices = new HashMap<>();
+      for (String[] line : lines) {
+        // TODO do we want anything from Header and Reads sections?
         headerMatcher = HEADER.matcher(line[0]);
         if (headerMatcher.matches()) {
           // "Capturing groups are indexed from left to right, starting at one.
@@ -128,18 +132,24 @@ public class ProcessDragen {
           case "BCLConvert_Data":
             if (bclDataFirstLine) {
               for (int i = 0; i < line.length; i++) {
+                // TODO BarcodeMismatchesIndex1 and 2
+                // TODO a couple samplesheets only have Lane and Sample_ID, should we support that?
+                // TODO there is almost certainly a better way to do this lol
                 switch (line[i]) {
                   case "Lane":
-                    laneIndex = i;
+                    lineIndices.put("lane", i);
                     break;
                   case "Sample_ID":
-                    sampleIndex = i;
+                    lineIndices.put("sample_id", i);
                     break;
                   case "Index":
-                    indexIndex = i;
+                    lineIndices.put("index", i);
                     break;
                   case "Index2":
-                    index2Index = i;
+                    lineIndices.put("index2", i);
+                    break;
+                  case "OverrideCycles":
+                    lineIndices.put("overrideCycles", i);
                     break;
                 }
               }
@@ -150,8 +160,22 @@ public class ProcessDragen {
             if (bclConvertSection == null) {
               bclConvertSection = new SamplesheetBCLConvertSection();
             }
-            bclConvertSection.addDatum(
-                line[laneIndex], line[sampleIndex], line[indexIndex], line[index2Index]);
+
+            if (lineIndices.get("overrideCycles") == null) {
+              bclConvertSection.addDatum(
+                  line[lineIndices.get("lane")],
+                  line[lineIndices.get("sample_id")],
+                  line[lineIndices.get("index")],
+                  line[lineIndices.get("index2")],
+                  null);
+            } else {
+              bclConvertSection.addDatum(
+                  line[lineIndices.get("lane")],
+                  line[lineIndices.get("sample_id")],
+                  line[lineIndices.get("index")],
+                  line[lineIndices.get("index2")],
+                  line[lineIndices.get("overrideCycles")]);
+            }
             temp.addToSamplesheet(bclConvertSection);
             expectedWorkflows.add(DragenWorkflow.BCL_CONVERT);
             break;
@@ -165,6 +189,13 @@ public class ProcessDragen {
             expectedWorkflows.add(DragenWorkflow.BCL_CONVERT);
           default:
             break;
+        }
+      }
+      // If there is a BCLConvert section but no OverrideCycles column in BCLConvert_Data,
+      // use the OverrideCycles from BCLConvert_Settings
+      if (bclConvertSection != null && !lineIndices.containsKey("overrideCycles")) {
+        for (SamplesheetBCLConvertDataEntry entry : bclConvertSection.getData()) {
+          entry.setOverrideCycles(bclConvertSection.getSettings().get("OverrideCycles"));
         }
       }
     } else {

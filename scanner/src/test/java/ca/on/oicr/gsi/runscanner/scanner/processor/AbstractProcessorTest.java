@@ -10,7 +10,6 @@ import ca.on.oicr.gsi.runscanner.dto.PipelineRun;
 import ca.on.oicr.gsi.runscanner.dto.WorkflowRun;
 import ca.on.oicr.gsi.runscanner.dto.dragen.AnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.dragen.DragenAnalysisUnit;
-import ca.on.oicr.gsi.runscanner.dto.dragen.DragenPipelineRun;
 import ca.on.oicr.gsi.runscanner.dto.dragen.DragenWorkflowRun;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -65,9 +64,6 @@ public abstract class AbstractProcessorTest {
 
         if (!illuminaResult.pipelineRuns.isEmpty()) {
           for (PipelineRun<?> pr : illuminaResult.pipelineRuns) {
-            if (pr instanceof DragenPipelineRun) {
-              ((DragenPipelineRun) pr).getSamplesheet().setModifiedTime(Instant.EPOCH);
-            }
             for (WorkflowRun wr : pr.getWorkflowRuns()) {
               wr.setCompletionTime(Instant.EPOCH);
               wr.setStartTime(Instant.EPOCH);

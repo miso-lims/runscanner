@@ -15,20 +15,31 @@ public class SamplesheetBCLConvertSection implements SamplesheetSection {
     private final String sampleId;
     private final String index;
     private final String index2;
+    private String overrideCycles;
 
     public SamplesheetBCLConvertDataEntry(
         @JsonProperty("lane") String lane,
         @JsonProperty("sampleId") String sampleId,
         @JsonProperty("index") String index,
-        @JsonProperty("index2") String index2) {
+        @JsonProperty("index2") String index2,
+        @JsonProperty("overrideCycles") String overrideCycles) {
       this.lane = lane;
       this.sampleId = sampleId;
       this.index = index;
       this.index2 = index2;
+      this.overrideCycles = overrideCycles;
     }
 
     public String getLane() {
       return lane;
+    }
+
+    public void setOverrideCycles(String overrideCycles) {
+      this.overrideCycles = overrideCycles;
+    }
+
+    public String getOverrideCycles() {
+      return overrideCycles;
     }
 
     public String getSampleId() {
@@ -55,12 +66,13 @@ public class SamplesheetBCLConvertSection implements SamplesheetSection {
       return Objects.equals(this.lane, that.lane)
           && Objects.equals(this.sampleId, that.sampleId)
           && Objects.equals(this.index, that.index)
-          && Objects.equals(this.index2, that.index2);
+          && Objects.equals(this.index2, that.index2)
+          && Objects.equals(this.overrideCycles, that.overrideCycles);
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(lane, sampleId, index, index2);
+      return Objects.hash(lane, sampleId, index, index2, overrideCycles);
     }
 
     @Override
@@ -77,6 +89,8 @@ public class SamplesheetBCLConvertSection implements SamplesheetSection {
           + ", "
           + "index2="
           + index2
+          + ", overrideCycles="
+          + overrideCycles
           + ']';
     }
   }
@@ -93,8 +107,9 @@ public class SamplesheetBCLConvertSection implements SamplesheetSection {
     return data;
   }
 
-  public void addDatum(String lane, String sampleId, String index, String index2) {
-    data.add(new SamplesheetBCLConvertDataEntry(lane, sampleId, index, index2));
+  public void addDatum(
+      String lane, String sampleId, String index, String index2, String overrideCycles) {
+    data.add(new SamplesheetBCLConvertDataEntry(lane, sampleId, index, index2, overrideCycles));
   }
 
   public Map<String, String> getSettings() {
