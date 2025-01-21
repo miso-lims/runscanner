@@ -27,6 +27,7 @@ import java.util.stream.Stream;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathException;
 import javax.xml.xpath.XPathExpression;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -105,26 +106,28 @@ public class RevioPacBioProcessor extends RunProcessor {
   private static RevioPacBioProcessor.ProcessMetadata processSampleInformation() {
     XPathExpression[] expr =
         RunProcessor.compileXPath(
-            "//WellSample/WellName",
-            "//SubreadSet/@UniqueId",
             "//ResultsFolder",
-            "//WellSample/@Name");
+            "//SubreadSet/@UniqueId",
+            "//WellSample/@Name",
+            "//AutomationParameters/AutomationParameter[@Name='MovieLength']/@SimpleValue");
     return (document, dto, timeZone) -> {
-      String position = (String) expr[0].evaluate(document, XPathConstants.STRING);
+      String position =
+          StringUtils.substringBetween(
+              (String) expr[0].evaluate(document, XPathConstants.STRING), "/", "/");
       String containerSerialNumber = (String) expr[1].evaluate(document, XPathConstants.STRING);
-      String resultFolder = (String) expr[2].evaluate(document, XPathConstants.STRING);
-      String poolName = (String) expr[3].evaluate(document, XPathConstants.STRING);
+      String poolName = (String) expr[2].evaluate(document, XPathConstants.STRING);
+      String movieLength = (String) expr[3].evaluate(document, XPathConstants.STRING);
 
       // From DefaultPacBio, checking to make sure string is valid
       if (isStringBlankOrNull(position)
-          || isStringBlankOrNull(resultFolder)
           || isStringBlankOrNull(containerSerialNumber)
-          || isStringBlankOrNull(poolName)) {
+          || isStringBlankOrNull(poolName)
+          || isStringBlankOrNull(movieLength)) {
         return;
       }
       // SMRTCellPosition is a Java Record and represents one SMRT Cell
       SMRTCellPosition containerInfo =
-          new SMRTCellPosition(resultFolder, position, containerSerialNumber, poolName);
+          new SMRTCellPosition(position, containerSerialNumber, poolName, movieLength);
 
       // Add container to SMRT cell positionList
       List<SMRTCellPosition> tempPositionList = dto.getPositionList();
@@ -183,23 +186,20 @@ public class RevioPacBioProcessor extends RunProcessor {
     dto.setSequencerFolderPath(runDirectory.getAbsolutePath());
 
     // Get the number of SMRT Cells in the run directory
-    int smrtCellCount = (int) getCellDirectory(runDirectory).count();
+    int smrtCellCount =
+        (int)
+            Arrays.stream(runDirectory.listFiles())
+                .filter(
+                    cellDirectory ->
+                        cellDirectory.isDirectory()
+                            && REVIO_CELL_DIRECTORY.test(cellDirectory.getName()))
+                .count();
     dto.setLaneCount(smrtCellCount);
 
-    // Presence of earliest Transfer_Test_*.txt indicates the run has started, get the creation time
-    Optional<File> firstTransferTestFile =
-        getMetadataDirectory(runDirectory)
-            .flatMap(
-                metadataDirectory ->
-                    Stream.of(
-                        Objects.requireNonNull(
-                            metadataDirectory.listFiles(
-                                file -> TRANSFER_TEST.test(file.getName())))))
-            .min(Comparator.comparing(RevioPacBioProcessor::getFileCreationTime));
-
-    // Set completion time based on most recently created .Transfer_Test file
-    dto.setStartDate(
-        getFileCreationTime(Objects.requireNonNull(firstTransferTestFile.orElse(null))));
+    // Get the creation time, earliest Transfer_Test_*.txt indicates the run has started
+    Instant startDate =
+        getFileCreationTime(getTransferTestFile(runDirectory).orElse(null).toFile());
+    dto.setStartDate(startDate);
 
     // Grab the .metadata.xml and begin processing
     getMetadataDirectory(runDirectory)
@@ -269,26 +269,16 @@ public class RevioPacBioProcessor extends RunProcessor {
   }
 
   /**
-   * Returns a stream that includes Cell directory level to be used for further processing
-   *
-   * @param runDirectory which we are currently processing
-   * @return Stream from Cell directory level
-   */
-  private Stream<File> getCellDirectory(File runDirectory) {
-    return Stream.of(Objects.requireNonNull(runDirectory.listFiles()))
-        .filter(
-            cellDirectory ->
-                cellDirectory.isDirectory() && REVIO_CELL_DIRECTORY.test(cellDirectory.getName()));
-  }
-
-  /**
    * Returns a stream that includes Metadata directory level to be used for further processing
    *
    * @param runDirectory which we are currently processing
    * @return Stream from Metadata directory level
    */
   private Stream<File> getMetadataDirectory(File runDirectory) {
-    return getCellDirectory(runDirectory)
+    return Stream.of(Objects.requireNonNull(runDirectory.listFiles()))
+        .filter(
+            cellDirectory ->
+                cellDirectory.isDirectory() && REVIO_CELL_DIRECTORY.test(cellDirectory.getName()))
         .flatMap(
             cellDirectory ->
                 Stream.of(Objects.requireNonNull(cellDirectory.listFiles()))
@@ -320,23 +310,46 @@ public class RevioPacBioProcessor extends RunProcessor {
    * @return true or false
    */
   private boolean isRunComplete(File runDirectory, int smrtCellCount) {
-    return getMetadataDirectory(runDirectory)
-                .flatMap(
-                    metadataDirectory ->
-                        Arrays.stream(
-                            Objects.requireNonNull(
-                                metadataDirectory.listFiles(
-                                    file -> TRANSFER_DONE.test(file.getName())))))
-                .count()
-            == smrtCellCount
-        && getMetadataDirectory(runDirectory)
-                .flatMap(
-                    metadataDirectory ->
-                        Arrays.stream(
-                            Objects.requireNonNull(
-                                metadataDirectory.listFiles(
-                                    file -> TRANSFER_TEST.test(file.getName())))))
-                .count()
-            == smrtCellCount;
+    try (Stream<Path> stream = Files.walk(runDirectory.toPath())) {
+      List<Path> metadataFiles =
+          stream
+              .filter(Files::isRegularFile) // Filter regular files
+              .filter(file -> TRANSFER_TEST.test(String.valueOf(file.getFileName())))
+              .toList();
+
+      return getMetadataDirectory(runDirectory)
+                  .flatMap(
+                      metadataDirectory ->
+                          Arrays.stream(
+                              Objects.requireNonNull(
+                                  metadataDirectory.listFiles(
+                                      file -> TRANSFER_DONE.test(file.getName())))))
+                  .count()
+              == smrtCellCount
+          && metadataFiles.size() == smrtCellCount;
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * @param runDirectory which we are currently processing
+   * @return path to earliest created TransferTest
+   */
+  private Optional<Path> getTransferTestFile(File runDirectory) {
+    try (Stream<Path> stream = Files.walk(runDirectory.toPath())) {
+      List<Path> transferTestFiles =
+          stream
+              .filter(Files::isRegularFile) // Filter regular files
+              .filter(file -> TRANSFER_TEST.test(String.valueOf(file.getFileName())))
+              .toList();
+
+      // Need to take the list of file paths and get the earliest creation time
+      return transferTestFiles
+          .stream()
+          .min(Comparator.comparing(filePath -> getFileCreationTime(filePath.toFile())));
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 }
