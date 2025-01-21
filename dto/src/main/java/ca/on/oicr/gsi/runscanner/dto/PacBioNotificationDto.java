@@ -11,7 +11,7 @@ public class PacBioNotificationDto extends NotificationDto {
   private Map<String, String> poolNames;
 
   public record SMRTCellPosition(
-      String resultFolder, String position, String containerSerialNumber, String poolName) {}
+      String position, String containerSerialNumber, String poolName, String movieLength) {}
 
   private List<SMRTCellPosition> positionList;
 
