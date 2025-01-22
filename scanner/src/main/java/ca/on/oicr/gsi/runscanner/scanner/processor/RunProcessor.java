@@ -9,7 +9,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
@@ -26,6 +25,7 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
+import org.apache.commons.io.input.BOMInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -130,9 +130,10 @@ public abstract class RunProcessor {
   public static Optional<Document> parseXml(File file) {
     try {
       DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-      // Parse using an InputStreamReader with UTF-8
-      try (InputStream inputStream = new FileInputStream(file);
-          Reader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
+      // Automatically detect BOMs and remove them from input stream
+      // BOM characters can interfere with text processing if not properly removed
+      try (BOMInputStream bomInputStream = new BOMInputStream(new FileInputStream(file));
+          Reader reader = new InputStreamReader(bomInputStream, StandardCharsets.UTF_8)) {
         return Optional.of(builder.parse(new InputSource(reader)));
       } catch (FileNotFoundException | SAXException e) {
         log.error("Failed to parse XML", e);
