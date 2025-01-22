@@ -310,23 +310,21 @@ public class RevioPacBioProcessor extends RunProcessor {
    * @return true or false
    */
   private boolean isRunComplete(File runDirectory, int smrtCellCount) {
-    try (Stream<Path> stream = Files.walk(runDirectory.toPath())) {
-      List<Path> metadataFiles =
-          stream
-              .filter(Files::isRegularFile) // Filter regular files
+    try (Stream<Path> testFileStream = Files.walk(runDirectory.toPath());
+        Stream<Path> testDoneStream = Files.walk(runDirectory.toPath())) {
+      List<Path> transferTestFiles =
+          testFileStream
+              .filter(Files::isRegularFile)
               .filter(file -> TRANSFER_TEST.test(String.valueOf(file.getFileName())))
               .toList();
 
-      return getMetadataDirectory(runDirectory)
-                  .flatMap(
-                      metadataDirectory ->
-                          Arrays.stream(
-                              Objects.requireNonNull(
-                                  metadataDirectory.listFiles(
-                                      file -> TRANSFER_DONE.test(file.getName())))))
-                  .count()
-              == smrtCellCount
-          && metadataFiles.size() == smrtCellCount;
+      List<Path> transferDoneFiles =
+          testDoneStream
+              .filter(Files::isRegularFile)
+              .filter(file -> TRANSFER_DONE.test(String.valueOf(file.getFileName())))
+              .toList();
+
+      return transferDoneFiles.size() == smrtCellCount && transferTestFiles.size() == smrtCellCount;
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -334,13 +332,13 @@ public class RevioPacBioProcessor extends RunProcessor {
 
   /**
    * @param runDirectory which we are currently processing
-   * @return path to earliest created TransferTest
+   * @return path to earliest created TransferTest file
    */
   private Optional<Path> getTransferTestFile(File runDirectory) {
     try (Stream<Path> stream = Files.walk(runDirectory.toPath())) {
       List<Path> transferTestFiles =
           stream
-              .filter(Files::isRegularFile) // Filter regular files
+              .filter(Files::isRegularFile)
               .filter(file -> TRANSFER_TEST.test(String.valueOf(file.getFileName())))
               .toList();
 
