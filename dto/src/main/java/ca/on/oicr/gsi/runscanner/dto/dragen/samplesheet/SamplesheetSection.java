@@ -9,7 +9,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 
 @JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "name")
 @JsonSubTypes({ //
-  @Type(value = SamplesheetBCLConvertSection.class, name = "BCLConvert") //
+  @Type(value = SamplesheetBCLConvertSection.class, name = "BCLConvert"), //
+  @Type(value = SamplesheetReadsSection.class, name = "Reads") //
 }) //
 @JsonIgnoreProperties(ignoreUnknown = true)
 public interface SamplesheetSection {

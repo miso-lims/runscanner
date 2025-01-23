@@ -6,6 +6,7 @@ import ca.on.oicr.gsi.runscanner.dto.dragen.DragenPipelineRun;
 import ca.on.oicr.gsi.runscanner.dto.dragen.samplesheet.Samplesheet;
 import ca.on.oicr.gsi.runscanner.dto.dragen.samplesheet.SamplesheetBCLConvertSection;
 import ca.on.oicr.gsi.runscanner.dto.dragen.samplesheet.SamplesheetBCLConvertSection.SamplesheetBCLConvertDataEntry;
+import ca.on.oicr.gsi.runscanner.dto.dragen.samplesheet.SamplesheetReadsSection;
 import ca.on.oicr.gsi.runscanner.dto.type.DragenWorkflow;
 import ca.on.oicr.gsi.runscanner.dto.type.PipelineStatus;
 import ca.on.oicr.gsi.runscanner.dto.type.WorkflowRunStatus;
@@ -115,12 +116,12 @@ public class ProcessDragen {
               .toList();
 
       SamplesheetBCLConvertSection bclConvertSection = null;
+      SamplesheetReadsSection readsSection = null;
       Matcher headerMatcher;
       String sectionName = "";
       boolean bclDataFirstLine = true;
       Map<String, Integer> lineIndices = new HashMap<>();
       for (String[] line : lines) {
-        // TODO do we want anything from Header and Reads sections?
         headerMatcher = HEADER.matcher(line[0]);
         if (headerMatcher.matches()) {
           // "Capturing groups are indexed from left to right, starting at one.
@@ -129,6 +130,26 @@ public class ProcessDragen {
           continue;
         }
         switch (sectionName) {
+          case "Reads":
+            readsSection = (SamplesheetReadsSection) temp.getByName("Reads");
+            if (readsSection == null) {
+              readsSection = new SamplesheetReadsSection();
+            }
+            int value = Integer.parseInt(line[1]);
+            switch (line[0]) {
+              case "Read1Cycles":
+                readsSection.setRead1Cycles(value);
+                break;
+              case "Read2Cycles":
+                readsSection.setRead2Cycles(value);
+                break;
+              case "Index1Cycles":
+                readsSection.setIndex1Cycles(value);
+                break;
+              case "Index2Cycles":
+                readsSection.setIndex2Cycles(value);
+            }
+            break;
           case "BCLConvert_Data":
             if (bclDataFirstLine) {
               for (int i = 0; i < line.length; i++) {
@@ -193,9 +214,33 @@ public class ProcessDragen {
       }
       // If there is a BCLConvert section but no OverrideCycles column in BCLConvert_Data,
       // use the OverrideCycles from BCLConvert_Settings
-      if (bclConvertSection != null && !lineIndices.containsKey("overrideCycles")) {
-        for (SamplesheetBCLConvertDataEntry entry : bclConvertSection.getData()) {
-          entry.setOverrideCycles(bclConvertSection.getSettings().get("OverrideCycles"));
+      // If neither is available, Illumina says:
+      // "the 'OverrideCycles' defaults [...] to match the run setup as applicable:
+      // Y(Read 1); I(Index 1); I(Index 2): Y(Read 2)"
+      // TODO BCLConvert.process() also needs this logic, see if we can refactor
+      if (bclConvertSection != null) {
+        if (!lineIndices.containsKey("overrideCycles")) {
+          for (SamplesheetBCLConvertDataEntry entry : bclConvertSection.getData()) {
+            entry.setOverrideCycles(bclConvertSection.getSettings().get("OverrideCycles"));
+          }
+        } else {
+          try {
+            String defaultOverrideCycles =
+                new StringBuilder("Y")
+                    .append(readsSection.getRead1Cycles())
+                    .append("I")
+                    .append(readsSection.getIndex1Cycles())
+                    .append("I")
+                    .append(readsSection.getIndex2Cycles())
+                    .append("Y")
+                    .append(readsSection.getRead2Cycles())
+                    .toString();
+            for (SamplesheetBCLConvertDataEntry entry : bclConvertSection.getData()) {
+              entry.setOverrideCycles(defaultOverrideCycles);
+            }
+          } catch (NullPointerException npe) {
+            throw new IllegalStateException("Missing Reads Section field for " + rootDir, npe);
+          }
         }
       }
     } else {

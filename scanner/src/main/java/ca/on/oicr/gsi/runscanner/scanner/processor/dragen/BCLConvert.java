@@ -172,7 +172,7 @@ public class BCLConvert {
         break;
       } else {
         for (AnalysisFile itemFile : dragenAnalysisUnitItem.getFiles()) {
-          // TODO there might be the override cycles in a better source
+          // Unfortunately there is no better source for OverrideCycles
           ((FastqAnalysisFile) itemFile).setOverrideCycles(item.getOverrideCycles());
           if (itemFile.getPath() == null
               || itemFile.getPath().toString().isBlank()
