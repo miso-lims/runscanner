@@ -7,6 +7,7 @@ import ca.on.oicr.gsi.runscanner.dto.dragen.samplesheet.Samplesheet;
 import ca.on.oicr.gsi.runscanner.dto.dragen.samplesheet.SamplesheetBCLConvertSection;
 import ca.on.oicr.gsi.runscanner.dto.dragen.samplesheet.SamplesheetBCLConvertSection.SamplesheetBCLConvertDataEntry;
 import ca.on.oicr.gsi.runscanner.dto.dragen.samplesheet.SamplesheetReadsSection;
+import ca.on.oicr.gsi.runscanner.dto.dragen.samplesheet.Semver;
 import ca.on.oicr.gsi.runscanner.dto.type.DragenWorkflow;
 import ca.on.oicr.gsi.runscanner.dto.type.PipelineStatus;
 import ca.on.oicr.gsi.runscanner.dto.type.WorkflowRunStatus;
@@ -55,10 +56,21 @@ public class ProcessDragen {
           }
           dragenPipelineRun = new DragenPipelineRun(attemptNum);
 
+          // Exit early if we didn't find any workflows we support
           if (expectedWorkflows.isEmpty()) {
             dragenPipelineRun.setPipelineStatus(PipelineStatus.UNSUPPORTED);
             dto.addPipelineRun(dragenPipelineRun);
-            return dto;
+            continue;
+          }
+
+          // Exit early if Samplesheet finds a SoftwareVersion < 4.1.7, our minimum supported
+          // version
+          SamplesheetBCLConvertSection bclConvertSection =
+              (SamplesheetBCLConvertSection) samplesheet.getByName("BCLConvert");
+          if (bclConvertSection.getSoftwareVersion().compareTo(new Semver(4, 1, 7)) < 0) {
+            dragenPipelineRun.setPipelineStatus(PipelineStatus.UNSUPPORTED);
+            dto.addPipelineRun(dragenPipelineRun);
+            continue;
           }
 
           if (expectedWorkflows.contains(DragenWorkflow.BCL_CONVERT)) {
@@ -153,9 +165,7 @@ public class ProcessDragen {
           case "BCLConvert_Data":
             if (bclDataFirstLine) {
               for (int i = 0; i < line.length; i++) {
-                // TODO BarcodeMismatchesIndex1 and 2
                 // TODO a couple samplesheets only have Lane and Sample_ID, this needs support
-                // TODO there is almost certainly a better way to do this lol
                 switch (line[i]) {
                   case "Lane":
                     lineIndices.put("lane", i);
@@ -205,23 +215,31 @@ public class ProcessDragen {
             if (bclConvertSection == null) {
               bclConvertSection = new SamplesheetBCLConvertSection();
             }
-            bclConvertSection.addSetting(line[0], line[1]);
+            switch (line[0]) {
+              case "SoftwareVersion":
+                bclConvertSection.setSoftwareVersion(line[1]);
+                break;
+              case "OverrideCycles":
+                bclConvertSection.setOverrideCyclesSetting(line[1]);
+                break;
+            }
             temp.addToSamplesheet(bclConvertSection);
             expectedWorkflows.add(DragenWorkflow.BCL_CONVERT);
           default:
             break;
         }
       }
+
       // If there is a BCLConvert section but no OverrideCycles column in BCLConvert_Data,
       // use the OverrideCycles from BCLConvert_Settings
       // If neither is available, Illumina says:
       // "the 'OverrideCycles' defaults [...] to match the run setup as applicable:
       // Y(Read 1); I(Index 1); I(Index 2): Y(Read 2)"
       // TODO BCLConvert.process() also needs this logic, see if we can refactor
-      if (bclConvertSection != null) {
-        if (!lineIndices.containsKey("overrideCycles")) {
+      if (bclConvertSection != null && !lineIndices.containsKey("overrideCycles")) {
+        if (bclConvertSection.getOverrideCyclesSetting() != null) {
           for (SamplesheetBCLConvertDataEntry entry : bclConvertSection.getData()) {
-            entry.setOverrideCycles(bclConvertSection.getSettings().get("OverrideCycles"));
+            entry.setOverrideCycles(bclConvertSection.getOverrideCyclesSetting());
           }
         } else {
           try {

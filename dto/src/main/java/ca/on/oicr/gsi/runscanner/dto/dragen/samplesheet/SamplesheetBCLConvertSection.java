@@ -1,10 +1,8 @@
 package ca.on.oicr.gsi.runscanner.dto.dragen.samplesheet;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 public class SamplesheetBCLConvertSection implements SamplesheetSection {
@@ -95,12 +93,12 @@ public class SamplesheetBCLConvertSection implements SamplesheetSection {
     }
   }
 
-  List<SamplesheetBCLConvertDataEntry> data;
-  Map<String, String> settings;
+  private List<SamplesheetBCLConvertDataEntry> data;
+  private String overrideCyclesSetting;
+  private Semver softwareVersion;
 
   public SamplesheetBCLConvertSection() {
     this.data = new LinkedList<>();
-    this.settings = new HashMap<>();
   }
 
   public List<SamplesheetBCLConvertDataEntry> getData() {
@@ -112,21 +110,42 @@ public class SamplesheetBCLConvertSection implements SamplesheetSection {
     data.add(new SamplesheetBCLConvertDataEntry(lane, sampleId, index, index2, overrideCycles));
   }
 
-  public Map<String, String> getSettings() {
-    return settings;
-  }
-
-  public void addSetting(String k, String v) {
-    settings.put(k, v);
-  }
-
   @Override
   public String getName() {
     return "BCLConvert";
   }
 
+  public String getOverrideCyclesSetting() {
+    return overrideCyclesSetting;
+  }
+
+  public Semver getSoftwareVersion() {
+    return softwareVersion;
+  }
+
+  public void setOverrideCyclesSetting(String overrideCyclesSetting) {
+    this.overrideCyclesSetting = overrideCyclesSetting;
+  }
+
+  public void setSoftwareVersion(String softwareVersion) {
+    String[] vers = softwareVersion.split("\\.");
+    this.setSoftwareVersion(
+        new Semver(
+            Integer.parseInt(vers[0]), Integer.parseInt(vers[1]), Integer.parseInt(vers[2])));
+  }
+
+  public void setSoftwareVersion(Semver version) {
+    this.softwareVersion = version;
+  }
+
   public String toString() {
-    return "SamplesheetBCLConvertSection [data=" + data + ", settings=" + settings + "]";
+    return "SamplesheetBCLConvertSection [data="
+        + data
+        + ", softwareVersion="
+        + softwareVersion
+        + ", overrideCycles="
+        + overrideCyclesSetting
+        + "]";
   }
 
   public boolean equals(Object obj) {
@@ -135,10 +154,12 @@ public class SamplesheetBCLConvertSection implements SamplesheetSection {
     if (getClass() != obj.getClass()) return false;
     SamplesheetBCLConvertSection other = (SamplesheetBCLConvertSection) obj;
 
-    return Objects.equals(this.data, other.data) && Objects.equals(this.settings, other.settings);
+    return Objects.equals(this.data, other.data)
+        && Objects.equals(this.softwareVersion, other.softwareVersion)
+        && Objects.equals(this.overrideCyclesSetting, other.overrideCyclesSetting);
   }
 
   public int hashCode() {
-    return Objects.hash(data, settings);
+    return Objects.hash(data, softwareVersion, overrideCyclesSetting);
   }
 }

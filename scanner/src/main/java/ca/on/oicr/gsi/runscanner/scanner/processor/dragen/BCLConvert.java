@@ -71,7 +71,6 @@ public class BCLConvert {
       bclConvertWorkflowRun.setCompletionTime(max_date);
 
       // Get file checksums from Analysis/#/Manifest.tsv
-      // TODO: Doesn't seem to exist for BCLConvert < 4.1.7 - skip?
       File manifest = new File(rootDir, "Manifest.tsv");
       if (manifest.exists() && manifest.isFile()) {
         List<String[]> manifestLines =
