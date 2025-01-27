@@ -1,0 +1,241 @@
+package ca.on.oicr.gsi.runscanner.scanner.processor.dragen.samplesheet;
+
+import ca.on.oicr.gsi.runscanner.dto.type.DragenWorkflow;
+import ca.on.oicr.gsi.runscanner.scanner.processor.dragen.samplesheet.SamplesheetBCLConvertSection.SamplesheetBCLConvertDataEntry;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.time.Instant;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class Samplesheet {
+  private List<SamplesheetSection> info;
+  private Instant modifiedTime;
+  private static final Pattern HEADER = Pattern.compile("(?:\\[)(.*)(?:\\])");
+  private Set<DragenWorkflow> expectedWorkflows;
+  private static final Logger log = LoggerFactory.getLogger(Samplesheet.class);
+
+  public Samplesheet(File rootDir) throws IOException {
+    info = new LinkedList<>();
+    // Both copies DRAGEN makes of the SampleSheet are within BCLConvert
+    // This is probably OK because we can't do any more analysis without it
+    File sampleSheet = new File(rootDir, "Data/BCLConvert/SampleSheet.csv");
+    if (sampleSheet.exists()) {
+      setModifiedTime(Files.getLastModifiedTime(sampleSheet.toPath()).toInstant());
+      List<String[]> lines =
+          Files.readAllLines(sampleSheet.toPath())
+              .stream()
+              .map(line -> line.split(","))
+              .filter(line -> !(line.length == 0 || line.length == 1 && line[0].isEmpty()))
+              .toList();
+
+      SamplesheetBCLConvertSection bclConvertSection = null;
+      SamplesheetReadsSection readsSection = null;
+      Matcher headerMatcher;
+      String sectionName = "";
+      boolean bclDataFirstLine = true;
+      Map<String, Integer> lineIndices = new HashMap<>();
+      for (String[] line : lines) {
+        headerMatcher = HEADER.matcher(line[0]);
+        if (headerMatcher.matches()) {
+          // "Capturing groups are indexed from left to right, starting at one.
+          // Group zero denotes the entire pattern"
+          sectionName = headerMatcher.group(1);
+          continue;
+        }
+        switch (sectionName) {
+          case "Reads":
+            readsSection = (SamplesheetReadsSection) getByName("Reads");
+            if (readsSection == null) {
+              readsSection = new SamplesheetReadsSection();
+            }
+            int value = Integer.parseInt(line[1]);
+            switch (line[0]) {
+              case "Read1Cycles":
+                readsSection.setRead1Cycles(value);
+                break;
+              case "Read2Cycles":
+                readsSection.setRead2Cycles(value);
+                break;
+              case "Index1Cycles":
+                readsSection.setIndex1Cycles(value);
+                break;
+              case "Index2Cycles":
+                readsSection.setIndex2Cycles(value);
+            }
+            break;
+          case "BCLConvert_Data":
+            if (bclDataFirstLine) {
+              for (int i = 0; i < line.length; i++) {
+                // TODO a couple samplesheets only have Lane and Sample_ID, this needs support
+                switch (line[i]) {
+                  case "Lane":
+                    lineIndices.put("lane", i);
+                    break;
+                  case "Sample_ID":
+                    lineIndices.put("sample_id", i);
+                    break;
+                  case "Index":
+                    lineIndices.put("index", i);
+                    break;
+                  case "Index2":
+                    lineIndices.put("index2", i);
+                    break;
+                  case "OverrideCycles":
+                    lineIndices.put("overrideCycles", i);
+                    break;
+                }
+              }
+              bclDataFirstLine = false;
+              continue;
+            }
+            bclConvertSection = (SamplesheetBCLConvertSection) getByName("BCLConvert");
+            if (bclConvertSection == null) {
+              bclConvertSection = new SamplesheetBCLConvertSection();
+            }
+
+            if (lineIndices.get("overrideCycles") == null) {
+              bclConvertSection.addDatum(
+                  line[lineIndices.get("lane")],
+                  line[lineIndices.get("sample_id")],
+                  line[lineIndices.get("index")],
+                  line[lineIndices.get("index2")],
+                  null);
+            } else {
+              bclConvertSection.addDatum(
+                  line[lineIndices.get("lane")],
+                  line[lineIndices.get("sample_id")],
+                  line[lineIndices.get("index")],
+                  line[lineIndices.get("index2")],
+                  line[lineIndices.get("overrideCycles")]);
+            }
+            addToSamplesheet(bclConvertSection);
+            expectedWorkflows.add(DragenWorkflow.BCL_CONVERT);
+            break;
+          case "BCLConvert_Settings":
+            bclConvertSection = (SamplesheetBCLConvertSection) getByName("BCLConvert");
+            if (bclConvertSection == null) {
+              bclConvertSection = new SamplesheetBCLConvertSection();
+            }
+            switch (line[0]) {
+              case "SoftwareVersion":
+                bclConvertSection.setSoftwareVersion(line[1]);
+                break;
+              case "OverrideCycles":
+                bclConvertSection.setOverrideCyclesSetting(line[1]);
+                break;
+            }
+            this.addToSamplesheet(bclConvertSection);
+            expectedWorkflows.add(DragenWorkflow.BCL_CONVERT);
+          default:
+            break;
+        }
+      }
+
+      // If there is a BCLConvert section but no OverrideCycles column in BCLConvert_Data,
+      // use the OverrideCycles from BCLConvert_Settings
+      // If neither is available, Illumina says:
+      // "the 'OverrideCycles' defaults [...] to match the run setup as applicable:
+      // Y(Read 1); I(Index 1); I(Index 2): Y(Read 2)"
+      // TODO BCLConvert.process() also needs this logic, see if we can refactor
+      if (bclConvertSection != null && !lineIndices.containsKey("overrideCycles")) {
+        if (bclConvertSection.getOverrideCyclesSetting() != null) {
+          for (SamplesheetBCLConvertDataEntry entry : bclConvertSection.getData()) {
+            entry.setOverrideCycles(bclConvertSection.getOverrideCyclesSetting());
+          }
+        } else {
+          try {
+            String defaultOverrideCycles =
+                new StringBuilder("Y")
+                    .append(readsSection.getRead1Cycles())
+                    .append("I")
+                    .append(readsSection.getIndex1Cycles())
+                    .append("I")
+                    .append(readsSection.getIndex2Cycles())
+                    .append("Y")
+                    .append(readsSection.getRead2Cycles())
+                    .toString();
+            for (SamplesheetBCLConvertDataEntry entry : bclConvertSection.getData()) {
+              entry.setOverrideCycles(defaultOverrideCycles);
+            }
+          } catch (NullPointerException npe) {
+            throw new IllegalStateException("Missing Reads Section field for " + rootDir, npe);
+          }
+        }
+      }
+    } else {
+      // Samplesheet appears several hours after Analysis directory does
+      log.info("No samplesheet for {}, will look again later", rootDir);
+    }
+  }
+
+  public SamplesheetSection getByName(String name) {
+    List<SamplesheetSection> found = info.stream().filter(i -> i.getName().equals(name)).toList();
+    if (found.isEmpty()) return null;
+    if (found.size() > 1)
+      throw new IllegalStateException("More than one section in Samplesheet with the same name.");
+    return found.get(0);
+  }
+
+  public void addToSamplesheet(SamplesheetSection section) {
+    SamplesheetSection potentiallyExtant = getByName(section.getName());
+    if (potentiallyExtant != null) {
+      info.remove(section);
+    }
+    info.add(section);
+  }
+
+  public List<SamplesheetSection> getInfo() {
+    return info;
+  }
+
+  public Instant getModifiedTime() {
+    return modifiedTime;
+  }
+
+  public void setModifiedTime(Instant modifiedTime) {
+    this.modifiedTime = modifiedTime;
+  }
+
+  public boolean noneExpected() {
+    return expectedWorkflows.isEmpty();
+  }
+
+  public boolean isExpected(DragenWorkflow dw) {
+    return expectedWorkflows.contains(dw);
+  }
+
+  public String toString() {
+    return "Samplesheet [info="
+        + info
+        + ", modifiedTime="
+        + modifiedTime
+        + ", expectedWorkflows="
+        + expectedWorkflows
+        + "]";
+  }
+
+  public boolean equals(Object obj) {
+    if (this == obj) return true;
+    if (obj == null) return false;
+    if (getClass() != obj.getClass()) return false;
+    Samplesheet other = (Samplesheet) obj;
+
+    return Objects.equals(this.info, other.info)
+        && Objects.equals(this.modifiedTime, other.modifiedTime)
+        && Objects.equals(this.expectedWorkflows, other.expectedWorkflows);
+  }
+
+  public int hashCode() {
+    return Objects.hash(this.info, this.modifiedTime, this.expectedWorkflows);
+  }
+}

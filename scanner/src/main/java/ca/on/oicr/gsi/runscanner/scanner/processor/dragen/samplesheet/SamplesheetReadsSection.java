@@ -1,4 +1,4 @@
-package ca.on.oicr.gsi.runscanner.dto.dragen.samplesheet;
+package ca.on.oicr.gsi.runscanner.scanner.processor.dragen.samplesheet;
 
 public class SamplesheetReadsSection implements SamplesheetSection {
   private int read1Cycles, read2Cycles, index1Cycles, index2Cycles;

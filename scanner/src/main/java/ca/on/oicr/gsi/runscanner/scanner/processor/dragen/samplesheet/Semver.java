@@ -1,4 +1,4 @@
-package ca.on.oicr.gsi.runscanner.dto.dragen.samplesheet;
+package ca.on.oicr.gsi.runscanner.scanner.processor.dragen.samplesheet;
 
 public class Semver implements Comparable<Semver> {
 
