@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -127,25 +126,32 @@ public abstract class RunProcessor {
     return mapper;
   }
 
+  /** Attempt to parse naively, and force parsing using UTF-8 if that doesn't work */
   public static Optional<Document> parseXml(File file) {
     try {
-      DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+      return Optional.of(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(file));
+    } catch (ParserConfigurationException | IOException | SAXException e) {
+      log.error("Not really a UTF-16 parsing exception, forcing UTF-8 parsing...", e);
+      DocumentBuilder builder;
+      try {
+        builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+      } catch (ParserConfigurationException e2) {
+        throw new RuntimeException(e2);
+      }
       // Automatically detect BOMs and remove them from input stream
       // BOM characters can interfere with text processing if not properly removed
       try (BOMInputStream bomInputStream = new BOMInputStream(new FileInputStream(file));
           Reader reader = new InputStreamReader(bomInputStream, StandardCharsets.UTF_8)) {
         return Optional.of(builder.parse(new InputSource(reader)));
-      } catch (FileNotFoundException | SAXException e) {
-        log.error("Failed to parse XML", e);
+      } catch (SAXException | IOException e3) {
+        log.error("Failed to parse XML", e3);
         return Optional.empty();
       }
-
-    } catch (ParserConfigurationException | IOException e) {
-      log.error("Failed to parse XML", e);
+    } catch (Exception e4) {
+      log.error("Failed to parse XML", e4);
       return Optional.empty();
     }
   }
-
   /**
    * Create a run processor for the request configuration, if one exists.
    *
