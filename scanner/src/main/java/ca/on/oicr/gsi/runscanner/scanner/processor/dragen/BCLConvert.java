@@ -24,6 +24,10 @@ public class BCLConvert {
       throws IOException {
     DragenWorkflowRun bclConvertWorkflowRun = new DragenWorkflowRun("BCLConvert");
     bclConvertWorkflowRun.setStartTime(samplesheet.getModifiedTime());
+    bclConvertWorkflowRun.setSoftwareVersion(
+        ((SamplesheetBCLConvertSection) samplesheet.getByName("BCLConvert"))
+            .getSoftwareVersion()
+            .toString());
     Instant max_date = Instant.MIN; // yes you read that right
     // Get fastq list
     // For gz compression, root/Analysis/#/Data/BCLConvert/fastq/Reports/fastq_list.csv

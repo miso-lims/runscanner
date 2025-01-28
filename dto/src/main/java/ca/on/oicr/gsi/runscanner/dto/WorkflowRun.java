@@ -22,6 +22,7 @@ public abstract class WorkflowRun {
   private Instant startTime;
   private final String workflowName;
   private WorkflowRunStatus workflowRunStatus;
+  private String softwareVersion;
 
   public WorkflowRun(String workflowName) {
     this.workflowName = workflowName;
@@ -30,6 +31,10 @@ public abstract class WorkflowRun {
 
   public Instant getCompletionTime() {
     return completionTime;
+  }
+
+  public String getSoftwareVersion() {
+    return softwareVersion;
   }
 
   public String getWorkflowName() {
@@ -46,6 +51,10 @@ public abstract class WorkflowRun {
 
   public Instant getStartTime() {
     return startTime;
+  }
+
+  public void setSoftwareVersion(String softwareVersion) {
+    this.softwareVersion = softwareVersion;
   }
 
   public void setStartTime(Instant i) {

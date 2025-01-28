@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.time.Instant;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,7 @@ public class Samplesheet {
 
   public Samplesheet(File rootDir) throws IOException {
     info = new LinkedList<>();
+    expectedWorkflows = new HashSet<>();
     // Both copies DRAGEN makes of the SampleSheet are within BCLConvert
     // This is probably OK because we can't do any more analysis without it
     File sampleSheet = new File(rootDir, "Data/BCLConvert/SampleSheet.csv");
