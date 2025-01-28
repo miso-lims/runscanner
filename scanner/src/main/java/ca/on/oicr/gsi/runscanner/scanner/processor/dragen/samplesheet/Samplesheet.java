@@ -78,7 +78,6 @@ public class Samplesheet {
           case "BCLConvert_Data":
             if (bclDataFirstLine) {
               for (int i = 0; i < line.length; i++) {
-                // TODO a couple samplesheets only have Lane and Sample_ID, this needs support
                 switch (line[i]) {
                   case "Lane":
                     lineIndices.put("lane", i);
@@ -148,7 +147,6 @@ public class Samplesheet {
       // If neither is available, Illumina says:
       // "the 'OverrideCycles' defaults [...] to match the run setup as applicable:
       // Y(Read 1); I(Index 1); I(Index 2): Y(Read 2)"
-      // TODO BCLConvert.process() also needs this logic, see if we can refactor
       if (bclConvertSection != null && !lineIndices.containsKey("overrideCycles")) {
         if (bclConvertSection.getOverrideCyclesSetting() != null) {
           for (SamplesheetBCLConvertDataEntry entry : bclConvertSection.getData()) {
