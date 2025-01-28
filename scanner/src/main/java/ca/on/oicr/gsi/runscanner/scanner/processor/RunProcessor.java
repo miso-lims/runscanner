@@ -130,25 +130,29 @@ public abstract class RunProcessor {
   public static Optional<Document> parseXml(File file) {
     try {
       return Optional.of(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(file));
-    } catch (ParserConfigurationException | IOException | SAXException e) {
-      log.error("Not really a UTF-16 parsing exception, forcing UTF-8 parsing...", e);
+    } catch (SAXException e) {
+      log.warn("Not really a UTF-16 parsing exception, forcing UTF-8 parsing...", e);
       DocumentBuilder builder;
       try {
         builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-      } catch (ParserConfigurationException e2) {
-        throw new RuntimeException(e2);
+      } catch (ParserConfigurationException er) {
+        throw new RuntimeException(er);
       }
+
       // Automatically detect BOMs and remove them from input stream
       // BOM characters can interfere with text processing if not properly removed
       try (BOMInputStream bomInputStream = new BOMInputStream(new FileInputStream(file));
           Reader reader = new InputStreamReader(bomInputStream, StandardCharsets.UTF_8)) {
         return Optional.of(builder.parse(new InputSource(reader)));
       } catch (SAXException | IOException e3) {
-        log.error("Failed to parse XML", e3);
+        log.error("Failed to parse XML after forcing UTF-8 encoding", e3);
         return Optional.empty();
       }
-    } catch (Exception e4) {
-      log.error("Failed to parse XML", e4);
+    } catch (ParserConfigurationException e) {
+      log.error("Failed to create new DocumentBuilder Instance", e);
+      return Optional.empty();
+    } catch (IOException e) {
+      log.error("Failed to parse XML", e);
       return Optional.empty();
     }
   }
