@@ -17,7 +17,6 @@ import java.util.TimeZone;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Stream;
-import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;
@@ -132,20 +131,17 @@ public abstract class RunProcessor {
       return Optional.of(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(file));
     } catch (SAXException e) {
       log.warn("Not really a UTF-16 parsing exception, forcing UTF-8 parsing...", e);
-      DocumentBuilder builder;
-      try {
-        builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-      } catch (ParserConfigurationException er) {
-        throw new RuntimeException(er);
-      }
 
       // Automatically detect BOMs and remove them from input stream
       // BOM characters can interfere with text processing if not properly removed
       try (BOMInputStream bomInputStream = new BOMInputStream(new FileInputStream(file));
           Reader reader = new InputStreamReader(bomInputStream, StandardCharsets.UTF_8)) {
-        return Optional.of(builder.parse(new InputSource(reader)));
-      } catch (SAXException | IOException e3) {
-        log.error("Failed to parse XML after forcing UTF-8 encoding", e3);
+        return Optional.of(
+            DocumentBuilderFactory.newInstance()
+                .newDocumentBuilder()
+                .parse(new InputSource(reader)));
+      } catch (SAXException | ParserConfigurationException | IOException e2) {
+        log.error("Failed to parse XML after forcing UTF-8 encoding", e2);
         return Optional.empty();
       }
     } catch (ParserConfigurationException e) {
