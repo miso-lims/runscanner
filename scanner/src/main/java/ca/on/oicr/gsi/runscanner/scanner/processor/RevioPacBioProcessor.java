@@ -12,7 +12,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.time.Instant;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -51,6 +52,9 @@ public class RevioPacBioProcessor extends RunProcessor {
   private static final Predicate<String> TRANSFER_DONE =
       Pattern.compile("[a-z][0-9]{5}_[0-9]{6}_[0-9]{6}_s[0-9].transferdone").asPredicate();
 
+  private static final Predicate<String> PB_REPORT_LOG =
+      Pattern.compile("[a-z][0-9]{5}_[0-9]{6}_[0-9]{6}_s[0-9].pbreports.log").asPredicate();
+
   private static final Logger log = LoggerFactory.getLogger(RevioPacBioProcessor.class);
 
   private static final Pattern RUN_DIRECTORY = Pattern.compile("^.+_\\d+$");
@@ -61,6 +65,7 @@ public class RevioPacBioProcessor extends RunProcessor {
         processString("//RunDetails/TimeStampedName", PacBioNotificationDto::setRunAlias),
         processString(
             "//CollectionMetadata/@InstrumentName", PacBioNotificationDto::setSequencerName),
+        processDate("//Run/@WhenStarted", PacBioNotificationDto::setStartDate),
         processSampleInformation()
       };
 
@@ -75,12 +80,11 @@ public class RevioPacBioProcessor extends RunProcessor {
       String expression, BiConsumer<PacBioNotificationDto, Instant> setter) {
     XPathExpression expr = RunProcessor.compileXPath(expression)[0];
     return (document, dto, timeZone) -> {
-      String result = (String) expr.evaluate(document, XPathConstants.STRING);
-      if (result != null) {
-        setter.accept(
-            dto,
-            LocalDateTime.parse(result)
-                .toInstant(timeZone.toZoneId().getRules().getOffset(LocalDateTime.parse(result))));
+      String date = (String) expr.evaluate(document, XPathConstants.STRING);
+      if (date != null) {
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
+        ZonedDateTime parsedDateTime = ZonedDateTime.parse(date, formatter);
+        setter.accept(dto, parsedDateTime.toInstant());
       }
     };
   }
@@ -195,11 +199,6 @@ public class RevioPacBioProcessor extends RunProcessor {
                             && REVIO_CELL_DIRECTORY.test(cellDirectory.getName()))
                 .count();
     dto.setLaneCount(smrtCellCount);
-
-    // Get the creation time, earliest Transfer_Test_*.txt indicates the run has started
-    Instant startDate =
-        getFileCreationTime(getTransferTestFile(runDirectory).orElse(null).toFile());
-    dto.setStartDate(startDate);
 
     // Grab the .metadata.xml and begin processing
     getMetadataDirectory(runDirectory)
@@ -325,27 +324,6 @@ public class RevioPacBioProcessor extends RunProcessor {
               .toList();
 
       return transferDoneFiles.size() == smrtCellCount && transferTestFiles.size() == smrtCellCount;
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  /**
-   * @param runDirectory which we are currently processing
-   * @return path to earliest created TransferTest file
-   */
-  private Optional<Path> getTransferTestFile(File runDirectory) {
-    try (Stream<Path> stream = Files.walk(runDirectory.toPath())) {
-      List<Path> transferTestFiles =
-          stream
-              .filter(Files::isRegularFile)
-              .filter(file -> TRANSFER_TEST.test(String.valueOf(file.getFileName())))
-              .toList();
-
-      // Need to take the list of file paths and get the earliest creation time
-      return transferTestFiles
-          .stream()
-          .min(Comparator.comparing(filePath -> getFileCreationTime(filePath.toFile())));
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
