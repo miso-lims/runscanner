@@ -147,8 +147,8 @@ public final class DefaultIllumina extends RunProcessor {
   /**
    * Calculates whether to scan DRAGEN analysis output.
    *
-   * <p>If scanDragen is specified and set to true, scan analysis. If it is false or nonspecified,
-   * do not.
+   * <p>If scanDragen is specified and set to true, scan analysis. If it is false or unspecified, do
+   * not.
    *
    * @param parameters ObjectNode possibly containing scanDragen parameter
    * @return true if scanDragen is true, false if scanDragen is null or false
