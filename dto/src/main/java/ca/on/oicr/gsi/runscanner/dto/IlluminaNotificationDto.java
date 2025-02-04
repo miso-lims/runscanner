@@ -205,8 +205,8 @@ public class IlluminaNotificationDto extends NotificationDto {
     this.indexSequencing = indexSequencing;
   }
 
-  public PipelineRun getPipelineRun(int i) {
-    return pipelineRuns.get(i);
+  public List<PipelineRun> getPipelineRuns() {
+    return pipelineRuns;
   }
 
   public boolean isAnalysisExpected() {
