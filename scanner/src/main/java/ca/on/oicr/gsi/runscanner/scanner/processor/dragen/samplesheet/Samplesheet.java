@@ -42,12 +42,11 @@ public class Samplesheet {
 
       SamplesheetBCLConvertSection bclConvertSection = null;
       SamplesheetReadsSection readsSection = null;
-      Matcher headerMatcher;
       String sectionName = "";
       boolean bclDataFirstLine = true;
       Map<String, Integer> lineIndices = new HashMap<>();
       for (String[] line : lines) {
-        headerMatcher = HEADER.matcher(line[0]);
+        Matcher headerMatcher = HEADER.matcher(line[0]);
         if (headerMatcher.matches()) {
           // "Capturing groups are indexed from left to right, starting at one.
           // Group zero denotes the entire pattern"
