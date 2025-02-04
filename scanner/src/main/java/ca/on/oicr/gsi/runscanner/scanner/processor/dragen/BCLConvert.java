@@ -67,8 +67,8 @@ public class BCLConvert {
         if (file2 != null && file2.getModifiedTime().compareTo(max_date) > 0)
           max_date = file2.getModifiedTime();
 
-        dragenAnalysisUnit.addFile(file1);
-        dragenAnalysisUnit.addFile(file2);
+        if (file1 != null) dragenAnalysisUnit.addFile(file1);
+        if (file2 != null) dragenAnalysisUnit.addFile(file2);
 
         bclConvertWorkflowRun.put(dragenAnalysisUnit);
       }
@@ -89,8 +89,10 @@ public class BCLConvert {
           Path filename = new File(rootDir, manifestLine[0]).toPath();
 
           // When this is null, it's often for an Undetermined read. We do not care.
-          try {
-            DragenAnalysisUnit dragenAnalysisUnit = bclConvertWorkflowRun.get(filename);
+          DragenAnalysisUnit dragenAnalysisUnit = bclConvertWorkflowRun.get(filename);
+          if (dragenAnalysisUnit == null) {
+            log.info("Unable to map {} to an Analysis object", filename);
+          } else {
             for (AnalysisFile file : dragenAnalysisUnit.getFiles()) {
               if (file.getPath().equals(filename)) {
                 file.setCrc32Checksum(manifestLine[1]);
@@ -98,11 +100,8 @@ public class BCLConvert {
               }
             }
             bclConvertWorkflowRun.put(dragenAnalysisUnit);
-          } catch (NullPointerException npe) {
-            log.info("Unable to map {} to an Analysis object", filename);
           }
         }
-
       } else {
         log.info("No Manifest.tsv for {}", rootDir);
       }
