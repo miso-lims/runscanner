@@ -196,6 +196,9 @@ public class BCLConvert {
 
   private static AnalysisFile fastqFromFilename(File rootDir, String fileName, int readNumber)
       throws IOException {
+    if (fileName == null || fileName.isBlank()) {
+      return null;
+    }
     Path fullPath = Paths.get(rootDir.getPath(), "/Data/BCLConvert/fastq/", fileName);
     if (!Files.exists(fullPath)) {
       fullPath = Paths.get(rootDir.getPath(), "/Data/BCLConvert/ora_fastq/", fileName);
