@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -59,7 +60,7 @@ public class Samplesheet {
         Files.readAllLines(sampleSheet.toPath())
             .stream()
             .map(line -> line.split(","))
-            .filter(line -> !(line.length == 0 || line.length == 1 && line[0].isEmpty()))
+            .filter(line -> !(line.length == 0 || Arrays.stream(line).allMatch(String::isBlank)))
             .toList();
     SamplesheetReadsSection readsSection = (SamplesheetReadsSection) getByName("Reads");
     if (readsSection == null) {
