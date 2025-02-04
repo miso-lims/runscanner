@@ -1,12 +1,10 @@
 package ca.on.oicr.gsi.runscanner.scanner.processor.dragen.samplesheet;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
 public class SamplesheetBCLConvertSection implements SamplesheetSection {
-  // TODO: This could be a record, but the code formatter crashes if i try
   public static final class SamplesheetBCLConvertDataEntry {
 
     private final String lane;
@@ -16,11 +14,7 @@ public class SamplesheetBCLConvertSection implements SamplesheetSection {
     private String overrideCycles;
 
     public SamplesheetBCLConvertDataEntry(
-        @JsonProperty("lane") String lane,
-        @JsonProperty("sampleId") String sampleId,
-        @JsonProperty("index") String index,
-        @JsonProperty("index2") String index2,
-        @JsonProperty("overrideCycles") String overrideCycles) {
+        String lane, String sampleId, String index, String index2, String overrideCycles) {
       this.lane = lane;
       this.sampleId = sampleId;
       this.index = index;
