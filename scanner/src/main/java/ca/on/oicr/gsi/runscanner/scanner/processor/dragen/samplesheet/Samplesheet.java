@@ -49,143 +49,143 @@ public class Samplesheet {
     // Both copies DRAGEN makes of the SampleSheet are within BCLConvert
     // This is probably OK because we can't do any more analysis without it
     File sampleSheet = new File(rootDir, "Data/BCLConvert/SampleSheet.csv");
-    if (sampleSheet.exists()) {
-      setModifiedTime(Files.getLastModifiedTime(sampleSheet.toPath()).toInstant());
-      List<String[]> lines =
-          Files.readAllLines(sampleSheet.toPath())
-              .stream()
-              .map(line -> line.split(","))
-              .filter(line -> !(line.length == 0 || line.length == 1 && line[0].isEmpty()))
-              .toList();
-      SamplesheetReadsSection readsSection = (SamplesheetReadsSection) getByName("Reads");
-      if (readsSection == null) {
-        readsSection = new SamplesheetReadsSection();
-      }
-      SamplesheetBCLConvertSection bclConvertSection =
-          (SamplesheetBCLConvertSection) getByName("BCLConvert");
-      if (bclConvertSection == null) {
-        bclConvertSection = new SamplesheetBCLConvertSection();
-      }
-      String sectionName = "";
-      boolean bclDataFirstLine = true;
-      Map<BCL_DATA_COL, Integer> lineIndices = new HashMap<>();
-
-      for (String[] line : lines) {
-        Matcher headerMatcher = HEADER.matcher(line[0]);
-        if (headerMatcher.matches()) {
-          // "Capturing groups are indexed from left to right, starting at one.
-          // Group zero denotes the entire pattern"
-          sectionName = headerMatcher.group(1);
-          continue;
-        }
-        switch (sectionName) {
-          case "Reads":
-            int value = Integer.parseInt(line[1]);
-            switch (line[0]) {
-              case "Read1Cycles":
-                readsSection.setRead1Cycles(value);
-                break;
-              case "Read2Cycles":
-                readsSection.setRead2Cycles(value);
-                break;
-              case "Index1Cycles":
-                readsSection.setIndex1Cycles(value);
-                break;
-              case "Index2Cycles":
-                readsSection.setIndex2Cycles(value);
-            }
-            break;
-          case "BCLConvert_Data":
-            if (bclDataFirstLine) {
-              for (int i = 0; i < line.length; i++) {
-                switch (line[i]) {
-                  case "Lane":
-                    lineIndices.put(BCL_DATA_COL.LANE, i);
-                    break;
-                  case "Sample_ID":
-                    lineIndices.put(BCL_DATA_COL.SAMPLE_ID, i);
-                    break;
-                  case "Index":
-                    lineIndices.put(BCL_DATA_COL.INDEX, i);
-                    break;
-                  case "Index2":
-                    lineIndices.put(BCL_DATA_COL.INDEX2, i);
-                    break;
-                  case "OverrideCycles":
-                    lineIndices.put(BCL_DATA_COL.OVERRIDE_CYCLES, i);
-                    break;
-                }
-              }
-              bclDataFirstLine = false;
-              continue;
-            }
-            if (lineIndices.get(BCL_DATA_COL.OVERRIDE_CYCLES) == null) {
-              bclConvertSection.addDatum(
-                  line[lineIndices.get(BCL_DATA_COL.LANE)],
-                  line[lineIndices.get(BCL_DATA_COL.SAMPLE_ID)],
-                  line[lineIndices.get(BCL_DATA_COL.INDEX)],
-                  line[lineIndices.get(BCL_DATA_COL.INDEX2)],
-                  null);
-            } else {
-              bclConvertSection.addDatum(
-                  line[lineIndices.get(BCL_DATA_COL.LANE)],
-                  line[lineIndices.get(BCL_DATA_COL.SAMPLE_ID)],
-                  line[lineIndices.get(BCL_DATA_COL.INDEX)],
-                  line[lineIndices.get(BCL_DATA_COL.INDEX2)],
-                  line[lineIndices.get(BCL_DATA_COL.OVERRIDE_CYCLES)]);
-            }
-            addToSamplesheet(bclConvertSection);
-            expectedWorkflows.add(DragenWorkflow.BCL_CONVERT);
-            break;
-          case "BCLConvert_Settings":
-            switch (line[0]) {
-              case "SoftwareVersion":
-                bclConvertSection.setSoftwareVersion(line[1]);
-                break;
-              case "OverrideCycles":
-                bclConvertSection.setOverrideCyclesSetting(line[1]);
-                break;
-            }
-            this.addToSamplesheet(bclConvertSection);
-            expectedWorkflows.add(DragenWorkflow.BCL_CONVERT);
-          default:
-            break;
-        }
-      }
-
-      // If there is a BCLConvert section but no OverrideCycles column in BCLConvert_Data,
-      // use the OverrideCycles from BCLConvert_Settings
-      // If neither is available, Illumina says:
-      // "the 'OverrideCycles' defaults [...] to match the run setup as applicable:
-      // Y(Read 1); I(Index 1); I(Index 2): Y(Read 2)"
-      if (!lineIndices.containsKey(BCL_DATA_COL.OVERRIDE_CYCLES)) {
-        if (bclConvertSection.getOverrideCyclesSetting() != null) {
-          for (SamplesheetBCLConvertDataEntry entry : bclConvertSection.getData()) {
-            entry.setOverrideCycles(bclConvertSection.getOverrideCyclesSetting());
-          }
-        } else {
-          try {
-            String defaultOverrideCycles =
-                new StringBuilder("Y")
-                    .append(readsSection.getRead1Cycles())
-                    .append("I")
-                    .append(readsSection.getIndex1Cycles())
-                    .append("I")
-                    .append(readsSection.getIndex2Cycles())
-                    .append("Y")
-                    .append(readsSection.getRead2Cycles())
-                    .toString();
-            for (SamplesheetBCLConvertDataEntry entry : bclConvertSection.getData()) {
-              entry.setOverrideCycles(defaultOverrideCycles);
-            }
-          } catch (NullPointerException npe) {
-            throw new IllegalStateException("Missing Reads Section field for " + rootDir, npe);
-          }
-        }
-      }
-    } else {
+    if (!sampleSheet.exists()) {
       // Samplesheet appears several hours after Analysis directory does
       log.info("No samplesheet for {}, will look again later", rootDir);
+      return;
+    }
+    setModifiedTime(Files.getLastModifiedTime(sampleSheet.toPath()).toInstant());
+    List<String[]> lines =
+        Files.readAllLines(sampleSheet.toPath())
+            .stream()
+            .map(line -> line.split(","))
+            .filter(line -> !(line.length == 0 || line.length == 1 && line[0].isEmpty()))
+            .toList();
+    SamplesheetReadsSection readsSection = (SamplesheetReadsSection) getByName("Reads");
+    if (readsSection == null) {
+      readsSection = new SamplesheetReadsSection();
+    }
+    SamplesheetBCLConvertSection bclConvertSection =
+        (SamplesheetBCLConvertSection) getByName("BCLConvert");
+    if (bclConvertSection == null) {
+      bclConvertSection = new SamplesheetBCLConvertSection();
+    }
+    String sectionName = "";
+    boolean bclDataFirstLine = true;
+    Map<BCL_DATA_COL, Integer> lineIndices = new HashMap<>();
+
+    for (String[] line : lines) {
+      Matcher headerMatcher = HEADER.matcher(line[0]);
+      if (headerMatcher.matches()) {
+        // "Capturing groups are indexed from left to right, starting at one.
+        // Group zero denotes the entire pattern"
+        sectionName = headerMatcher.group(1);
+        continue;
+      }
+      switch (sectionName) {
+        case "Reads":
+          int value = Integer.parseInt(line[1]);
+          switch (line[0]) {
+            case "Read1Cycles":
+              readsSection.setRead1Cycles(value);
+              break;
+            case "Read2Cycles":
+              readsSection.setRead2Cycles(value);
+              break;
+            case "Index1Cycles":
+              readsSection.setIndex1Cycles(value);
+              break;
+            case "Index2Cycles":
+              readsSection.setIndex2Cycles(value);
+          }
+          break;
+        case "BCLConvert_Data":
+          if (bclDataFirstLine) {
+            for (int i = 0; i < line.length; i++) {
+              switch (line[i]) {
+                case "Lane":
+                  lineIndices.put(BCL_DATA_COL.LANE, i);
+                  break;
+                case "Sample_ID":
+                  lineIndices.put(BCL_DATA_COL.SAMPLE_ID, i);
+                  break;
+                case "Index":
+                  lineIndices.put(BCL_DATA_COL.INDEX, i);
+                  break;
+                case "Index2":
+                  lineIndices.put(BCL_DATA_COL.INDEX2, i);
+                  break;
+                case "OverrideCycles":
+                  lineIndices.put(BCL_DATA_COL.OVERRIDE_CYCLES, i);
+                  break;
+              }
+            }
+            bclDataFirstLine = false;
+            continue;
+          }
+          if (lineIndices.get(BCL_DATA_COL.OVERRIDE_CYCLES) == null) {
+            bclConvertSection.addDatum(
+                line[lineIndices.get(BCL_DATA_COL.LANE)],
+                line[lineIndices.get(BCL_DATA_COL.SAMPLE_ID)],
+                line[lineIndices.get(BCL_DATA_COL.INDEX)],
+                line[lineIndices.get(BCL_DATA_COL.INDEX2)],
+                null);
+          } else {
+            bclConvertSection.addDatum(
+                line[lineIndices.get(BCL_DATA_COL.LANE)],
+                line[lineIndices.get(BCL_DATA_COL.SAMPLE_ID)],
+                line[lineIndices.get(BCL_DATA_COL.INDEX)],
+                line[lineIndices.get(BCL_DATA_COL.INDEX2)],
+                line[lineIndices.get(BCL_DATA_COL.OVERRIDE_CYCLES)]);
+          }
+          addToSamplesheet(bclConvertSection);
+          expectedWorkflows.add(DragenWorkflow.BCL_CONVERT);
+          break;
+        case "BCLConvert_Settings":
+          switch (line[0]) {
+            case "SoftwareVersion":
+              bclConvertSection.setSoftwareVersion(line[1]);
+              break;
+            case "OverrideCycles":
+              bclConvertSection.setOverrideCyclesSetting(line[1]);
+              break;
+          }
+          this.addToSamplesheet(bclConvertSection);
+          expectedWorkflows.add(DragenWorkflow.BCL_CONVERT);
+        default:
+          break;
+      }
+    }
+
+    // If there is a BCLConvert section but no OverrideCycles column in BCLConvert_Data,
+    // use the OverrideCycles from BCLConvert_Settings
+    // If neither is available, Illumina says:
+    // "the 'OverrideCycles' defaults [...] to match the run setup as applicable:
+    // Y(Read 1); I(Index 1); I(Index 2): Y(Read 2)"
+    if (!lineIndices.containsKey(BCL_DATA_COL.OVERRIDE_CYCLES)) {
+      if (bclConvertSection.getOverrideCyclesSetting() != null) {
+        for (SamplesheetBCLConvertDataEntry entry : bclConvertSection.getData()) {
+          entry.setOverrideCycles(bclConvertSection.getOverrideCyclesSetting());
+        }
+      } else {
+        try {
+          String defaultOverrideCycles =
+              new StringBuilder("Y")
+                  .append(readsSection.getRead1Cycles())
+                  .append("I")
+                  .append(readsSection.getIndex1Cycles())
+                  .append("I")
+                  .append(readsSection.getIndex2Cycles())
+                  .append("Y")
+                  .append(readsSection.getRead2Cycles())
+                  .toString();
+          for (SamplesheetBCLConvertDataEntry entry : bclConvertSection.getData()) {
+            entry.setOverrideCycles(defaultOverrideCycles);
+          }
+        } catch (NullPointerException npe) {
+          throw new IllegalStateException("Missing Reads Section field for " + rootDir, npe);
+        }
+      }
     }
   }
 
