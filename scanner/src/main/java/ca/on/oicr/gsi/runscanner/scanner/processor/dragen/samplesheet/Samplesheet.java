@@ -19,6 +19,24 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Samplesheet {
+  private enum BCL_DATA_COL {
+    LANE("lane"),
+    SAMPLE_ID("sample_id"),
+    INDEX("index"),
+    INDEX2("index2"),
+    OVERRIDE_CYCLES("overrideCycles");
+
+    private final String name;
+
+    BCL_DATA_COL(String s) {
+      name = s;
+    }
+
+    public String toString() {
+      return this.name;
+    }
+  }
+
   private List<SamplesheetSection> info;
   private Instant modifiedTime;
   private static final Pattern HEADER = Pattern.compile("(?:\\[)(.*)(?:\\])");
@@ -50,7 +68,7 @@ public class Samplesheet {
       }
       String sectionName = "";
       boolean bclDataFirstLine = true;
-      Map<String, Integer> lineIndices = new HashMap<>();
+      Map<BCL_DATA_COL, Integer> lineIndices = new HashMap<>();
 
       for (String[] line : lines) {
         Matcher headerMatcher = HEADER.matcher(line[0]);
@@ -82,48 +100,44 @@ public class Samplesheet {
               for (int i = 0; i < line.length; i++) {
                 switch (line[i]) {
                   case "Lane":
-                    lineIndices.put("lane", i);
+                    lineIndices.put(BCL_DATA_COL.LANE, i);
                     break;
                   case "Sample_ID":
-                    lineIndices.put("sample_id", i);
+                    lineIndices.put(BCL_DATA_COL.SAMPLE_ID, i);
                     break;
                   case "Index":
-                    lineIndices.put("index", i);
+                    lineIndices.put(BCL_DATA_COL.INDEX, i);
                     break;
                   case "Index2":
-                    lineIndices.put("index2", i);
+                    lineIndices.put(BCL_DATA_COL.INDEX2, i);
                     break;
                   case "OverrideCycles":
-                    lineIndices.put("overrideCycles", i);
+                    lineIndices.put(BCL_DATA_COL.OVERRIDE_CYCLES, i);
                     break;
                 }
               }
               bclDataFirstLine = false;
               continue;
             }
-            if (lineIndices.get("overrideCycles") == null) {
+            if (lineIndices.get(BCL_DATA_COL.OVERRIDE_CYCLES) == null) {
               bclConvertSection.addDatum(
-                  line[lineIndices.get("lane")],
-                  line[lineIndices.get("sample_id")],
-                  line[lineIndices.get("index")],
-                  line[lineIndices.get("index2")],
+                  line[lineIndices.get(BCL_DATA_COL.LANE)],
+                  line[lineIndices.get(BCL_DATA_COL.SAMPLE_ID)],
+                  line[lineIndices.get(BCL_DATA_COL.INDEX)],
+                  line[lineIndices.get(BCL_DATA_COL.INDEX2)],
                   null);
             } else {
               bclConvertSection.addDatum(
-                  line[lineIndices.get("lane")],
-                  line[lineIndices.get("sample_id")],
-                  line[lineIndices.get("index")],
-                  line[lineIndices.get("index2")],
-                  line[lineIndices.get("overrideCycles")]);
+                  line[lineIndices.get(BCL_DATA_COL.LANE)],
+                  line[lineIndices.get(BCL_DATA_COL.SAMPLE_ID)],
+                  line[lineIndices.get(BCL_DATA_COL.INDEX)],
+                  line[lineIndices.get(BCL_DATA_COL.INDEX2)],
+                  line[lineIndices.get(BCL_DATA_COL.OVERRIDE_CYCLES)]);
             }
             addToSamplesheet(bclConvertSection);
             expectedWorkflows.add(DragenWorkflow.BCL_CONVERT);
             break;
           case "BCLConvert_Settings":
-            bclConvertSection = (SamplesheetBCLConvertSection) getByName("BCLConvert");
-            if (bclConvertSection == null) {
-              bclConvertSection = new SamplesheetBCLConvertSection();
-            }
             switch (line[0]) {
               case "SoftwareVersion":
                 bclConvertSection.setSoftwareVersion(line[1]);
@@ -144,7 +158,7 @@ public class Samplesheet {
       // If neither is available, Illumina says:
       // "the 'OverrideCycles' defaults [...] to match the run setup as applicable:
       // Y(Read 1); I(Index 1); I(Index 2): Y(Read 2)"
-      if (bclConvertSection != null && !lineIndices.containsKey("overrideCycles")) {
+      if (!lineIndices.containsKey(BCL_DATA_COL.OVERRIDE_CYCLES)) {
         if (bclConvertSection.getOverrideCyclesSetting() != null) {
           for (SamplesheetBCLConvertDataEntry entry : bclConvertSection.getData()) {
             entry.setOverrideCycles(bclConvertSection.getOverrideCyclesSetting());
