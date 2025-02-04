@@ -39,12 +39,19 @@ public class Samplesheet {
               .map(line -> line.split(","))
               .filter(line -> !(line.length == 0 || line.length == 1 && line[0].isEmpty()))
               .toList();
-
-      SamplesheetBCLConvertSection bclConvertSection = null;
-      SamplesheetReadsSection readsSection = null;
+      SamplesheetReadsSection readsSection = (SamplesheetReadsSection) getByName("Reads");
+      if (readsSection == null) {
+        readsSection = new SamplesheetReadsSection();
+      }
+      SamplesheetBCLConvertSection bclConvertSection =
+          (SamplesheetBCLConvertSection) getByName("BCLConvert");
+      if (bclConvertSection == null) {
+        bclConvertSection = new SamplesheetBCLConvertSection();
+      }
       String sectionName = "";
       boolean bclDataFirstLine = true;
       Map<String, Integer> lineIndices = new HashMap<>();
+
       for (String[] line : lines) {
         Matcher headerMatcher = HEADER.matcher(line[0]);
         if (headerMatcher.matches()) {
@@ -55,10 +62,6 @@ public class Samplesheet {
         }
         switch (sectionName) {
           case "Reads":
-            readsSection = (SamplesheetReadsSection) getByName("Reads");
-            if (readsSection == null) {
-              readsSection = new SamplesheetReadsSection();
-            }
             int value = Integer.parseInt(line[1]);
             switch (line[0]) {
               case "Read1Cycles":
@@ -98,11 +101,6 @@ public class Samplesheet {
               bclDataFirstLine = false;
               continue;
             }
-            bclConvertSection = (SamplesheetBCLConvertSection) getByName("BCLConvert");
-            if (bclConvertSection == null) {
-              bclConvertSection = new SamplesheetBCLConvertSection();
-            }
-
             if (lineIndices.get("overrideCycles") == null) {
               bclConvertSection.addDatum(
                   line[lineIndices.get("lane")],
