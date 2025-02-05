@@ -51,17 +51,17 @@ public class ProcessDragen {
             continue;
           }
 
-          // Exit early if Samplesheet finds a SoftwareVersion < 4.1.7, our minimum supported
-          // version
-          SamplesheetBCLConvertSection bclConvertSection =
-              (SamplesheetBCLConvertSection) samplesheet.getByName("BCLConvert");
-          if (bclConvertSection.getSoftwareVersion().compareTo(new Semver(4, 1, 7)) < 0) {
-            dragenPipelineRun.setPipelineStatus(PipelineStatus.UNSUPPORTED);
-            dto.addPipelineRun(dragenPipelineRun);
-            continue;
-          }
-
           if (samplesheet.isExpected(DragenWorkflow.BCL_CONVERT)) {
+            // Exit early if Samplesheet finds a SoftwareVersion < 4.1.7, our minimum supported
+            // version
+            SamplesheetBCLConvertSection bclConvertSection =
+                (SamplesheetBCLConvertSection) samplesheet.getByName("BCLConvert");
+            if (bclConvertSection.getSoftwareVersion().compareTo(new Semver(4, 1, 7)) < 0) {
+              dragenPipelineRun.setPipelineStatus(PipelineStatus.UNSUPPORTED);
+              dto.addPipelineRun(dragenPipelineRun);
+              continue;
+            }
+
             dragenPipelineRun.put(BCLConvert.process(samplesheet, analysisAttempt));
           }
 
