@@ -129,7 +129,7 @@ public abstract class RunProcessor {
   public static Optional<Document> parseXml(File file) {
     try {
       return Optional.of(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(file));
-    } catch (SAXException e) {
+    } catch (SAXException | ParserConfigurationException | IOException e) {
       log.warn("Not really a UTF-16 parsing exception, forcing UTF-8 parsing...", e);
 
       // Automatically detect BOMs and remove them from input stream
@@ -144,12 +144,6 @@ public abstract class RunProcessor {
         log.error("Failed to parse XML after forcing UTF-8 encoding", e2);
         return Optional.empty();
       }
-    } catch (ParserConfigurationException e) {
-      log.error("Failed to create new DocumentBuilder Instance", e);
-      return Optional.empty();
-    } catch (IOException e) {
-      log.error("Failed to parse XML", e);
-      return Optional.empty();
     }
   }
   /**

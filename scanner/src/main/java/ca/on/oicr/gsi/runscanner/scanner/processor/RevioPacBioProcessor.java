@@ -6,8 +6,11 @@ import ca.on.oicr.gsi.runscanner.dto.PacBioNotificationDto.SMRTCellPosition;
 import ca.on.oicr.gsi.runscanner.dto.type.HealthType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
@@ -23,6 +26,7 @@ import java.util.Optional;
 import java.util.TimeZone;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import javax.xml.xpath.XPathConstants;
@@ -201,7 +205,7 @@ public class RevioPacBioProcessor extends RunProcessor {
     dto.setLaneCount(smrtCellCount);
 
     // Grab the .metadata.xml and begin processing
-    getMetadataDirectory(runDirectory)
+    getSubDirectory(runDirectory, "metadata")
         .flatMap(
             metadataDirectory ->
                 Stream.of(Objects.requireNonNull(metadataDirectory.listFiles()))
@@ -210,12 +214,17 @@ public class RevioPacBioProcessor extends RunProcessor {
         .filter(Optional::isPresent)
         .forEach(metadata -> processMetadata(metadata.get(), dto, tz));
 
-    // Check for .transferdone and Transfer_Test in all SMRT Cells to consider the run complete
+    // Check for .transferdone and Transfer_Test in all SMRT Cells
+    // to consider the run complete
     if (isRunComplete(runDirectory, smrtCellCount)) {
-      // We have all the expected files, the run is considered finished, get the completion time
       dto.setHealthType(HealthType.COMPLETED);
+
+      /*
+       We have all the expected files. Initially use file creation time, but if
+       there is a timestamp from pbereports.log, use that instead
+      */
       Optional<File> mostRecentDoneFile =
-          getMetadataDirectory(runDirectory)
+          getSubDirectory(runDirectory, "metadata")
               .flatMap(
                   metadataDirectory ->
                       Stream.of(
@@ -223,10 +232,31 @@ public class RevioPacBioProcessor extends RunProcessor {
                               metadataDirectory.listFiles(
                                   file -> TRANSFER_DONE.test(file.getName())))))
               .max(Comparator.comparing(RevioPacBioProcessor::getFileCreationTime));
-
       // Set completion time based on most recently created .transferdone file
-      dto.setCompletionDate(
-          getFileCreationTime(Objects.requireNonNull(mostRecentDoneFile.orElse(null))));
+      dto.setCompletionDate(getFileCreationTime(mostRecentDoneFile.orElse(null)));
+
+      // Check if pbereport.log present and use that instead for completion time
+      Stream<Path> logFileStream = Files.walk(runDirectory.toPath());
+      List<Path> logFiles =
+          logFileStream
+              .filter(Files::isRegularFile)
+              .filter(file -> PB_REPORT_LOG.test(String.valueOf(file.getFileName())))
+              .toList();
+
+      if (logFiles.size() == smrtCellCount) {
+        // Grab completion time from log file instead
+        Optional<File> mostRecentlyCompleted =
+            getSubDirectory(runDirectory, "statistics")
+                .flatMap(
+                    statisticsDirectory ->
+                        Stream.of(
+                            Objects.requireNonNull(
+                                statisticsDirectory.listFiles(
+                                    file -> PB_REPORT_LOG.test(file.getName())))))
+                .max(Comparator.comparing(RevioPacBioProcessor::getLogCompletionTime));
+        // Set completion time based on log file timestamp
+        dto.setCompletionDate(getLogCompletionTime(mostRecentlyCompleted.orElse(null)));
+      }
     } else {
       // There are some missing files, the run may not be complete
       dto.setHealthType(HealthType.RUNNING);
@@ -271,9 +301,10 @@ public class RevioPacBioProcessor extends RunProcessor {
    * Returns a stream that includes Metadata directory level to be used for further processing
    *
    * @param runDirectory which we are currently processing
+   * @param directoryName specific sub-directory we want
    * @return Stream from Metadata directory level
    */
-  private Stream<File> getMetadataDirectory(File runDirectory) {
+  private Stream<File> getSubDirectory(File runDirectory, String directoryName) {
     return Stream.of(Objects.requireNonNull(runDirectory.listFiles()))
         .filter(
             cellDirectory ->
@@ -282,9 +313,9 @@ public class RevioPacBioProcessor extends RunProcessor {
             cellDirectory ->
                 Stream.of(Objects.requireNonNull(cellDirectory.listFiles()))
                     .filter(
-                        metadataDirectory ->
-                            metadataDirectory.isDirectory()
-                                && metadataDirectory.getName().equals("metadata")));
+                        subDirectory ->
+                            subDirectory.isDirectory()
+                                && subDirectory.getName().equals(directoryName)));
   }
 
   /**
@@ -301,6 +332,37 @@ public class RevioPacBioProcessor extends RunProcessor {
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  /**
+   * Grab the completion time from a log file
+   *
+   * @param file
+   * @return completion time
+   */
+  private static Instant getLogCompletionTime(File file) {
+    try {
+      FileInputStream fStream = new FileInputStream(file);
+      BufferedReader reader = new BufferedReader((new InputStreamReader(fStream)));
+      String line;
+      while ((line = reader.readLine()) != null) {
+        String pattern = String.valueOf(Pattern.compile("^.*exiting with return code 0.*$"));
+        if (line.matches(pattern)) {
+          // We've found the line we can use for completion time, grab date timestamp
+          Pattern datePattern =
+              Pattern.compile(
+                  "[0-9]{4}-[0-9]{2}-[0-9]{2}\\s[0-9]{2}:[0-9]{2}:[0-9]{2}[,.][0-9]{3}Z");
+          Matcher m = datePattern.matcher(line);
+          if (m.find()) {
+            return Instant.parse(m.group().replaceAll(" ", "T").replaceAll("[.,]\\d+(?=Z)", ""));
+          }
+        }
+      }
+      fStream.close();
+    } catch (IOException e) {
+      log.warn("Unable to get completion time", e);
+    }
+    return null;
   }
 
   /**
