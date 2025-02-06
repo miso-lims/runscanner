@@ -4,6 +4,7 @@ Changes:
 
   * Update clang in CI from 12 to 14 
   * Fixed Run Scanner's interactive Swagger docs generating incorrect URLs in some configurations
+  * Detect new RunErrored status on Novaseq X
 
 # 2.0.1
 

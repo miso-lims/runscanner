@@ -171,11 +171,14 @@ public final class DefaultIllumina extends RunProcessor {
     // NovaSeq X pattern
     status = getValueFromXml(runCompletionStatus, COMPLETION_STATUS_NOVASEQ);
     if (status != null) {
-      if (status.equals("RunCompleted")) {
-        return Optional.of(HealthType.COMPLETED);
-      } else {
-        log.debug("New Illumina RunStatus status found: {}", status);
-        return Optional.empty();
+      switch (status) {
+        case "RunCompleted":
+          return Optional.of(HealthType.COMPLETED);
+        case "RunErrored":
+          return Optional.of(HealthType.FAILED);
+        default:
+          log.debug("New Illumina RunStatus status found: {}", status);
+          return Optional.empty();
       }
     }
     return Optional.empty();
