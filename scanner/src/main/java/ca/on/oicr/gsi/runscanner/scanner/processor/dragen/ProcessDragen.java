@@ -35,14 +35,21 @@ public class ProcessDragen {
       for (File analysisAttempt : Objects.requireNonNull(analysisDir.listFiles())) {
         if (analysisAttempt.isDirectory() && analysisAttempt.getName().matches(NUMERAL)) {
           int attemptNum = Integer.parseInt(analysisAttempt.getName());
-          Samplesheet samplesheet = new Samplesheet(analysisAttempt);
+          dragenPipelineRun = new DragenPipelineRun(attemptNum);
+          Samplesheet samplesheet;
+          try {
+            samplesheet = new Samplesheet(analysisAttempt);
+          } catch (IllegalStateException ise) {
+            dragenPipelineRun.setPipelineStatus(PipelineStatus.SCAN_ERROR);
+            dto.addPipelineRun(dragenPipelineRun);
+            return dto;
+          }
           if (samplesheet.getInfo() == null) {
             // no info populated if samplesheet doesn't yet exist
             // however samplesheet doesn't drop immediately. return DTO still pending for another
             // go-around
             return dto;
           }
-          dragenPipelineRun = new DragenPipelineRun(attemptNum);
 
           // Exit early if we didn't find any workflows we support
           if (samplesheet.noneExpected()) {

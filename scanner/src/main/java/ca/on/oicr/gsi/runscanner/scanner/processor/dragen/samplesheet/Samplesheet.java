@@ -44,7 +44,7 @@ public class Samplesheet {
   private Set<DragenWorkflow> expectedWorkflows;
   private static final Logger log = LoggerFactory.getLogger(Samplesheet.class);
 
-  public Samplesheet(File rootDir) throws IOException {
+  public Samplesheet(File rootDir) throws IllegalStateException, IOException {
     info = new LinkedList<>();
     expectedWorkflows = new HashSet<>();
     // Both copies DRAGEN makes of the SampleSheet are within BCLConvert
@@ -120,6 +120,14 @@ public class Samplesheet {
                   lineIndices.put(BCL_DATA_COL.OVERRIDE_CYCLES, i);
                   break;
               }
+            }
+            if (!(lineIndices.containsKey(BCL_DATA_COL.LANE)
+                && lineIndices.containsKey(BCL_DATA_COL.SAMPLE_ID)
+                && lineIndices.containsKey(BCL_DATA_COL.INDEX)
+                && lineIndices.containsKey(BCL_DATA_COL.INDEX2))) {
+              throw new IllegalStateException(
+                  "Expected Lane, Sample_ID, Index, and Index2 in BCLConvert_Data, got "
+                      + lineIndices.keySet());
             }
             bclDataFirstLine = false;
             continue;
