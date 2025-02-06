@@ -18,6 +18,7 @@ import java.util.Objects;
 }) //
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class WorkflowRun {
+  // TODO 20250131_LH00130_0126_B22VMYLLT3 has the start time after the completion time
   private Instant completionTime;
   private Instant startTime;
   private final String workflowName;
