@@ -165,11 +165,16 @@ public class BCLConvert {
       log.info("No fastq_list.csv for {}", rootDir);
     }
 
-    // Check against samplesheet for okayness
-    // TODO case where completed date is still MIN_DATE
-    // TODO get date from SecondaryAnalysisComplete if nothing else?
-    // TODO start date cannot be after completed date
+    // Sanity check against samplesheet and that no dummy values are still present
     boolean isOk = true;
+
+    // Completion time should not be Instant.MIN (implies problem with max_date calculation)
+    // nor should the start time be later than the completion time
+    if (bclConvertWorkflowRun.getCompletionTime().equals(Instant.MIN)
+        || bclConvertWorkflowRun.getStartTime().compareTo(bclConvertWorkflowRun.getCompletionTime())
+            > 0) {
+      isOk = false;
+    }
     for (SamplesheetBCLConvertDataEntry item :
         ((SamplesheetBCLConvertSection) samplesheet.getByName("BCLConvert")).getData()) {
       DragenAnalysisUnit dragenAnalysisUnitItem =
@@ -178,12 +183,13 @@ public class BCLConvert {
               item.getLane(),
               item.getIndex(),
               reverseComplement(item.getIndex2()));
-      if (dragenAnalysisUnitItem == null || dragenAnalysisUnitItem.isEmpty()) {
+      if (dragenAnalysisUnitItem == null
+          || dragenAnalysisUnitItem.isEmpty()
+          || dragenAnalysisUnitItem.getFiles().isEmpty()) {
         isOk = false;
         break;
       } else {
-        for (AnalysisFile itemFile :
-            dragenAnalysisUnitItem.getFiles()) { // TODO case where there are no files
+        for (AnalysisFile itemFile : dragenAnalysisUnitItem.getFiles()) {
           // Unfortunately there is no better source for OverrideCycles
           ((FastqAnalysisFile) itemFile).setOverrideCycles(item.getOverrideCycles());
           if (itemFile.getPath() == null
