@@ -181,11 +181,11 @@ public class Samplesheet {
           String defaultOverrideCycles =
               new StringBuilder("Y")
                   .append(readsSection.getRead1Cycles())
-                  .append("I")
+                  .append(";I")
                   .append(readsSection.getIndex1Cycles())
-                  .append("I")
+                  .append(";I")
                   .append(readsSection.getIndex2Cycles())
-                  .append("Y")
+                  .append(";Y")
                   .append(readsSection.getRead2Cycles())
                   .toString();
           for (SamplesheetBCLConvertDataEntry entry : bclConvertSection.getData()) {
