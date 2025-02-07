@@ -198,7 +198,14 @@ public class BCLConvert {
     if (fileName == null || fileName.isBlank()) {
       return null;
     }
-    Path fullPath = Paths.get(rootDir.getPath(), "/Data/BCLConvert/fastq/", fileName);
+    // 4.1.7 fileName from fastq report looks like 'MY_FILE.fastq.gz'
+    // 4.3 fileName looks like '../MY_FILE.fastq.gz'
+    // So we have to interpret the string as a path and get the last element
+    Path fullPath =
+        Paths.get(
+            rootDir.getPath(),
+            "/Data/BCLConvert/fastq/",
+            Path.of(fileName).getFileName().toString());
     if (!Files.exists(fullPath)) {
       fullPath = Paths.get(rootDir.getPath(), "/Data/BCLConvert/ora_fastq/", fileName);
     }
