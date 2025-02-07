@@ -107,14 +107,19 @@ public class BCLConvert {
       }
 
       // Get read counts from Demultiplex Stats file
-      // for gz compression: root/Analysis/#/Data/BCLConvert/fastq/Reports/Demultiplex_Stats.csv
-      // for ora compression:
-      // root/Analysis/#/Data/BCLConvert/ora_fastq/Reports/Demultiplex_Stats.csv
-      File demulitplexStats =
-          new File(rootDir, "Data/BCLConvert/fastq/Reports/Demultiplex_Stats.csv");
-      if (!(demulitplexStats.exists() && demulitplexStats.isFile())) {
-        demulitplexStats =
-            new File(rootDir, "Data/BCLConvert/ora_fastq/Reports/Demultiplex_Stats.csv");
+      // Many potential locations for this file based on settings and DRAGEN version
+      List<File> potentialDemultiplexStatsLocations =
+          List.of(
+              new File(rootDir, "Data/BCLConvert/fastq/Reports/Demultiplex_Stats.csv"),
+              new File(rootDir, "Data/BCLConvert/ora_fastq/Reports/Demultiplex_Stats.csv"),
+              new File(rootDir, "Data/Demux/Demultiplex_Stats.csv"));
+      File demulitplexStats = new File(rootDir, "dummy/location");
+
+      for (File potentialDemultiplexStats : potentialDemultiplexStatsLocations) {
+        if (potentialDemultiplexStats.exists() && potentialDemultiplexStats.isFile()) {
+          demulitplexStats = potentialDemultiplexStats;
+          break;
+        }
       }
 
       if (demulitplexStats.exists() && demulitplexStats.isFile()) {
@@ -126,6 +131,7 @@ public class BCLConvert {
 
         for (String[] demuxLine : demultiplexLines) {
           if (demuxLine[0].startsWith("Lane")) continue; // skip the column labels
+          if (demuxLine[1].equals("Undetermined")) continue; // skip Undetermined reads
           // 0 = Lane, 1 = SampleId, 2 = Index, 3= # Reads, 4 = # Perfect Index Reads,
           // 5 = # One Mismatch Index Reads, 6 = # Two Mismatch Index Reads, 7 = % Reads,
           // 8 = % Perfect Index Reads, 9 = % One Mismatch Index Reads,
@@ -160,6 +166,9 @@ public class BCLConvert {
     }
 
     // Check against samplesheet for okayness
+    // TODO case where completed date is still MIN_DATE
+    // TODO get date from SecondaryAnalysisComplete if nothing else?
+    // TODO start date cannot be after completed date
     boolean isOk = true;
     for (SamplesheetBCLConvertDataEntry item :
         ((SamplesheetBCLConvertSection) samplesheet.getByName("BCLConvert")).getData()) {
@@ -173,7 +182,8 @@ public class BCLConvert {
         isOk = false;
         break;
       } else {
-        for (AnalysisFile itemFile : dragenAnalysisUnitItem.getFiles()) {
+        for (AnalysisFile itemFile :
+            dragenAnalysisUnitItem.getFiles()) { // TODO case where there are no files
           // Unfortunately there is no better source for OverrideCycles
           ((FastqAnalysisFile) itemFile).setOverrideCycles(item.getOverrideCycles());
           if (itemFile.getPath() == null
