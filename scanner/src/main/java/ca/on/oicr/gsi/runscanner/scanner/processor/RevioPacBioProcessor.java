@@ -204,6 +204,26 @@ public class RevioPacBioProcessor extends RunProcessor {
                 .count();
     dto.setLaneCount(smrtCellCount);
 
+    // Check for presence of Transfer_Test file initially to grab start time
+    try (Stream<Path> stream = Files.walk(runDirectory.toPath())) {
+      List<Path> transferTestFiles =
+          stream
+              .filter(Files::isRegularFile)
+              .filter(file -> TRANSFER_TEST.test(String.valueOf(file.getFileName())))
+              .toList();
+
+      // Need to take the list of file paths and get the earliest creation time
+      Optional<Path> earliestCreatedFilePath =
+          transferTestFiles
+              .stream()
+              .min(Comparator.comparing(filePath -> getFileCreationTime(filePath.toFile())));
+      dto.setStartDate(
+          getFileCreationTime(
+              Objects.requireNonNull(earliestCreatedFilePath.orElse(null)).toFile()));
+    } catch (IOException e) {
+      log.warn("Transfer_Test file not present");
+    }
+
     // Grab the .metadata.xml and begin processing
     getSubDirectory(runDirectory, "metadata")
         .flatMap(
