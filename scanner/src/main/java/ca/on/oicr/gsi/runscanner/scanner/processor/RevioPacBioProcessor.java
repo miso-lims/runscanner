@@ -239,23 +239,7 @@ public class RevioPacBioProcessor extends RunProcessor {
     if (isRunComplete(runDirectory, smrtCellCount)) {
       dto.setHealthType(HealthType.COMPLETED);
 
-      /*
-       We have all the expected files. Initially use file creation time, but if
-       there is a timestamp from pbereports.log, use that instead
-      */
-      Optional<File> mostRecentDoneFile =
-          getSubDirectory(runDirectory, "metadata")
-              .flatMap(
-                  metadataDirectory ->
-                      Stream.of(
-                          Objects.requireNonNull(
-                              metadataDirectory.listFiles(
-                                  file -> TRANSFER_DONE.test(file.getName())))))
-              .max(Comparator.comparing(RevioPacBioProcessor::getFileCreationTime));
-      // Set completion time based on most recently created .transferdone file
-      dto.setCompletionDate(getFileCreationTime(mostRecentDoneFile.orElse(null)));
-
-      // Check if pbereport.log present and use that instead for completion time
+      // Check if pbereport.log present and use that for completion time
       Stream<Path> logFileStream = Files.walk(runDirectory.toPath());
       List<Path> logFiles =
           logFileStream
@@ -264,7 +248,7 @@ public class RevioPacBioProcessor extends RunProcessor {
               .toList();
 
       if (logFiles.size() == smrtCellCount) {
-        // Grab completion time from log file instead
+        // Grab completion time from log file
         Optional<File> mostRecentlyCompleted =
             getSubDirectory(runDirectory, "statistics")
                 .flatMap(
@@ -276,6 +260,22 @@ public class RevioPacBioProcessor extends RunProcessor {
                 .max(Comparator.comparing(RevioPacBioProcessor::getLogCompletionTime));
         // Set completion time based on log file timestamp
         dto.setCompletionDate(getLogCompletionTime(mostRecentlyCompleted.orElse(null)));
+
+        // We don't have the pbereport.log, we'll have to fallback on using transfer_done file
+        // creation time instead
+        if (dto.getCompletionDate() == null) {
+          Optional<File> mostRecentDoneFile =
+              getSubDirectory(runDirectory, "metadata")
+                  .flatMap(
+                      metadataDirectory ->
+                          Stream.of(
+                              Objects.requireNonNull(
+                                  metadataDirectory.listFiles(
+                                      file -> TRANSFER_DONE.test(file.getName())))))
+                  .max(Comparator.comparing(RevioPacBioProcessor::getFileCreationTime));
+          // Set completion time based on most recently created .transferdone file
+          dto.setCompletionDate(getFileCreationTime(mostRecentDoneFile.orElse(null)));
+        }
       }
     } else {
       // There are some missing files, the run may not be complete
