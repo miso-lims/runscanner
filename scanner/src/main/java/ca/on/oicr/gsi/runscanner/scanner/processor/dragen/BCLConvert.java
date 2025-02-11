@@ -13,6 +13,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,12 +26,36 @@ public class BCLConvert {
   public static DragenWorkflowRun process(Samplesheet samplesheet, File rootDir)
       throws IOException {
     DragenWorkflowRun bclConvertWorkflowRun = new DragenWorkflowRun("BCLConvert");
-    bclConvertWorkflowRun.setStartTime(samplesheet.getModifiedTime());
     bclConvertWorkflowRun.setSoftwareVersion(
         ((SamplesheetBCLConvertSection) samplesheet.getByName("BCLConvert"))
             .getSoftwareVersion()
             .toString());
-    Instant max_date = Instant.MIN; // yes you read that right
+
+    // Get start and end time from root/Analysis/#/Data/b2c_dragen_events.csv
+    File b2cEvents = new File(rootDir, "Data/b2c_dragen_events.csv");
+    if (b2cEvents.exists() && b2cEvents.isFile()) {
+      List<String[]> b2cLines =
+          Files.readAllLines(b2cEvents.toPath()).stream().map(line -> line.split(",")).toList();
+      boolean start = true;
+
+      // Line format: 0 = time, 1 = label (we don't need the label for anything)
+      DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+      for (String[] event : b2cLines) {
+        if (event[0].startsWith("time")) continue; // skip the column label line
+        // Assuming the file uses timestamps in the timezone of the machine already,
+        // no offset actually needed
+        Instant instantDateTime =
+            LocalDateTime.parse(event[0], dateTimeFormatter).atOffset(ZoneOffset.UTC).toInstant();
+        if (start) {
+          bclConvertWorkflowRun.setStartTime(instantDateTime);
+          start = false;
+        }
+        bclConvertWorkflowRun.setCompletionTime(instantDateTime);
+      }
+    } else {
+      log.info("No b2c_dragen_events.csv for {}", rootDir);
+    }
+
     // Get fastq list
     // For gz compression, root/Analysis/#/Data/BCLConvert/fastq/Reports/fastq_list.csv
     // For ora compression, root/Analysis/#/Data/BCLConvert/ora_fastq/Reports/fastq_list.csv
@@ -61,18 +88,11 @@ public class BCLConvert {
         AnalysisFile file1 = fastqFromFilename(rootDir, fastq[4], 1),
             file2 = fastqFromFilename(rootDir, fastq[5], 2);
 
-        if (file1 != null && file1.getModifiedTime().compareTo(max_date) > 0)
-          max_date = file1.getModifiedTime();
-
-        if (file2 != null && file2.getModifiedTime().compareTo(max_date) > 0)
-          max_date = file2.getModifiedTime();
-
         if (file1 != null) dragenAnalysisUnit.addFile(file1);
         if (file2 != null) dragenAnalysisUnit.addFile(file2);
 
         bclConvertWorkflowRun.put(dragenAnalysisUnit);
       }
-      bclConvertWorkflowRun.setCompletionTime(max_date);
 
       // Get file checksums from Analysis/#/Manifest.tsv
       File manifest = new File(rootDir, "Manifest.tsv");

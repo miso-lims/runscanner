@@ -12,7 +12,6 @@ import ca.on.oicr.gsi.runscanner.scanner.processor.dragen.samplesheet.Semver;
 import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
-import java.util.TimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,8 +20,8 @@ public class ProcessDragen {
   private static final String NUMERAL = "\\d+";
   private static final Logger log = LoggerFactory.getLogger(ProcessDragen.class);
 
-  public static IlluminaNotificationDto analyse(
-      File runDirectory, TimeZone tz, IlluminaNotificationDto dto) throws IOException {
+  public static IlluminaNotificationDto analyse(File runDirectory, IlluminaNotificationDto dto)
+      throws IOException {
     DragenPipelineRun dragenPipelineRun = null;
 
     File analysisDir = new File(runDirectory, "Analysis");

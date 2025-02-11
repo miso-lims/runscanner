@@ -477,7 +477,7 @@ public final class DefaultIllumina extends RunProcessor {
       updatedHealth.ifPresent(dto::setHealthType);
     }
     if (scanDragen) {
-      dto = ProcessDragen.analyse(runDirectory, tz, dto);
+      dto = ProcessDragen.analyse(runDirectory, dto);
     } else {
       dto.setAnalysisExpected(false);
     }
