@@ -188,9 +188,10 @@ public class BCLConvert {
     // Sanity check against samplesheet and that no dummy values are still present
     boolean isOk = true;
 
-    // Completion time should not be Instant.MIN (implies problem with max_date calculation)
-    // nor should the start time be later than the completion time
-    if (bclConvertWorkflowRun.getCompletionTime().equals(Instant.MIN)
+    // start and completed time should be set and
+    // start time should not be later than the completion time
+    if (bclConvertWorkflowRun.getStartTime() == null
+        || bclConvertWorkflowRun.getCompletionTime() == null
         || bclConvertWorkflowRun.getStartTime().compareTo(bclConvertWorkflowRun.getCompletionTime())
             > 0) {
       isOk = false;
