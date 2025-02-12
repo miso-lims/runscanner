@@ -38,13 +38,19 @@ public class Samplesheet {
     }
   }
 
+  public static class SamplesheetException extends Exception {
+    public SamplesheetException(String s) {
+      super(s);
+    }
+  }
+
   private List<SamplesheetSection> info;
   private Instant modifiedTime;
   private static final Pattern HEADER = Pattern.compile("(?:\\[)(.*)(?:\\])");
   private Set<DragenWorkflow> expectedWorkflows;
   private static final Logger log = LoggerFactory.getLogger(Samplesheet.class);
 
-  public Samplesheet(File rootDir) throws IllegalStateException, IOException {
+  public Samplesheet(File rootDir) throws SamplesheetException, IOException {
     info = new LinkedList<>();
     expectedWorkflows = new HashSet<>();
     // Both copies DRAGEN makes of the SampleSheet are within BCLConvert
@@ -125,7 +131,7 @@ public class Samplesheet {
                 && lineIndices.containsKey(BCL_DATA_COL.SAMPLE_ID)
                 && lineIndices.containsKey(BCL_DATA_COL.INDEX)
                 && lineIndices.containsKey(BCL_DATA_COL.INDEX2))) {
-              throw new IllegalStateException(
+              throw new SamplesheetException(
                   "Expected Lane, Sample_ID, Index, and Index2 in BCLConvert_Data, got "
                       + lineIndices.keySet());
             }

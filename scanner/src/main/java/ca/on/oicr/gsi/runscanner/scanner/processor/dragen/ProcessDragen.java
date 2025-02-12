@@ -7,6 +7,7 @@ import ca.on.oicr.gsi.runscanner.dto.type.DragenWorkflow;
 import ca.on.oicr.gsi.runscanner.dto.type.PipelineStatus;
 import ca.on.oicr.gsi.runscanner.dto.type.WorkflowRunStatus;
 import ca.on.oicr.gsi.runscanner.scanner.processor.dragen.samplesheet.Samplesheet;
+import ca.on.oicr.gsi.runscanner.scanner.processor.dragen.samplesheet.Samplesheet.SamplesheetException;
 import ca.on.oicr.gsi.runscanner.scanner.processor.dragen.samplesheet.SamplesheetBCLConvertSection;
 import ca.on.oicr.gsi.runscanner.scanner.processor.dragen.samplesheet.Semver;
 import java.io.File;
@@ -38,7 +39,7 @@ public class ProcessDragen {
           Samplesheet samplesheet;
           try {
             samplesheet = new Samplesheet(analysisAttempt);
-          } catch (IllegalStateException ise) {
+          } catch (SamplesheetException ise) {
             dragenPipelineRun.setPipelineStatus(PipelineStatus.SCAN_ERROR);
             dto.addPipelineRun(dragenPipelineRun);
             return dto;
