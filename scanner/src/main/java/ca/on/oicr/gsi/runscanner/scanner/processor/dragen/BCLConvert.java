@@ -133,7 +133,7 @@ public class BCLConvert {
               new File(rootDir, "Data/BCLConvert/fastq/Reports/Demultiplex_Stats.csv"),
               new File(rootDir, "Data/BCLConvert/ora_fastq/Reports/Demultiplex_Stats.csv"),
               new File(rootDir, "Data/Demux/Demultiplex_Stats.csv"));
-      File demulitplexStats = new File(rootDir, "dummy/location");
+      File demulitplexStats = null;
 
       for (File potentialDemultiplexStats : potentialDemultiplexStatsLocations) {
         if (potentialDemultiplexStats.exists() && potentialDemultiplexStats.isFile()) {
@@ -142,7 +142,7 @@ public class BCLConvert {
         }
       }
 
-      if (demulitplexStats.exists() && demulitplexStats.isFile()) {
+      if (demulitplexStats != null && demulitplexStats.exists() && demulitplexStats.isFile()) {
         List<String[]> demultiplexLines =
             Files.readAllLines(demulitplexStats.toPath())
                 .stream()
