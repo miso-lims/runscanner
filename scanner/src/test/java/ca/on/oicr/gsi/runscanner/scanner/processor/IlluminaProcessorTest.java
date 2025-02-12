@@ -10,7 +10,7 @@ import java.util.TimeZone;
 
 public class IlluminaProcessorTest extends AbstractProcessorTest {
   private final DefaultIllumina instance =
-      new DefaultIllumina(new Builder(Platform.ILLUMINA, "unittest", null), true);
+      new DefaultIllumina(new Builder(Platform.ILLUMINA, "unittest", null), true, true);
 
   public IlluminaProcessorTest() {
     super(IlluminaNotificationDto.class);
@@ -23,8 +23,8 @@ public class IlluminaProcessorTest extends AbstractProcessorTest {
 
   @Override
   public void testGoldens() throws IOException {
-    if (!System.getProperty("skipIllumina", "true").equals("true")) {
-      checkDirectory("/illumina");
-    }
+    // if (!System.getProperty("skipIllumina", "true").equals("true")) {
+    checkDirectory("/illumina");
+    // }
   }
 }

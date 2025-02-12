@@ -24,5 +24,7 @@
   "runBasesMask" : "y151,I8,I8,y151",
   "scoreCycle" : 318,
   "workflowType" : null,
-  "indexSequencing" : "I5_REVERSE_COMPLEMENT"
+  "indexSequencing" : "I5_REVERSE_COMPLEMENT",
+  "analysis": [],
+  "analysisStatus": "NONE"
 }
