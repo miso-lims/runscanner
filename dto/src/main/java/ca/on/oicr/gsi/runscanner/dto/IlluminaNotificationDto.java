@@ -37,7 +37,7 @@ public class IlluminaNotificationDto extends NotificationDto {
       }
       for (PipelineRun pr : pipelineRuns) {
         if (!pr.getPipelineStatus().equals(PipelineStatus.COMPLETE)
-            || !pr.getPipelineStatus().equals(PipelineStatus.UNSUPPORTED)) {
+            && !pr.getPipelineStatus().equals(PipelineStatus.UNSUPPORTED)) {
           analysisDoneIfExpected = false;
           break;
         }
