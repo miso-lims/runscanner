@@ -6,23 +6,23 @@ import ca.on.oicr.gsi.runscanner.dto.PacBioNotificationDto.SMRTCellPosition;
 import ca.on.oicr.gsi.runscanner.dto.type.HealthType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
+import java.util.Scanner;
 import java.util.TimeZone;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
@@ -93,23 +93,6 @@ public class RevioPacBioProcessor extends RunProcessor {
     };
   }
 
-  /**
-   * Extract a number from the metadata file and put the result into the DTO.
-   *
-   * @param expression the XPath expression yielding the number
-   * @param setter the writer for the number
-   */
-  private static RevioPacBioProcessor.ProcessMetadata processNumber(
-      String expression, BiConsumer<PacBioNotificationDto, Double> setter) {
-    XPathExpression expr = RunProcessor.compileXPath(expression)[0];
-    return (document, dto, timeZone) -> {
-      Double result = (Double) expr.evaluate(document, XPathConstants.NUMBER);
-      if (result != null) {
-        setter.accept(dto, result);
-      }
-    };
-  }
-
   // Revio Samples
   private static RevioPacBioProcessor.ProcessMetadata processSampleInformation() {
     XPathExpression[] expr =
@@ -126,13 +109,6 @@ public class RevioPacBioProcessor extends RunProcessor {
       String poolName = (String) expr[2].evaluate(document, XPathConstants.STRING);
       String movieLength = (String) expr[3].evaluate(document, XPathConstants.STRING);
 
-      // From DefaultPacBio, checking to make sure string is valid
-      if (isStringBlankOrNull(position)
-          || isStringBlankOrNull(containerSerialNumber)
-          || isStringBlankOrNull(poolName)
-          || isStringBlankOrNull(movieLength)) {
-        return;
-      }
       // SMRTCellPosition is a Java Record and represents one SMRT Cell
       SMRTCellPosition containerInfo =
           new SMRTCellPosition(position, containerSerialNumber, poolName, movieLength);
@@ -179,8 +155,7 @@ public class RevioPacBioProcessor extends RunProcessor {
   @Override
   public Stream<File> getRunsFromRoot(File root) {
     return Arrays.stream(
-        Objects.requireNonNull(
-            root.listFiles(f -> f.isDirectory() && RUN_DIRECTORY.matcher(f.getName()).matches())));
+        root.listFiles(f -> f.isDirectory() && RUN_DIRECTORY.matcher(f.getName()).matches()));
   }
 
   @Override
@@ -204,35 +179,20 @@ public class RevioPacBioProcessor extends RunProcessor {
                 .count();
     dto.setLaneCount(smrtCellCount);
 
-    // Check for presence of Transfer_Test file initially to grab start time
-    try (Stream<Path> stream = Files.walk(runDirectory.toPath())) {
-      List<Path> transferTestFiles =
-          stream
-              .filter(Files::isRegularFile)
-              .filter(file -> TRANSFER_TEST.test(String.valueOf(file.getFileName())))
-              .toList();
-
-      // Need to take the list of file paths and get the earliest creation time
-      Optional<Path> earliestCreatedFilePath =
-          transferTestFiles
-              .stream()
-              .min(Comparator.comparing(filePath -> getFileCreationTime(filePath.toFile())));
-      dto.setStartDate(
-          getFileCreationTime(
-              Objects.requireNonNull(earliestCreatedFilePath.orElse(null)).toFile()));
-    } catch (IOException e) {
-      log.warn("Transfer_Test file not present");
-    }
-
     // Grab the .metadata.xml and begin processing
-    getSubDirectory(runDirectory, "metadata")
+    streamSmrtCellSubdirectories(runDirectory, "metadata")
         .flatMap(
             metadataDirectory ->
-                Stream.of(Objects.requireNonNull(metadataDirectory.listFiles()))
+                Stream.of(metadataDirectory.listFiles())
                     .filter(file -> file.getName().endsWith(".metadata.xml")))
         .map(RunProcessor::parseXml)
         .filter(Optional::isPresent)
         .forEach(metadata -> processMetadata(metadata.get(), dto, tz));
+
+    // We don't have a start date from metadata, fallback to Transfer_Tests file creation time
+    if (dto.getStartDate() == null) {
+      getStartTimeFromTransferTests(runDirectory, dto);
+    }
 
     // Check for .transferdone and Transfer_Test in all SMRT Cells
     // to consider the run complete
@@ -247,39 +207,40 @@ public class RevioPacBioProcessor extends RunProcessor {
               .filter(file -> PB_REPORT_LOG.test(String.valueOf(file.getFileName())))
               .toList();
 
+      // Grab completion time from a file
       if (logFiles.size() == smrtCellCount) {
-        // Grab completion time from log file
-        Optional<File> mostRecentlyCompleted =
-            getSubDirectory(runDirectory, "statistics")
+        Optional<Instant> latestCompletionTime =
+            streamSmrtCellSubdirectories(runDirectory, "statistics")
                 .flatMap(
                     statisticsDirectory ->
                         Stream.of(
-                            Objects.requireNonNull(
-                                statisticsDirectory.listFiles(
-                                    file -> PB_REPORT_LOG.test(file.getName())))))
-                .max(Comparator.comparing(RevioPacBioProcessor::getLogCompletionTime));
-        // Set completion time based on log file timestamp
-        dto.setCompletionDate(getLogCompletionTime(mostRecentlyCompleted.orElse(null)));
-
+                            statisticsDirectory.listFiles(
+                                file -> PB_REPORT_LOG.test(file.getName()))))
+                .map(RevioPacBioProcessor::getLogCompletionTime)
+                .max(Comparator.naturalOrder());
+        // Set completion time based on pbereports.log file
+        dto.setCompletionDate(latestCompletionTime.get());
+      } else {
         // We don't have the pbereport.log, we'll have to fallback on using transfer_done file
         // creation time instead
         if (dto.getCompletionDate() == null) {
-          Optional<File> mostRecentDoneFile =
-              getSubDirectory(runDirectory, "metadata")
+          Optional<Instant> mostRecentDoneFile =
+              streamSmrtCellSubdirectories(runDirectory, "metadata")
                   .flatMap(
                       metadataDirectory ->
                           Stream.of(
-                              Objects.requireNonNull(
-                                  metadataDirectory.listFiles(
-                                      file -> TRANSFER_DONE.test(file.getName())))))
-                  .max(Comparator.comparing(RevioPacBioProcessor::getFileCreationTime));
+                              metadataDirectory.listFiles(
+                                  file -> TRANSFER_DONE.test(file.getName()))))
+                  .map(RevioPacBioProcessor::getFileCreationTime)
+                  .max(Comparator.naturalOrder());
           // Set completion time based on most recently created .transferdone file
-          dto.setCompletionDate(getFileCreationTime(mostRecentDoneFile.orElse(null)));
+          dto.setCompletionDate(mostRecentDoneFile.get());
         }
       }
     } else {
       // There are some missing files, the run may not be complete
       dto.setHealthType(HealthType.RUNNING);
+      log.warn("There may be some missing .transferdone and Transfer_Test files");
     }
 
     return dto;
@@ -324,14 +285,14 @@ public class RevioPacBioProcessor extends RunProcessor {
    * @param directoryName specific sub-directory we want
    * @return Stream from Metadata directory level
    */
-  private Stream<File> getSubDirectory(File runDirectory, String directoryName) {
-    return Stream.of(Objects.requireNonNull(runDirectory.listFiles()))
+  private Stream<File> streamSmrtCellSubdirectories(File runDirectory, String directoryName) {
+    return Stream.of(runDirectory.listFiles())
         .filter(
             cellDirectory ->
                 cellDirectory.isDirectory() && REVIO_CELL_DIRECTORY.test(cellDirectory.getName()))
         .flatMap(
             cellDirectory ->
-                Stream.of(Objects.requireNonNull(cellDirectory.listFiles()))
+                Stream.of(cellDirectory.listFiles())
                     .filter(
                         subDirectory ->
                             subDirectory.isDirectory()
@@ -357,30 +318,27 @@ public class RevioPacBioProcessor extends RunProcessor {
   /**
    * Grab the completion time from a log file
    *
-   * @param file
+   * @param file we are checking
    * @return completion time
    */
   private static Instant getLogCompletionTime(File file) {
     try {
-      FileInputStream fStream = new FileInputStream(file);
-      BufferedReader reader = new BufferedReader((new InputStreamReader(fStream)));
-      String line;
-      while ((line = reader.readLine()) != null) {
-        String pattern = String.valueOf(Pattern.compile("^.*exiting with return code 0.*$"));
-        if (line.matches(pattern)) {
-          // We've found the line we can use for completion time, grab date timestamp
-          Pattern datePattern =
-              Pattern.compile(
-                  "[0-9]{4}-[0-9]{2}-[0-9]{2}\\s[0-9]{2}:[0-9]{2}:[0-9]{2}[,.][0-9]{3}Z");
-          Matcher m = datePattern.matcher(line);
-          if (m.find()) {
-            return Instant.parse(m.group().replaceAll(" ", "T").replaceAll("[.,]\\d+(?=Z)", ""));
-          }
+      Scanner myReader = new Scanner(file);
+      Pattern pattern =
+          Pattern.compile("^\\[INFO] (.*) \\[.*] exiting with return code \\d+" + " .*");
+      while (myReader.hasNextLine()) {
+        Matcher matcher = pattern.matcher(myReader.nextLine());
+        if (matcher.matches()) {
+          String stringDate = matcher.group(1);
+          String datePattern = "yyyy-MM-dd HH:mm:ss[.SSS][,SSS][Z][X]";
+          DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(datePattern);
+          return LocalDateTime.parse(stringDate, dateTimeFormatter)
+              .atOffset(ZoneOffset.UTC)
+              .toInstant();
         }
       }
-      fStream.close();
-    } catch (IOException e) {
-      log.warn("Unable to get completion time", e);
+    } catch (FileNotFoundException e) {
+      throw new RuntimeException(e);
     }
     return null;
   }
@@ -408,6 +366,26 @@ public class RevioPacBioProcessor extends RunProcessor {
       return transferDoneFiles.size() == smrtCellCount && transferTestFiles.size() == smrtCellCount;
     } catch (IOException e) {
       throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * Check for presence of Transfer_Test file and grab start time
+   *
+   * @param runDirectory which we are currently processing
+   * @param dto PacBioNotificationDto which we will modify
+   */
+  private void getStartTimeFromTransferTests(File runDirectory, PacBioNotificationDto dto) {
+    try (Stream<Path> stream = Files.walk(runDirectory.toPath())) {
+      // Need to take the list of file paths and get the earliest creation time
+      Optional<Path> earliestCreatedFilePath =
+          stream
+              .filter(Files::isRegularFile)
+              .filter(file -> TRANSFER_TEST.test(String.valueOf(file.getFileName())))
+              .min(Comparator.comparing(filePath -> getFileCreationTime(filePath.toFile())));
+      dto.setStartDate(getFileCreationTime(earliestCreatedFilePath.orElse(null).toFile()));
+    } catch (NullPointerException | IOException e) {
+      log.warn("Transfer_Test file not present");
     }
   }
 }

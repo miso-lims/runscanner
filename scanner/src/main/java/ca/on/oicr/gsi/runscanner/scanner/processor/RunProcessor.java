@@ -141,14 +141,20 @@ public abstract class RunProcessor {
                 .newDocumentBuilder()
                 .parse(new InputSource(reader)));
       } catch (SAXException | ParserConfigurationException | IOException e2) {
-        log.error("Failed to parse XML after forcing UTF-8 encoding", e2);
+        log.error(
+            String.format(
+                "Failed to parse XML after forcing UTF-8 encoding for file: %s", file.getPath()),
+            e2);
         return Optional.empty();
       }
     } catch (ParserConfigurationException e) {
-      log.error("Error in the configuration of the XML parser", e);
+      log.error(
+          String.format(
+              "Error in the configuration of the XML parser for file: %s", file.getPath()),
+          e);
       return Optional.empty();
     } catch (IOException e) {
-      log.error("IO error when parsing XML content", e);
+      log.error(String.format("IO error when parsing XML content for file: %s", file.getPath()), e);
       return Optional.empty();
     }
   }
