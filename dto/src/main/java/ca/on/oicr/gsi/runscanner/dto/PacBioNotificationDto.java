@@ -1,6 +1,8 @@
 package ca.on.oicr.gsi.runscanner.dto;
 
 import ca.on.oicr.gsi.runscanner.dto.type.Platform;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -10,9 +12,11 @@ public class PacBioNotificationDto extends NotificationDto {
 
   private Map<String, String> poolNames;
 
+  @JsonInclude(Include.NON_NULL)
   public record SMRTCellPosition(
       String position, String containerSerialNumber, String poolName, String movieLength) {}
 
+  @JsonInclude(Include.NON_NULL)
   private List<SMRTCellPosition> positionList;
 
   @Override
