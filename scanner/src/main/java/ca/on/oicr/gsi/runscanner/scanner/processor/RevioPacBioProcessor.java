@@ -191,7 +191,7 @@ public class RevioPacBioProcessor extends RunProcessor {
 
     // We don't have a start date from metadata, fallback to Transfer_Tests file creation time
     if (dto.getStartDate() == null) {
-      getStartTimeFromTransferTests(runDirectory, dto);
+      setStartTimeFromTransferTest(runDirectory, dto);
     }
 
     // Check for .transferdone and Transfer_Test in all SMRT Cells
@@ -221,20 +221,10 @@ public class RevioPacBioProcessor extends RunProcessor {
         // Set completion time based on pbereports.log file
         dto.setCompletionDate(latestCompletionTime.get());
       } else {
-        // We don't have the pbereport.log, we'll have to fallback on using transfer_done file
+        // We don't have the pbereport.log, we'll have to fallback on using .transferdone file
         // creation time instead
         if (dto.getCompletionDate() == null) {
-          Optional<Instant> mostRecentDoneFile =
-              streamSmrtCellSubdirectories(runDirectory, "metadata")
-                  .flatMap(
-                      metadataDirectory ->
-                          Stream.of(
-                              metadataDirectory.listFiles(
-                                  file -> TRANSFER_DONE.test(file.getName()))))
-                  .map(RevioPacBioProcessor::getFileCreationTime)
-                  .max(Comparator.naturalOrder());
-          // Set completion time based on most recently created .transferdone file
-          dto.setCompletionDate(mostRecentDoneFile.get());
+          setCompletionTimeFromTransferDone(runDirectory, dto);
         }
       }
     } else {
@@ -370,22 +360,40 @@ public class RevioPacBioProcessor extends RunProcessor {
   }
 
   /**
-   * Check for presence of Transfer_Test file and grab start time
+   * Check for presence of Transfer_Test file and grab creation time
    *
    * @param runDirectory which we are currently processing
    * @param dto PacBioNotificationDto which we will modify
    */
-  private void getStartTimeFromTransferTests(File runDirectory, PacBioNotificationDto dto) {
-    try (Stream<Path> stream = Files.walk(runDirectory.toPath())) {
-      // Need to take the list of file paths and get the earliest creation time
-      Optional<Path> earliestCreatedFilePath =
-          stream
-              .filter(Files::isRegularFile)
-              .filter(file -> TRANSFER_TEST.test(String.valueOf(file.getFileName())))
-              .min(Comparator.comparing(filePath -> getFileCreationTime(filePath.toFile())));
-      dto.setStartDate(getFileCreationTime(earliestCreatedFilePath.orElse(null).toFile()));
-    } catch (NullPointerException | IOException e) {
-      log.warn("Transfer_Test file not present");
-    }
+  private void setStartTimeFromTransferTest(File runDirectory, PacBioNotificationDto dto) {
+    Optional<Instant> earliestTransferTestCreationTime =
+        streamSmrtCellSubdirectories(runDirectory, "metadata")
+            .flatMap(
+                metadataDirectory ->
+                    Stream.of(
+                        metadataDirectory.listFiles(file -> TRANSFER_TEST.test(file.getName()))))
+            .map(RevioPacBioProcessor::getFileCreationTime)
+            .min(Comparator.naturalOrder());
+    // Set run start time based on most recently created .Transfer_Test file
+    dto.setStartDate(earliestTransferTestCreationTime.get());
+  }
+
+  /**
+   * Check for presence of .Transferdone file and grab creation time
+   *
+   * @param runDirectory which we are currently processing
+   * @param dto PacBioNotificationDto which we will modify
+   */
+  private void setCompletionTimeFromTransferDone(File runDirectory, PacBioNotificationDto dto) {
+    Optional<Instant> latestTransferDoneCreationTime =
+        streamSmrtCellSubdirectories(runDirectory, "metadata")
+            .flatMap(
+                metadataDirectory ->
+                    Stream.of(
+                        metadataDirectory.listFiles(file -> TRANSFER_DONE.test(file.getName()))))
+            .map(RevioPacBioProcessor::getFileCreationTime)
+            .max(Comparator.naturalOrder());
+    // Set completion time based on most recently created .transferdone file
+    dto.setCompletionDate(latestTransferDoneCreationTime.get());
   }
 }
