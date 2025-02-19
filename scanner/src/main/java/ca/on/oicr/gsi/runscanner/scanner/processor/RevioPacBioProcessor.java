@@ -141,15 +141,13 @@ public class RevioPacBioProcessor extends RunProcessor {
     };
   }
 
-  public RevioPacBioProcessor(Builder builder, String address) {
+  public RevioPacBioProcessor(Builder builder) {
     super(builder);
   }
 
   public static RunProcessor create(Builder builder, ObjectNode parameters) {
     JsonNode address = parameters.get("address");
-    return address.isTextual()
-        ? new RevioPacBioProcessor(builder, address.textValue().replaceAll("/+$", ""))
-        : null;
+    return address.isTextual() ? new RevioPacBioProcessor(builder) : null;
   }
 
   @Override
@@ -200,37 +198,26 @@ public class RevioPacBioProcessor extends RunProcessor {
       dto.setHealthType(HealthType.COMPLETED);
 
       // Check if pbereport.log present and use that for completion time
-      Stream<Path> logFileStream = Files.walk(runDirectory.toPath());
-      List<Path> logFiles =
-          logFileStream
-              .filter(Files::isRegularFile)
-              .filter(file -> PB_REPORT_LOG.test(String.valueOf(file.getFileName())))
-              .toList();
+      Optional<Instant> latestCompletionTime =
+          streamSmrtCellSubdirectories(runDirectory, "statistics")
+              .flatMap(
+                  statisticsDirectory ->
+                      Stream.of(
+                          statisticsDirectory.listFiles(
+                              file -> PB_REPORT_LOG.test(file.getName()))))
+              .map(RevioPacBioProcessor::getLogCompletionTime)
+              .max(Comparator.naturalOrder());
+      // Set completion time based on pbereports.log file
+      latestCompletionTime.ifPresent(dto::setCompletionDate);
 
-      // Grab completion time from a file
-      if (logFiles.size() == smrtCellCount) {
-        Optional<Instant> latestCompletionTime =
-            streamSmrtCellSubdirectories(runDirectory, "statistics")
-                .flatMap(
-                    statisticsDirectory ->
-                        Stream.of(
-                            statisticsDirectory.listFiles(
-                                file -> PB_REPORT_LOG.test(file.getName()))))
-                .map(RevioPacBioProcessor::getLogCompletionTime)
-                .max(Comparator.naturalOrder());
-        // Set completion time based on pbereports.log file
-        dto.setCompletionDate(latestCompletionTime.get());
-      } else {
-        // We don't have the pbereport.log, we'll have to fallback on using .transferdone file
-        // creation time instead
-        if (dto.getCompletionDate() == null) {
-          setCompletionTimeFromTransferDone(runDirectory, dto);
-        }
+      // If we don't have the pbereport.log, we'll have to fallback using .transferdone file
+      // creation time instead
+      if (dto.getCompletionDate() == null) {
+        setCompletionTimeFromTransferDone(runDirectory, dto);
       }
     } else {
       // There are some missing files, the run may not be complete
       dto.setHealthType(HealthType.RUNNING);
-      log.warn("There may be some missing .transferdone and Transfer_Test files");
     }
 
     return dto;
@@ -296,13 +283,13 @@ public class RevioPacBioProcessor extends RunProcessor {
    * @return Instant point in time
    */
   private static Instant getFileCreationTime(File file) {
+    FileTime fileTime = null;
     try {
-      FileTime fileTime =
-          (FileTime) Files.getAttribute(Path.of(file.getAbsolutePath()), "creationTime");
-      return fileTime.toInstant();
+      fileTime = (FileTime) Files.getAttribute(Path.of(file.getAbsolutePath()), "creationTime");
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
+    return fileTime.toInstant();
   }
 
   /**
@@ -320,7 +307,7 @@ public class RevioPacBioProcessor extends RunProcessor {
         Matcher matcher = pattern.matcher(myReader.nextLine());
         if (matcher.matches()) {
           String stringDate = matcher.group(1);
-          String datePattern = "yyyy-MM-dd HH:mm:ss[.SSS][,SSS][Z][X]";
+          String datePattern = "yyyy-MM-dd HH:mm:ss[,SSS][XX]";
           DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(datePattern);
           return LocalDateTime.parse(stringDate, dateTimeFormatter)
               .atOffset(ZoneOffset.UTC)
@@ -328,7 +315,7 @@ public class RevioPacBioProcessor extends RunProcessor {
         }
       }
     } catch (FileNotFoundException e) {
-      throw new RuntimeException(e);
+      throw new IllegalArgumentException("This file is expected to exist.");
     }
     return null;
   }
@@ -338,24 +325,24 @@ public class RevioPacBioProcessor extends RunProcessor {
    * @param smrtCellCount total number of SMRT cells in runDirectory
    * @return true or false
    */
-  private boolean isRunComplete(File runDirectory, int smrtCellCount) {
+  private boolean isRunComplete(File runDirectory, int smrtCellCount) throws IOException {
     try (Stream<Path> testFileStream = Files.walk(runDirectory.toPath());
         Stream<Path> testDoneStream = Files.walk(runDirectory.toPath())) {
-      List<Path> transferTestFiles =
-          testFileStream
-              .filter(Files::isRegularFile)
-              .filter(file -> TRANSFER_TEST.test(String.valueOf(file.getFileName())))
-              .toList();
+      int transferTestFiles =
+          (int)
+              testFileStream
+                  .filter(Files::isRegularFile)
+                  .filter(file -> TRANSFER_TEST.test(String.valueOf(file.getFileName())))
+                  .count();
 
-      List<Path> transferDoneFiles =
-          testDoneStream
-              .filter(Files::isRegularFile)
-              .filter(file -> TRANSFER_DONE.test(String.valueOf(file.getFileName())))
-              .toList();
+      int transferDoneFiles =
+          (int)
+              testDoneStream
+                  .filter(Files::isRegularFile)
+                  .filter(file -> TRANSFER_DONE.test(String.valueOf(file.getFileName())))
+                  .count();
 
-      return transferDoneFiles.size() == smrtCellCount && transferTestFiles.size() == smrtCellCount;
-    } catch (IOException e) {
-      throw new RuntimeException(e);
+      return transferDoneFiles == smrtCellCount && transferTestFiles == smrtCellCount;
     }
   }
 
@@ -364,6 +351,7 @@ public class RevioPacBioProcessor extends RunProcessor {
    *
    * @param runDirectory which we are currently processing
    * @param dto PacBioNotificationDto which we will modify
+   *     <p>Throws NoSuchElementException if the .Transfer_Test files are missing
    */
   private void setStartTimeFromTransferTest(File runDirectory, PacBioNotificationDto dto) {
     Optional<Instant> earliestTransferTestCreationTime =
@@ -383,6 +371,7 @@ public class RevioPacBioProcessor extends RunProcessor {
    *
    * @param runDirectory which we are currently processing
    * @param dto PacBioNotificationDto which we will modify
+   *     <p>Throws NoSuchElementException if the .Transferdone files are missing
    */
   private void setCompletionTimeFromTransferDone(File runDirectory, PacBioNotificationDto dto) {
     Optional<Instant> latestTransferDoneCreationTime =

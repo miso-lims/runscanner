@@ -12,8 +12,7 @@ public class PacBioNotificationDto extends NotificationDto {
 
   private Map<String, String> poolNames;
 
-  @JsonInclude(Include.NON_NULL)
-  public record SMRTCellPosition(
+  public static record SMRTCellPosition(
       String position, String containerSerialNumber, String poolName, String movieLength) {}
 
   @JsonInclude(Include.NON_NULL)
