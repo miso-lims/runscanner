@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Scanner;
 import java.util.TimeZone;
@@ -42,7 +43,7 @@ public class RevioPacBioProcessor extends RunProcessor {
   /** Extract data from an XML metadata file and put it in the DTO. */
   interface ProcessMetadata {
 
-    public void accept(Document document, PacBioNotificationDto dto, TimeZone timeZone)
+    void accept(Document document, PacBioNotificationDto dto, TimeZone timeZone)
         throws XPathException;
   }
 
@@ -185,9 +186,9 @@ public class RevioPacBioProcessor extends RunProcessor {
         .filter(Optional::isPresent)
         .forEach(metadata -> processMetadata(metadata.get(), dto, tz));
 
-    // We don't have a start date from metadata, fallback to Transfer_Tests file creation time
+    // We don't have a start date from metadata, fallback to Transfer_Test file creation time
     if (dto.getStartDate() == null) {
-      setStartTimeFromTransferTest(runDirectory, dto);
+      dto.setStartDate(startTimeFromTransferTest(runDirectory));
     }
 
     // Check for .transferdone and Transfer_Test in all SMRT Cells
@@ -211,7 +212,7 @@ public class RevioPacBioProcessor extends RunProcessor {
       // If we don't have the pbereport.log, we'll have to fallback using .transferdone file
       // creation time instead
       if (dto.getCompletionDate() == null) {
-        setCompletionTimeFromTransferDone(runDirectory, dto);
+        dto.setCompletionDate(completionTimeFromTransferDone(runDirectory));
       }
     } else {
       // There are some missing files, the run may not be complete
@@ -235,17 +236,6 @@ public class RevioPacBioProcessor extends RunProcessor {
         log.error("Failed to extract metadata", e);
       }
     }
-  }
-
-  /**
-   * Tests whether a String is blank (empty or just spaces) or null. Duplicated from MISO's
-   * LimsUtils.
-   *
-   * @param s String to test for blank or null
-   * @return true if blank or null String provided
-   */
-  private static boolean isStringBlankOrNull(String s) {
-    return s == null || s.trim().isEmpty();
   }
 
   @Override
@@ -341,58 +331,54 @@ public class RevioPacBioProcessor extends RunProcessor {
   }
 
   /**
-   * Check for presence of Transfer_Test file and grab creation time
+   * Filter runDirectory for Transfer_Test files and grab earliest creation time
    *
    * @param runDirectory which we are currently processing
-   * @param dto PacBioNotificationDto which we will modify @Throws NoSuchElementException if the
-   *     .Transfer_Test files are missing
+   * @return earliest file creation time
+   * @throws NoSuchElementException if the .Transfer_Test files are missing
    */
-  private void setStartTimeFromTransferTest(File runDirectory, PacBioNotificationDto dto) {
-    Optional<Instant> earliestTransferTestCreationTime =
+  private Instant startTimeFromTransferTest(File runDirectory) throws IOException {
+    List<File> TransferTestFiles =
         streamSmrtCellSubdirectories(runDirectory, "metadata")
             .flatMap(
                 metadataDirectory ->
                     Stream.of(
                         metadataDirectory.listFiles(file -> TRANSFER_TEST.test(file.getName()))))
-            .map(
-                file -> {
-                  try {
-                    return getFileCreationTime(file);
-                  } catch (IOException e) {
-                    log.error("Unable to get the creation time.");
-                    throw new RuntimeException(e);
-                  }
-                })
-            .min(Comparator.naturalOrder());
-    // Set run start time based on most recently created .Transfer_Test file
-    dto.setStartDate(earliestTransferTestCreationTime.get());
+            .toList();
+
+    Instant minInstant = null;
+    for (File file : TransferTestFiles) {
+      Instant creationTime = getFileCreationTime(file);
+      if (minInstant == null || creationTime.isBefore(minInstant)) {
+        minInstant = creationTime;
+      }
+    }
+    return minInstant;
   }
 
   /**
-   * Check for presence of .Transferdone file and grab creation time
+   * Filter runDirectory for .Transferdone file and grab latest creation time
    *
    * @param runDirectory which we are currently processing
-   * @param dto PacBioNotificationDto which we will modify @Throws NoSuchElementException if the
-   *     .Transferdone files are missing
+   * @return latest file creation time
+   * @throws NoSuchElementException if the .Transferdone files are missing
    */
-  private void setCompletionTimeFromTransferDone(File runDirectory, PacBioNotificationDto dto) {
-    Optional<Instant> latestTransferDoneCreationTime =
+  private Instant completionTimeFromTransferDone(File runDirectory) throws IOException {
+    List<File> TransferDoneFiles =
         streamSmrtCellSubdirectories(runDirectory, "metadata")
             .flatMap(
                 metadataDirectory ->
                     Stream.of(
                         metadataDirectory.listFiles(file -> TRANSFER_DONE.test(file.getName()))))
-            .map(
-                file -> {
-                  try {
-                    return getFileCreationTime(file);
-                  } catch (IOException e) {
-                    log.error("Unable to get the creation time.");
-                    throw new RuntimeException(e);
-                  }
-                })
-            .max(Comparator.naturalOrder());
-    // Set completion time based on most recently created .transferdone file
-    dto.setCompletionDate(latestTransferDoneCreationTime.get());
+            .toList();
+
+    Instant maxInstant = null;
+    for (File file : TransferDoneFiles) {
+      Instant creationTime = getFileCreationTime(file);
+      if (maxInstant == null || creationTime.isAfter(maxInstant)) {
+        maxInstant = creationTime;
+      }
+    }
+    return maxInstant;
   }
 }
