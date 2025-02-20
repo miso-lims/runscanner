@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Scanner;
 import java.util.TimeZone;
@@ -334,8 +333,7 @@ public class RevioPacBioProcessor extends RunProcessor {
    * Filter runDirectory for Transfer_Test files and grab earliest creation time
    *
    * @param runDirectory which we are currently processing
-   * @return earliest file creation time
-   * @throws NoSuchElementException if the .Transfer_Test files are missing
+   * @return earliest file creation time or null if no Transfer_Test files are found
    */
   private Instant startTimeFromTransferTest(File runDirectory) throws IOException {
     List<File> TransferTestFiles =
@@ -360,8 +358,7 @@ public class RevioPacBioProcessor extends RunProcessor {
    * Filter runDirectory for .Transferdone file and grab latest creation time
    *
    * @param runDirectory which we are currently processing
-   * @return latest file creation time
-   * @throws NoSuchElementException if the .Transferdone files are missing
+   * @return latest file creation time or null if no Transferdone files are found
    */
   private Instant completionTimeFromTransferDone(File runDirectory) throws IOException {
     List<File> TransferDoneFiles =
