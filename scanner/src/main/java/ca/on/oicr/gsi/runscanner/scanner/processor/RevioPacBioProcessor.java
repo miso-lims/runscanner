@@ -4,7 +4,6 @@ import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.PacBioNotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.PacBioNotificationDto.SMRTCellPosition;
 import ca.on.oicr.gsi.runscanner.dto.type.HealthType;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -146,8 +145,7 @@ public class RevioPacBioProcessor extends RunProcessor {
   }
 
   public static RunProcessor create(Builder builder, ObjectNode parameters) {
-    JsonNode address = parameters.get("address");
-    return address.isTextual() ? new RevioPacBioProcessor(builder) : null;
+    return new RevioPacBioProcessor(builder);
   }
 
   @Override
@@ -282,13 +280,9 @@ public class RevioPacBioProcessor extends RunProcessor {
    * @param file which we are currently processing
    * @return Instant point in time
    */
-  private static Instant getFileCreationTime(File file) {
-    FileTime fileTime = null;
-    try {
-      fileTime = (FileTime) Files.getAttribute(Path.of(file.getAbsolutePath()), "creationTime");
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+  private static Instant getFileCreationTime(File file) throws IOException {
+    FileTime fileTime =
+        (FileTime) Files.getAttribute(Path.of(file.getAbsolutePath()), "creationTime");
     return fileTime.toInstant();
   }
 
@@ -307,7 +301,7 @@ public class RevioPacBioProcessor extends RunProcessor {
         Matcher matcher = pattern.matcher(myReader.nextLine());
         if (matcher.matches()) {
           String stringDate = matcher.group(1);
-          String datePattern = "yyyy-MM-dd HH:mm:ss[,SSS][XX]";
+          String datePattern = "yyyy-MM-dd HH:mm:ss,SSSXX";
           DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(datePattern);
           return LocalDateTime.parse(stringDate, dateTimeFormatter)
               .atOffset(ZoneOffset.UTC)
@@ -350,8 +344,8 @@ public class RevioPacBioProcessor extends RunProcessor {
    * Check for presence of Transfer_Test file and grab creation time
    *
    * @param runDirectory which we are currently processing
-   * @param dto PacBioNotificationDto which we will modify
-   *     <p>Throws NoSuchElementException if the .Transfer_Test files are missing
+   * @param dto PacBioNotificationDto which we will modify @Throws NoSuchElementException if the
+   *     .Transfer_Test files are missing
    */
   private void setStartTimeFromTransferTest(File runDirectory, PacBioNotificationDto dto) {
     Optional<Instant> earliestTransferTestCreationTime =
@@ -360,7 +354,15 @@ public class RevioPacBioProcessor extends RunProcessor {
                 metadataDirectory ->
                     Stream.of(
                         metadataDirectory.listFiles(file -> TRANSFER_TEST.test(file.getName()))))
-            .map(RevioPacBioProcessor::getFileCreationTime)
+            .map(
+                file -> {
+                  try {
+                    return getFileCreationTime(file);
+                  } catch (IOException e) {
+                    log.error("Unable to get the creation time.");
+                    throw new RuntimeException(e);
+                  }
+                })
             .min(Comparator.naturalOrder());
     // Set run start time based on most recently created .Transfer_Test file
     dto.setStartDate(earliestTransferTestCreationTime.get());
@@ -370,8 +372,8 @@ public class RevioPacBioProcessor extends RunProcessor {
    * Check for presence of .Transferdone file and grab creation time
    *
    * @param runDirectory which we are currently processing
-   * @param dto PacBioNotificationDto which we will modify
-   *     <p>Throws NoSuchElementException if the .Transferdone files are missing
+   * @param dto PacBioNotificationDto which we will modify @Throws NoSuchElementException if the
+   *     .Transferdone files are missing
    */
   private void setCompletionTimeFromTransferDone(File runDirectory, PacBioNotificationDto dto) {
     Optional<Instant> latestTransferDoneCreationTime =
@@ -380,7 +382,15 @@ public class RevioPacBioProcessor extends RunProcessor {
                 metadataDirectory ->
                     Stream.of(
                         metadataDirectory.listFiles(file -> TRANSFER_DONE.test(file.getName()))))
-            .map(RevioPacBioProcessor::getFileCreationTime)
+            .map(
+                file -> {
+                  try {
+                    return getFileCreationTime(file);
+                  } catch (IOException e) {
+                    log.error("Unable to get the creation time.");
+                    throw new RuntimeException(e);
+                  }
+                })
             .max(Comparator.naturalOrder());
     // Set completion time based on most recently created .transferdone file
     dto.setCompletionDate(latestTransferDoneCreationTime.get());
