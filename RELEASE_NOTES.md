@@ -2,6 +2,7 @@
 
 Changes:
 
+  * Added RevioPacBioProcessor to scan PacBio Revio runs (experimental; still under development)
   * Update clang in CI from 12 to 14 
   * Fixed Run Scanner's interactive Swagger docs generating incorrect URLs in some configurations
   * Detect new RunErrored status on Novaseq X

@@ -6,7 +6,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.TimeZone;
@@ -19,9 +23,11 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
+import org.apache.commons.io.input.BOMInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 /**
@@ -87,6 +93,7 @@ public abstract class RunProcessor {
         Stream.of(
             new Builder(Platform.ILLUMINA, "default", DefaultIllumina::create),
             new Builder(Platform.PACBIO, "default", DefaultPacBio::create),
+            new Builder(Platform.PACBIO, "revio", RevioPacBioProcessor::create),
             new Builder(Platform.OXFORDNANOPORE, "promethion", PromethionProcessor::create),
             new Builder(Platform.OXFORDNANOPORE, "minion", MinionProcessor::create));
     return Stream.concat(
@@ -118,15 +125,39 @@ public abstract class RunProcessor {
     return mapper;
   }
 
+  /** Attempt to parse naively, and force parsing using UTF-8 if that doesn't work */
   public static Optional<Document> parseXml(File file) {
     try {
       return Optional.of(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(file));
-    } catch (SAXException | ParserConfigurationException | IOException e) {
-      log.error("Failed to parse XML", e);
+    } catch (SAXException e) {
+      log.warn("Not really a UTF-16 parsing exception, forcing UTF-8 parsing...", e);
+
+      // Automatically detect BOMs and remove them from input stream
+      // BOM characters can interfere with text processing if not properly removed
+      try (BOMInputStream bomInputStream = new BOMInputStream(new FileInputStream(file));
+          Reader reader = new InputStreamReader(bomInputStream, StandardCharsets.UTF_8)) {
+        return Optional.of(
+            DocumentBuilderFactory.newInstance()
+                .newDocumentBuilder()
+                .parse(new InputSource(reader)));
+      } catch (SAXException | ParserConfigurationException | IOException e2) {
+        log.error(
+            String.format(
+                "Failed to parse XML after forcing UTF-8 encoding for file: %s", file.getPath()),
+            e2);
+        return Optional.empty();
+      }
+    } catch (ParserConfigurationException e) {
+      log.error(
+          String.format(
+              "Error in the configuration of the XML parser for file: %s", file.getPath()),
+          e);
+      return Optional.empty();
+    } catch (IOException e) {
+      log.error(String.format("IO error when parsing XML content for file: %s", file.getPath()), e);
       return Optional.empty();
     }
   }
-
   /**
    * Create a run processor for the request configuration, if one exists.
    *
