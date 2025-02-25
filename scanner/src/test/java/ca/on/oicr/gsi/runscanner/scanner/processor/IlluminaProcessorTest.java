@@ -10,7 +10,7 @@ import java.util.TimeZone;
 
 public class IlluminaProcessorTest extends AbstractProcessorTest {
   private final DefaultIllumina instance =
-      new DefaultIllumina(new Builder(Platform.ILLUMINA, "unittest", null), true);
+      new DefaultIllumina(new Builder(Platform.ILLUMINA, "unittest", null), true, true);
 
   public IlluminaProcessorTest() {
     super(IlluminaNotificationDto.class);

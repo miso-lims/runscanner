@@ -3,14 +3,22 @@ package ca.on.oicr.gsi.runscanner.scanner.processor;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
+import ca.on.oicr.gsi.runscanner.dto.IlluminaNotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.OxfordNanoporeNotificationDto;
+import ca.on.oicr.gsi.runscanner.dto.PipelineRun;
+import ca.on.oicr.gsi.runscanner.dto.WorkflowRun;
+import ca.on.oicr.gsi.runscanner.dto.dragen.AnalysisFile;
+import ca.on.oicr.gsi.runscanner.dto.dragen.DragenAnalysisUnit;
+import ca.on.oicr.gsi.runscanner.dto.dragen.DragenWorkflowRun;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.time.Instant;
 import org.junit.Test;
 
 public abstract class AbstractProcessorTest {
@@ -46,6 +54,37 @@ public abstract class AbstractProcessorTest {
       // For only Oxford Nanopore processors
       if (clazz.equals(OxfordNanoporeNotificationDto.class)) {
         ((OxfordNanoporeNotificationDto) result).setProtocolVersion(null);
+      }
+
+      // For only Illumina runs with DRAGEN analysis, strip out times in the DRAGEN analysis
+      // Because git is liable to change each files mtime
+      // This is a ratking of a for loop, but I can't get streams to cooperate
+      if (clazz.equals(IlluminaNotificationDto.class)) {
+        IlluminaNotificationDto illuminaResult = (IlluminaNotificationDto) result;
+
+        if (!illuminaResult.pipelineRuns.isEmpty()) {
+          for (PipelineRun<?> pr : illuminaResult.pipelineRuns) {
+            for (WorkflowRun wr : pr.getWorkflowRuns()) {
+              wr.setCompletionTime(Instant.EPOCH);
+              wr.setStartTime(Instant.EPOCH);
+              if (wr instanceof DragenWorkflowRun) {
+                for (DragenAnalysisUnit dau : ((DragenWorkflowRun) wr).getAnalysisOutputs()) {
+                  for (AnalysisFile af : dau.getFiles()) {
+                    af.setCreatedTime(Instant.EPOCH);
+                    af.setModifiedTime(Instant.EPOCH);
+
+                    // Strip away /home/user/workspace/etc from path to match reference
+                    Path pathToCut = af.getPath();
+                    while (!pathToCut.getName(0).equals(Path.of("scanner"))) {
+                      pathToCut = pathToCut.subpath(1, pathToCut.getNameCount());
+                    }
+                    af.setPath(pathToCut);
+                  }
+                }
+              }
+            }
+          }
+        }
       }
 
       // For all processors

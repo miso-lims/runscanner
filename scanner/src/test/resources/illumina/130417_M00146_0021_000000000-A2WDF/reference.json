@@ -24,5 +24,7 @@
   "runBasesMask" : "y121,y121",
   "scoreCycle" : 242,
   "workflowType" : null,
-  "indexSequencing" : null
+  "indexSequencing" : null,
+  "analysis": [],
+  "analysisStatus": "NONE"
 }
