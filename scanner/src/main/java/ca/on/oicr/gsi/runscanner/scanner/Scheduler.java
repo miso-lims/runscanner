@@ -58,8 +58,7 @@ public class Scheduler {
      * the processing queue.
      */
     public boolean shouldRerun() {
-      return !dto.getHealthType().isDone()
-          && Duration.between(created, Instant.now()).toMinutes() > 10;
+      return !dto.isDone() && Duration.between(created, Instant.now()).toMinutes() > 10;
     }
   }
 
