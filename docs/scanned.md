@@ -4,20 +4,23 @@ link on the header bar of the Run Scanner interface. This page outlines the
 runs detected and successfully processed by Run Scanner.
 
 ### Scanned Runs List
+
 Each run which has been successfully scanned and processed by Run Scanner
 will be listed on the Scanned page. Each item in the list contains the Run
 Alias, which is a link to the Run JSON (see below), and the path at
 which Run Scanner detected the run.
 
 ### Run JSON
+
 Clicking the Run Alias will load the Run
 [JSON](https://en.wikipedia.org/wiki/JSON) for the selected run.
 This file is a summary of all of the information Run Scanner has retrieved
-from the sequencing run output.
+from the sequencing run output, and analysis platform output if applicable.
+See [Analysis Platform Support](./analysis/) for more information.
 
 This file contains the same information which will be returned when accessed
 via the REST API.
-<!-- right? --> <!-- For more information, please refer to [API Docs](../api/). -->
+For more information, please refer to [API Docs](./api/).
 
 The fields within this file vary based on the model of sequencer which has
 produced the run. (For more information, please refer to

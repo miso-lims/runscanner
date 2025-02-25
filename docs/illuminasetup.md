@@ -52,6 +52,7 @@ create the JSON. This must be provided by the system.
 
 
 ### Compiling
+
 The `build-illumina-interop` script compiles a copy of the Illumina interop library
 with the correct build flags. The build flags have two goals: make a library
 suitable for static linking to a C++11 binary and discard any features that are
@@ -78,6 +79,7 @@ Illumina library can be cleaned separate using `make -C interop clean` or
 deleting `interop-build`.
 
 ### Testing
+
 There are no direct tests for this code. There are tests for Run Scanner that
 test the output of this program against golden output. These tests are disabled
 by default because this program must be built and put on the path, which is not

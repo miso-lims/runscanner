@@ -16,6 +16,7 @@ Please refer to
  for more information.
 
 ### Downloading the latest release
+
 <!-- This will change when we have docker images -->
 Use the GitHub interface to download the
 [latest release](https://github.com/miso-lims/runscanner/releases/latest).

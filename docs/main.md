@@ -5,6 +5,7 @@ and can be accessed from anywhere in the Run Scanner interface by clicking
 the bold 'Run Scanner' link on the menu bar at the top of the screen.
 
 ### Core
+
 This section provides information about the current state of Run Scanner,
 including uptime, whether Run Scanner's current configuration is valid, and
 whether Run Scanner is currently in the process of scanning for new run
@@ -24,6 +25,7 @@ tasks by Run Scanner. Run Scanner will continue processing runs after scanning
  for new runs has completed.
 
 ### Sequencing Output Directories
+
 Underneath the [Core](#core) section, Run Scanner displays one
 section per sequencing output directory, as defined in the configuration
 JSON (for more information, please refer to
@@ -41,6 +43,7 @@ refer to
 [Sequencing Output Directory 'Valid?' reads 'No'](../troubleshooting/#sequencing-output-directory-valid-reads-no).
 
 ### Processors
+
 The final section of the Main Page is a list of available name and
 platformType combinations. This section can be considered a reference for
 creating the configuration JSON (as outlined in
