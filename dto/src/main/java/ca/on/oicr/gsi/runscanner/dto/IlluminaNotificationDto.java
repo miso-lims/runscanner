@@ -2,7 +2,9 @@ package ca.on.oicr.gsi.runscanner.dto;
 
 import ca.on.oicr.gsi.runscanner.dto.type.IlluminaChemistry;
 import ca.on.oicr.gsi.runscanner.dto.type.IndexSequencing;
+import ca.on.oicr.gsi.runscanner.dto.type.PipelineStatus;
 import ca.on.oicr.gsi.runscanner.dto.type.Platform;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
@@ -21,6 +23,28 @@ public class IlluminaNotificationDto extends NotificationDto {
   private int scoreCycle;
   private String workflowType;
   private IndexSequencing indexSequencing;
+
+  public List<PipelineRun> pipelineRuns = new LinkedList<>();
+
+  private boolean analysisExpected;
+
+  @Override
+  public boolean isDone() {
+    boolean analysisDoneIfExpected = true;
+    if (analysisExpected) {
+      if (pipelineRuns.isEmpty()) {
+        analysisDoneIfExpected = false;
+      }
+      for (PipelineRun pr : pipelineRuns) {
+        if (!pr.getPipelineStatus().equals(PipelineStatus.COMPLETE)
+            && !pr.getPipelineStatus().equals(PipelineStatus.UNSUPPORTED)) {
+          analysisDoneIfExpected = false;
+          break;
+        }
+      }
+    }
+    return getHealthType().isDone() && analysisDoneIfExpected;
+  }
 
   @Override
   public boolean equals(Object obj) {
@@ -41,7 +65,9 @@ public class IlluminaNotificationDto extends NotificationDto {
         && Objects.equals(this.readLengths, other.readLengths)
         && Objects.equals(this.scoreCycle, other.scoreCycle)
         && Objects.equals(this.workflowType, other.workflowType)
-        && Objects.equals(this.indexSequencing, other.indexSequencing);
+        && Objects.equals(this.indexSequencing, other.indexSequencing)
+        && Objects.equals(this.pipelineRuns, other.pipelineRuns)
+        && Objects.equals(this.analysisExpected, other.analysisExpected);
   }
 
   public int getBclCount() {
@@ -124,7 +150,9 @@ public class IlluminaNotificationDto extends NotificationDto {
         readLengths,
         scoreCycle,
         workflowType,
-        indexSequencing);
+        indexSequencing,
+        pipelineRuns,
+        analysisExpected);
   }
 
   public void setBclCount(int bclCount) {
@@ -179,6 +207,22 @@ public class IlluminaNotificationDto extends NotificationDto {
     this.indexSequencing = indexSequencing;
   }
 
+  public List<PipelineRun> getPipelineRuns() {
+    return pipelineRuns;
+  }
+
+  public boolean isAnalysisExpected() {
+    return analysisExpected;
+  }
+
+  public void addPipelineRun(PipelineRun a) {
+    pipelineRuns.add(a);
+  }
+
+  public void setAnalysisExpected(boolean b) {
+    this.analysisExpected = b;
+  }
+
   @Override
   public String toString() {
     return super.toString()
@@ -208,6 +252,10 @@ public class IlluminaNotificationDto extends NotificationDto {
         + workflowType
         + ", indexSequencing="
         + indexSequencing
+        + ", pipelineRuns="
+        + pipelineRuns
+        + ", analysisExpected="
+        + analysisExpected
         + "]";
   }
 }

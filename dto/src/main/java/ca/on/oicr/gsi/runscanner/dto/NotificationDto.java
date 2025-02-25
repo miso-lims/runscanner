@@ -297,4 +297,14 @@ public abstract class NotificationDto {
   public Optional<String> getLaneContents(int lane) {
     return Optional.empty();
   }
+
+  /**
+   * Whether the processor has marked this run as done processing.
+   *
+   * @return bool
+   */
+  @JsonIgnore
+  public boolean isDone() {
+    return healthType.isDone();
+  }
 }
