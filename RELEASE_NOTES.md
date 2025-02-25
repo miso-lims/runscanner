@@ -1,5 +1,8 @@
 # Unreleased
 
+Added:
+  * Support for parsing and serving Illumina DRAGEN BCLConvert data
+
 Changes:
 
   * Added RevioPacBioProcessor to scan PacBio Revio runs (experimental; still under development)
