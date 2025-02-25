@@ -6,6 +6,7 @@ import ca.on.oicr.gsi.runscanner.dto.type.HealthType;
 import ca.on.oicr.gsi.runscanner.dto.type.IlluminaChemistry;
 import ca.on.oicr.gsi.runscanner.dto.type.IndexSequencing;
 import ca.on.oicr.gsi.runscanner.scanner.LatencyHistogram;
+import ca.on.oicr.gsi.runscanner.scanner.processor.dragen.ProcessDragen;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
@@ -139,16 +140,27 @@ public final class DefaultIllumina extends RunProcessor {
   }
 
   public static DefaultIllumina create(Builder builder, ObjectNode parameters) {
-    return new DefaultIllumina(builder, calculateCheckOutput(parameters));
+    return new DefaultIllumina(
+        builder, calculateCheckOutput(parameters), calculateScanDragen(parameters));
   }
 
+  /**
+   * Calculates whether to scan DRAGEN analysis output.
+   *
+   * <p>If scanDragen is specified and set to true, scan analysis. If it is false or unspecified, do
+   * not.
+   *
+   * @param parameters ObjectNode possibly containing scanDragen parameter
+   * @return true if scanDragen is true, false if scanDragen is null or false
+   */
+  private static boolean calculateScanDragen(ObjectNode parameters) {
+    return parameters.hasNonNull("scanDragen") && parameters.get("scanDragen").asBoolean();
+  }
   /**
    * Calculates whether or not to check output based on parameter.
    *
    * <p>If checkOutput is not specified (i.e., is null), check output. (If checkOutput is not
    * non-null, return true) If checkOutput is specified, use its value.
-   *
-   * <p>checkOutput | return ==================== null | T T | T F | F
    *
    * @param parameters ObjectNode possibly containing checkOutput parameter
    * @return true if checkOutput is true or null, false if checkOutput is explicitly false.
@@ -185,10 +197,12 @@ public final class DefaultIllumina extends RunProcessor {
   }
 
   private final boolean checkOutput;
+  private final boolean scanDragen;
 
-  public DefaultIllumina(Builder builder, boolean checkOutput) {
+  public DefaultIllumina(Builder builder, boolean checkOutput, boolean scanDragen) {
     super(builder);
     this.checkOutput = checkOutput;
+    this.scanDragen = scanDragen;
   }
 
   @Override
@@ -446,11 +460,12 @@ public final class DefaultIllumina extends RunProcessor {
           Path baseCallDirectory =
               Paths.get(dto.getSequencerFolderPath(), "Data", "Intensities", "BaseCalls");
           // Check that each lane directory is complete
+          IlluminaNotificationDto finalDto = dto;
           boolean dataCopied =
               IntStream.rangeClosed(1, dto.getLaneCount()) //
                   .mapToObj(lane -> String.format("L%03d", lane)) //
                   .map(baseCallDirectory::resolve) //
-                  .allMatch(laneDir -> isLaneComplete(laneDir, dto));
+                  .allMatch(laneDir -> isLaneComplete(laneDir, finalDto));
           if (!dataCopied) {
             updatedHealth = Optional.of(HealthType.RUNNING);
             completness_method_success.labelValues("dirscan").inc();
@@ -461,7 +476,11 @@ public final class DefaultIllumina extends RunProcessor {
       }
       updatedHealth.ifPresent(dto::setHealthType);
     }
-
+    if (scanDragen) {
+      dto = ProcessDragen.analyse(runDirectory, dto);
+    } else {
+      dto.setAnalysisExpected(false);
+    }
     return dto;
   }
 
