@@ -1,5 +1,7 @@
 # Unreleased
 
+# 2.1.0
+
 Added:
   * Support for parsing and serving Illumina DRAGEN BCLConvert data
 
