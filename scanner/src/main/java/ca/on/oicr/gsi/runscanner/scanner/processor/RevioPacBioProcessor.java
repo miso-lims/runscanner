@@ -169,6 +169,21 @@ public class RevioPacBioProcessor extends RunProcessor {
     dto.setPairedEndRun(false);
     dto.setSequencerFolderPath(runDirectory.getAbsolutePath());
 
+    // TODO temp
+    dto.setContainerModel("SMRT Cell 1");
+
+    // TODO grab the instrument ID from the run directory name
+    Pattern pattern = Pattern.compile("r(\\d+)_");
+    Matcher matcher = pattern.matcher(runDirectory.getName());
+    XPathExpression[] expr = RunProcessor.compileXPath("//CollectionMetadata/@InstrumentId");
+    // String position = (String) expr[0].evaluate(document, XPathConstants.STRING);
+    while (matcher.find()) {
+      System.out.println(matcher.group(1));
+      if (matcher.group(1).equals("84151")) {
+        System.out.println("Found match in metadata.xml");
+      }
+    }
+
     // Get the number of SMRT Cells in the run directory
     int smrtCellCount =
         (int)
