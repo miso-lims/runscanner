@@ -69,6 +69,8 @@ public class RevioPacBioProcessor extends RunProcessor {
         processString(
             "//CollectionMetadata/@InstrumentName", PacBioNotificationDto::setSequencerName),
         processDate("//Run/@WhenStarted", PacBioNotificationDto::setStartDate),
+        processString(
+            "//VersionInfo[@Name='smrtlink']/@Version", PacBioNotificationDto::setSoftware),
         processSampleInformation()
       };
 
@@ -98,6 +100,7 @@ public class RevioPacBioProcessor extends RunProcessor {
         RunProcessor.compileXPath(
             "//ResultsFolder",
             "//SubreadSet/@UniqueId",
+            "//CellPac/@PartNumber",
             "//WellSample/@Name",
             "//AutomationParameters/AutomationParameter[@Name='MovieLength']/@SimpleValue");
     return (document, dto, timeZone) -> {
@@ -105,20 +108,22 @@ public class RevioPacBioProcessor extends RunProcessor {
           StringUtils.substringBetween(
               (String) expr[0].evaluate(document, XPathConstants.STRING), "/", "/");
       String containerSerialNumber = (String) expr[1].evaluate(document, XPathConstants.STRING);
-      String poolName = (String) expr[2].evaluate(document, XPathConstants.STRING);
-      String movieLength = (String) expr[3].evaluate(document, XPathConstants.STRING);
+      String smrtCellContainerModel = (String) expr[2].evaluate(document, XPathConstants.STRING);
+      String poolName = (String) expr[3].evaluate(document, XPathConstants.STRING);
+      String movieLength = (String) expr[4].evaluate(document, XPathConstants.STRING);
 
       // SMRTCellPosition is a Java Record and represents one SMRT Cell
       SMRTCellPosition containerInfo =
-          new SMRTCellPosition(position, containerSerialNumber, poolName, movieLength);
+          new SMRTCellPosition(
+              position, containerSerialNumber, smrtCellContainerModel, poolName, movieLength);
 
       // Add container to SMRT cell positionList
-      List<SMRTCellPosition> tempPositionList = dto.getPositionList();
-      if (dto.getPositionList() == null) {
+      List<SMRTCellPosition> tempPositionList = dto.getSmrtCellPositionList();
+      if (dto.getSmrtCellPositionList() == null) {
         tempPositionList = new ArrayList<>();
       }
       tempPositionList.add(containerInfo);
-      dto.setPositionList(tempPositionList);
+      dto.setSmrtCellPositionList(tempPositionList);
     };
   }
 
@@ -180,10 +185,24 @@ public class RevioPacBioProcessor extends RunProcessor {
         .flatMap(
             metadataDirectory ->
                 Stream.of(metadataDirectory.listFiles())
-                    .filter(file -> file.getName().endsWith(".metadata.xml")))
+                    .filter(
+                        file ->
+                            file.getName()
+                                .matches("^([A-Za-z0-9]+(_[A-Za-z0-9]+){3})\\.metadata\\.xml$")))
         .map(RunProcessor::parseXml)
         .filter(Optional::isPresent)
         .forEach(metadata -> processMetadata(metadata.get(), dto, tz));
+
+    // Check if we grabbed a run alias from metadata.xml
+    if (dto.getRunAlias() != null) {
+      // Validate that it matches with run alias being the run directory name
+      if (!runDirectory.getName().equals(dto.getRunAlias())) {
+        dto.setRunAlias(null);
+      }
+    } else {
+      // Unable to grab run alias from metadata.xml set it using run directory name
+      dto.setRunAlias(runDirectory.getName());
+    }
 
     // We don't have a start date from metadata, fallback to Transfer_Test file creation time
     if (dto.getStartDate() == null) {

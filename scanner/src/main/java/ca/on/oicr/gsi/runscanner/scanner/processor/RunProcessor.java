@@ -130,7 +130,8 @@ public abstract class RunProcessor {
     try {
       return Optional.of(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(file));
     } catch (SAXException e) {
-      log.warn("Not really a UTF-16 parsing exception, forcing UTF-8 parsing...", e);
+      log.warn(
+          "Not really a UTF-16 parsing exception, forcing UTF-8 parsing for {}", file.getPath());
 
       // Automatically detect BOMs and remove them from input stream
       // BOM characters can interfere with text processing if not properly removed
@@ -142,19 +143,14 @@ public abstract class RunProcessor {
                 .parse(new InputSource(reader)));
       } catch (SAXException | ParserConfigurationException | IOException e2) {
         log.error(
-            String.format(
-                "Failed to parse XML after forcing UTF-8 encoding for file: %s", file.getPath()),
-            e2);
+            "Failed to parse XML after forcing UTF-8 encoding for file: {}", file.getPath(), e);
         return Optional.empty();
       }
     } catch (ParserConfigurationException e) {
-      log.error(
-          String.format(
-              "Error in the configuration of the XML parser for file: %s", file.getPath()),
-          e);
+      log.error("Error in the configuration of the XML parser for file: {}", file.getPath(), e);
       return Optional.empty();
     } catch (IOException e) {
-      log.error(String.format("IO error when parsing XML content for file: %s", file.getPath()), e);
+      log.error("IO error when parsing XML content for file: {}", file.getPath(), e);
       return Optional.empty();
     }
   }
