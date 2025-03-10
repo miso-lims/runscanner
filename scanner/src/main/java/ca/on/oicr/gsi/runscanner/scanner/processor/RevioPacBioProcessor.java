@@ -195,7 +195,7 @@ public class RevioPacBioProcessor extends RunProcessor {
 
     // Check if we grabbed a run alias from metadata.xml
     if (dto.getRunAlias() != null) {
-      // Validate that it matches with run alias being the run directory name
+      // Not valid, if it doesn't match run directory name
       if (!runDirectory.getName().equals(dto.getRunAlias())) {
         dto.setRunAlias(null);
       }
@@ -214,7 +214,7 @@ public class RevioPacBioProcessor extends RunProcessor {
     if (isRunComplete(runDirectory, smrtCellCount)) {
       dto.setHealthType(HealthType.COMPLETED);
 
-      // Check if pbereport.log present and use that for completion time
+      // Check if pbreport.log present and use that for completion time
       Optional<Instant> latestCompletionTime =
           streamSmrtCellSubdirectories(runDirectory, "statistics")
               .flatMap(
@@ -224,10 +224,10 @@ public class RevioPacBioProcessor extends RunProcessor {
                               file -> PB_REPORT_LOG.test(file.getName()))))
               .map(RevioPacBioProcessor::getLogCompletionTime)
               .max(Comparator.naturalOrder());
-      // Set completion time based on pbereports.log file
+      // Set completion time based on pbreports.log file
       latestCompletionTime.ifPresent(dto::setCompletionDate);
 
-      // If we don't have the pbereport.log, we'll have to fallback using .transferdone file
+      // Don't have pbreport.log, fallback to using .transferdone file
       // creation time instead
       if (dto.getCompletionDate() == null) {
         dto.setCompletionDate(completionTimeFromTransferDone(runDirectory));

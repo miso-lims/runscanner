@@ -1,5 +1,9 @@
 # Unreleased
 
+Changes:
+
+  * Sample PacBio Revio test directory
+
 # 2.1.0
 
 Added:

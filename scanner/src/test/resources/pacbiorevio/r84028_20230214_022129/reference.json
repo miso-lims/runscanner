@@ -1,0 +1,65 @@
+{
+  "platform" : "PacBio",
+  "runAlias" : "r84028_20230214_022129",
+  "sequencerName" : "84028",
+  "sequencerPosition" : null,
+  "containerSerialNumber" : null,
+  "containerModel" : null,
+  "sequencingKit" : null,
+  "laneCount" : 8,
+  "healthType" : "COMPLETED",
+  "startDate" : "2023-02-14T02:23:09.211949900Z",
+  "completionDate" : "2025-03-07T17:53:13.338Z",
+  "pairedEndRun" : false,
+  "metrics" : null,
+  "poolNames" : null,
+  "smrtCellPositionList" : [ {
+    "position" : "2_D01",
+    "containerSerialNumber" : "8b65414d-8438-4ade-a9b6-359f4006c450",
+    "smrtCellContainerModel" : "102-202-200",
+    "poolName" : "Mplex7-8_KestrelValid_HG002_84028_D01_200pM",
+    "movieLength" : "1440.0"
+  }, {
+    "position" : "2_C01",
+    "containerSerialNumber" : "622a9075-7fc7-401e-bbcf-0545e00c5d29",
+    "smrtCellContainerModel" : "102-202-200",
+    "poolName" : "Sample4_PPHT",
+    "movieLength" : "1440.0"
+  }, {
+    "position" : "1_A01",
+    "containerSerialNumber" : "3932867e-eaef-4a66-9ea6-219075a385a2",
+    "smrtCellContainerModel" : "102-202-200",
+    "poolName" : "Sample1_PPHT",
+    "movieLength" : "1440.0"
+  }, {
+    "position" : "2_B01",
+    "containerSerialNumber" : "3b054444-48d3-4448-a85a-6c15821d93fb",
+    "smrtCellContainerModel" : "102-202-200",
+    "poolName" : "Mplex5-6_KestrelValid_HG002_84028_B01_200pM",
+    "movieLength" : "1440.0"
+  }, {
+    "position" : "2_A01",
+    "containerSerialNumber" : "39d7cbe4-0471-470c-9ec7-8215223b8ddf",
+    "smrtCellContainerModel" : "102-202-200",
+    "poolName" : "Sample3_PPHT",
+    "movieLength" : "1440.0"
+  }, {
+    "position" : "1_C01",
+    "containerSerialNumber" : "83480686-276b-46b3-9597-1b72b7a9e32e",
+    "smrtCellContainerModel" : "102-202-200",
+    "poolName" : "Sample2_PPHT",
+    "movieLength" : "1440.0"
+  }, {
+    "position" : "1_B01",
+    "containerSerialNumber" : "079d6bfd-3df1-4d02-8fbc-36be5f3c646b",
+    "smrtCellContainerModel" : "102-202-200",
+    "poolName" : "Mplex1-2_KestrelValid_HG002_84028_B01_200pM",
+    "movieLength" : "1440.0"
+  }, {
+    "position" : "1_D01",
+    "containerSerialNumber" : "5c5ec958-aa35-4b65-953e-aa6bd7348a5f",
+    "smrtCellContainerModel" : "102-202-200",
+    "poolName" : "Mplex3-4_KestrelValid_HG002_84028_D01_200pM",
+    "movieLength" : "1440.0"
+  } ]
+}
