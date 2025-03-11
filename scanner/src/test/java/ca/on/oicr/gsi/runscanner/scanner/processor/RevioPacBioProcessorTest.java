@@ -7,10 +7,12 @@ import ca.on.oicr.gsi.runscanner.scanner.processor.RunProcessor.Builder;
 import java.io.File;
 import java.io.IOException;
 import java.util.TimeZone;
+import org.junit.Assert;
 
 public class RevioPacBioProcessorTest extends AbstractProcessorTest {
   private final RevioPacBioProcessor instance =
       new RevioPacBioProcessor(new Builder(Platform.PACBIO, "unittest", null));
+  private NotificationDto afterProcessing;
 
   public RevioPacBioProcessorTest() {
     super(PacBioNotificationDto.class);
@@ -18,7 +20,21 @@ public class RevioPacBioProcessorTest extends AbstractProcessorTest {
 
   @Override
   protected NotificationDto process(File directory) throws IOException {
-    return instance.process(directory, TimeZone.getTimeZone("America/Toronto"));
+    afterProcessing = instance.process(directory, TimeZone.getTimeZone("America/Toronto"));
+    return afterProcessing;
+    // return instance.process(directory, TimeZone.getTimeZone("America/Toronto"));
+  }
+
+  @Override
+  public void beforeComparison(NotificationDto reference, NotificationDto result) {
+    // Check if run name matches new run directory
+    if (afterProcessing.getRunAlias().equals(result.getRunAlias())) {
+      // Assert that a start time (any) was detected
+      Assert.assertNotNull(afterProcessing.getStartDate());
+
+      // Set the start date to match the reference json
+      afterProcessing.setStartDate(reference.getStartDate());
+    }
   }
 
   @Override

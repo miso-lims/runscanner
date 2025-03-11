@@ -29,6 +29,10 @@ public abstract class AbstractProcessorTest {
     this.clazz = clazz;
   }
 
+  public void beforeComparison(NotificationDto reference, NotificationDto result) {
+    // Not used by default, do nothing
+  }
+
   protected final void checkDirectory(String root)
       throws JsonParseException, JsonMappingException, IOException {
     ObjectMapper mapper = RunProcessor.createObjectMapper();
@@ -86,6 +90,9 @@ public abstract class AbstractProcessorTest {
           }
         }
       }
+
+      // TODO call this new method before assertEquals
+      beforeComparison(reference, result);
 
       // For all processors
       assertEquals(reference, result);

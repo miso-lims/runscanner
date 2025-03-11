@@ -28,8 +28,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Stream;
 import javax.xml.stream.XMLStreamException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -42,8 +40,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 public class UserInterfaceController {
   @Value("${project.version}")
   String projectVersion;
-
-  private static final Logger log = LoggerFactory.getLogger(UserInterfaceController.class);
 
   public static final ServerConfig SERVER_CONFIG =
       new ServerConfig() {
