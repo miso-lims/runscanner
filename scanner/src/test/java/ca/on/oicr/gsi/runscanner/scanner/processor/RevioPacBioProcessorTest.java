@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.util.TimeZone;
 import org.junit.Assert;
 
-public class RevioPacBioProcessorTest extends AbstractProcessorTest {
+public class RevioPacBioProcessorTest<T> extends AbstractProcessorTest<PacBioNotificationDto> {
   private final RevioPacBioProcessor instance =
       new RevioPacBioProcessor(new Builder(Platform.PACBIO, "unittest", null));
   private NotificationDto afterProcessing;
@@ -26,7 +26,7 @@ public class RevioPacBioProcessorTest extends AbstractProcessorTest {
   }
 
   @Override
-  public void beforeComparison(NotificationDto reference, NotificationDto result) {
+  public void beforeComparison(PacBioNotificationDto reference, PacBioNotificationDto result) {
     // Check if run name matches new run directory
     if (afterProcessing.getRunAlias().equals(result.getRunAlias())) {
       // Assert that a start time (any) was detected
