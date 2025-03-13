@@ -2,7 +2,8 @@
 
 Changes:
 
-  * Sample PacBio Revio test directory
+  * Added Sample PacBio Revio test directory
+  * Fixed Runs not displaying for PacBio Revio Processors (experimental; still under development)
 
 # 2.1.0
 
