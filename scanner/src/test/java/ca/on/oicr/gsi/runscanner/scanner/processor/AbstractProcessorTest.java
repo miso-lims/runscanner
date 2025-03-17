@@ -30,7 +30,7 @@ public abstract class AbstractProcessorTest<T extends NotificationDto> {
   }
 
   public void beforeComparison(T reference, T result) {
-    // Not used by default
+    // No default behaviour, but called before assertEquals(reference, result)
   }
 
   protected final void checkDirectory(String root)
