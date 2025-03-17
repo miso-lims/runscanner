@@ -1,0 +1,18 @@
+{
+  "platform" : "PacBio",
+  "runAlias" : "r84028_20250129_101315",
+  "sequencerFolderPath" : null,
+  "sequencerName" : null,
+  "sequencerPosition" : null,
+  "containerSerialNumber" : null,
+  "containerModel" : null,
+  "sequencingKit" : null,
+  "laneCount" : 8,
+  "healthType" : "RUNNING",
+  "startDate" : "2025-03-10T20:11:46.494376012Z",
+  "completionDate" : null,
+  "pairedEndRun" : false,
+  "software" : null,
+  "metrics" : null,
+  "poolNames" : null
+}

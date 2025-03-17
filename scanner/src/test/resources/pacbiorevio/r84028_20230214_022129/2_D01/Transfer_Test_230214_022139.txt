@@ -1,0 +1,7 @@
+File Transfer Scheme : s5cmd
+Name : s5
+Id : f95142f4-e7e5-4499-9337-f4cf13324e5c
+Description : revio s5
+DestPath : /collections
+RelativePath : 
+Region : 

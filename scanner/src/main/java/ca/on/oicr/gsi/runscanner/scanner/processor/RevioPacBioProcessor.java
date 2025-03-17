@@ -69,6 +69,8 @@ public class RevioPacBioProcessor extends RunProcessor {
         processString(
             "//CollectionMetadata/@InstrumentName", PacBioNotificationDto::setSequencerName),
         processDate("//Run/@WhenStarted", PacBioNotificationDto::setStartDate),
+        processString(
+            "//VersionInfo[@Name='smrtlink']/@Version", PacBioNotificationDto::setSoftware),
         processSampleInformation()
       };
 
@@ -98,6 +100,7 @@ public class RevioPacBioProcessor extends RunProcessor {
         RunProcessor.compileXPath(
             "//ResultsFolder",
             "//SubreadSet/@UniqueId",
+            "//CellPac/@PartNumber",
             "//WellSample/@Name",
             "//AutomationParameters/AutomationParameter[@Name='MovieLength']/@SimpleValue");
     return (document, dto, timeZone) -> {
@@ -105,20 +108,22 @@ public class RevioPacBioProcessor extends RunProcessor {
           StringUtils.substringBetween(
               (String) expr[0].evaluate(document, XPathConstants.STRING), "/", "/");
       String containerSerialNumber = (String) expr[1].evaluate(document, XPathConstants.STRING);
-      String poolName = (String) expr[2].evaluate(document, XPathConstants.STRING);
-      String movieLength = (String) expr[3].evaluate(document, XPathConstants.STRING);
+      String smrtCellContainerModel = (String) expr[2].evaluate(document, XPathConstants.STRING);
+      String poolName = (String) expr[3].evaluate(document, XPathConstants.STRING);
+      String movieLength = (String) expr[4].evaluate(document, XPathConstants.STRING);
 
       // SMRTCellPosition is a Java Record and represents one SMRT Cell
       SMRTCellPosition containerInfo =
-          new SMRTCellPosition(position, containerSerialNumber, poolName, movieLength);
+          new SMRTCellPosition(
+              position, containerSerialNumber, smrtCellContainerModel, poolName, movieLength);
 
       // Add container to SMRT cell positionList
-      List<SMRTCellPosition> tempPositionList = dto.getPositionList();
-      if (dto.getPositionList() == null) {
+      List<SMRTCellPosition> tempPositionList = dto.getSequencerPositions();
+      if (dto.getSequencerPositions() == null) {
         tempPositionList = new ArrayList<>();
       }
       tempPositionList.add(containerInfo);
-      dto.setPositionList(tempPositionList);
+      dto.setSequencerPositions(tempPositionList);
     };
   }
 
@@ -180,10 +185,27 @@ public class RevioPacBioProcessor extends RunProcessor {
         .flatMap(
             metadataDirectory ->
                 Stream.of(metadataDirectory.listFiles())
-                    .filter(file -> file.getName().endsWith(".metadata.xml")))
+                    .filter(
+                        file ->
+                            file.getName()
+                                .matches("^([A-Za-z0-9]+(_[A-Za-z0-9]+){3})\\.metadata\\.xml$")))
         .map(RunProcessor::parseXml)
         .filter(Optional::isPresent)
         .forEach(metadata -> processMetadata(metadata.get(), dto, tz));
+
+    // When a run first starts, we can only get the run alias from the directory.
+    // We use this check to ensure the same run doesn't appear under a different name when
+    // the metadata files are written out and available
+    if (dto.getRunAlias() != null) {
+      // Not valid, if it doesn't match run directory name
+      if (!runDirectory.getName().equals(dto.getRunAlias())) {
+        throw new RuntimeException(
+            String.format("This run: %s exists under a different name", runDirectory.getName()));
+      }
+    } else {
+      // Unable to grab run alias from metadata.xml set it using run directory name
+      dto.setRunAlias(runDirectory.getName());
+    }
 
     // We don't have a start date from metadata, fallback to Transfer_Test file creation time
     if (dto.getStartDate() == null) {
@@ -195,7 +217,7 @@ public class RevioPacBioProcessor extends RunProcessor {
     if (isRunComplete(runDirectory, smrtCellCount)) {
       dto.setHealthType(HealthType.COMPLETED);
 
-      // Check if pbereport.log present and use that for completion time
+      // Check if pbreport.log present and use that for completion time
       Optional<Instant> latestCompletionTime =
           streamSmrtCellSubdirectories(runDirectory, "statistics")
               .flatMap(
@@ -205,10 +227,10 @@ public class RevioPacBioProcessor extends RunProcessor {
                               file -> PB_REPORT_LOG.test(file.getName()))))
               .map(RevioPacBioProcessor::getLogCompletionTime)
               .max(Comparator.naturalOrder());
-      // Set completion time based on pbereports.log file
+      // Set completion time based on pbreports.log file
       latestCompletionTime.ifPresent(dto::setCompletionDate);
 
-      // If we don't have the pbereport.log, we'll have to fallback using .transferdone file
+      // Don't have pbreport.log, fallback to using .transferdone file
       // creation time instead
       if (dto.getCompletionDate() == null) {
         dto.setCompletionDate(completionTimeFromTransferDone(runDirectory));
@@ -336,17 +358,16 @@ public class RevioPacBioProcessor extends RunProcessor {
    * @return earliest file creation time or null if no Transfer_Test files are found
    */
   private Instant startTimeFromTransferTest(File runDirectory) throws IOException {
-    List<File> TransferTestFiles =
-        streamSmrtCellSubdirectories(runDirectory, "metadata")
-            .flatMap(
-                metadataDirectory ->
-                    Stream.of(
-                        metadataDirectory.listFiles(file -> TRANSFER_TEST.test(file.getName()))))
+    Stream<Path> testFileStream = Files.walk(runDirectory.toPath());
+    List<Path> transferTestFiles =
+        testFileStream
+            .filter(Files::isRegularFile)
+            .filter(file -> TRANSFER_TEST.test(String.valueOf(file.getFileName())))
             .toList();
 
     Instant minInstant = null;
-    for (File file : TransferTestFiles) {
-      Instant creationTime = getFileCreationTime(file);
+    for (Path filepath : transferTestFiles) {
+      Instant creationTime = getFileCreationTime(filepath.toFile());
       if (minInstant == null || creationTime.isBefore(minInstant)) {
         minInstant = creationTime;
       }
@@ -361,17 +382,16 @@ public class RevioPacBioProcessor extends RunProcessor {
    * @return latest file creation time or null if no Transferdone files are found
    */
   private Instant completionTimeFromTransferDone(File runDirectory) throws IOException {
-    List<File> TransferDoneFiles =
-        streamSmrtCellSubdirectories(runDirectory, "metadata")
-            .flatMap(
-                metadataDirectory ->
-                    Stream.of(
-                        metadataDirectory.listFiles(file -> TRANSFER_DONE.test(file.getName()))))
+    Stream<Path> testFileStream = Files.walk(runDirectory.toPath());
+    List<Path> transferDoneFiles =
+        testFileStream
+            .filter(Files::isRegularFile)
+            .filter(file -> TRANSFER_DONE.test(String.valueOf(file.getFileName())))
             .toList();
 
     Instant maxInstant = null;
-    for (File file : TransferDoneFiles) {
-      Instant creationTime = getFileCreationTime(file);
+    for (Path filepath : transferDoneFiles) {
+      Instant creationTime = getFileCreationTime(filepath.toFile());
       if (maxInstant == null || creationTime.isAfter(maxInstant)) {
         maxInstant = creationTime;
       }

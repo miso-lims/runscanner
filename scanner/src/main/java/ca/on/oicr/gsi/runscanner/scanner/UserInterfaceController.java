@@ -93,7 +93,6 @@ public class UserInterfaceController {
   @GetMapping(value = "/listScanned")
   public void listScannedRuns(HttpServletResponse response) throws IOException {
     response.setContentType(CONTENT_TYPE);
-    response.setStatus(HttpServletResponse.SC_OK);
     try (OutputStream output = response.getOutputStream()) {
       new TablePage(SERVER_CONFIG) {
 
@@ -117,6 +116,7 @@ public class UserInterfaceController {
           if (empty.get()) {
             writer.write(Arrays.asList(new Pair<>("colspan", "2")), "No items.");
           }
+          response.setStatus(HttpServletResponse.SC_OK);
         }
       }.renderPage(output);
     }

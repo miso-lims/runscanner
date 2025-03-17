@@ -12,11 +12,15 @@ public class PacBioNotificationDto extends NotificationDto {
 
   private Map<String, String> poolNames;
 
-  public static record SMRTCellPosition(
-      String position, String containerSerialNumber, String poolName, String movieLength) {}
+  public record SMRTCellPosition(
+      String position,
+      String containerSerialNumber,
+      String containerModel,
+      String poolName,
+      String movieLength) {}
 
   @JsonInclude(Include.NON_NULL)
-  private List<SMRTCellPosition> positionList;
+  private List<SMRTCellPosition> sequencerPositions;
 
   @Override
   public boolean equals(Object obj) {
@@ -45,8 +49,8 @@ public class PacBioNotificationDto extends NotificationDto {
     return poolNames;
   }
 
-  public List<SMRTCellPosition> getPositionList() {
-    return positionList;
+  public List<SMRTCellPosition> getSequencerPositions() {
+    return sequencerPositions;
   }
 
   @Override
@@ -58,8 +62,8 @@ public class PacBioNotificationDto extends NotificationDto {
     this.poolNames = poolNames;
   }
 
-  public void setPositionList(List<SMRTCellPosition> positionList) {
-    this.positionList = positionList;
+  public void setSequencerPositions(List<SMRTCellPosition> sequencerPositions) {
+    this.sequencerPositions = sequencerPositions;
   }
 
   @Override
@@ -67,8 +71,8 @@ public class PacBioNotificationDto extends NotificationDto {
     return super.toString()
         + ", PacBioNotificationDto [poolNames= "
         + poolNames
-        + ", positionList= "
-        + positionList
+        + ", sequencerPositions= "
+        + sequencerPositions
         + "]";
   }
 }

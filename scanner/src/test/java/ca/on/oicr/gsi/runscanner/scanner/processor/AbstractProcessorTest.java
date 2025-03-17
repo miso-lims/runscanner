@@ -21,12 +21,16 @@ import java.nio.file.Path;
 import java.time.Instant;
 import org.junit.Test;
 
-public abstract class AbstractProcessorTest {
-  private final Class<? extends NotificationDto> clazz;
+public abstract class AbstractProcessorTest<T extends NotificationDto> {
+  private final Class<T> clazz;
 
-  public AbstractProcessorTest(Class<? extends NotificationDto> clazz) {
+  public AbstractProcessorTest(Class<T> clazz) {
     super();
     this.clazz = clazz;
+  }
+
+  public void beforeComparison(T reference, T result) {
+    // No default behaviour, but called before assertEquals(reference, result)
   }
 
   protected final void checkDirectory(String root)
@@ -86,6 +90,9 @@ public abstract class AbstractProcessorTest {
           }
         }
       }
+
+      // Not implemented for all processors
+      beforeComparison((T) reference, (T) result);
 
       // For all processors
       assertEquals(reference, result);
