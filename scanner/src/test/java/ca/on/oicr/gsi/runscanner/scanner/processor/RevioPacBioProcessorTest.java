@@ -27,11 +27,14 @@ public class RevioPacBioProcessorTest<T> extends AbstractProcessorTest<PacBioNot
 
   @Override
   public void beforeComparison(PacBioNotificationDto reference, PacBioNotificationDto result) {
-    // Check if run name matches new run directory
-    if (afterProcessing.getRunAlias().equals(result.getRunAlias())) {
+    // Check if reference run name matches new run directory name
+    if (afterProcessing.getRunAlias().equals(reference.getRunAlias())) {
       // Assert that a start time (any) was detected
       Assert.assertNotNull(afterProcessing.getStartDate());
 
+      // Need to modify reference.json because for runs that have just started, the only
+      // information they have are the run name and start time using file creation. For tests, we
+      // cannot use file creation time as these aren't stored in git.
       // Set the start date to match the reference json
       afterProcessing.setStartDate(reference.getStartDate());
     }
