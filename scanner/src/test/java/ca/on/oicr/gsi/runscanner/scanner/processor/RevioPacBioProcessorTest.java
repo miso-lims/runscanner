@@ -32,10 +32,9 @@ public class RevioPacBioProcessorTest<T> extends AbstractProcessorTest<PacBioNot
       // Assert that a start time (any) was detected
       Assert.assertNotNull(result.getStartDate());
 
-      // Need to modify reference.json because for runs that have just started, the only
-      // information they have are the run name and start time using file creation. For tests, we
-      // cannot use file creation time as these aren't stored in git.
-      // Set start date to hard-coded value matching reference.json
+      // Need to modify result to match reference.json because for runs that have just started,
+      // the only information available are run name and start time using file creation. For
+      // tests, we cannot use file creation time as these aren't stored in git
       result.setStartDate(
           LocalDateTime.parse(
                   "2025-03-10 20:11:46,494376012Z",
