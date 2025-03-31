@@ -4,6 +4,7 @@ Changes:
 
   * Added Sample PacBio Revio test directory
   * Fixed Runs not displaying for PacBio Revio Processors
+  * Added custom error page
 
 # 2.1.0
 

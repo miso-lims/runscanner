@@ -4,6 +4,7 @@ import ca.on.oicr.gsi.Pair;
 import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
 import ca.on.oicr.gsi.runscanner.scanner.processor.RunProcessor;
 import ca.on.oicr.gsi.runscanner.scanner.processor.RunProcessor.Builder;
+import ca.on.oicr.gsi.status.BasePage;
 import ca.on.oicr.gsi.status.ConfigurationSection;
 import ca.on.oicr.gsi.status.Header;
 import ca.on.oicr.gsi.status.NavigationMenu;
@@ -14,6 +15,7 @@ import ca.on.oicr.gsi.status.TablePage;
 import ca.on.oicr.gsi.status.TableRowWriter;
 import com.google.common.collect.ImmutableMap;
 import io.swagger.v3.oas.annotations.Hidden;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
@@ -28,8 +30,10 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Stream;
 import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -224,6 +228,31 @@ public class UserInterfaceController {
           }
           renderer.line("Processed Runs", scheduler.getFinishedDirectories().size());
           renderer.line("Waiting Runs", scheduler.getScheduledWork().size());
+        }
+      }.renderPage(output);
+    }
+  }
+
+  @GetMapping("/error")
+  public void showError(HttpServletRequest request, HttpServletResponse response)
+      throws IOException {
+    response.setContentType(CONTENT_TYPE);
+
+    Object attr = request.getAttribute("jakarta.servlet.error.status_code");
+    int statusCode = attr == null ? 500 : (Integer) attr;
+    if (attr == null) {
+      response.setStatus(500);
+    }
+    String message = HttpStatus.valueOf(statusCode).getReasonPhrase();
+
+    try (OutputStream output = response.getOutputStream()) {
+      new BasePage(SERVER_CONFIG, false) {
+
+        @Override
+        protected void renderContent(XMLStreamWriter writer) throws XMLStreamException {
+          writer.writeStartElement("h1");
+          writer.writeCharacters("%d %s".formatted(statusCode, message));
+          writer.writeEndElement();
         }
       }.renderPage(output);
     }
