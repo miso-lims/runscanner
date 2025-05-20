@@ -304,8 +304,7 @@ public class RevioPacBioProcessor extends RunProcessor {
    * @return completion time
    */
   private static Instant getLogCompletionTime(File file) {
-    try {
-      Scanner myReader = new Scanner(file);
+    try (Scanner myReader = new Scanner(file)) {
       Pattern pattern =
           Pattern.compile("^\\[INFO] (.*) \\[.*] exiting with return code \\d+" + " .*");
       while (myReader.hasNextLine()) {
@@ -358,21 +357,22 @@ public class RevioPacBioProcessor extends RunProcessor {
    * @return earliest file creation time or null if no Transfer_Test files are found
    */
   private Instant startTimeFromTransferTest(File runDirectory) throws IOException {
-    Stream<Path> testFileStream = Files.walk(runDirectory.toPath());
-    List<Path> transferTestFiles =
-        testFileStream
-            .filter(Files::isRegularFile)
-            .filter(file -> TRANSFER_TEST.test(String.valueOf(file.getFileName())))
-            .toList();
+    try (Stream<Path> testFileStream = Files.walk(runDirectory.toPath())) {
+      List<Path> transferTestFiles =
+          testFileStream
+              .filter(Files::isRegularFile)
+              .filter(file -> TRANSFER_TEST.test(String.valueOf(file.getFileName())))
+              .toList();
 
-    Instant minInstant = null;
-    for (Path filepath : transferTestFiles) {
-      Instant creationTime = getFileCreationTime(filepath.toFile());
-      if (minInstant == null || creationTime.isBefore(minInstant)) {
-        minInstant = creationTime;
+      Instant minInstant = null;
+      for (Path filepath : transferTestFiles) {
+        Instant creationTime = getFileCreationTime(filepath.toFile());
+        if (minInstant == null || creationTime.isBefore(minInstant)) {
+          minInstant = creationTime;
+        }
       }
+      return minInstant;
     }
-    return minInstant;
   }
 
   /**
@@ -382,20 +382,21 @@ public class RevioPacBioProcessor extends RunProcessor {
    * @return latest file creation time or null if no Transferdone files are found
    */
   private Instant completionTimeFromTransferDone(File runDirectory) throws IOException {
-    Stream<Path> testFileStream = Files.walk(runDirectory.toPath());
-    List<Path> transferDoneFiles =
-        testFileStream
-            .filter(Files::isRegularFile)
-            .filter(file -> TRANSFER_DONE.test(String.valueOf(file.getFileName())))
-            .toList();
+    try (Stream<Path> testFileStream = Files.walk(runDirectory.toPath())) {
+      List<Path> transferDoneFiles =
+          testFileStream
+              .filter(Files::isRegularFile)
+              .filter(file -> TRANSFER_DONE.test(String.valueOf(file.getFileName())))
+              .toList();
 
-    Instant maxInstant = null;
-    for (Path filepath : transferDoneFiles) {
-      Instant creationTime = getFileCreationTime(filepath.toFile());
-      if (maxInstant == null || creationTime.isAfter(maxInstant)) {
-        maxInstant = creationTime;
+      Instant maxInstant = null;
+      for (Path filepath : transferDoneFiles) {
+        Instant creationTime = getFileCreationTime(filepath.toFile());
+        if (maxInstant == null || creationTime.isAfter(maxInstant)) {
+          maxInstant = creationTime;
+        }
       }
+      return maxInstant;
     }
-    return maxInstant;
   }
 }
