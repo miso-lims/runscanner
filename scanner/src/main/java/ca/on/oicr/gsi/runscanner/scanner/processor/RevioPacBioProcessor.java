@@ -50,13 +50,11 @@ public class RevioPacBioProcessor extends RunProcessor {
       Pattern.compile("[0-9]_[A-Z][0-9]{2}").asPredicate();
 
   private static final Predicate<String> TRANSFER_TEST =
-      Pattern.compile("Transfer_Test_[0-9]{6}_[0-9]{6}.txt").asPredicate();
+      Pattern.compile("Transfer_Test_.*\\.txt").asPredicate();
 
-  private static final Predicate<String> TRANSFER_DONE =
-      Pattern.compile("[a-z][0-9]{5}_[0-9]{6}_[0-9]{6}_s[0-9].transferdone").asPredicate();
+  private static final String TRANSFER_DONE_SUFFIX = ".transferdone";
 
-  private static final Predicate<String> PB_REPORT_LOG =
-      Pattern.compile("[a-z][0-9]{5}_[0-9]{6}_[0-9]{6}_s[0-9].pbreports.log").asPredicate();
+  private static final String PB_REPORT_FILE_SUFFIX = ".pbreports.log";
 
   private static final Logger log = LoggerFactory.getLogger(RevioPacBioProcessor.class);
 
@@ -183,19 +181,22 @@ public class RevioPacBioProcessor extends RunProcessor {
 
     // Grab the .metadata.xml and begin processing
     streamSmrtCellSubdirectories(runDirectory, "metadata")
-        .flatMap(
+        .map(
             metadataDirectory ->
-                Stream.of(metadataDirectory.listFiles())
-                    .filter(
-                        file ->
-                            file.getName()
-                                .matches("^([A-Za-z0-9]+(_[A-Za-z0-9]+){3})\\.metadata\\.xml$")))
-        .map(RunProcessor::parseXml)
+                Stream.of(
+                        metadataDirectory.listFiles(
+                            (dir, name) -> {
+                              return name.endsWith(".metadata.xml") && !name.contains("preview");
+                            }))
+                    .findAny())
         .filter(Optional::isPresent)
+        .map(Optional::get)
+        .map(RunProcessor::parseXml)
         .forEach(metadata -> processMetadata(metadata.get(), dto, tz));
 
     // When a run first starts, we can only get the run alias from the directory.
-    // We use this check to ensure the same run doesn't appear under a different name when
+    // We use this check to ensure the same run doesn't appear under a different
+    // name when
     // the metadata files are written out and available
     if (dto.getRunAlias() != null) {
       // Not valid, if it doesn't match run directory name
@@ -208,7 +209,8 @@ public class RevioPacBioProcessor extends RunProcessor {
       dto.setRunAlias(runDirectory.getName());
     }
 
-    // We don't have a start date from metadata, fallback to Transfer_Test file creation time
+    // We don't have a start date from metadata, fallback to Transfer_Test file
+    // creation time
     if (dto.getStartDate() == null) {
       dto.setStartDate(startTimeFromTransferTest(runDirectory));
     }
@@ -225,7 +227,7 @@ public class RevioPacBioProcessor extends RunProcessor {
                   statisticsDirectory ->
                       Stream.of(
                           statisticsDirectory.listFiles(
-                              file -> PB_REPORT_LOG.test(file.getName()))))
+                              (dir, file) -> file.endsWith(PB_REPORT_FILE_SUFFIX))))
               .map(RevioPacBioProcessor::getLogCompletionTime)
               .max(Comparator.naturalOrder());
       // Set completion time based on pbreports.log file
@@ -331,23 +333,15 @@ public class RevioPacBioProcessor extends RunProcessor {
    * @return true or false
    */
   private boolean isRunComplete(File runDirectory, int smrtCellCount) throws IOException {
-    try (Stream<Path> testFileStream = Files.walk(runDirectory.toPath());
-        Stream<Path> testDoneStream = Files.walk(runDirectory.toPath())) {
-      int transferTestFiles =
-          (int)
-              testFileStream
-                  .filter(Files::isRegularFile)
-                  .filter(file -> TRANSFER_TEST.test(String.valueOf(file.getFileName())))
-                  .count();
-
+    try (Stream<Path> testDoneStream = Files.walk(runDirectory.toPath())) {
       int transferDoneFiles =
           (int)
               testDoneStream
                   .filter(Files::isRegularFile)
-                  .filter(file -> TRANSFER_DONE.test(String.valueOf(file.getFileName())))
+                  .filter(file -> file.getFileName().toString().endsWith(TRANSFER_DONE_SUFFIX))
                   .count();
 
-      return transferDoneFiles == smrtCellCount && transferTestFiles == smrtCellCount;
+      return transferDoneFiles == smrtCellCount;
     }
   }
 
@@ -387,7 +381,7 @@ public class RevioPacBioProcessor extends RunProcessor {
       List<Path> transferDoneFiles =
           testFileStream
               .filter(Files::isRegularFile)
-              .filter(file -> TRANSFER_DONE.test(String.valueOf(file.getFileName())))
+              .filter(file -> file.getFileName().toString().endsWith(TRANSFER_DONE_SUFFIX))
               .toList();
 
       Instant maxInstant = null;
