@@ -70,7 +70,8 @@ public class RevioPacBioProcessor extends RunProcessor {
             "//CollectionMetadata/@InstrumentName", PacBioNotificationDto::setSequencerName),
         processDate("//Run/@WhenStarted", PacBioNotificationDto::setStartDate),
         processString(
-            "//VersionInfo[@Name='smrtlink']/@Version", PacBioNotificationDto::setSoftware),
+            "//VersionInfo[@Name='smrtlink']/@Version",
+            (dto, string) -> dto.setSoftware("SMRT Link " + string)),
         processSampleInformation()
       };
 
