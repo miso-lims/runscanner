@@ -2,17 +2,21 @@
 
 Changes:
 
+
+
+# 2.1.1
+
+Changes:
+
   * Added Sample PacBio Revio test directory
   * Fixed Runs not displaying for PacBio Revio Processors
   * Added custom error page
 
 # 2.1.0
 
-Added:
-  * Support for parsing and serving Illumina DRAGEN BCLConvert data
-
 Changes:
 
+  * Added support for parsing and serving Illumina DRAGEN BCLConvert data                            
   * Added RevioPacBioProcessor to scan PacBio Revio runs (experimental; still under development)
   * Update clang in CI from 12 to 14 
   * Fixed Run Scanner's interactive Swagger docs generating incorrect URLs in some configurations
