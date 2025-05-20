@@ -36,8 +36,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
-/** Scan PacBio Revio runs from a directory. */
-public class RevioPacBioProcessor extends RunProcessor {
+/** Scan PacBio Revio and Vega runs from a directory. */
+public class V2PacBioProcessor extends RunProcessor {
 
   /** Extract data from an XML metadata file and put it in the DTO. */
   interface ProcessMetadata {
@@ -56,13 +56,13 @@ public class RevioPacBioProcessor extends RunProcessor {
 
   private static final String PB_REPORT_FILE_SUFFIX = ".pbreports.log";
 
-  private static final Logger log = LoggerFactory.getLogger(RevioPacBioProcessor.class);
+  private static final Logger log = LoggerFactory.getLogger(V2PacBioProcessor.class);
 
   private static final Pattern RUN_DIRECTORY = Pattern.compile("^.+_\\d+$");
 
   // Run information extracted from metadata XML file
-  private static final RevioPacBioProcessor.ProcessMetadata[] REVIO_METADATA_PROCESSORS =
-      new RevioPacBioProcessor.ProcessMetadata[] {
+  private static final V2PacBioProcessor.ProcessMetadata[] REVIO_METADATA_PROCESSORS =
+      new V2PacBioProcessor.ProcessMetadata[] {
         processString("//RunDetails/TimeStampedName", PacBioNotificationDto::setRunAlias),
         processString(
             "//CollectionMetadata/@InstrumentName", PacBioNotificationDto::setSequencerName),
@@ -80,7 +80,7 @@ public class RevioPacBioProcessor extends RunProcessor {
    * @param expression the XPath expression yielding the date
    * @param setter the writer for the date
    */
-  private static RevioPacBioProcessor.ProcessMetadata processDate(
+  private static V2PacBioProcessor.ProcessMetadata processDate(
       String expression, BiConsumer<PacBioNotificationDto, Instant> setter) {
     XPathExpression expr = RunProcessor.compileXPath(expression)[0];
     return (document, dto, timeZone) -> {
@@ -94,7 +94,7 @@ public class RevioPacBioProcessor extends RunProcessor {
   }
 
   // Revio Samples
-  private static RevioPacBioProcessor.ProcessMetadata processSampleInformation() {
+  private static V2PacBioProcessor.ProcessMetadata processSampleInformation() {
     XPathExpression[] expr =
         RunProcessor.compileXPath(
             "//ResultsFolder",
@@ -133,7 +133,7 @@ public class RevioPacBioProcessor extends RunProcessor {
    * @param setter writer for the string
    * @return
    */
-  private static RevioPacBioProcessor.ProcessMetadata processString(
+  private static V2PacBioProcessor.ProcessMetadata processString(
       String expression, BiConsumer<PacBioNotificationDto, String> setter) {
     XPathExpression expr = RunProcessor.compileXPath(expression)[0];
     return (document, dto, timeZone) -> {
@@ -144,12 +144,12 @@ public class RevioPacBioProcessor extends RunProcessor {
     };
   }
 
-  public RevioPacBioProcessor(Builder builder) {
+  public V2PacBioProcessor(Builder builder) {
     super(builder);
   }
 
   public static RunProcessor create(Builder builder, ObjectNode parameters) {
-    return new RevioPacBioProcessor(builder);
+    return new V2PacBioProcessor(builder);
   }
 
   @Override
@@ -228,7 +228,7 @@ public class RevioPacBioProcessor extends RunProcessor {
                       Stream.of(
                           statisticsDirectory.listFiles(
                               (dir, file) -> file.endsWith(PB_REPORT_FILE_SUFFIX))))
-              .map(RevioPacBioProcessor::getLogCompletionTime)
+              .map(V2PacBioProcessor::getLogCompletionTime)
               .max(Comparator.naturalOrder());
       // Set completion time based on pbreports.log file
       latestCompletionTime.ifPresent(dto::setCompletionDate);
@@ -253,7 +253,7 @@ public class RevioPacBioProcessor extends RunProcessor {
    * @param dto the DTO to update
    */
   private void processMetadata(Document metadata, PacBioNotificationDto dto, TimeZone timeZone) {
-    for (RevioPacBioProcessor.ProcessMetadata processor : REVIO_METADATA_PROCESSORS) {
+    for (V2PacBioProcessor.ProcessMetadata processor : REVIO_METADATA_PROCESSORS) {
       try {
         processor.accept(metadata, dto, timeZone);
       } catch (XPathException e) {

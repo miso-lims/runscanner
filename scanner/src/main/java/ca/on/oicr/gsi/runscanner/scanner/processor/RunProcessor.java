@@ -93,7 +93,7 @@ public abstract class RunProcessor {
         Stream.of(
             new Builder(Platform.ILLUMINA, "default", DefaultIllumina::create),
             new Builder(Platform.PACBIO, "default", DefaultPacBio::create),
-            new Builder(Platform.PACBIO, "revio", RevioPacBioProcessor::create),
+            new Builder(Platform.PACBIO, "v2", V2PacBioProcessor::create),
             new Builder(Platform.OXFORDNANOPORE, "promethion", PromethionProcessor::create),
             new Builder(Platform.OXFORDNANOPORE, "minion", MinionProcessor::create));
     return Stream.concat(
@@ -154,6 +154,7 @@ public abstract class RunProcessor {
       return Optional.empty();
     }
   }
+
   /**
    * Create a run processor for the request configuration, if one exists.
    *
