@@ -2,7 +2,7 @@
 
 Changes:
 
-
+  * Fixed bad URLs in Swagger docs
 
 # 2.1.1
 

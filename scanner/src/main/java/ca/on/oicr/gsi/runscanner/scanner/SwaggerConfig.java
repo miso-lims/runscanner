@@ -49,7 +49,7 @@ public class SwaggerConfig {
 
   @Bean
   public OpenAPI openApi(
-      ServletContext servletContext, @Value("${swagger.baseUrl:#{null}") String baseUrl) {
+      ServletContext servletContext, @Value("${swagger.baseUrl:#{null}}") String baseUrl) {
     Server server =
         new Server()
             .url(baseUrl != null ? baseUrl : servletContext.getContextPath())
