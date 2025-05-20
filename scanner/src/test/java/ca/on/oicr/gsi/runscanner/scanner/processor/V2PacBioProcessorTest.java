@@ -12,11 +12,11 @@ import java.time.format.DateTimeFormatter;
 import java.util.TimeZone;
 import org.junit.Assert;
 
-public class RevioPacBioProcessorTest<T> extends AbstractProcessorTest<PacBioNotificationDto> {
-  private final RevioPacBioProcessor instance =
-      new RevioPacBioProcessor(new Builder(Platform.PACBIO, "unittest", null));
+public class V2PacBioProcessorTest<T> extends AbstractProcessorTest<PacBioNotificationDto> {
+  private final V2PacBioProcessor instance =
+      new V2PacBioProcessor(new Builder(Platform.PACBIO, "unittest", null));
 
-  public RevioPacBioProcessorTest() {
+  public V2PacBioProcessorTest() {
     super(PacBioNotificationDto.class);
   }
 
@@ -32,8 +32,10 @@ public class RevioPacBioProcessorTest<T> extends AbstractProcessorTest<PacBioNot
       // Assert that a start time (any) was detected
       Assert.assertNotNull(result.getStartDate());
 
-      // Need to modify result to match reference.json because for runs that have just started,
-      // the only information available are run name and start time using file creation. For
+      // Need to modify result to match reference.json because for runs that have just
+      // started,
+      // the only information available are run name and start time using file
+      // creation. For
       // tests, we cannot use file creation time as these aren't stored in git
       result.setStartDate(
           LocalDateTime.parse(

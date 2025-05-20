@@ -2,7 +2,8 @@
 
 Changes:
 
-
+  * Renamed PacBio "revio" processor to "v2"
+  * Adapted PacBio v2 processor to support Vega runs
 
 # 2.1.1
 
