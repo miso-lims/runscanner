@@ -20,9 +20,15 @@
     </tr>
     <tr>
         <td>name</td>
-        <td>Illumina/PacBio:
+        <td>Illumina:
         <ul>
             <li>"default"</li>
+            <li>"testing"</li>
+        </ul>
+        PacBio:
+        <ul>
+            <li>"default"</li>
+            <li>"v2"</li>
             <li>"testing"</li>
         </ul>
         Oxford Nanopore:
@@ -78,7 +84,6 @@
         </table></td>
     </tr>
 </table>
-
 
 # Appendix B: Run JSON Fields
 
@@ -294,12 +299,17 @@ format as a sequencer whose name is bolded, however they have not been tested.
 If a sequencer is not included in this list, it should be assumed to be
 unsupported.
 
-#### PacBio
+#### PacBio - "default" processor
 
 * **RS**
 * **RS II**
 
-#### Illumina
+#### PacBio - "v2" processor
+
+* **Revio**
+* **Vega**
+
+#### Illumina - "default" processor
 
 * **HiSeq 1000**
 * **HiSeq 2000**
@@ -308,27 +318,32 @@ unsupported.
 * **MiSeq**
 * **NextSeq 500**
 * **NextSeq 550**
-* _NextSeq 2000_
+* **NextSeq 2000**
 * **NovaSeq 6000**
-* _NovaSeq X Plus_
+* **NovaSeq X Plus**
 * iSeq
 * MiniSeq
 
-#### Oxford Nanopore
+#### Oxford Nanopore - "promethion" processor
 
 * **PromethION** - as of PromethION Release 19.01.1
+
+#### Oxford Nanopore - "minion" processor
+
 * **MinION** - as of MinION Release 18.12
 
-**Note for Oxford Nanopore Sequencers**: all sequencing output created before
-January 1 2017 is automatically skipped.
+**Notes for Oxford Nanopore Sequencers**
+
+* All sequencing output created before January 1 2017 is automatically skipped.
+* Supports `fast5` output only - `pod5` format not supported.
 
 # Appendix D: Analysis Platforms Supported by Run Scanner
 
-This is a list of on-instrument analysis platforms for which Run Scanner is capable of 
+This is a list of on-instrument analysis platforms for which Run Scanner is capable of
 processing output. For more information, see [Analysis Platform Support](./analysis.md).
 
-* Illumina DRAGEN - as of DRAGEN 4.1.7. Analysis output created by DRAGEN versions older than 4.1.7 
-will be marked `UNSUPPORTED`.
+* Illumina DRAGEN - as of DRAGEN 4.1.7. Analysis output created by DRAGEN versions older than 4.1.7
+  will be marked `UNSUPPORTED`.
 
 ## Files Required for Parsing Analysis Data
 
@@ -345,16 +360,16 @@ and including the file location.
 
 Let `attempt` be `sequencer location/run directory/Analysis/attempt number/`
 
- * `attempt/Data/BCLConvert/SampleSheet.csv` (the SampleSheet.csv at the root of the Analysis cannot
-be used due to it not updating between attempts)
- * `attempt/Data/b2c_dragen_events.csv`
- * One of:
-   * `attempt/Data/BCLConvert/fastq/Reports/fastq_list.csv`
-   * `attempt/Data/BCLConvert/ora_fastq/Reports/fastq_list.csv`
- * The fastq files in the `fastq_list.csv` retrieved above must exist
- * `attempt/Manifest.tsv`
- * One of:
-   * `attempt/Data/BCLConvert/fastq/Reports/Demultiplex_Stats.csv`
-   * `attempt/Data/BCLConvert/ora_fastq/Reports/Demultiplex_Stats.csv`
-   * `attempt/Data/Demux/Demultiplex_Stats.csv`
- * `attempt/Data/Secondary_Analysis_Complete.txt`
+* `attempt/Data/BCLConvert/SampleSheet.csv` (the SampleSheet.csv at the root of the Analysis cannot
+  be used due to it not updating between attempts)
+* `attempt/Data/b2c_dragen_events.csv`
+* One of:
+  * `attempt/Data/BCLConvert/fastq/Reports/fastq_list.csv`
+  * `attempt/Data/BCLConvert/ora_fastq/Reports/fastq_list.csv`
+* The fastq files in the `fastq_list.csv` retrieved above must exist
+* `attempt/Manifest.tsv`
+* One of:
+  * `attempt/Data/BCLConvert/fastq/Reports/Demultiplex_Stats.csv`
+  * `attempt/Data/BCLConvert/ora_fastq/Reports/Demultiplex_Stats.csv`
+  * `attempt/Data/Demux/Demultiplex_Stats.csv`
+* `attempt/Data/Secondary_Analysis_Complete.txt`
