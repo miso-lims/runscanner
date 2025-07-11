@@ -65,13 +65,14 @@ public class RestResponseController {
   }
 
   @DeleteMapping("/run/{name}")
-  @Operation(summary = "Invalidate cache for run by name")
+  @Operation(summary = "Invalidate cache for run by run directory name")
   @ApiResponses({
     @ApiResponse(responseCode = "204", description = "Success"),
     @ApiResponse(responseCode = "404", description = "Run not found")
   })
   @ResponseStatus(code = HttpStatus.NO_CONTENT)
-  public void deleteByName(@PathVariable("name") @Parameter(description = "Run name") String id) {
+  public void deleteByRunDirectoryName(
+      @PathVariable("name") @Parameter(description = "Run directory name") String id) {
     if (!scheduler.invalidate(id)) throw new ResourceNotFoundException();
   }
 
