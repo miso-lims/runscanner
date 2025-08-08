@@ -2,6 +2,12 @@
 
 Changes:
 
+
+
+# 2.2.0
+
+Changes:
+
   * Renamed PacBio "revio" processor to "v2"
   * Adapted PacBio v2 processor to support Vega runs
   * Fixed bad URLs in Swagger docs
