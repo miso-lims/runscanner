@@ -139,11 +139,11 @@ public final class DefaultIllumina extends RunProcessor {
 
   // XPath for MiSeq
   private static final XPathExpression REAGENT_KIT_LOT =
-      xpath("//ReagentKitRfidTag/LotNumber/text()");
+      xpath("//ReagentKitRFIDTag/LotNumber/text()");
   private static final XPathExpression FLOWCELL_RFID_LOT =
-      xpath("//FlowCellRfidTag/LotNumber/text()");
+      xpath("//FlowcellRFIDTag/LotNumber/text()");
   private static final XPathExpression PR2_BOTTLE_LOT =
-      xpath("//PR2BottleRfidTag/LotNumber/text()");
+      xpath("//PR2BottleRFIDTag/LotNumber/text()");
 
   // XPath for NextSeq 2000
   private static final XPathExpression NEXTSEQ_FLOWCELL_LOT = xpath("//FlowCellLotNumber/text()");
@@ -690,7 +690,8 @@ public final class DefaultIllumina extends RunProcessor {
     return PathType.DIRECTORY;
   }
 
-  /** Extracts all consumables from RunParameters XML. */
+  // Extracts all consumables from RunParameters XML.
+
   private static List<Consumable> extractConsumables(Document runParameters) {
     List<Consumable> consumables = new ArrayList<>();
 
@@ -707,7 +708,8 @@ public final class DefaultIllumina extends RunProcessor {
     return consumables;
   }
 
-  /** Extracts consumables from NovaSeq X Plus XML structure. */
+  // Extracts consumables from NovaSeq X Plus XML structure.
+
   private static List<Consumable> extractNovaSeqConsumables(Document runParameters) {
     List<Consumable> consumables = new ArrayList<>();
 
@@ -721,14 +723,12 @@ public final class DefaultIllumina extends RunProcessor {
         if (node.getNodeType() == Node.ELEMENT_NODE) {
           Element element = (Element) node;
 
-          String type = (String) CONSUMABLE_TYPE.evaluate(element, XPathConstants.STRING);
-          String lotNumber = (String) CONSUMABLE_LOT.evaluate(element, XPathConstants.STRING);
+          String type = ((String) CONSUMABLE_TYPE.evaluate(element, XPathConstants.STRING)).trim();
+          String lotNumber =
+              ((String) CONSUMABLE_LOT.evaluate(element, XPathConstants.STRING)).trim();
 
-          if (type != null
-              && !type.trim().isEmpty()
-              && lotNumber != null
-              && !lotNumber.trim().isEmpty()) {
-            consumables.add(new Consumable(type.trim(), lotNumber.trim()));
+          if (!type.isEmpty() && !lotNumber.isEmpty()) {
+            consumables.add(new Consumable(type, lotNumber));
           }
         }
       }
@@ -739,24 +739,34 @@ public final class DefaultIllumina extends RunProcessor {
     return consumables;
   }
 
-  /** Extracts consumables from MiSeq XML structure. */
+  // Extracts consumables from MiSeq XML structure.
+
   private static List<Consumable> extractMiSeqConsumables(Document runParameters) {
     List<Consumable> consumables = new ArrayList<>();
 
     try {
       String reagentLot = getValueFromXml(runParameters, REAGENT_KIT_LOT);
-      if (reagentLot != null && !reagentLot.trim().isEmpty()) {
-        consumables.add(new Consumable("ReagentKit", reagentLot.trim()));
+      if (reagentLot != null) {
+        reagentLot = reagentLot.trim();
+        if (!reagentLot.isEmpty()) {
+          consumables.add(new Consumable("ReagentKit", reagentLot));
+        }
       }
 
       String flowcellLot = getValueFromXml(runParameters, FLOWCELL_RFID_LOT);
-      if (flowcellLot != null && !flowcellLot.trim().isEmpty()) {
-        consumables.add(new Consumable("FlowCell", flowcellLot.trim()));
+      if (flowcellLot != null) {
+        flowcellLot = flowcellLot.trim();
+        if (!flowcellLot.isEmpty()) {
+          consumables.add(new Consumable("FlowCell", flowcellLot));
+        }
       }
 
       String pr2Lot = getValueFromXml(runParameters, PR2_BOTTLE_LOT);
-      if (pr2Lot != null && !pr2Lot.trim().isEmpty()) {
-        consumables.add(new Consumable("PR2Bottle", pr2Lot.trim()));
+      if (pr2Lot != null) {
+        pr2Lot = pr2Lot.trim();
+        if (!pr2Lot.isEmpty()) {
+          consumables.add(new Consumable("PR2Bottle", pr2Lot));
+        }
       }
     } catch (Exception e) {
       log.error("Error extracting MiSeq consumables", e);
@@ -771,13 +781,19 @@ public final class DefaultIllumina extends RunProcessor {
 
     try {
       String flowcellLot = getValueFromXml(runParameters, NEXTSEQ_FLOWCELL_LOT);
-      if (flowcellLot != null && !flowcellLot.trim().isEmpty()) {
-        consumables.add(new Consumable("FlowCell", flowcellLot.trim()));
+      if (flowcellLot != null) {
+        flowcellLot = flowcellLot.trim();
+        if (!flowcellLot.isEmpty()) {
+          consumables.add(new Consumable("FlowCell", flowcellLot));
+        }
       }
 
       String cartridgeLot = getValueFromXml(runParameters, NEXTSEQ_CARTRIDGE_LOT);
-      if (cartridgeLot != null && !cartridgeLot.trim().isEmpty()) {
-        consumables.add(new Consumable("Cartridge", cartridgeLot.trim()));
+      if (cartridgeLot != null) {
+        cartridgeLot = cartridgeLot.trim();
+        if (!cartridgeLot.isEmpty()) {
+          consumables.add(new Consumable("Cartridge", cartridgeLot));
+        }
       }
     } catch (Exception e) {
       log.error("Error extracting NextSeq consumables", e);
