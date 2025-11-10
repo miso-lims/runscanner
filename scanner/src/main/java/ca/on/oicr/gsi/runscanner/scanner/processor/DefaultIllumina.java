@@ -1,5 +1,6 @@
 package ca.on.oicr.gsi.runscanner.scanner.processor;
 
+import ca.on.oicr.gsi.runscanner.dto.Consumable;
 import ca.on.oicr.gsi.runscanner.dto.IlluminaNotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.type.HealthType;
@@ -31,9 +32,11 @@ import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Scanner;
@@ -45,12 +48,16 @@ import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * Scan an Illumina sequencer's output using the Illumina Interop C++ library.
@@ -123,6 +130,24 @@ public final class DefaultIllumina extends RunProcessor {
   private static final XPathExpression SBS_CONSUMABLE_VERSION =
       xpath("//RfidsInfo/SbsConsumableVersion/text()");
   private static final XPathExpression RUNPARAM_START_TIME_XPATH = xpath("//RunStartTime/text()");
+
+  // XPath for NovaSeq X Plus
+  private static final XPathExpression CONSUMABLE_INFO_NOVA =
+      xpath("//ConsumableInfo/ConsumableInfo");
+  private static final XPathExpression CONSUMABLE_TYPE = xpath(".//Type/text()");
+  private static final XPathExpression CONSUMABLE_LOT = xpath(".//LotNumber/text()");
+
+  // XPath for MiSeq
+  private static final XPathExpression REAGENT_KIT_LOT =
+      xpath("//ReagentKitRfidTag/LotNumber/text()");
+  private static final XPathExpression FLOWCELL_RFID_LOT =
+      xpath("//FlowCellRfidTag/LotNumber/text()");
+  private static final XPathExpression PR2_BOTTLE_LOT =
+      xpath("//PR2BottleRfidTag/LotNumber/text()");
+
+  // XPath for NextSeq 2000
+  private static final XPathExpression NEXTSEQ_FLOWCELL_LOT = xpath("//FlowCellLotNumber/text()");
+  private static final XPathExpression NEXTSEQ_CARTRIDGE_LOT = xpath("//CartridgeLotNumber/text()");
 
   // RunCompletionInfo XPaths
   private static final XPathExpression COMPLETION_STATUS_NEXTSEQ =
@@ -352,6 +377,13 @@ public final class DefaultIllumina extends RunProcessor {
       if (workflowType != null && !workflowType.equals("None")) {
         dto.setWorkflowType(workflowType);
       }
+
+      // Extract and set consumables
+      List<Consumable> consumables = extractConsumables(runParameters);
+      if (consumables != null && !consumables.isEmpty()) {
+        dto.setConsumables(consumables);
+      }
+
       dto.setIndexSequencing(findIndexSequencing(runInfo, runParameters));
       if (dto.getStartDate() == null) {
         dto.setStartDate(findStartDate(runInfo, runParameters, runCompletionStatus));
@@ -656,5 +688,101 @@ public final class DefaultIllumina extends RunProcessor {
   @Override
   public PathType getPathType() {
     return PathType.DIRECTORY;
+  }
+
+  /** Extracts all consumables from RunParameters XML. */
+  private static List<Consumable> extractConsumables(Document runParameters) {
+    List<Consumable> consumables = new ArrayList<>();
+
+    consumables.addAll(extractNovaSeqConsumables(runParameters));
+
+    if (consumables.isEmpty()) {
+      consumables.addAll(extractMiSeqConsumables(runParameters));
+    }
+
+    if (consumables.isEmpty()) {
+      consumables.addAll(extractNextSeqConsumables(runParameters));
+    }
+
+    return consumables;
+  }
+
+  /** Extracts consumables from NovaSeq X Plus XML structure. */
+  private static List<Consumable> extractNovaSeqConsumables(Document runParameters) {
+    List<Consumable> consumables = new ArrayList<>();
+
+    try {
+      NodeList nodes =
+          (NodeList) CONSUMABLE_INFO_NOVA.evaluate(runParameters, XPathConstants.NODESET);
+
+      for (int i = 0; i < nodes.getLength(); i++) {
+        Node node = nodes.item(i);
+
+        if (node.getNodeType() == Node.ELEMENT_NODE) {
+          Element element = (Element) node;
+
+          String type = (String) CONSUMABLE_TYPE.evaluate(element, XPathConstants.STRING);
+          String lotNumber = (String) CONSUMABLE_LOT.evaluate(element, XPathConstants.STRING);
+
+          if (type != null
+              && !type.trim().isEmpty()
+              && lotNumber != null
+              && !lotNumber.trim().isEmpty()) {
+            consumables.add(new Consumable(type.trim(), lotNumber.trim()));
+          }
+        }
+      }
+    } catch (Exception e) {
+      log.error("Error extracting NovaSeq consumables", e);
+    }
+
+    return consumables;
+  }
+
+  /** Extracts consumables from MiSeq XML structure. */
+  private static List<Consumable> extractMiSeqConsumables(Document runParameters) {
+    List<Consumable> consumables = new ArrayList<>();
+
+    try {
+      String reagentLot = getValueFromXml(runParameters, REAGENT_KIT_LOT);
+      if (reagentLot != null && !reagentLot.trim().isEmpty()) {
+        consumables.add(new Consumable("ReagentKit", reagentLot.trim()));
+      }
+
+      String flowcellLot = getValueFromXml(runParameters, FLOWCELL_RFID_LOT);
+      if (flowcellLot != null && !flowcellLot.trim().isEmpty()) {
+        consumables.add(new Consumable("FlowCell", flowcellLot.trim()));
+      }
+
+      String pr2Lot = getValueFromXml(runParameters, PR2_BOTTLE_LOT);
+      if (pr2Lot != null && !pr2Lot.trim().isEmpty()) {
+        consumables.add(new Consumable("PR2Bottle", pr2Lot.trim()));
+      }
+    } catch (Exception e) {
+      log.error("Error extracting MiSeq consumables", e);
+    }
+
+    return consumables;
+  }
+
+  /** Extracts consumables from NextSeq 2000 XML structure. */
+  private static List<Consumable> extractNextSeqConsumables(Document runParameters) {
+    List<Consumable> consumables = new ArrayList<>();
+
+    try {
+      String flowcellLot = getValueFromXml(runParameters, NEXTSEQ_FLOWCELL_LOT);
+      if (flowcellLot != null && !flowcellLot.trim().isEmpty()) {
+        consumables.add(new Consumable("FlowCell", flowcellLot.trim()));
+      }
+
+      String cartridgeLot = getValueFromXml(runParameters, NEXTSEQ_CARTRIDGE_LOT);
+      if (cartridgeLot != null && !cartridgeLot.trim().isEmpty()) {
+        consumables.add(new Consumable("Cartridge", cartridgeLot.trim()));
+      }
+    } catch (Exception e) {
+      log.error("Error extracting NextSeq consumables", e);
+    }
+
+    return consumables;
   }
 }

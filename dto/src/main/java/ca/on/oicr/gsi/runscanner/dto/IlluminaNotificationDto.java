@@ -23,6 +23,7 @@ public class IlluminaNotificationDto extends NotificationDto {
   private int scoreCycle;
   private String workflowType;
   private IndexSequencing indexSequencing;
+  private List<Consumable> consumables;
 
   public List<PipelineRun> pipelineRuns = new LinkedList<>();
 
@@ -66,6 +67,7 @@ public class IlluminaNotificationDto extends NotificationDto {
         && Objects.equals(this.scoreCycle, other.scoreCycle)
         && Objects.equals(this.workflowType, other.workflowType)
         && Objects.equals(this.indexSequencing, other.indexSequencing)
+        && Objects.equals(this.consumables, other.consumables)
         && Objects.equals(this.pipelineRuns, other.pipelineRuns)
         && Objects.equals(this.analysisExpected, other.analysisExpected);
   }
@@ -84,6 +86,14 @@ public class IlluminaNotificationDto extends NotificationDto {
 
   public int getImgCycle() {
     return imgCycle;
+  }
+
+  public List<Consumable> getConsumables() {
+    return consumables;
+  }
+
+  public void setConsumables(List<Consumable> consumables) {
+    this.consumables = consumables;
   }
 
   /**
@@ -151,6 +161,7 @@ public class IlluminaNotificationDto extends NotificationDto {
         scoreCycle,
         workflowType,
         indexSequencing,
+        consumables,
         pipelineRuns,
         analysisExpected);
   }
@@ -252,6 +263,8 @@ public class IlluminaNotificationDto extends NotificationDto {
         + workflowType
         + ", indexSequencing="
         + indexSequencing
+        + ", consumables="
+        + consumables
         + ", pipelineRuns="
         + pipelineRuns
         + ", analysisExpected="
