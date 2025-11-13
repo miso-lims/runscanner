@@ -139,15 +139,22 @@ public final class DefaultIllumina extends RunProcessor {
 
   // XPath for MiSeq
   private static final XPathExpression REAGENT_KIT_LOT =
-      xpath("//ReagentKitRFIDTag/LotNumber/text()");
+      xpath(
+          "//*[translate(local-name(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')='reagentkitrfidtag']/*[translate(local-name(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')='lotnumber']/text()");
   private static final XPathExpression FLOWCELL_RFID_LOT =
-      xpath("//FlowcellRFIDTag/LotNumber/text()");
+      xpath(
+          "//*[translate(local-name(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')='flowcellrfidtag']/*[translate(local-name(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')='lotnumber']/text()");
   private static final XPathExpression PR2_BOTTLE_LOT =
-      xpath("//PR2BottleRFIDTag/LotNumber/text()");
+      xpath(
+          "//*[translate(local-name(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')='pr2bottlerfidtag']/*[translate(local-name(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')='lotnumber']/text()");
 
   // XPath for NextSeq 2000
-  private static final XPathExpression NEXTSEQ_FLOWCELL_LOT = xpath("//FlowCellLotNumber/text()");
-  private static final XPathExpression NEXTSEQ_CARTRIDGE_LOT = xpath("//CartridgeLotNumber/text()");
+  private static final XPathExpression NEXTSEQ_FLOWCELL_LOT =
+      xpath(
+          "//*[translate(local-name(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')='flowcelllotnumber']/text()");
+  private static final XPathExpression NEXTSEQ_CARTRIDGE_LOT =
+      xpath(
+          "//*[translate(local-name(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')='cartridgelotnumber']/text()");
 
   // RunCompletionInfo XPaths
   private static final XPathExpression COMPLETION_STATUS_NEXTSEQ =

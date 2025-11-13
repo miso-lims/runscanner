@@ -10,8 +10,6 @@ public class Consumable {
   private String type;
   private String lotNumber;
 
-  public Consumable() {}
-
   public Consumable(String type, String lotNumber) {
     this.type = type;
     this.lotNumber = lotNumber;
@@ -52,6 +50,6 @@ public class Consumable {
 
   @Override
   public String toString() {
-    return "Consumable{" + "type='" + type + '\'' + ", lotNumber='" + lotNumber + '\'' + '}';
+    return "Consumable{type='" + type + "', lotNumber='" + lotNumber + "'}";
   }
 }
