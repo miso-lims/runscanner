@@ -643,7 +643,7 @@ public final class DefaultIllumina extends RunProcessor {
     return position;
   }
 
-  private static String getValueFromXml(Document xml, XPathExpression xpath) {
+  private static String getValueFromXml(Node xml, XPathExpression xpath) {
     String value;
     try {
       value = xpath.evaluate(xml);
@@ -658,13 +658,22 @@ public final class DefaultIllumina extends RunProcessor {
     }
   }
 
-  private static String getValueFromXml(Document xml, Collection<XPathExpression> xpaths) {
+  private static String getValueFromXml(Node xml, Collection<XPathExpression> xpaths) {
     return xpaths
         .stream()
         .map(xpath -> getValueFromXml(xml, xpath))
         .filter(Objects::nonNull)
         .findAny()
         .orElse(null);
+  }
+
+  private static NodeList getNodeListFromXml(Node xml, XPathExpression xpath) {
+    try {
+      return (NodeList) xpath.evaluate(xml, XPathConstants.NODESET);
+    } catch (XPathExpressionException e) {
+      // ignore
+      return null;
+    }
   }
 
   /**
@@ -720,27 +729,28 @@ public final class DefaultIllumina extends RunProcessor {
   private static List<Consumable> extractNovaSeqConsumables(Document runParameters) {
     List<Consumable> consumables = new ArrayList<>();
 
-    try {
-      NodeList nodes =
-          (NodeList) CONSUMABLE_INFO_NOVA.evaluate(runParameters, XPathConstants.NODESET);
+    NodeList nodes = getNodeListFromXml(runParameters, CONSUMABLE_INFO_NOVA);
 
-      for (int i = 0; i < nodes.getLength(); i++) {
-        Node node = nodes.item(i);
+    if (nodes == null) {
+      return consumables;
+    }
 
-        if (node.getNodeType() == Node.ELEMENT_NODE) {
-          Element element = (Element) node;
+    for (int i = 0; i < nodes.getLength(); i++) {
+      Node node = nodes.item(i);
 
-          String type = ((String) CONSUMABLE_TYPE.evaluate(element, XPathConstants.STRING)).trim();
-          String lotNumber =
-              ((String) CONSUMABLE_LOT.evaluate(element, XPathConstants.STRING)).trim();
+      if (node.getNodeType() == Node.ELEMENT_NODE) {
+        Element element = (Element) node;
 
-          if (!type.isEmpty() && !lotNumber.isEmpty()) {
-            consumables.add(new Consumable(type, lotNumber));
-          }
+        String type = getValueFromXml(element, CONSUMABLE_TYPE);
+        String lotNumber = getValueFromXml(element, CONSUMABLE_LOT);
+
+        if (type != null
+            && !type.trim().isEmpty()
+            && lotNumber != null
+            && !lotNumber.trim().isEmpty()) {
+          consumables.add(new Consumable(type.trim(), lotNumber.trim()));
         }
       }
-    } catch (Exception e) {
-      log.error("Error extracting NovaSeq consumables", e);
     }
 
     return consumables;
@@ -751,32 +761,28 @@ public final class DefaultIllumina extends RunProcessor {
   private static List<Consumable> extractMiSeqConsumables(Document runParameters) {
     List<Consumable> consumables = new ArrayList<>();
 
-    try {
-      String reagentLot = getValueFromXml(runParameters, REAGENT_KIT_LOT);
-      if (reagentLot != null) {
-        reagentLot = reagentLot.trim();
-        if (!reagentLot.isEmpty()) {
-          consumables.add(new Consumable("ReagentKit", reagentLot));
-        }
+    String reagentLot = getValueFromXml(runParameters, REAGENT_KIT_LOT);
+    if (reagentLot != null) {
+      reagentLot = reagentLot.trim();
+      if (!reagentLot.isEmpty()) {
+        consumables.add(new Consumable("ReagentKit", reagentLot));
       }
+    }
 
-      String flowcellLot = getValueFromXml(runParameters, FLOWCELL_RFID_LOT);
-      if (flowcellLot != null) {
-        flowcellLot = flowcellLot.trim();
-        if (!flowcellLot.isEmpty()) {
-          consumables.add(new Consumable("FlowCell", flowcellLot));
-        }
+    String flowcellLot = getValueFromXml(runParameters, FLOWCELL_RFID_LOT);
+    if (flowcellLot != null) {
+      flowcellLot = flowcellLot.trim();
+      if (!flowcellLot.isEmpty()) {
+        consumables.add(new Consumable("FlowCell", flowcellLot));
       }
+    }
 
-      String pr2Lot = getValueFromXml(runParameters, PR2_BOTTLE_LOT);
-      if (pr2Lot != null) {
-        pr2Lot = pr2Lot.trim();
-        if (!pr2Lot.isEmpty()) {
-          consumables.add(new Consumable("PR2Bottle", pr2Lot));
-        }
+    String pr2Lot = getValueFromXml(runParameters, PR2_BOTTLE_LOT);
+    if (pr2Lot != null) {
+      pr2Lot = pr2Lot.trim();
+      if (!pr2Lot.isEmpty()) {
+        consumables.add(new Consumable("PR2Bottle", pr2Lot));
       }
-    } catch (Exception e) {
-      log.error("Error extracting MiSeq consumables", e);
     }
 
     return consumables;
@@ -786,24 +792,20 @@ public final class DefaultIllumina extends RunProcessor {
   private static List<Consumable> extractNextSeqConsumables(Document runParameters) {
     List<Consumable> consumables = new ArrayList<>();
 
-    try {
-      String flowcellLot = getValueFromXml(runParameters, NEXTSEQ_FLOWCELL_LOT);
-      if (flowcellLot != null) {
-        flowcellLot = flowcellLot.trim();
-        if (!flowcellLot.isEmpty()) {
-          consumables.add(new Consumable("FlowCell", flowcellLot));
-        }
+    String flowcellLot = getValueFromXml(runParameters, NEXTSEQ_FLOWCELL_LOT);
+    if (flowcellLot != null) {
+      flowcellLot = flowcellLot.trim();
+      if (!flowcellLot.isEmpty()) {
+        consumables.add(new Consumable("FlowCell", flowcellLot));
       }
+    }
 
-      String cartridgeLot = getValueFromXml(runParameters, NEXTSEQ_CARTRIDGE_LOT);
-      if (cartridgeLot != null) {
-        cartridgeLot = cartridgeLot.trim();
-        if (!cartridgeLot.isEmpty()) {
-          consumables.add(new Consumable("Cartridge", cartridgeLot));
-        }
+    String cartridgeLot = getValueFromXml(runParameters, NEXTSEQ_CARTRIDGE_LOT);
+    if (cartridgeLot != null) {
+      cartridgeLot = cartridgeLot.trim();
+      if (!cartridgeLot.isEmpty()) {
+        consumables.add(new Consumable("Cartridge", cartridgeLot));
       }
-    } catch (Exception e) {
-      log.error("Error extracting NextSeq consumables", e);
     }
 
     return consumables;
