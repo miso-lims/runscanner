@@ -653,8 +653,7 @@ public final class DefaultIllumina extends RunProcessor {
         return value;
       }
     } catch (XPathExpressionException e) {
-      // ignore
-      return null;
+      throw new IllegalArgumentException("XPath evaluation failed", e);
     }
   }
 
@@ -671,8 +670,7 @@ public final class DefaultIllumina extends RunProcessor {
     try {
       return (NodeList) xpath.evaluate(xml, XPathConstants.NODESET);
     } catch (XPathExpressionException e) {
-      // ignore
-      return null;
+      throw new IllegalArgumentException("XPath evaluation failed", e);
     }
   }
 
@@ -707,7 +705,6 @@ public final class DefaultIllumina extends RunProcessor {
   }
 
   // Extracts all consumables from RunParameters XML.
-
   private static List<Consumable> extractConsumables(Document runParameters) {
     List<Consumable> consumables = new ArrayList<>();
 
@@ -725,7 +722,6 @@ public final class DefaultIllumina extends RunProcessor {
   }
 
   // Extracts consumables from NovaSeq X Plus XML structure.
-
   private static List<Consumable> extractNovaSeqConsumables(Document runParameters) {
     List<Consumable> consumables = new ArrayList<>();
 
@@ -757,7 +753,6 @@ public final class DefaultIllumina extends RunProcessor {
   }
 
   // Extracts consumables from MiSeq XML structure.
-
   private static List<Consumable> extractMiSeqConsumables(Document runParameters) {
     List<Consumable> consumables = new ArrayList<>();
 
