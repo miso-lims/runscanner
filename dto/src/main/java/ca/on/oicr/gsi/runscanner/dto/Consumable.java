@@ -1,7 +1,10 @@
 package ca.on.oicr.gsi.runscanner.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Objects;
+
 
 /** Represents a sequencing consumable with its type and lot number. */
 @JsonInclude(JsonInclude.Include.NON_NULL)
