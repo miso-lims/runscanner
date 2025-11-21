@@ -10,7 +10,10 @@ public class Consumable {
   private String type;
   private String lotNumber;
 
-  public Consumable(String type, String lotNumber) {
+  @JsonCreator
+  public Consumable(
+      @JsonProperty("type") String type, 
+      @JsonProperty("lotNumber") String lotNumber) {
     this.type = type;
     this.lotNumber = lotNumber;
   }
