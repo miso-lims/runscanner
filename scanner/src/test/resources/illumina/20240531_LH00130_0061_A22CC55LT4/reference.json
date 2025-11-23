@@ -3639,6 +3639,22 @@
         } ]
       } ]
     } ],
+     "consumables" : [ {
+    "type" : "Lyo",
+    "lotNumber" : "18137922"
+  }, {
+    "type" : "Reagent",
+    "lotNumber" : "20840698"
+  }, {
+    "type" : "Buffer",
+    "lotNumber" : "24011201"
+  }, {
+    "type" : "SampleTube",
+    "lotNumber" : "1000020019"
+  }, {
+    "type" : "FlowCell",
+    "lotNumber" : "20846909"
+  } ],
     "pipelineStatus" : "COMPLETE"
   } ],
   "analysisExpected" : true
