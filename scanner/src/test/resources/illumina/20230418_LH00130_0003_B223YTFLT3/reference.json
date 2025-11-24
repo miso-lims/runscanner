@@ -25,22 +25,6 @@
   "scoreCycle" : 318,
   "workflowType" : null,
   "indexSequencing" : "I5_REVERSE_COMPLEMENT",
-  "consumables" : [ {
-    "type" : "FlowCell",
-    "lotNumber" : "20737134"
-  }, {
-    "type" : "Reagent",
-    "lotNumber" : "20731068"
-  }, {
-    "type" : "Buffer",
-    "lotNumber" : "23021501"
-  }, {
-    "type" : "SampleTube",
-    "lotNumber" : "1000015508"
-  }, {
-    "type" : "Lyo",
-    "lotNumber" : "17847279"
-  } ],
   "analysis": [],
   "analysisStatus": "NONE",
   "consumables" : 
