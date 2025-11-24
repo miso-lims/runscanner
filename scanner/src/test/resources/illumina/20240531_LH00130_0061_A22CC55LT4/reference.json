@@ -3639,7 +3639,8 @@
         } ]
       } ]
     } ],
-     "consumables" : [ {
+  "consumables" : 
+  [ {
     "type" : "Lyo",
     "lotNumber" : "18137922"
   }, {
