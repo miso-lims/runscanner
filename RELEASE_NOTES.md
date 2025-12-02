@@ -2,6 +2,13 @@
 
 Changes:
 
+  * Added consumables extraction and tracking for Illumina sequencing runs
+  * Implemented consumable lot number capture for NovaSeq X Plus instruments
+  * Implemented consumable lot number capture for MiSeq instruments (Reagent, FlowCell, PR2Bottle)
+  * Implemented consumable lot number capture for NextSeq 2000 instruments (FlowCell, Cartridge)
+  * Consumables now displayed in run information for better traceability and quality control
+  * Renamed MiSeq consumable type "ReagentKit" to "Reagent" for consistency across instrument models
+  * Standardized XPath constant naming with model-specific prefixes (NOVASEQ_, MISEQ_, NEXTSEQ_)
 
 
 # 2.2.0
