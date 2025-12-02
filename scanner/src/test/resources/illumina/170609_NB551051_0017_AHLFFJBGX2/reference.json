@@ -29,7 +29,7 @@
   "analysisStatus": "NONE",
      "consumables": [
        {
-         "type": "ReagentKit",
+         "type": "Reagent",
          "lotNumber": "20139066"
        },
        {
