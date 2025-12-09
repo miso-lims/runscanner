@@ -26,5 +26,19 @@
   "workflowType" : null,
   "indexSequencing" : null,
   "analysis": [],
-  "analysisStatus": "NONE"
+  "analysisStatus": "NONE",
+     "consumables": [
+       {
+         "type": "Reagent",
+         "lotNumber": "20139066"
+       },
+       {
+         "type": "FlowCell",
+         "lotNumber": "20137425"
+       },
+       {
+         "type": "PR2Bottle",
+         "lotNumber": "20129642"
+       }
+     ]
 }
