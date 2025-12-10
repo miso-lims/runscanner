@@ -1,9 +1,10 @@
 # Unreleased
 
+# 2.3.0
+
 Changes:
 
   * Added consumables with LOT numbers to Illumina runs.
-
 
 # 2.2.0
 
