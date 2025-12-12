@@ -1,6 +1,6 @@
 # Unreleased
 
-Changes:
+# 2.3.0
 
   * Added consumables extraction and tracking for Illumina sequencing runs
   * Implemented consumable lot number capture for NovaSeq X Plus instruments
@@ -9,7 +9,9 @@ Changes:
   * Consumables now displayed in run information for better traceability and quality control
   * Renamed MiSeq consumable type "ReagentKit" to "Reagent" for consistency across instrument models
   * Standardized XPath constant naming with model-specific prefixes (NOVASEQ_, MISEQ_, NEXTSEQ_)
+Changes:
 
+  * Added consumables with LOT numbers to Illumina runs.
 
 # 2.2.0
 
