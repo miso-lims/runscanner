@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -239,7 +240,11 @@ public final class DefaultIllumina extends RunProcessor {
 
   @Override
   public Stream<File> getRunsFromRoot(File root) {
-    return Arrays.stream(root.listFiles(f -> f.isDirectory() && !f.getName().equals("Instrument")));
+    return Arrays.stream(
+            root.listFiles(f -> f.isDirectory() && !f.getName().equals("Instrument"))) //
+        // illumina runs start with yymmdd or yyyymmdd for newer instruments,
+        // we want runscanner to scan newer runs first
+        .sorted(Comparator.comparing(File::getName).reversed());
   }
 
   private boolean isLaneComplete(Path laneDir, IlluminaNotificationDto dto) {

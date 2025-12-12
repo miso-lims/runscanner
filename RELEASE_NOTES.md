@@ -1,5 +1,9 @@
 # Unreleased
 
+Changes:
+
+  * Update Illumina run directory scanning to be completed in reverse order by run directory name (approximately reverse chronological order)
+
 # 2.3.0
 
 Changes:
