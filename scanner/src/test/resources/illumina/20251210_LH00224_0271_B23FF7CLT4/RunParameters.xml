@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunParameters xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Side>B</Side>
+  <Application>NovaSeqXSeries Control Software</Application>
+  <SystemSuiteVersion>1.3.1.59007</SystemSuiteVersion>
+  <OutputFolder>//storage.isilon.stg.oicr.on.ca/prod/archive/LH00224/20251210_LH00224_0271_B23FF7CLT4</OutputFolder>
+  <CustomPrimerSelections>
+    <ReadOnePrimer>false</ReadOnePrimer>
+    <ReadTwoPrimer>false</ReadTwoPrimer>
+    <IndexOnePrimer>false</IndexOnePrimer>
+    <IndexTwoPrimer>false</IndexTwoPrimer>
+  </CustomPrimerSelections>
+  <CloudUploadMode>RunMonitoringAndStorage</CloudUploadMode>
+  <RunSetupMode>Manual</RunSetupMode>
+  <SecondaryAnalysisMode>None</SecondaryAnalysisMode>
+  <InstrumentType>NovaSeqXPlus</InstrumentType>
+  <InstrumentSerialNumber>LH00224</InstrumentSerialNumber>
+  <RunId>20251210_LH00224_0271_B23FF7CLT4</RunId>
+  <FlowCellName>NovaSeqXSeries B4</FlowCellName>
+  <FlowCellType>NovaSeqXSeriesB4</FlowCellType>
+  <ConsumableInfo>
+    <ConsumableInfo>
+      <SerialNumber>LC1135392-LS1</SerialNumber>
+      <LotNumber>1000028789</LotNumber>
+      <PartNumber>20101913</PartNumber>
+      <ExpirationDate>2027-07-20T00:00:00-04:00</ExpirationDate>
+      <Type>SampleTube</Type>
+      <Mode>3</Mode>
+      <Version>1.0</Version>
+      <Name>8 Lane</Name>
+    </ConsumableInfo>
+    <ConsumableInfo>
+      <SerialNumber>LC4444946-25B3</SerialNumber>
+      <LotNumber>20993069</LotNumber>
+      <PartNumber>20066626</PartNumber>
+      <ExpirationDate>2027-03-27T00:00:00-04:00</ExpirationDate>
+      <Type>Reagent</Type>
+      <Mode>4</Mode>
+      <Version>1.5</Version>
+      <Name>25B 300c</Name>
+    </ConsumableInfo>
+    <ConsumableInfo>
+      <SerialNumber>LC2274828-LI6</SerialNumber>
+      <LotNumber>18383802</LotNumber>
+      <PartNumber>20090671</PartNumber>
+      <ExpirationDate>2027-01-12T00:00:00-05:00</ExpirationDate>
+      <Type>Lyo</Type>
+      <Mode>11</Mode>
+      <Version>1.5</Version>
+      <Name>High</Name>
+    </ConsumableInfo>
+    <ConsumableInfo>
+      <SerialNumber>LC2507103246-1</SerialNumber>
+      <LotNumber>25070901</LotNumber>
+      <PartNumber>20089853</PartNumber>
+      <ExpirationDate>2026-12-31T00:00:00-05:00</ExpirationDate>
+      <Type>Buffer</Type>
+      <Mode>3</Mode>
+      <Version>1.0</Version>
+      <Name>Universal</Name>
+    </ConsumableInfo>
+    <ConsumableInfo>
+      <SerialNumber>23FF7CLT4</SerialNumber>
+      <LotNumber>20992036</LotNumber>
+      <PartNumber>20088039</PartNumber>
+      <ExpirationDate>2027-03-12T00:00:00-05:00</ExpirationDate>
+      <Type>FlowCell</Type>
+      <Mode>4</Mode>
+      <Version>1.0</Version>
+      <Name>25B</Name>
+    </ConsumableInfo>
+  </ConsumableInfo>
+  <PlannedReads>
+    <Read ReadName="Read1" Cycles="151" />
+    <Read ReadName="Index1" Cycles="8" />
+    <Read ReadName="Index2" Cycles="8" />
+    <Read ReadName="Read2" Cycles="151" />
+  </PlannedReads>
+  <SecondaryAnalysisInfo />
+  <DisableBclCopy>false</DisableBclCopy>
+  <RunCounter>271</RunCounter>
+  <RecipeName>25B Sequencing</RecipeName>
+  <RecipeVersion>25B-01.03.03</RecipeVersion>
+  <ExperimentName>251210-Dec Run 6</ExperimentName>
+</RunParameters>

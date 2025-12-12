@@ -1,0 +1,48 @@
+{
+  "platform" : "Illumina",
+  "runAlias" : "20251210_LH00224_0271_B23FF7CLT4",
+  "sequencerFolderPath" : "/Users/ndua/runscanner/scanner/src/test/resources/illumina/20251210_LH00224_0271_B23FF7CLT4",
+  "sequencerName" : "LH00224",
+  "sequencerPosition" : "B",
+  "containerSerialNumber" : "23FF7CLT4",
+  "containerModel" : "20088039",
+  "sequencingKit" : null,
+  "laneCount" : 8,
+  "healthType" : "RUNNING",
+  "startDate" : "2025-12-11T01:47:17Z",
+  "completionDate" : null,
+  "pairedEndRun" : true,
+  "software" : "Interop: v1.2.0-dirty Instrument: 0",
+  "metrics" : "[{\"type\":\"chart\",\"values\":[{\"name\":\"Ends\",\"value\":\"Paired\"},{\"name\":\"Cycles\",\"value\":\"1 / 318\"},{\"name\":\"Base Mask\",\"value\":\"y151,I8,I8,y151\"},{\"name\":\"% > Q30\",\"value\":\"nan %\"},{\"name\":\"Clusters\",\"value\":\"0\"},{\"name\":\"Clusters PF\",\"value\":\"0\"}]},{\"columns\":[{\"name\":\"Lane\",\"property\":\"lane\"},{\"name\":\"Pool\",\"property\":\"pool\"},{\"name\":\"Density %\",\"property\":\"densityPct\"},{\"name\":\"Density (K clusters/mm\\u00b2)\",\"property\":\"density\"},{\"name\":\"Density PF\",\"property\":\"densityPf\"},{\"name\":\"% > Q30 (Read 1)\",\"property\":\"errors0\"},{\"name\":\"Aligned (Read 1)\",\"property\":\"aligned0\"},{\"name\":\"% > Q30 (Index 1)\",\"property\":\"errors1\"},{\"name\":\"% > Q30 (Index 2)\",\"property\":\"errors2\"},{\"name\":\"% > Q30 (Read 2)\",\"property\":\"errors3\"},{\"name\":\"Aligned (Read 2)\",\"property\":\"aligned3\"}],\"rows\":[{\"aligned0\":\"N/A\",\"aligned3\":\"N/A\",\"density\":\"N/A\",\"densityPct\":\"nan %\",\"densityPf\":\"N/A\",\"errors0\":\"N/A\",\"errors1\":\"N/A\",\"errors2\":\"N/A\",\"errors3\":\"N/A\",\"lane\":1,\"pool\":\"{1}\",\"q30\":\"N/A\"},{\"aligned0\":\"N/A\",\"aligned3\":\"N/A\",\"density\":\"N/A\",\"densityPct\":\"nan %\",\"densityPf\":\"N/A\",\"errors0\":\"N/A\",\"errors1\":\"N/A\",\"errors2\":\"N/A\",\"errors3\":\"N/A\",\"lane\":2,\"pool\":\"{2}\",\"q30\":\"N/A\"},{\"aligned0\":\"N/A\",\"aligned3\":\"N/A\",\"density\":\"N/A\",\"densityPct\":\"nan %\",\"densityPf\":\"N/A\",\"errors0\":\"N/A\",\"errors1\":\"N/A\",\"errors2\":\"N/A\",\"errors3\":\"N/A\",\"lane\":3,\"pool\":\"{3}\",\"q30\":\"N/A\"},{\"aligned0\":\"N/A\",\"aligned3\":\"N/A\",\"density\":\"N/A\",\"densityPct\":\"nan %\",\"densityPf\":\"N/A\",\"errors0\":\"N/A\",\"errors1\":\"N/A\",\"errors2\":\"N/A\",\"errors3\":\"N/A\",\"lane\":4,\"pool\":\"{4}\",\"q30\":\"N/A\"},{\"aligned0\":\"N/A\",\"aligned3\":\"N/A\",\"density\":\"N/A\",\"densityPct\":\"nan %\",\"densityPf\":\"N/A\",\"errors0\":\"N/A\",\"errors1\":\"N/A\",\"errors2\":\"N/A\",\"errors3\":\"N/A\",\"lane\":5,\"pool\":\"{5}\",\"q30\":\"N/A\"},{\"aligned0\":\"N/A\",\"aligned3\":\"N/A\",\"density\":\"N/A\",\"densityPct\":\"nan %\",\"densityPf\":\"N/A\",\"errors0\":\"N/A\",\"errors1\":\"N/A\",\"errors2\":\"N/A\",\"errors3\":\"N/A\",\"lane\":6,\"pool\":\"{6}\",\"q30\":\"N/A\"},{\"aligned0\":\"N/A\",\"aligned3\":\"N/A\",\"density\":\"N/A\",\"densityPct\":\"nan %\",\"densityPf\":\"N/A\",\"errors0\":\"N/A\",\"errors1\":\"N/A\",\"errors2\":\"N/A\",\"errors3\":\"N/A\",\"lane\":7,\"pool\":\"{7}\",\"q30\":\"N/A\"},{\"aligned0\":\"N/A\",\"aligned3\":\"N/A\",\"density\":\"N/A\",\"densityPct\":\"nan %\",\"densityPf\":\"N/A\",\"errors0\":\"N/A\",\"errors1\":\"N/A\",\"errors2\":\"N/A\",\"errors3\":\"N/A\",\"lane\":8,\"pool\":\"{8}\",\"q30\":\"N/A\"}],\"type\":\"table\"},{\"categories\":[\" Read 1\",\" Index 1\",\" Index 2\",\" Read 2\"],\"series\":[{\"data\":[null,null,null,null],\"name\":\"Yield\"},{\"data\":[0.0,0.0,0.0,0.0],\"name\":\"Projected Yield\"}],\"type\":\"illumina-yield-by-read\"},{\"series\":[{\"data\":[0,0,0,0,0,0,0,0],\"name\":\"Clusters\"},{\"data\":[0,0,0,0,0,0,0,0],\"name\":\"Clusters PF\"}],\"type\":\"illumina-clusters-by-lane\"}]\n",
+  "bclCount" : 784,
+  "callCycle" : 0,
+  "chemistry" : "NOVASEQ",
+  "imgCycle" : 1,
+  "indexLengths" : [ 8, 8 ],
+  "numCycles" : 318,
+  "numReads" : 2,
+  "readLength" : 151,
+  "readLengths" : [ 151, 151 ],
+  "runBasesMask" : "y151,I8,I8,y151",
+  "scoreCycle" : 0,
+  "workflowType" : null,
+  "indexSequencing" : "I5_REVERSE_COMPLEMENT",
+  "consumables" : [ {
+    "type" : "SampleTube",
+    "lotNumber" : "1000028789"
+  }, {
+    "type" : "Reagent",
+    "lotNumber" : "20993069"
+  }, {
+    "type" : "Lyo",
+    "lotNumber" : "18383802"
+  }, {
+    "type" : "Buffer",
+    "lotNumber" : "25070901"
+  }, {
+    "type" : "FlowCell",
+    "lotNumber" : "20992036"
+  } ],
+  "pipelineRuns" : [ ],
+  "analysisExpected" : false
+}
