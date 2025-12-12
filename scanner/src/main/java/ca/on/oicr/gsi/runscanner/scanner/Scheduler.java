@@ -303,7 +303,11 @@ public class Scheduler {
   private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
   private UnreadableDirectories unreadableDirectories;
-  private final ExecutorService workPool = Executors.newWorkStealingPool();
+
+  // Executors.newFixedThreadPool uses a LinkedBlockingQueue by default for its work pool, which
+  // results in scanning jobs being executed in order of submission
+  private final ExecutorService workPool =
+      Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
   // The paths that need to be processed (and the corresponding processor).
   private final Set<File> workToDo = new ConcurrentSkipListSet<>();
