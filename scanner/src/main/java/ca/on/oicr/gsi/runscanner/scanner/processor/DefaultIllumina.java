@@ -644,6 +644,9 @@ public final class DefaultIllumina extends RunProcessor {
   }
 
   private static String getValueFromXml(Node xml, XPathExpression xpath) {
+    if (xml == null) {
+      return null;
+    }
     String value;
     try {
       value = xpath.evaluate(xml);
