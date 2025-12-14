@@ -1,5 +1,7 @@
 # Unreleased
 
+ * Resolved processing failures for Illumina runs with incomplete XML configuration files
+
 # 2.3.0
 
 Changes:
