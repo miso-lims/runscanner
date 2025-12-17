@@ -1,12 +1,16 @@
 # Unreleased
 
- * Resolved processing failures for Illumina runs with incomplete XML configuration files
+ * Fixed processing failures for Illumina runs with incomplete XML configuration files
 
 # 2.3.0
 
 Changes:
 
   * Added consumables with LOT numbers to Illumina runs.
+
+Known Issues:
+
+  * Processing failures for Illumina runs with incomplete XML configuration files
 
 # 2.2.0
 
