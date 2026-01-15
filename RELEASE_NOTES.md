@@ -1,5 +1,6 @@
 # Unreleased
 
+ * Clarified behaviour of the cache invalidation endpoint
  * Fixed processing failures for Illumina runs with incomplete XML configuration files
 
 # 2.3.0
