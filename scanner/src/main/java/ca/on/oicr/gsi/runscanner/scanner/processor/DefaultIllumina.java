@@ -360,7 +360,11 @@ public final class DefaultIllumina extends RunProcessor {
 
     if (exitcode != 0) {
       throw new IOException(
-          "Illumina run processor did not exit cleanly: " + runDirectory.getAbsolutePath());
+          new StringBuilder("Illumina run processor exited with code ")
+              .append(exitcode)
+              .append(" for run: ")
+              .append(runDirectory.getAbsolutePath())
+              .toString());
     }
 
     // Grab .xml files with information about the run
