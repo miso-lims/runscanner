@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import io.prometheus.metrics.core.metrics.Counter;
 import java.io.File;
@@ -106,17 +107,24 @@ public final class DefaultIllumina extends RunProcessor {
       xpath("//FlowCellRfidTag/PartNumber/text()");
   private static final XPathExpression novaSeqPartNum = xpath("//RfidsInfo/FlowCellMode/text()");
   private static final XPathExpression nextSeq2000PartNumber = xpath("//FlowCellPartNumber/text()");
+  private static final XPathExpression miSeqi100PartNumber =
+      xpath(
+          "//ConsumableInfo/ConsumableInfo/Type[text() = 'DryCartridge']/parent::*/PartNumber/text()");
   private static final XPathExpression novaSeqXPartNumber =
       xpath(
           "//ConsumableInfo/ConsumableInfo/Type[text() = 'FlowCell']/parent::*/PartNumber/text()");
-  private static final Set<XPathExpression> CONTAINER_PARTNUMBER_XPATHS =
-      Collections.unmodifiableSet(
-          Sets.newHashSet(
+  private static final List<XPathExpression> CONTAINER_PARTNUMBER_XPATHS =
+      Collections.unmodifiableList(
+          Lists.newArrayList(
+              miSeqi100PartNumber,
               miSeqPartNumber,
               nextSeqPartNumber,
               novaSeqPartNum,
               nextSeq2000PartNumber,
               novaSeqXPartNumber));
+  private static final XPathExpression miSeqi100DryCartridgeSerialNumber =
+      xpath(
+          "//ConsumableInfo/ConsumableInfo/Type[text() = 'DryCartridge']/parent::*/SerialNumber/text()");
   private static final XPathExpression hiSeqPosition = xpath("//Setup/FCPosition/text()");
   private static final XPathExpression novaSeqPosition = xpath("//Side/text()");
   private static final Set<XPathExpression> POSITION_XPATHS =
@@ -380,6 +388,7 @@ public final class DefaultIllumina extends RunProcessor {
               .findFirst()
               .orElse(IlluminaChemistry.UNKNOWN));
       dto.setContainerModel(findContainerModel(runParameters));
+      adjustContainerSerialNumber(dto, runParameters);
       dto.setSequencerPosition(findSequencerPosition(runParameters));
       // See if we can figure out the workflow type on the NovaSeq or HiSeq. This
       // mostly
@@ -581,6 +590,22 @@ public final class DefaultIllumina extends RunProcessor {
     }
   }
 
+  /**
+   * The flow cell serial number is usually detected correctly by the InterOp library, but for the
+   * MiSeq i100, we want to use the serial number of the DryCartridge instead of the actual flow
+   * cell serial number, so we are making that substitution that here.
+   *
+   * @param dto
+   * @param runParameters
+   */
+  private void adjustContainerSerialNumber(IlluminaNotificationDto dto, Document runParameters) {
+    String dryCartridgeSerialNumber =
+        getValueFromXml(runParameters, miSeqi100DryCartridgeSerialNumber);
+    if (dryCartridgeSerialNumber != null) {
+      dto.setContainerSerialNumber(dryCartridgeSerialNumber);
+    }
+  }
+
   private String findSequencerPosition(Document runParams) {
     String position = getValueFromXml(runParams, POSITION_XPATHS);
     position = fixIfHasBadNovaSeqPosition(position);
@@ -669,7 +694,7 @@ public final class DefaultIllumina extends RunProcessor {
         .stream()
         .map(xpath -> getValueFromXml(xml, xpath))
         .filter(Objects::nonNull)
-        .findAny()
+        .findFirst()
         .orElse(null);
   }
 
