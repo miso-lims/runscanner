@@ -2,6 +2,12 @@
 
 Changes:
 
+ * Update read the doc links
+ 
+# 2.4.0
+
+Changes:
+
  * Use the DryCartridge part number as the container model for MiSeq i100
  * Use the DryCartridge serial number as the container serial number for MiSeq i100
 
