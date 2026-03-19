@@ -4,7 +4,7 @@
 This is a web service that monitors directories on the file system containing
 the output from sequencing instruments and serves metadata for runs.
 
-Full instructions for the setup and use of Run Scanner can be found in the [Run Scanner User Manual](https://miso-lims.readthedocs.io/projects/runscanner/en/latest).
+Full instructions for the setup and use of Run Scanner can be found in the [Run Scanner User Manual](https://runscanner.readthedocs.io/en/latest/).
 
 ## Prerequisites
 
@@ -24,7 +24,7 @@ Extract the `.zip` or `.tar.gz` file.
 
 ## Setting Up Run Scanner
 
-Please refer to [Installation & Setup](https://miso-lims.readthedocs.io/projects/runscanner/en/latest/installation/) in the Run Scanner User Manual for installation instructions.
+Please refer to [Installation & Setup](https://runscanner.readthedocs.io/en/latest/installation/) in the Run Scanner User Manual for installation instructions.
 
 ## Debugging
 
@@ -42,4 +42,4 @@ To troubleshoot whether a processor can observe a run, you can see a list of all
     
 It will display usage instructions. You will have to set the `RUN_SCANNER_HOME` to the path containing an unpacked version of the WAR.
 
-Please refer to [Troubleshooting](https://miso-lims.readthedocs.io/projects/runscanner/en/latest/troubleshooting/) in the Run Scanner User Manual for more information.
+Please refer to [Troubleshooting](https://runscanner.readthedocs.io/en/latest/troubleshooting/) in the Run Scanner User Manual for more information.
