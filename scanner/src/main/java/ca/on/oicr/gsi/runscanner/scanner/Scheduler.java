@@ -13,15 +13,7 @@ import java.io.File;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.TimeZone;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutorService;
@@ -94,14 +86,26 @@ public class Scheduler {
   public static class SuppliedDirectoryConfig {
 
     private String name;
+    private String nexusApiAddress;
+    private String nexusApiTokenFile;
     private ObjectNode parameters;
     private String path;
     private Platform platformType;
+    private String sampleDBApiAddress;
+    private String sampleDBApiTokenFile;
     private String timeZone;
     private List<File> ignoreSubdirectories;
 
     public String getName() {
       return name;
+    }
+
+    public String getNexusApiAddress() {
+      return nexusApiAddress;
+    }
+
+    public String getNexusApiTokenFile() {
+      return nexusApiTokenFile;
     }
 
     public ObjectNode getParameters() {
@@ -116,6 +120,14 @@ public class Scheduler {
       return platformType;
     }
 
+    public String getSampleDBApiAddress() {
+      return sampleDBApiAddress;
+    }
+
+    public String getSampleDBApiTokenFile() {
+      return sampleDBApiTokenFile;
+    }
+
     public String getTimeZone() {
       return timeZone;
     }
@@ -128,6 +140,14 @@ public class Scheduler {
       this.name = name;
     }
 
+    public void setNexusApiAddress(String nexusApiAddress) {
+      this.nexusApiAddress = nexusApiAddress;
+    }
+
+    public void setNexusApiTokenFile(String nexusApiTokenFile) {
+      this.nexusApiTokenFile = nexusApiTokenFile;
+    }
+
     public void setParameters(ObjectNode parameters) {
       this.parameters = parameters;
     }
@@ -138,6 +158,14 @@ public class Scheduler {
 
     public void setPlatformType(Platform platformType) {
       this.platformType = platformType;
+    }
+
+    public void setSampleDBApiAddress(String sampleDBApiAddress) {
+      this.sampleDBApiAddress = sampleDBApiAddress;
+    }
+
+    public void setSampleDBApiTokenFile(String sampleDBApiTokenFile) {
+      this.sampleDBApiTokenFile = sampleDBApiTokenFile;
     }
 
     public void setTimeZone(String timeZone) {
@@ -502,13 +530,23 @@ public class Scheduler {
               .map(
                   source -> {
                     Configuration destination = new Configuration();
+                    destination.setIgnoreSubdirectories(source.getIgnoreSubdirectories());
+                    destination.setNexusApiAddress(source.getNexusApiAddress());
+                    destination.setNexusApiTokenFile(
+                        Optional.ofNullable(source.getNexusApiTokenFile())
+                            .map(File::new)
+                            .orElse(null));
                     destination.setPath(new File(source.getPath()));
+                    destination.setSampleDBApiAddress(source.getSampleDBApiAddress());
+                    destination.setSampleDBApiTokenFile(
+                        Optional.ofNullable(source.getSampleDBApiTokenFile())
+                            .map(File::new)
+                            .orElse(null));
                     destination.setTimeZone(TimeZone.getTimeZone(source.getTimeZone()));
                     destination.setProcessor(
                         RunProcessor.processorFor(
                                 source.getPlatformType(), source.getName(), source.getParameters())
                             .orElse(null));
-                    destination.setIgnoreSubdirectories(source.getIgnoreSubdirectories());
                     // Create gauge metric to inform us if directory is valid or not
                     loadingRunDirectoryValid
                         .labelValues(source.getPath())
@@ -586,7 +624,7 @@ public class Scheduler {
                 scanningNow = false;
               },
               1,
-              15,
+              2,
               TimeUnit.MINUTES);
     }
   }

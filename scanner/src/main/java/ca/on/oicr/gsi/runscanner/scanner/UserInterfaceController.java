@@ -20,12 +20,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -189,6 +184,13 @@ public class UserInterfaceController {
                               renderer.line(
                                   "Platform",
                                   configuration.getProcessor().getPlatformType().name());
+                              // TODO remove for prod, just for debugging
+                              Optional.ofNullable(configuration.getNexusApiAddress())
+                                  .ifPresent(sdbAd -> renderer.line("Nexus API A", sdbAd));
+                              Optional.ofNullable(configuration.getSampleDBApiAddress())
+                                  .ifPresent(
+                                      sdbAd ->
+                                          renderer.line("Sample DB Api Token", sdbAd.toString()));
                               renderer.line("Processor", configuration.getProcessor().getName());
                               renderer.line(
                                   "Time Zone", configuration.getTimeZone().getDisplayName());
@@ -197,6 +199,14 @@ public class UserInterfaceController {
                                   configuration.isValid()
                                       ? "Yes"
                                       : "No: " + configuration.validitySummary());
+                              Optional.ofNullable(configuration.getNexusApiTokenFile())
+                                  .ifPresent(
+                                      nexusTok ->
+                                          renderer.line("Nexus Api Token", nexusTok.toString()));
+                              Optional.ofNullable(configuration.getSampleDBApiTokenFile())
+                                  .ifPresent(
+                                      sdbTok ->
+                                          renderer.line("Sample DB Api Token", sdbTok.toString()));
                               renderer.line("Ignoring subdirectories", " ");
                               // Add a new render line for each subdirectory to ignore
                               for (File directory : configuration.getIgnoreSubdirectories()) {

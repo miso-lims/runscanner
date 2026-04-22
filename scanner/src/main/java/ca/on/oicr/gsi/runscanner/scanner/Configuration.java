@@ -10,13 +10,27 @@ import java.util.stream.Stream;
 
 public class Configuration {
 
+  private List<File> ignoreSubdirectories;
+  private String nexusApiAddress;
+  private File nexusApiTokenFile;
   private File path;
-
   private RunProcessor processor;
+  private String sampleDBApiAddress;
+  private File sampleDBApiTokenFile;
 
   private TimeZone timeZone;
 
-  private List<File> ignoreSubdirectories;
+  public List<File> getIgnoreSubdirectories() {
+    return ignoreSubdirectories;
+  }
+
+  public String getNexusApiAddress() {
+    return nexusApiAddress;
+  }
+
+  public File getNexusApiTokenFile() {
+    return nexusApiTokenFile;
+  }
 
   public File getPath() {
     return path;
@@ -30,12 +44,16 @@ public class Configuration {
     return processor.getRunsFromRoot(getPath()).map(directory -> new Pair<>(directory, this));
   }
 
-  public TimeZone getTimeZone() {
-    return timeZone;
+  public String getSampleDBApiAddress() {
+    return sampleDBApiAddress;
   }
 
-  public List<File> getIgnoreSubdirectories() {
-    return ignoreSubdirectories;
+  public File getSampleDBApiTokenFile() {
+    return sampleDBApiTokenFile;
+  }
+
+  public TimeZone getTimeZone() {
+    return timeZone;
   }
 
   public boolean isValid() {
@@ -61,6 +79,22 @@ public class Configuration {
     return summary;
   }
 
+  public void setIgnoreSubdirectories(List<File> ignoreSubdirectories) {
+    if (ignoreSubdirectories == null) {
+      this.ignoreSubdirectories = new ArrayList<>();
+    } else {
+      this.ignoreSubdirectories = ignoreSubdirectories;
+    }
+  }
+
+  public void setNexusApiAddress(String nexusApiAddress) {
+    this.nexusApiAddress = nexusApiAddress;
+  }
+
+  public void setNexusApiTokenFile(File nexusApiTokenFile) {
+    this.nexusApiTokenFile = nexusApiTokenFile;
+  }
+
   public void setPath(File path) {
     this.path = path;
   }
@@ -69,15 +103,15 @@ public class Configuration {
     this.processor = processor;
   }
 
-  public void setTimeZone(TimeZone timeZone) {
-    this.timeZone = timeZone;
+  public void setSampleDBApiAddress(String sampleDBApiAddress) {
+    this.sampleDBApiAddress = nexusApiAddress;
   }
 
-  public void setIgnoreSubdirectories(List<File> ignoreSubdirectories) {
-    if (ignoreSubdirectories == null) {
-      this.ignoreSubdirectories = new ArrayList<>();
-    } else {
-      this.ignoreSubdirectories = ignoreSubdirectories;
-    }
+  public void setSampleDBApiTokenFile(File sampleDBApiTokenFile) {
+    this.sampleDBApiTokenFile = sampleDBApiTokenFile;
+  }
+
+  public void setTimeZone(TimeZone timeZone) {
+    this.timeZone = timeZone;
   }
 }
