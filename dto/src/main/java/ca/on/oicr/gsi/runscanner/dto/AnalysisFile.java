@@ -1,5 +1,8 @@
-package ca.on.oicr.gsi.runscanner.dto.dragen;
+package ca.on.oicr.gsi.runscanner.dto;
 
+import ca.on.oicr.gsi.runscanner.dto.dragen.FastqAnalysisFile;
+import ca.on.oicr.gsi.runscanner.dto.ultima.CramAnalysisFile;
+import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaAnalysisFile;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -12,7 +15,9 @@ import java.util.Objects;
 // Represents one file output by DRAGEN
 @JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "format")
 @JsonSubTypes({ //
-  @Type(value = FastqAnalysisFile.class, name = "fastq"), //
+  @Type(value = FastqAnalysisFile.class, name = "fastq"),
+  @Type(value = UltimaAnalysisFile.class, name = "ultima"),
+  @Type(value = CramAnalysisFile.class, name = "cram"), //
 }) //
 public abstract class AnalysisFile {
   private Path path;

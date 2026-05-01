@@ -3,12 +3,12 @@ package ca.on.oicr.gsi.runscanner.scanner.processor;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
+import ca.on.oicr.gsi.runscanner.dto.AnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.IlluminaNotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.OxfordNanoporeNotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.PipelineRun;
 import ca.on.oicr.gsi.runscanner.dto.WorkflowRun;
-import ca.on.oicr.gsi.runscanner.dto.dragen.AnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.dragen.DragenAnalysisUnit;
 import ca.on.oicr.gsi.runscanner.dto.dragen.DragenWorkflowRun;
 import com.fasterxml.jackson.core.JsonParseException;

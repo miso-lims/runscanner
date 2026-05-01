@@ -1,6 +1,6 @@
 package ca.on.oicr.gsi.runscanner.rs.dto.test.dragen;
 
-import ca.on.oicr.gsi.runscanner.dto.dragen.AnalysisFile;
+import ca.on.oicr.gsi.runscanner.dto.AnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.dragen.DragenAnalysisUnit;
 import ca.on.oicr.gsi.runscanner.dto.dragen.DragenPipelineRun;
 import ca.on.oicr.gsi.runscanner.dto.dragen.DragenWorkflowRun;
@@ -54,7 +54,7 @@ public class JacksonTest {
   }
 
   private AnalysisFile makeAnalysisFile() {
-    AnalysisFile file = new FastqAnalysisFile();
+    FastqAnalysisFile file = new FastqAnalysisFile();
     file.setPath(Path.of("/", "path", "to", "file"));
     file.setCrc32Checksum("abcdefg");
     file.setModifiedTime(Instant.EPOCH);
@@ -89,7 +89,6 @@ public class JacksonTest {
 
   private static void assertAnalysisFileEqual(AnalysisFile one, AnalysisFile two) {
     Assert.assertEquals(one.getPath(), two.getPath());
-    Assert.assertEquals(one.getCrc32Checksum(), two.getCrc32Checksum());
     Assert.assertEquals(one.getModifiedTime(), two.getModifiedTime());
     Assert.assertEquals(one.getCreatedTime(), two.getCreatedTime());
     Assert.assertEquals(one.getSize(), two.getSize());

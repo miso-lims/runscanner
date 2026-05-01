@@ -33,6 +33,8 @@ public class Testing extends RunProcessor {
         return PacBioNotificationDto.class;
       case OXFORDNANOPORE:
         return OxfordNanoporeNotificationDto.class;
+      case ULTIMA:
+        return UltimaNotificationDto.class;
       default:
         return NotificationDto.class;
     }

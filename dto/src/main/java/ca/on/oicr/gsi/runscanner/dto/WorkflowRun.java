@@ -2,6 +2,7 @@ package ca.on.oicr.gsi.runscanner.dto;
 
 import ca.on.oicr.gsi.runscanner.dto.dragen.DragenWorkflowRun;
 import ca.on.oicr.gsi.runscanner.dto.type.WorkflowRunStatus;
+import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaWorkflowRun;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
@@ -14,7 +15,8 @@ import java.util.Objects;
 // Represents one attempt at a workflow within a suite
 @JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "suite")
 @JsonSubTypes({ //
-  @Type(value = DragenWorkflowRun.class, name = "DRAGEN") //
+  @Type(value = DragenWorkflowRun.class, name = "DRAGEN"), //
+  @Type(value = UltimaWorkflowRun.class, name = "ULTIMA") //
 }) //
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class WorkflowRun {

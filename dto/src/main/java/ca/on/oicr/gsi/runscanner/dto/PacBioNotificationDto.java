@@ -62,6 +62,10 @@ public class PacBioNotificationDto extends NotificationDto {
     this.poolNames = poolNames;
   }
 
+  public void setPoolNames2(Map<String, String> poolNames) {
+    this.poolNames = poolNames;
+  }
+
   public void setSequencerPositions(List<SMRTCellPosition> sequencerPositions) {
     this.sequencerPositions = sequencerPositions;
   }

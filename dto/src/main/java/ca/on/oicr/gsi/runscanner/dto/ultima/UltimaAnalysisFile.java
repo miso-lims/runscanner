@@ -1,9 +1,9 @@
-package ca.on.oicr.gsi.runscanner.dto.dragen;
+package ca.on.oicr.gsi.runscanner.dto.ultima;
 
 import ca.on.oicr.gsi.runscanner.dto.AnalysisFile;
 import java.util.Objects;
 
-public class FastqAnalysisFile extends AnalysisFile {
+public class UltimaAnalysisFile extends AnalysisFile {
   private Integer readCount, readNumber;
 
   public Integer getReadCount() {
@@ -22,10 +22,19 @@ public class FastqAnalysisFile extends AnalysisFile {
     this.readNumber = readNumber;
   }
 
+  public void setCrc32Checksum() {
+    super.setCrc32Checksum("unimplemented");
+  }
+
+  @Override
+  public void setCrc32Checksum(String s) {
+    super.setCrc32Checksum("unimplemented");
+  }
+
   @Override
   public String toString() {
     return super.toString()
-        + ", FastqAnalysisFile [readCount="
+        + ", UltimaAnalysisFile [readCount="
         + readCount
         + ", readNumber="
         + readNumber
@@ -37,7 +46,7 @@ public class FastqAnalysisFile extends AnalysisFile {
     if (this == obj) return true;
     if (!super.equals(obj)) return false;
     if (getClass() != obj.getClass()) return false;
-    FastqAnalysisFile other = (FastqAnalysisFile) obj;
+    UltimaAnalysisFile other = (UltimaAnalysisFile) obj;
 
     return Objects.equals(this.readCount, other.readCount)
         && Objects.equals(this.readNumber, other.readNumber);
