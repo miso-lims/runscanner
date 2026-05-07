@@ -1,0 +1,22 @@
+{
+  "runAlias": "123456",
+  "sequencerName": "v987",
+  "software": null,
+  "completedFlows": 460,
+  "expectedFlows": 464,
+  "waferShelf": 1,
+  "readLength":300.0,
+  "metrics": "[{\"type\":\"chart\",\"values\":[{\"name\":\"Number of Beads\",\"value\":\"600000000\"},{\"name\":\"Output Reads\",\"value\":\"450000000\"},{\"name\":\"Pass Filter %\",\"value\":\"83.33\"}]}]",
+  "sequencerPosition": "1",
+  "containerSerialNumber": "FC12.2T1234567890",
+  "containerModel": "FC12.2T",
+  "healthType": "COMPLETED",
+  "analysisStatus":"COMPLETE",
+  "uploadStatus": "COMPLETE",
+  "sequencingStatus": "COMPLETE",
+  "startDate": "2024-05-07T10:00:00Z",
+  "completionDate": "2024-05-08T10:00:00Z",
+  "laneCount": 1,
+  "pairedEndRun": false,
+  "platform": "Ultima"
+}

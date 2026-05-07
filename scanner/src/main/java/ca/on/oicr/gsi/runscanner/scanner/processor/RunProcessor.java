@@ -95,7 +95,8 @@ public abstract class RunProcessor {
             new Builder(Platform.PACBIO, "default", DefaultPacBio::create),
             new Builder(Platform.PACBIO, "v2", V2PacBioProcessor::create),
             new Builder(Platform.OXFORDNANOPORE, "promethion", PromethionProcessor::create),
-            new Builder(Platform.OXFORDNANOPORE, "minion", MinionProcessor::create));
+            new Builder(Platform.OXFORDNANOPORE, "minion", MinionProcessor::create),
+            new Builder(Platform.ULTIMA, "default", DefaultUltima::create));
     return Stream.concat(
         standard,
         Arrays.stream(Platform.values())
@@ -221,17 +222,18 @@ public abstract class RunProcessor {
   public abstract NotificationDto process(File runDirectory, TimeZone tz) throws IOException;
 
   /**
-   * Get the type of path (File, Directory) this processor requires for runs.
+   * Get the type of path (File, Directory, Virtual) this processor requires for runs.
    *
-   * @return PathType File or Directory
+   * @return PathType File or Directory or Virtual
    */
   public abstract PathType getPathType();
 
   /**
    * Determine whether a File is readable by the processor.
    *
-   * @param filesystemObject File object which may represent a directory or file.
-   * @return true if processor can process filesystem object, false otherwise.
+   * @param filesystemObject File object which may represent a directory, file, or virtual path.
+   * @return true if processor can process filesystem object or it's a "virtual" object, false
+   *     otherwise.
    */
   public boolean isFilePathValid(File filesystemObject) {
     boolean valid = false;
@@ -243,10 +245,23 @@ public abstract class RunProcessor {
       case DIRECTORY:
         valid = filesystemObject.isDirectory();
         break;
+      case VIRTUAL:
+        return true;
     }
 
     valid = valid && filesystemObject.canExecute() && filesystemObject.canRead();
 
     return valid;
+  }
+
+  /**
+   * Determine whether the parameters for the processor are valid. All parameters are valid by
+   * default and implementations may impose restrictions
+   *
+   * @param ObjectNode parameters object which may any number of key value pairs.
+   * @return true (All parameters are valid by default and implementations may impose restrictions)
+   */
+  public boolean validateParameters(ObjectNode parameters) {
+    return true;
   }
 }

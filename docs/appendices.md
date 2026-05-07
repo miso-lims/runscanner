@@ -16,6 +16,7 @@
             <li>ILLUMINA</li>
             <li>PACBIO</li>
             <li>OXFORDNANOPORE</li>
+            <li>ULTIMA</li>
         </ul></td>
     </tr>
     <tr>
@@ -37,6 +38,11 @@
             <li>"minion"</li>
             <li>"testing"</li>
         </ul></td>
+        <td>Ultima:
+        <ul>
+            <li>"default"</li>
+            <li>"testing"</li>
+        </ul>
     </tr>
     <tr>
         <td>timeZone</td>
@@ -81,6 +87,17 @@
                 <td>(no additional parameters)</td>
                 <td></td>
             </tr>
+            <tr colspan="2">
+                <th>ULTIMA</th>
+            </tr>
+            <tr>
+                <td>nexusApiAddress (required)</td>
+                <td>The base URL of the Nexus API (Ex. https://example-nexus.com)</td>
+            </tr>
+            <tr>
+                <td>nexusApiTokenFile (required)</td>
+                <td>The location of a file containing a Nexus Auth Token</td>
+            </tr>
         </table></td>
     </tr>
 </table>
@@ -95,9 +112,11 @@ esp bc they might vary in meaning b/w PromION and MinION -->
         <th>PacBio</th>
         <th>Illumina</th>
         <th>Oxford Nanopore</th>
+        <th>Ultima</th>
     </tr>
     <tr>
         <td>platform</td>
+        <td>✓</td>
         <td>✓</td>
         <td>✓</td>
         <td>✓</td>
@@ -107,15 +126,18 @@ esp bc they might vary in meaning b/w PromION and MinION -->
         <td>✓</td>
         <td>✓</td>
         <td>✓</td>
+        <td>✓</td>
     </tr>
     <tr>
         <td>sequencerFolderPath</td>
         <td>✓</td>
         <td>✓</td>
         <td>✓</td>
+        <td></td>
     </tr>
     <tr>
         <td>sequencerName</td>
+        <td>✓</td>
         <td>✓</td>
         <td>✓</td>
         <td>✓</td>
@@ -125,9 +147,11 @@ esp bc they might vary in meaning b/w PromION and MinION -->
         <td>✓</td>
         <td>✓</td>
         <td>✓</td>
+        <td>✓</td>
     </tr>
     <tr>
         <td>containerSerialNumber</td>
+        <td>✓</td>
         <td>✓</td>
         <td>✓</td>
         <td>✓</td>
@@ -137,9 +161,11 @@ esp bc they might vary in meaning b/w PromION and MinION -->
         <td>✓</td>
         <td>✓</td>
         <td>✓</td>
+        <td>✓</td>
     </tr>
     <tr>
         <td>laneCount</td>
+        <td>✓</td>
         <td>✓</td>
         <td>✓</td>
         <td>✓</td>
@@ -149,9 +175,11 @@ esp bc they might vary in meaning b/w PromION and MinION -->
         <td>✓</td>
         <td>✓</td>
         <td>✓</td>
+        <td>✓</td>
     </tr>
     <tr>
         <td>startDate</td>
+        <td>✓</td>
         <td>✓</td>
         <td>✓</td>
         <td>✓</td>
@@ -161,9 +189,11 @@ esp bc they might vary in meaning b/w PromION and MinION -->
         <td>✓</td>
         <td>✓</td>
         <td>✓</td>
+        <td>✓</td>
     </tr>
     <tr>
         <td>pairedEndRun</td>
+        <td>✓</td>
         <td>✓</td>
         <td>✓</td>
         <td>✓</td>
@@ -173,9 +203,11 @@ esp bc they might vary in meaning b/w PromION and MinION -->
         <td>✓</td>
         <td>✓</td>
         <td>✓</td>
+        <td>✓</td>
     </tr>
     <tr>
         <td>metrics</td>
+        <td>✓</td>
         <td>✓</td>
         <td>✓</td>
         <td>✓</td>
@@ -183,6 +215,7 @@ esp bc they might vary in meaning b/w PromION and MinION -->
     <tr>
         <td>poolNames</td>
         <td>✓</td>
+        <td></td>
         <td></td>
         <td></td>
     </tr>
@@ -191,11 +224,13 @@ esp bc they might vary in meaning b/w PromION and MinION -->
         <td></td>
         <td>✓</td>
         <td></td>
+        <td></td>
     </tr>
     <tr>
         <td>bclCount</td>
         <td></td>
         <td>✓</td>
+        <td></td>
         <td></td>
     </tr>
     <tr>
@@ -203,11 +238,13 @@ esp bc they might vary in meaning b/w PromION and MinION -->
         <td></td>
         <td>✓</td>
         <td></td>
+        <td></td>
     </tr>
     <tr>
         <td>chemistry</td>
         <td></td>
         <td>✓</td>
+        <td></td>
         <td></td>
     </tr>
     <tr>
@@ -215,11 +252,13 @@ esp bc they might vary in meaning b/w PromION and MinION -->
         <td></td>
         <td>✓</td>
         <td></td>
+        <td></td>
     </tr>
     <tr>
         <td>indexLengths</td>
         <td></td>
         <td>✓</td>
+        <td></td>
         <td></td>
     </tr>
     <tr>
@@ -227,11 +266,13 @@ esp bc they might vary in meaning b/w PromION and MinION -->
         <td></td>
         <td>✓</td>
         <td></td>
+        <td></td>
     </tr>
     <tr>
         <td>numReads</td>
         <td></td>
         <td>✓</td>
+        <td></td>
         <td></td>
     </tr>
     <tr>
@@ -239,17 +280,20 @@ esp bc they might vary in meaning b/w PromION and MinION -->
         <td></td>
         <td>✓</td>
         <td></td>
+        <td></td>
     </tr>
     <tr>
         <td>readLength</td>
         <td></td>
         <td>✓</td>
         <td></td>
+        <td>✓</td>
     </tr>
     <tr>
         <td>scoreCycle</td>
         <td></td>
         <td>✓</td>
+        <td></td>
         <td></td>
     </tr>
     <tr>
@@ -257,15 +301,60 @@ esp bc they might vary in meaning b/w PromION and MinION -->
         <td></td>
         <td>✓</td>
         <td></td>
+        <td></td>
     </tr>
     <tr>
         <td>runType</td>
         <td></td>
         <td></td>
         <td>✓</td>
+        <td></td>
     </tr>
     <tr>
         <td>protocolVersion</td>
+        <td></td>
+        <td></td>
+        <td>✓</td>
+        <td></td>
+    </tr>
+    <tr>
+        <td>sequencingStatus</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>✓</td>
+    </tr>
+    <tr>
+        <td>analysisStatus</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>✓</td>
+    </tr>
+    <tr>
+        <td>uploadStatus</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>✓</td>
+    </tr>
+    <tr>
+        <td>expectedFlows</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>✓</td>
+    </tr>
+    <tr>
+        <td>completedFlows</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>✓</td>
+    </tr>
+    <tr>
+        <td>waferShelf</td>
+        <td></td>
         <td></td>
         <td></td>
         <td>✓</td>
@@ -275,10 +364,12 @@ esp bc they might vary in meaning b/w PromION and MinION -->
         <td>✓</td>
         <td></td>
         <td></td>
+        <td></td>
     </tr>
     <tr>
         <td>pipelineRuns</td>
         <td>✓</td>
+        <td></td>
         <td></td>
         <td></td>
     </tr>
@@ -323,6 +414,13 @@ unsupported.
 * **NovaSeq X Plus**
 * iSeq
 * MiniSeq
+
+#### Ultima - "default" processor
+* *UG 100*
+
+**Notes for Ultima Sequencers**
+
+* Current support is in development and subject to change
 
 #### Oxford Nanopore - "promethion" processor
 
