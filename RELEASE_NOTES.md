@@ -3,6 +3,7 @@
 Changes:
 
  * Update read the doc links
+ * Added initial support for Ultima UG 100 run information
  
 # 2.4.0
 

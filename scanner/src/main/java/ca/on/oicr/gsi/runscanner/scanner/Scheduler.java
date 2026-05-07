@@ -3,6 +3,7 @@ package ca.on.oicr.gsi.runscanner.scanner;
 import ca.on.oicr.gsi.Pair;
 import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.type.Platform;
+import ca.on.oicr.gsi.runscanner.scanner.processor.PathType;
 import ca.on.oicr.gsi.runscanner.scanner.processor.RunProcessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -498,13 +499,14 @@ public class Scheduler {
               .map(
                   source -> {
                     Configuration destination = new Configuration();
+                    destination.setIgnoreSubdirectories(source.getIgnoreSubdirectories());
                     destination.setPath(new File(source.getPath()));
                     destination.setTimeZone(TimeZone.getTimeZone(source.getTimeZone()));
                     destination.setProcessor(
                         RunProcessor.processorFor(
                                 source.getPlatformType(), source.getName(), source.getParameters())
                             .orElse(null));
-                    destination.setIgnoreSubdirectories(source.getIgnoreSubdirectories());
+                    destination.setParameters(source.getParameters());
                     // Create gauge metric to inform us if directory is valid or not
                     loadingRunDirectoryValid
                         .labelValues(source.getPath())
@@ -558,7 +560,11 @@ public class Scheduler {
                       .filter(Configuration::isValid) //
                       .flatMap(Configuration::getRuns) //
                       .peek(attempted) //
-                      .filter(entry -> newUnreadableDirectories.test(entry.first())) //
+                      .filter(
+                          entry ->
+                              entry.second().getProcessor().getPathType() == PathType.VIRTUAL
+                                  || newUnreadableDirectories.test(
+                                      entry.first())) // skip the check if virtual path
                       .peek(accepted) //
                       .filter(
                           entry -> {

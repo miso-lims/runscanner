@@ -1,0 +1,22 @@
+{
+  "runid": "123456",
+  "sysid": "v987",
+  "RecipeVersion": "1.2.3",
+  "completedflownum": "460",
+  "wafershelf": 1,
+  "num_reads_pass_filter": 500000000,
+  "numbeads": 600000000,
+  "numflows":"464",
+  "pf_output_reads": "450000000",
+  "SequencingRecipe": "UG_116cycles_Baseline_1.8.0.0",
+  "rl": "300",
+  "Chuck": "1",
+  "wafer": "FC12.2T1234567890",
+  "runstatus": 100,
+  "isruncompleted": 1,
+  "errormsg": "",
+  "timezone": "Eastern Standard Time",
+  "startdatetime": "2024-05-07 10:00:00",
+  "runtime": 1440,
+  "analysisstatus": "0220"
+}

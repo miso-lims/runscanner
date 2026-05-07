@@ -3,11 +3,7 @@ package ca.on.oicr.gsi.runscanner.scanner.processor;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-import ca.on.oicr.gsi.runscanner.dto.IlluminaNotificationDto;
-import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
-import ca.on.oicr.gsi.runscanner.dto.OxfordNanoporeNotificationDto;
-import ca.on.oicr.gsi.runscanner.dto.PipelineRun;
-import ca.on.oicr.gsi.runscanner.dto.WorkflowRun;
+import ca.on.oicr.gsi.runscanner.dto.*;
 import ca.on.oicr.gsi.runscanner.dto.dragen.AnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.dragen.DragenAnalysisUnit;
 import ca.on.oicr.gsi.runscanner.dto.dragen.DragenWorkflowRun;
@@ -89,6 +85,14 @@ public abstract class AbstractProcessorTest<T extends NotificationDto> {
             }
           }
         }
+      }
+
+      if (clazz.equals(UltimaNotificationDto.class)) {
+        UltimaNotificationDto ultimaResult = (UltimaNotificationDto) result;
+        UltimaNotificationDto ultimaReference = (UltimaNotificationDto) reference;
+        assertEquals(ultimaResult.getAnalysisStatus(), ultimaReference.getAnalysisStatus());
+        assertEquals(ultimaResult.getUploadStatus(), ultimaReference.getUploadStatus());
+        assertEquals(ultimaResult.getSequencingStatus(), ultimaReference.getSequencingStatus());
       }
 
       // Not implemented for all processors
