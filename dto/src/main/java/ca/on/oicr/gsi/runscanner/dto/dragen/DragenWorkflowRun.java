@@ -23,8 +23,7 @@ public class DragenWorkflowRun extends WorkflowRun {
   }
 
   public DragenAnalysisUnit get(String sample, int lane, String index1, String index2) {
-    return analysisOutputs
-        .stream()
+    return analysisOutputs.stream()
         .filter(
             a ->
                 a.getSample().equals(sample)
@@ -37,8 +36,7 @@ public class DragenWorkflowRun extends WorkflowRun {
 
   public DragenAnalysisUnit get(Path filePath) {
     List<DragenAnalysisUnit> list =
-        analysisOutputs
-            .stream()
+        analysisOutputs.stream()
             .filter(a -> a.getFiles().stream().anyMatch(f -> f.getPath().equals(filePath)))
             .toList();
     if (list.size() > 1) {

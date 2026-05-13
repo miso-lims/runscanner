@@ -63,8 +63,7 @@ public class Samplesheet {
     }
     setModifiedTime(Files.getLastModifiedTime(sampleSheet.toPath()).toInstant());
     List<String[]> lines =
-        Files.readAllLines(sampleSheet.toPath())
-            .stream()
+        Files.readAllLines(sampleSheet.toPath()).stream()
             .map(line -> line.split(","))
             .filter(line -> !(line.length == 0 || Arrays.stream(line).allMatch(String::isBlank)))
             .toList();

@@ -98,8 +98,7 @@ public class BCLConvert {
       File manifest = new File(rootDir, "Manifest.tsv");
       if (manifest.exists() && manifest.isFile()) {
         List<String[]> manifestLines =
-            Files.readAllLines(manifest.toPath())
-                .stream()
+            Files.readAllLines(manifest.toPath()).stream()
                 .map(line -> line.split("\t"))
                 .filter(line -> line[0].startsWith("Data/BCLConvert"))
                 .filter(line -> (line[0].endsWith(".fastq.gz") || line[0].endsWith(".fastq.ora")))
@@ -144,8 +143,7 @@ public class BCLConvert {
 
       if (demulitplexStats != null && demulitplexStats.exists() && demulitplexStats.isFile()) {
         List<String[]> demultiplexLines =
-            Files.readAllLines(demulitplexStats.toPath())
-                .stream()
+            Files.readAllLines(demulitplexStats.toPath()).stream()
                 .map(line -> line.split(","))
                 .toList();
 

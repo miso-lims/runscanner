@@ -50,9 +50,7 @@ public class UserInterfaceController {
 
         @Override
         public Stream<NavigationMenu> navigation() {
-          return COLLECTIONS
-              .keySet()
-              .stream() //
+          return COLLECTIONS.keySet().stream() //
               .map(collectionName -> NavigationMenu.item("list" + collectionName, collectionName));
         }
 
