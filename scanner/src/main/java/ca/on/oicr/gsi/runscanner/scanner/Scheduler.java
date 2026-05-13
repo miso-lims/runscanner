@@ -313,9 +313,7 @@ public class Scheduler {
   }
 
   public Stream<NotificationDto> finished(long epoch, Predicate<FinishedWork> filter) {
-    return finishedWork
-        .values()
-        .stream()
+    return finishedWork.values().stream()
         .filter(x -> x.epoch >= epoch)
         .sorted((a, b) -> a.epoch - b.epoch)
         .filter(filter)
@@ -383,9 +381,7 @@ public class Scheduler {
   }
 
   public boolean invalidate(String runName) {
-    return finishedWork
-        .keySet()
-        .stream()
+    return finishedWork.keySet().stream()
         .filter(file -> file.getName().equals(runName))
         .map(finishedWork::remove)
         .anyMatch(Objects::nonNull);
@@ -558,8 +554,7 @@ public class Scheduler {
                     StreamCountSpy<Pair<File, Configuration>> accepted =
                         new StreamCountSpy<>(acceptedDirectories);
                     AutoCloseable timer = scanTime.start()) {
-                  roots
-                      .stream() //
+                  roots.stream() //
                       .filter(Configuration::isValid) //
                       .flatMap(Configuration::getRuns) //
                       .peek(attempted) //

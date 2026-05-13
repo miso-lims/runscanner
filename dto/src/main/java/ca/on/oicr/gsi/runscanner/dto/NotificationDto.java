@@ -91,7 +91,9 @@ public abstract class NotificationDto {
     this.containerSerialNumber = containerId;
   }
 
-  /** @return the part number OR model name of the container */
+  /**
+   * @return the part number OR model name of the container
+   */
   public String getContainerModel() {
     return containerModel;
   }
@@ -100,7 +102,9 @@ public abstract class NotificationDto {
     this.containerModel = containerModel;
   }
 
-  /** @return the part number OR name of the sequencing kit */
+  /**
+   * @return the part number OR name of the sequencing kit
+   */
   public String getSequencingKit() {
     return sequencingKit;
   }

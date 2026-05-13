@@ -128,7 +128,8 @@ public final class DefaultIllumina extends RunProcessor {
   private static final XPathExpression hiSeqPosition = xpath("//Setup/FCPosition/text()");
   private static final XPathExpression novaSeqPosition = xpath("//Side/text()");
   private static final Set<XPathExpression> POSITION_XPATHS =
-      Collections.unmodifiableSet(Sets.newHashSet(hiSeqPosition, novaSeqPosition));;
+      Collections.unmodifiableSet(Sets.newHashSet(hiSeqPosition, novaSeqPosition));
+  ;
   private static final XPathExpression FLOWCELL = xpath("//Setup/Flowcell/text()");
   private static final Pattern FLOWCELL_PATTERN =
       Pattern.compile("^([a-zA-Z]+(?: Rapid)?) (Flow Cell v\\d)$");
@@ -690,8 +691,7 @@ public final class DefaultIllumina extends RunProcessor {
   }
 
   private static String getValueFromXml(Node xml, Collection<XPathExpression> xpaths) {
-    return xpaths
-        .stream()
+    return xpaths.stream()
         .map(xpath -> getValueFromXml(xml, xpath))
         .filter(Objects::nonNull)
         .findFirst()

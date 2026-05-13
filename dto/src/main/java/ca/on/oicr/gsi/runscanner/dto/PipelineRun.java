@@ -29,8 +29,7 @@ public abstract class PipelineRun<T extends WorkflowRun> {
   }
 
   public T get(String workflowName) {
-    return workflowRuns
-        .stream()
+    return workflowRuns.stream()
         .filter(a -> a.getWorkflowName().equals(workflowName))
         .findFirst()
         .orElse(null);
