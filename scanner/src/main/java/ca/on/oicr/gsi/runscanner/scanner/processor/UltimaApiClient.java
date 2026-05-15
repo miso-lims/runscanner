@@ -4,7 +4,6 @@ import ca.on.oicr.gsi.runscanner.scanner.LatencyHistogram;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.prometheus.metrics.core.metrics.Counter;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.Duration;
@@ -14,7 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -34,10 +32,10 @@ public class UltimaApiClient {
           .register();
 
   private final String apiUrl;
-  private final HttpHeaders headers;
   private final RestTemplate restTemplate;
+  private final HttpHeaders headers;
 
-  public UltimaApiClient(String apiUrl, String tokenPath) {
+  public UltimaApiClient(String apiUrl, String tokenPath) throws IOException {
     this.apiUrl = apiUrl;
     this.restTemplate =
         new RestTemplateBuilder()
@@ -45,24 +43,11 @@ public class UltimaApiClient {
             .setReadTimeout(Duration.ofSeconds(5))
             .build();
 
-    try {
-      String token = Files.readString(Paths.get(tokenPath)).trim();
-      HttpHeaders headers = new HttpHeaders();
-      headers.set(HttpHeaders.AUTHORIZATION, token);
-      headers.set(HttpHeaders.ACCEPT, "application/json");
-      this.headers = headers;
-    } catch (IOException e) {
-      // config should have been invalid by this point
-      throw new UncheckedIOException("Failed to read Ultima API token from " + tokenPath, e);
-    }
-  }
-
-  @Bean
-  public RestTemplate restTemplate() {
-    return new RestTemplateBuilder()
-        .setConnectTimeout(Duration.ofSeconds(5))
-        .setReadTimeout(Duration.ofSeconds(5))
-        .build();
+    String token = Files.readString(Paths.get(tokenPath)).trim();
+    HttpHeaders headers = new HttpHeaders();
+    headers.set(HttpHeaders.AUTHORIZATION, token);
+    headers.set(HttpHeaders.ACCEPT, "application/json");
+    this.headers = headers;
   }
 
   public List<JsonNode> fetchAllRunSummaries() throws IOException {

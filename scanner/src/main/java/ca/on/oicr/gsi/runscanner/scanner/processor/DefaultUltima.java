@@ -35,11 +35,16 @@ public class DefaultUltima extends RunProcessor {
   private final UltimaApiClient apiClient;
 
   public static DefaultUltima create(Builder builder, ObjectNode parameters) {
-    return new DefaultUltima(
-        builder, fetchNexusApiUrl(parameters), fetchNexusApiTokenFile(parameters));
+    try {
+      return new DefaultUltima(
+          builder, fetchNexusApiUrl(parameters), fetchNexusApiTokenFile(parameters));
+    } catch (IOException e) {
+      log.error("Could not create Ultima run processor: {}", e.getMessage(), e);
+      return null;
+    }
   }
 
-  protected DefaultUltima(Builder builder, String apiUrl, String tokenPath) {
+  protected DefaultUltima(Builder builder, String apiUrl, String tokenPath) throws IOException {
     super(builder);
     this.apiClient = new UltimaApiClient(apiUrl, tokenPath);
   }

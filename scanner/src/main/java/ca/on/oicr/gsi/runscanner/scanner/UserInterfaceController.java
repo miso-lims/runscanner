@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -166,6 +167,7 @@ public class UserInterfaceController {
                     @Override
                     public void emit(SectionRenderer renderer) throws XMLStreamException {
                       RunProcessor.builders() //
+                          .filter(Objects::nonNull)
                           .sorted(
                               Comparator.<Builder>comparingInt(
                                       builder -> builder.getPlatformType().ordinal())
@@ -184,17 +186,29 @@ public class UserInterfaceController {
 
                             @Override
                             public void emit(SectionRenderer renderer) throws XMLStreamException {
-                              renderer.line(
-                                  "Platform",
-                                  configuration.getProcessor().getPlatformType().name());
-                              renderer.line("Processor", configuration.getProcessor().getName());
+                              RunProcessor processor = configuration.getProcessor();
+
+                              if (processor != null) {
+                                renderer.line(
+                                    "Platform",
+                                    configuration.getProcessor().getPlatformType().name());
+                                renderer.line("Processor", configuration.getProcessor().getName());
+                              } else {
+                                renderer.line("Platform", "UNKNOWN");
+                                renderer.line("Processor", "INITIALIZATION FAILED");
+                              }
                               renderer.line(
                                   "Time Zone", configuration.getTimeZone().getDisplayName());
-                              renderer.line(
-                                  "Valid?",
-                                  configuration.isValid()
-                                      ? "Yes"
-                                      : "No: " + configuration.validitySummary());
+                              if (processor == null) {
+                                renderer.line(
+                                    "Valid?", "No: Scanner implementation failed to initialize");
+                              } else {
+                                renderer.line(
+                                    "Valid?",
+                                    configuration.isValid()
+                                        ? "Yes"
+                                        : "No: " + configuration.validitySummary());
+                              }
                               renderer.line("Ignoring subdirectories", " ");
                               // Add a new render line for each subdirectory to ignore
                               for (File directory : configuration.getIgnoreSubdirectories()) {
