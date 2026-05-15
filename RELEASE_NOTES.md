@@ -1,6 +1,8 @@
 # Unreleased
 
-Changes:
+Fixes:
+
+* Validate and display error if Ultima configuration parameters are incorrect
 
 # 2.5.0
 
