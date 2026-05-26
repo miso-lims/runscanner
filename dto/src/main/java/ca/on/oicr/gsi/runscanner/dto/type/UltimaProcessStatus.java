@@ -4,17 +4,20 @@ public enum UltimaProcessStatus {
   PENDING,
   RUNNING,
   COMPLETE,
+  UNKNOWN,
   FAILED;
 
   public static UltimaProcessStatus fromCode(int status) {
-    switch (status) {
-      case 0:
-        return UltimaProcessStatus.PENDING;
-      case 1:
-        return UltimaProcessStatus.RUNNING;
-      case 2:
-        return UltimaProcessStatus.COMPLETE;
+
+    if (status > 3) {
+      return UltimaProcessStatus.FAILED;
     }
-    return UltimaProcessStatus.FAILED;
+
+    return switch (status) {
+      case 0 -> UltimaProcessStatus.PENDING;
+      case 1 -> UltimaProcessStatus.RUNNING;
+      case 2 -> UltimaProcessStatus.COMPLETE;
+      default -> UltimaProcessStatus.UNKNOWN;
+    };
   }
 }

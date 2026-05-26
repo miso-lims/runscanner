@@ -171,7 +171,7 @@ public class DefaultUltima extends RunProcessor {
     // the first and last digit are vestigial and should be ignored.
     // the second and third digit are the analysis and upload status respectively.
     // 0 is not started, 1 is in progress, 2 is complete, and 3+ is error
-    String analAndUpStatus = json.path("analysisstatus").asText();
+    String analAndUpStatus = json.path("analysisstatus").asText("0000");
 
     UltimaProcessStatus analysisStatus =
         UltimaProcessStatus.fromCode(Character.getNumericValue(analAndUpStatus.charAt(1)));
@@ -206,7 +206,8 @@ public class DefaultUltima extends RunProcessor {
   }
 
   private UltimaProcessStatus sequencingComplete(int pctComplete, int succeeded, String errmsg) {
-    if (!errmsg.isEmpty()) {
+    if (!errmsg.isEmpty()
+        && !errmsg.equals("null")) { // error message is "null" when run is first started
       return UltimaProcessStatus.FAILED;
     } else if (pctComplete == 100) {
       return (succeeded == 1) ? UltimaProcessStatus.COMPLETE : UltimaProcessStatus.FAILED;
