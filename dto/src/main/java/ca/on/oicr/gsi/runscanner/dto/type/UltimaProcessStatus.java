@@ -9,7 +9,7 @@ public enum UltimaProcessStatus {
 
   public static UltimaProcessStatus fromCode(int status) {
 
-    if (status > 3) {
+    if (status >= 3) {
       return UltimaProcessStatus.FAILED;
     }
 
