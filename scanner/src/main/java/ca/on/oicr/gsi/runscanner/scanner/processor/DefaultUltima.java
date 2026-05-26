@@ -172,7 +172,7 @@ public class DefaultUltima extends RunProcessor {
 
     int pctCompleted = json.path("runstatus").asInt(); // Percentage 0-100
     int succeeded = json.path("isruncompleted").asInt(); // Successful run 0 or 1
-    String errmsg = json.path("errormsg").asText();
+    String errmsg = json.path("errormsg").asText("");
 
     // the first and last digit are vestigial and should be ignored.
     // the second and third digit are the analysis and upload status respectively.

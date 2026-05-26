@@ -3,6 +3,9 @@
 Changes:
 
 * Improve metric format for Ultima runs and include units
+  * Number of Beads -> Total Bead (M)
+  * Output Reads -> Output Reads (M)
+  * Add Indel Rate TT %
 
 Fixes:
 
