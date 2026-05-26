@@ -10,7 +10,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.File;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -145,16 +144,23 @@ public class DefaultUltima extends RunProcessor {
 
     values
         .addObject()
-        .put("name", "Number of Beads")
-        .put("value", new BigDecimal(numBeads).toPlainString()); // prevent scientific notation
+        .put("name", "Total Beads (M)")
+        .put("value", String.format("%.0f", numBeads)); // Given in (M), decimal points not needed
     values
         .addObject()
-        .put("name", "Output Reads")
-        .put("value", json.path("pf_output_reads").asText("0"));
+        .put("name", "Output Reads (M)")
+        .put(
+            "value",
+            String.format(
+                "%.0f", json.path("pf_output_reads").asDouble(0) / 1000000)); // convert to (M)
     values
         .addObject()
         .put("name", "Pass Filter %")
         .put("value", String.format("%.2f", passFilterPercent));
+    values
+        .addObject()
+        .put("name", "Indel Rate TT %")
+        .put("value", String.format("%.2f", json.path("indel_rate").asDouble(0)));
     metrics.add(chartNode);
     dto.setMetrics(mapper.writeValueAsString(metrics));
 

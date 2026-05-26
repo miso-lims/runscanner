@@ -1,8 +1,13 @@
 # Unreleased
 
+Changes:
+
+* Improve metric format for Ultima runs and include units
+
 Fixes:
 
 * Validate and display error if Ultima configuration parameters are incorrect
+* Handle unique status conditions when Ultima runs first start running
 
 # 2.5.0
 

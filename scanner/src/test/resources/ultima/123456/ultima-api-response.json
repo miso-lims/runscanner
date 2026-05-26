@@ -18,5 +18,6 @@
   "timezone": "Eastern Standard Time",
   "startdatetime": "2024-05-07 10:00:00",
   "runtime": 1440,
-  "analysisstatus": "0220"
+  "analysisstatus": "0220",
+  "indel_rate":0.52
 }

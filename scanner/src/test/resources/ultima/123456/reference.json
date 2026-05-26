@@ -6,7 +6,7 @@
   "expectedFlows": 464,
   "waferShelf": 1,
   "readLength":300.0,
-  "metrics": "[{\"type\":\"chart\",\"values\":[{\"name\":\"Number of Beads\",\"value\":\"600000000\"},{\"name\":\"Output Reads\",\"value\":\"450000000\"},{\"name\":\"Pass Filter %\",\"value\":\"83.33\"}]}]",
+  "metrics": "[{\"type\":\"chart\",\"values\":[{\"name\":\"Total Beads (M)\",\"value\":\"600000000\"},{\"name\":\"Output Reads (M)\",\"value\":\"450\"},{\"name\":\"Pass Filter %\",\"value\":\"83.33\"},{\"name\":\"Indel Rate TT %\",\"value\":\"0.52\"}]}]",
   "sequencerPosition": "1",
   "containerSerialNumber": "FC12.2T1234567890",
   "containerModel": "FC12.2T",
