@@ -1,5 +1,7 @@
 # Unreleased
 
+# 2.5.1
+
 Changes:
 
 * Improve metric format for Ultima runs and include units
