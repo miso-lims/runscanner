@@ -1,5 +1,9 @@
 # Unreleased
 
+Changes:
+* Add Sample DB support for Ultima
+* Add consumables to Ultima Runs
+
 # 2.5.1
 
 Changes:

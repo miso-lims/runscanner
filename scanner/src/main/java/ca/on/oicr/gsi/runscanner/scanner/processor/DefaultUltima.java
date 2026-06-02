@@ -1,5 +1,6 @@
 package ca.on.oicr.gsi.runscanner.scanner.processor;
 
+import ca.on.oicr.gsi.runscanner.dto.Consumable;
 import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.UltimaNotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.type.HealthType;
@@ -37,16 +38,27 @@ public class DefaultUltima extends RunProcessor {
   public static DefaultUltima create(Builder builder, ObjectNode parameters) {
     try {
       return new DefaultUltima(
-          builder, fetchNexusApiUrl(parameters), fetchNexusApiTokenFile(parameters));
+          builder,
+          fetchNexusApiUrl(parameters),
+          fetchNexusApiTokenFile(parameters),
+          fetchOptionalParameter(parameters, "sampleDBApiAddress"),
+          fetchOptionalParameter(parameters, "sampleDBApiTokenFile"));
     } catch (IOException e) {
       log.error("Could not create Ultima run processor: {}", e.getMessage(), e);
       return null;
     }
   }
 
-  protected DefaultUltima(Builder builder, String apiUrl, String tokenPath) throws IOException {
+  protected DefaultUltima(
+      Builder builder,
+      String apiUrlNexus,
+      String tokenPathNexus,
+      String apiUrlSampleDB,
+      String tokenPathSampleDB)
+      throws IOException {
     super(builder);
-    this.apiClient = new UltimaApiClient(apiUrl, tokenPath);
+    this.apiClient =
+        new UltimaApiClient(apiUrlNexus, tokenPathNexus, apiUrlSampleDB, tokenPathSampleDB);
   }
 
   protected DefaultUltima(Builder builder, UltimaApiClient apiClient) {
@@ -56,7 +68,7 @@ public class DefaultUltima extends RunProcessor {
 
   /**
    * @param parameters ObjectNode
-   * @return String with base URL for the ULTIMA API
+   * @return String with base URL for the ULTIMA Nexus API
    */
   private static String fetchNexusApiUrl(ObjectNode parameters) {
     if (parameters.hasNonNull("nexusApiAddress")) {
@@ -69,13 +81,26 @@ public class DefaultUltima extends RunProcessor {
 
   /**
    * @param parameters ObjectNode
-   * @return String filename where token is stored
+   * @return String filename where Nexus token is stored
    */
   private static String fetchNexusApiTokenFile(ObjectNode parameters) {
     if (parameters.hasNonNull("nexusApiTokenFile")) {
       return parameters.get("nexusApiTokenFile").asText();
     } else {
       log.error("No Nexus API Token configured for Ultima, this config should be invalid");
+      return null;
+    }
+  }
+
+  /**
+   * @param parameters ObjectNode
+   * @param parameterName String
+   * @return The value stored at the parameter name or null if it doesn't exist
+   */
+  private static String fetchOptionalParameter(ObjectNode parameters, String parameterName) {
+    if (parameters.hasNonNull(parameterName)) {
+      return parameters.get(parameterName).asText();
+    } else {
       return null;
     }
   }
@@ -124,6 +149,7 @@ public class DefaultUltima extends RunProcessor {
     }
 
     UltimaNotificationDto dto = new UltimaNotificationDto();
+
     dto.setRunAlias(runId);
     dto.setSequencerName(json.path("sysid").asText());
     dto.setSoftware(json.path("SequencingRecipe").asText());
@@ -208,6 +234,39 @@ public class DefaultUltima extends RunProcessor {
     // No paired ends
     dto.setPairedEndRun(false);
 
+    String ampSamplePlate = json.path("AMP_SamplePlate").asText("");
+    dto.setPoolNames(getPoolsFromSampleDB(ampSamplePlate));
+
+    List<Consumable> consumables = new ArrayList<>();
+    consumables.add(new Consumable("Amplification Sample Plate Serial Number", ampSamplePlate));
+    consumables.add(
+        new Consumable(
+            "Amplification Chilled Rack Lot Number", json.path("AMP_ChilledRack").asText()));
+    consumables.add(
+        new Consumable("Amplification RT Rack Lot Number", json.path("AMP_RTRack").asText()));
+    consumables.add(
+        new Consumable("Amplification Tube Array Lot Number", json.path("AMP_TubeArray").asText()));
+    consumables.add(
+        new Consumable(
+            "Amplification Break Container Lot Number", json.path("AMP_BreakContainer").asText()));
+    consumables.add(
+        new Consumable("Amplification Wash 1 Lot Number", json.path("AMP_Wash1").asText()));
+    consumables.add(
+        new Consumable("Amplification Wash 2 Lot Number", json.path("AMP_Wash2").asText()));
+    consumables.add(
+        new Consumable(
+            "Amplification Enrichment Bead Lot Number", json.path("AMP_EnrichmentBead").asText()));
+    consumables.add(new Consumable("Sequencing Rack Lot Number", json.path("SampleRack").asText()));
+    consumables.add(new Consumable("Sample Tube Lot Number", json.path("SampleTube").asText()));
+    consumables.add(
+        new Consumable(
+            "Sequencing Cartridge Lot Number", json.path("SequencingCartridge").asText()));
+    consumables.add(
+        new Consumable("Wash Container Lot Number", json.path("WashContainer").asText()));
+    consumables.add(new Consumable("Wafer Serial Number", json.path("Wafer").asText()));
+
+    dto.setConsumables(consumables);
+
     return dto;
   }
 
@@ -280,6 +339,31 @@ public class DefaultUltima extends RunProcessor {
   @Override
   public PathType getPathType() {
     return PathType.VIRTUAL;
+  }
+
+  private List<String> getPoolsFromSampleDB(String ampSamplePlate) {
+    List<JsonNode> pools = new ArrayList<>();
+    List<String> poolNames = new ArrayList<>();
+    try {
+      JsonNode samplePlateNode = apiClient.fetchSampleDB(ampSamplePlate);
+      if (samplePlateNode != null
+          && samplePlateNode.has("pools")
+          && samplePlateNode.get("pools").isArray()) {
+        samplePlateNode.get("pools").forEach(pools::add);
+      } else {
+        log.error("Couldn't parse response from Sample DB, no pool names set");
+      }
+
+      pools.forEach(
+          node -> {
+            if (node.has("libraryPool")) {
+              poolNames.add(node.get("libraryPool").asText());
+            }
+          });
+    } catch (IOException e) {
+      log.error("Couldn't access Sample DB, no pool names set", e);
+    }
+    return poolNames;
   }
 
   @Override
