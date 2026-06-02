@@ -92,11 +92,19 @@
             </tr>
             <tr>
                 <td>nexusApiAddress (required)</td>
-                <td>The base URL of the Nexus API (Ex. https://example-nexus.com)</td>
+                <td>The base URL of the Nexus API (Ex. https://example-nexus.ca)</td>
             </tr>
             <tr>
                 <td>nexusApiTokenFile (required)</td>
                 <td>The location of a file containing a Nexus Auth Token</td>
+            </tr>
+            <tr>
+                <td>sampleDBApiAddress (optional)</td>
+                <td>The base URL of the Sample DB API (Ex. https://sample-db.ca)</td>
+            </tr>
+            <tr>
+                <td>sampleDBApiTokenFile (optional)</td>
+                <td>The location of a file containing a Sample DB Auth Token</td>
             </tr>
         </table></td>
     </tr>
@@ -213,13 +221,6 @@ esp bc they might vary in meaning b/w PromION and MinION -->
         <td>✓</td>
     </tr>
     <tr>
-        <td>poolNames</td>
-        <td>✓</td>
-        <td></td>
-        <td></td>
-        <td></td>
-    </tr>
-    <tr>
         <td>runBasesMask</td>
         <td></td>
         <td>✓</td>
@@ -246,6 +247,13 @@ esp bc they might vary in meaning b/w PromION and MinION -->
         <td>✓</td>
         <td></td>
         <td></td>
+    </tr>
+    <tr>
+        <td>consumables</td>
+        <td></td>
+        <td>✓</td>
+        <td></td>
+        <td>✓</td>
     </tr>
     <tr>
         <td>imgCycle</td>
@@ -277,10 +285,10 @@ esp bc they might vary in meaning b/w PromION and MinION -->
     </tr>
     <tr>
         <td>poolNames</td>
-        <td></td>
+        <td>✓</td>
         <td>✓</td>
         <td></td>
-        <td></td>
+        <td>✓</td>
     </tr>
     <tr>
         <td>readLength</td>
