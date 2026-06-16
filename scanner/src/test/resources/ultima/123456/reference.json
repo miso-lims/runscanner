@@ -6,7 +6,7 @@
   "expectedFlows": 464,
   "waferShelf": 1,
   "readLength":300.0,
-  "metrics": "[{\"type\":\"chart\",\"values\":[{\"name\":\"Total Beads (M)\",\"value\":\"600,000,000.000000\"},{\"name\":\"Output Reads\",\"value\":\"450,000,000\"},{\"name\":\"Pass Filter %\",\"value\":\"83.33\"},{\"name\":\"Indel Rate TT %\",\"value\":\"0.52\"}]}]",
+  "metrics": "[{\"type\":\"chart\",\"values\":[{\"name\":\"Total Beads (M)\",\"value\":\"600,000,000.000000\"},{\"name\":\"Output Reads\",\"value\":\"450,000,000\"},{\"name\":\"Pass Filter %\",\"value\":\"83.33\"},{\"name\":\"Indel Rate TT %\",\"value\":\"0.52\"},{\"name\":\"Control Sample Bases > Q30 %\",\"value\":\"77.77\"}]}]",
   "sequencerPosition": "1",
   "containerSerialNumber": "FC12.2T1234567890",
   "containerModel": "FC12.2T",
@@ -18,5 +18,6 @@
   "completionDate": "2024-05-08T10:00:00Z",
   "laneCount": 1,
   "pairedEndRun": false,
-  "platform": "Ultima"
+  "platform": "Ultima",
+  "poolNames": ["2026-01-01_Testing_Poolof10_800pM"]
 }
