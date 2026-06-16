@@ -11,7 +11,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.File;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -172,13 +171,11 @@ public class DefaultUltima extends RunProcessor {
     values
         .addObject()
         .put("name", "Total Beads (M)")
-        .put(
-            "value",
-            new BigDecimal(numBeads).toPlainString()); // Given in (M), decimal points not needed
+        .put("value", String.format("%,.6f", numBeads));
     values
         .addObject()
         .put("name", "Output Reads")
-        .put("value", json.path("pf_output_reads").asText("0"));
+        .put("value", String.format("%,d", json.path("pf_output_reads").asInt(0)));
     values
         .addObject()
         .put("name", "Pass Filter %")

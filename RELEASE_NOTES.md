@@ -1,6 +1,9 @@
 # Unreleased
 
 Changes:
+* Add "," to Ultima consumables (1000 -> 1,000) and reduce Total Beads to 6 decimal precision
+
+Changes:
 * Add Sample DB support for Ultima
 * Add consumables to Ultima Runs
 
