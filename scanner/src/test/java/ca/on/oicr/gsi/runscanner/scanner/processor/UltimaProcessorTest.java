@@ -26,12 +26,22 @@ public class UltimaProcessorTest extends AbstractProcessorTest {
   @Override
   protected NotificationDto process(File directory) throws IOException {
 
-    // Load the mock JSON data from the test directory
-    File mockFile = new File(directory, "ultima-api-response.json");
-    JsonNode mockJson = mapper.readTree(mockFile);
+    // Load the mock JSONs data from the test directory
+    File mockRunsummaryFile = new File(directory, "ultima-api-runsummary-response.json");
+    JsonNode mockRunsummaryJson = mapper.readTree(mockRunsummaryFile);
+    File mockSampleDBFile = new File(directory, "sampledb-api-response.json");
+    JsonNode mockSampleDBJson = mapper.readTree(mockSampleDBFile);
+    File mockTTMetricsFile = new File(directory, "ultima-api-TT-metric-response.json");
+    JsonNode mockTTMetricsJson = mapper.readTree(mockTTMetricsFile);
+
+    String runId = mockRunsummaryJson.path("runid").asText("");
+    String samplePlate = mockRunsummaryJson.path("AMP_SamplePlate").asText("");
 
     UltimaApiClient mockClient = mock(UltimaApiClient.class);
-    when(mockClient.fetchAllRunSummaries()).thenReturn(Collections.singletonList(mockJson));
+    when(mockClient.fetchAllRunSummaries())
+        .thenReturn(Collections.singletonList(mockRunsummaryJson));
+    when(mockClient.fetchSampleDB(samplePlate)).thenReturn(mockSampleDBJson);
+    when(mockClient.fetchBarcodeMetrics(runId, "TT")).thenReturn(mockTTMetricsJson);
 
     // Create the processor with the Mock client instead of the real one
     DefaultUltima processor =

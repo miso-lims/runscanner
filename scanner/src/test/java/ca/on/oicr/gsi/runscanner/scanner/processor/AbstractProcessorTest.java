@@ -93,6 +93,7 @@ public abstract class AbstractProcessorTest<T extends NotificationDto> {
         assertEquals(ultimaResult.getAnalysisStatus(), ultimaReference.getAnalysisStatus());
         assertEquals(ultimaResult.getUploadStatus(), ultimaReference.getUploadStatus());
         assertEquals(ultimaResult.getSequencingStatus(), ultimaReference.getSequencingStatus());
+        assertEquals(ultimaResult.getPoolNames(), ultimaReference.getPoolNames());
       }
 
       // Not implemented for all processors

@@ -1,0 +1,15 @@
+{
+  "total": 290,
+  "pools": [
+    {
+      "id": 291,
+      "libraryPool": "2026-01-01_Testing_Poolof10_800pM",
+      "comments": "",
+      "preAmpReagents": "",
+      "isPrepped": false,
+      "isAmped": true,
+      "isSeqed": true,
+      "samples": []
+    }
+  ]
+}

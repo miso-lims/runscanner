@@ -30,6 +30,7 @@ public class DefaultUltima extends RunProcessor {
   protected final Map<String, JsonNode> runCache = new ConcurrentHashMap<>();
 
   DateTimeFormatter NEXUS_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+  String CONTROL_BARCODE = "TT";
 
   private static final Logger log = LoggerFactory.getLogger(DefaultUltima.class);
   private final UltimaApiClient apiClient;
@@ -167,6 +168,7 @@ public class DefaultUltima extends RunProcessor {
     double numReadPass = json.path("num_reads_pass_filter").asDouble();
     double numBeads = json.path("numbeads").asDouble();
     double passFilterPercent = (numBeads > 0) ? (numReadPass / numBeads) * 100 : 0;
+    double controlBasesQ30 = getControlQ30Bases(runId);
 
     values
         .addObject()
@@ -184,6 +186,10 @@ public class DefaultUltima extends RunProcessor {
         .addObject()
         .put("name", "Indel Rate TT %")
         .put("value", json.path("indel_rate").asText());
+    values
+        .addObject()
+        .put("name", "Control Sample Bases > Q30 %")
+        .put("value", String.format("%.2f", controlBasesQ30));
     metrics.add(chartNode);
     dto.setMetrics(mapper.writeValueAsString(metrics));
 
@@ -345,8 +351,8 @@ public class DefaultUltima extends RunProcessor {
       JsonNode samplePlateNode = apiClient.fetchSampleDB(ampSamplePlate);
       if (samplePlateNode != null
           && samplePlateNode.has("pools")
-          && samplePlateNode.get("pools").isArray()) {
-        samplePlateNode.get("pools").forEach(pools::add);
+          && samplePlateNode.path("pools").isArray()) {
+        samplePlateNode.path("pools").forEach(pools::add);
       } else {
         log.error("Couldn't parse response from Sample DB, no pool names set");
       }
@@ -354,13 +360,24 @@ public class DefaultUltima extends RunProcessor {
       pools.forEach(
           node -> {
             if (node.has("libraryPool")) {
-              poolNames.add(node.get("libraryPool").asText());
+              poolNames.add(node.path("libraryPool").asText());
             }
           });
     } catch (IOException e) {
       log.error("Couldn't access Sample DB, no pool names set", e);
     }
     return poolNames;
+  }
+
+  private double getControlQ30Bases(String runId) throws IOException {
+    double percentBasesQ30 = 0;
+    try {
+      JsonNode metrics = apiClient.fetchBarcodeMetrics(runId, CONTROL_BARCODE);
+      percentBasesQ30 = metrics.path("PCT_PF_Q30_bases").asDouble(0);
+    } catch (IOException e) {
+      log.error("Couldn't get control barcode metrics (Bases >Q30) for run {}.", runId, e);
+    }
+    return percentBasesQ30;
   }
 
   @Override
