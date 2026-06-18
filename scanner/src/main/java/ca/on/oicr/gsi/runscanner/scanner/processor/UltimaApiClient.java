@@ -148,6 +148,13 @@ public class UltimaApiClient {
     }
     if (response.getBody() != null) {
       if (response.getBody().isArray()) {
+        if (response.getBody().size() > 1) {
+          throw new IOException(
+              "Unexpected JSON response format from API request to "
+                  + url
+                  + " : "
+                  + response.getBody());
+        }
         return response.getBody().get(0); // API returns a list of 1
       } else {
         return response.getBody();
