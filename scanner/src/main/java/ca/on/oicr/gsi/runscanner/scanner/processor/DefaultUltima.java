@@ -115,22 +115,18 @@ public class DefaultUltima extends RunProcessor {
     try {
       List<JsonNode> allRunInfo = apiClient.fetchAllRunSummaries();
 
+      // nexus orders the runs by increasing runId (newer Run Id = higher num)
+      // we want runscanner to scan newer runs first
       return allRunInfo.stream()
+          .filter(n -> !n.path("runid").asText().isBlank())
+          .sorted(Comparator.comparingLong((JsonNode n) -> n.path("runid").asLong()).reversed())
           .map(
               node -> {
                 String runId = node.path("runid").asText();
-
-                // Skip if runId is null, empty, or just whitespace
-                if (runId == null || runId.trim().isEmpty()) {
-                  return null;
-                }
-
                 runCache.put(runId, node); // Cache for the process() step
-
                 // TODO eventually will be google bucket path with runID in subfolder name
                 return new File(root, runId);
-              })
-          .filter(Objects::nonNull);
+              });
     } catch (Exception e) {
       log.error("Failed to fetch run list from Ultima API", e);
       return Stream.empty();

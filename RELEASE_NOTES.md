@@ -6,6 +6,7 @@ Changes:
 * Add "," to Ultima metrics (1000 -> 1,000) and reduce Total Beads to 6 decimal precision
 * Add "Control Sample Bases > Q30 %" Ultima metric
 * Update Illumina run directory scanning to be completed in reverse order by run directory name (approximately reverse chronological order)
+* Update Ultima run directory scanning to be completed in reverse order by run ID (approximately reverse chronological order)
 
 # 2.5.1
 
