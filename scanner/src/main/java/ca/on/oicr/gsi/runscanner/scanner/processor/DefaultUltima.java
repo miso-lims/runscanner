@@ -369,7 +369,7 @@ public class DefaultUltima extends RunProcessor {
     double percentBasesQ30 = 0;
     try {
       JsonNode metrics = apiClient.fetchBarcodeMetrics(runId, CONTROL_BARCODE);
-      percentBasesQ30 = metrics.path("PCT_PF_Q30_bases").asDouble(0);
+      percentBasesQ30 = metrics.path("qtable").path("PCT_PF_Q30_bases").asDouble(0);
     } catch (IOException e) {
       log.error("Couldn't get control barcode metrics (Bases >Q30) for run {}.", runId, e);
     }
