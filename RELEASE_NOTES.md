@@ -1,5 +1,10 @@
 # Unreleased
 
+Fixes:
+* "Control Sample Bases > Q30 %" to come from subtable in metrics
+
+# 2.6.0
+
 Changes:
 * Add Sample DB support for Ultima
 * Add consumables to Ultima Runs
