@@ -118,7 +118,7 @@ public class DefaultUltima extends RunProcessor {
       // nexus orders the runs by increasing runId (newer Run Id = higher num)
       // we want runscanner to scan newer runs first
       return allRunInfo.stream()
-          .filter(n -> !n.path("runid").asText().isBlank())
+          .filter(n -> n.hasNonNull("runid") && !n.path("runid").asText().isBlank())
           .sorted(Comparator.comparingLong((JsonNode n) -> n.path("runid").asLong()).reversed())
           .map(
               node -> {
