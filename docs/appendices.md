@@ -106,6 +106,10 @@
                 <td>sampleDBApiTokenFile (optional)</td>
                 <td>The location of a file containing a Sample DB Auth Token</td>
             </tr>
+            <tr>
+                <td>googleServiceAccount (required)</td>
+                <td>The email address of the Google service account to impersonate when accessing the GCS bucket containing run output (Ex. runscanner@project.iam.gserviceaccount.com)</td>
+            </tr>
         </table></td>
     </tr>
 </table>
@@ -380,6 +384,13 @@ esp bc they might vary in meaning b/w PromION and MinION -->
         <td></td>
         <td></td>
         <td></td>
+    </tr>
+    <tr>
+        <td>workflowRuns</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>✓</td>
     </tr>
 </table>
 

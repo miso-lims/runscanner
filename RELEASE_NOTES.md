@@ -21,6 +21,9 @@ Fixes:
 # 2.6.0
 
 Changes:
+* Add in support for Google Cloud Storage for Ultima
+
+Changes:
 * Add Sample DB support for Ultima
 * Add consumables to Ultima Runs
 * Add "," to Ultima metrics (1000 -> 1,000) and reduce Total Beads to 6 decimal precision

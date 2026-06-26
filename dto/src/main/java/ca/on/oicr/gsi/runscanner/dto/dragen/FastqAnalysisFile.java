@@ -1,5 +1,6 @@
 package ca.on.oicr.gsi.runscanner.dto.dragen;
 
+import ca.on.oicr.gsi.runscanner.dto.AnalysisFile;
 import java.util.Objects;
 
 public class FastqAnalysisFile extends AnalysisFile {
