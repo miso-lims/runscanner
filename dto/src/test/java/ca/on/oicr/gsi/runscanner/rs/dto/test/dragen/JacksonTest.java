@@ -1,6 +1,6 @@
 package ca.on.oicr.gsi.runscanner.rs.dto.test.dragen;
 
-import ca.on.oicr.gsi.runscanner.dto.dragen.AnalysisFile;
+import ca.on.oicr.gsi.runscanner.dto.AnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.dragen.DragenAnalysisUnit;
 import ca.on.oicr.gsi.runscanner.dto.dragen.DragenPipelineRun;
 import ca.on.oicr.gsi.runscanner.dto.dragen.DragenWorkflowRun;

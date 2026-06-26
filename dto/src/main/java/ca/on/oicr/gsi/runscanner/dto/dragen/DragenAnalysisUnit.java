@@ -1,5 +1,6 @@
 package ca.on.oicr.gsi.runscanner.dto.dragen;
 
+import ca.on.oicr.gsi.runscanner.dto.AnalysisFile;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.LinkedList;
 import java.util.List;

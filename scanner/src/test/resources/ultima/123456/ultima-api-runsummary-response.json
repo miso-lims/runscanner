@@ -20,5 +20,7 @@
   "runtime": 1440,
   "AMP_SamplePlate": "testplate",
   "analysisstatus": "0220",
-  "indel_rate":0.52
+  "indel_rate":0.52,
+  "Analysis_Start_Time": "2024-05-07 12:00:00",
+  "AnalysisRecipe": "TestAnalysisRecipe"
 }
