@@ -1,5 +1,7 @@
 # Unreleased
 
+# 2.6.1
+
 Fixes:
 * "Control Sample Bases > Q30 %" to come from subtable in metrics
 
