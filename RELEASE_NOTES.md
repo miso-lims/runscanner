@@ -1,5 +1,8 @@
 # Unreleased
 
+Fixes:
+* handle missing Ultima metrics without marking run as unreadable
+
 # 2.6.1
 
 Fixes:
