@@ -38,6 +38,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 /** Front-end status monitoring for run scanner */
 @Controller
@@ -245,7 +246,7 @@ public class UserInterfaceController {
     }
   }
 
-  @GetMapping("/error")
+  @RequestMapping("/error")
   public void showError(HttpServletRequest request, HttpServletResponse response)
       throws IOException {
     response.setContentType(CONTENT_TYPE);

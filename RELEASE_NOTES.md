@@ -2,6 +2,7 @@
 
 Fixes:
 * handle missing Ultima metrics without marking run as unreadable
+* return correct error response when deleting unreadable run
 
 # 2.6.1
 
