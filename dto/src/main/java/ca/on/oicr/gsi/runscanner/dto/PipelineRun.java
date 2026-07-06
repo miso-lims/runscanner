@@ -2,6 +2,7 @@ package ca.on.oicr.gsi.runscanner.dto;
 
 import ca.on.oicr.gsi.runscanner.dto.dragen.DragenPipelineRun;
 import ca.on.oicr.gsi.runscanner.dto.type.PipelineStatus;
+import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaPipelineRun;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
@@ -15,7 +16,8 @@ import java.util.Objects;
 // Represents one attempt at an analysis suite.
 @JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "suite")
 @JsonSubTypes({ //
-  @Type(value = DragenPipelineRun.class, name = "DRAGEN") //
+  @Type(value = DragenPipelineRun.class, name = "DRAGEN"), //
+  @Type(value = UltimaPipelineRun.class, name = "ULTIMA") //
 }) //
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class PipelineRun<T extends WorkflowRun> {

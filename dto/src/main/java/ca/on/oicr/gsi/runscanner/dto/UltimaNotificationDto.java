@@ -2,7 +2,7 @@ package ca.on.oicr.gsi.runscanner.dto;
 
 import ca.on.oicr.gsi.runscanner.dto.type.Platform;
 import ca.on.oicr.gsi.runscanner.dto.type.UltimaProcessStatus;
-import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaWorkflowRun;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -18,7 +18,8 @@ public class UltimaNotificationDto extends NotificationDto {
   private UltimaProcessStatus uploadStatus;
   private List<Consumable> consumables;
   private List<String> poolNames;
-  private List<UltimaWorkflowRun> workflowRuns;
+
+  public List<PipelineRun> pipelineRuns = new LinkedList<>();
 
   @Override
   public boolean equals(Object obj) {
@@ -29,7 +30,7 @@ public class UltimaNotificationDto extends NotificationDto {
 
     return Objects.equals(expectedFlows, other.expectedFlows)
         && Objects.equals(waferShelf, other.waferShelf)
-        && Objects.equals(workflowRuns, other.workflowRuns);
+        && Objects.equals(pipelineRuns, other.pipelineRuns);
   }
 
   @Override
@@ -105,12 +106,12 @@ public class UltimaNotificationDto extends NotificationDto {
     return poolNames;
   }
 
-  public List<UltimaWorkflowRun> getWorkflowRuns() {
-    return workflowRuns;
+  public List<PipelineRun> getPipelineRuns() {
+    return pipelineRuns;
   }
 
-  public void setWorkflowRuns(List<UltimaWorkflowRun> workflowRuns) {
-    this.workflowRuns = workflowRuns;
+  public void addPipelineRun(PipelineRun a) {
+    pipelineRuns.add(a);
   }
 
   public void setUploadStatus(UltimaProcessStatus uploadStatus) {
@@ -140,8 +141,8 @@ public class UltimaNotificationDto extends NotificationDto {
         + consumables
         + ", wafershelf="
         + waferShelf
-        + ", workflowRuns="
-        + workflowRuns
+        + ", pipelineRuns="
+        + pipelineRuns
         + ", poolNames=["
         + poolNames
         + "]]";

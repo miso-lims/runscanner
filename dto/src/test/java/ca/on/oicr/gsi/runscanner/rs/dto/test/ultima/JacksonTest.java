@@ -1,10 +1,12 @@
 package ca.on.oicr.gsi.runscanner.rs.dto.test.ultima;
 
 import ca.on.oicr.gsi.runscanner.dto.AnalysisFile;
+import ca.on.oicr.gsi.runscanner.dto.type.PipelineStatus;
 import ca.on.oicr.gsi.runscanner.dto.type.WorkflowRunStatus;
 import ca.on.oicr.gsi.runscanner.dto.ultima.CramAnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.ultima.MetadataAnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaAnalysisUnit;
+import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaPipelineRun;
 import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaWorkflowRun;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -55,6 +57,16 @@ public class JacksonTest {
     assertWorkflowRunEqual(workflowRun, deserialized);
   }
 
+  @Test
+  public void testUltimaPipelineRunSerializeDeserialize() throws Exception {
+    UltimaPipelineRun pipelineRun = makeUltimaPipelineRun();
+    String serialized = mapper.writeValueAsString(pipelineRun);
+    // Deserialize via the base type to exercise the "suite" discriminator
+    UltimaPipelineRun deserialized =
+        mapper.readerFor(UltimaPipelineRun.class).readValue(serialized);
+    assertPipelineRunEqual(pipelineRun, deserialized);
+  }
+
   private AnalysisFile makeCramFile() {
     AnalysisFile file = new CramAnalysisFile();
     file.setPath(Path.of("/", "test-bucket", "run", "barcode", "sample.cram"));
@@ -92,6 +104,13 @@ public class JacksonTest {
     return workflowRun;
   }
 
+  private UltimaPipelineRun makeUltimaPipelineRun() {
+    UltimaPipelineRun pipelineRun = new UltimaPipelineRun(1);
+    pipelineRun.setPipelineStatus(PipelineStatus.COMPLETE);
+    pipelineRun.put(makeUltimaWorkflowRun());
+    return pipelineRun;
+  }
+
   private static void assertAnalysisFileEqual(AnalysisFile one, AnalysisFile two) {
     Assert.assertEquals(one.getPath(), two.getPath());
     Assert.assertEquals(one.getCrc32Checksum(), two.getCrc32Checksum());
@@ -115,5 +134,11 @@ public class JacksonTest {
     Assert.assertEquals(one.getSoftwareVersion(), two.getSoftwareVersion());
     Assert.assertEquals(one.getAnalysisOutputs().size(), two.getAnalysisOutputs().size());
     assertAnalysisUnitEqual(one.getAnalysisOutputs().get(0), two.getAnalysisOutputs().get(0));
+  }
+
+  private static void assertPipelineRunEqual(UltimaPipelineRun one, UltimaPipelineRun two) {
+    Assert.assertEquals(one.getAttempt(), two.getAttempt());
+    Assert.assertEquals(one.getPipelineStatus(), two.getPipelineStatus());
+    assertWorkflowRunEqual(one.getWorkflowRuns().get(0), two.getWorkflowRuns().get(0));
   }
 }

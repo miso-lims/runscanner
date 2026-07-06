@@ -5,24 +5,30 @@ import ca.on.oicr.gsi.runscanner.dto.Consumable;
 import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.UltimaNotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.type.HealthType;
+import ca.on.oicr.gsi.runscanner.dto.type.PipelineStatus;
 import ca.on.oicr.gsi.runscanner.dto.type.UltimaProcessStatus;
+import ca.on.oicr.gsi.runscanner.dto.type.WorkflowRunStatus;
 import ca.on.oicr.gsi.runscanner.dto.ultima.CramAnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.ultima.MetadataAnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaAnalysisUnit;
+import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaPipelineRun;
 import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaWorkflowRun;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.cloud.storage.Blob;
+import com.google.cloud.storage.StorageException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.time.DateTimeException;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
@@ -154,7 +160,7 @@ public class DefaultUltima extends RunProcessor {
                 runCache.put(runId, node);
                 return new File(root, runId);
               });
-    } catch (Exception e) {
+    } catch (IOException e) {
       log.error("Failed to fetch run list from Ultima API", e);
       return Stream.empty();
     }
@@ -248,7 +254,13 @@ public class DefaultUltima extends RunProcessor {
     String zoneString = json.path("timezone").asText();
     LocalDateTime ldt =
         LocalDateTime.parse(json.path("startdatetime").asText(), NEXUS_DATE_FORMATTER);
-    Instant startDate = extractTime(ldt, zoneString);
+    Instant startDate;
+    try {
+      startDate = extractTime(ldt, zoneString);
+    } catch (DateTimeException e) {
+      log.error("Invalid timezone cannot determine start or completion time.");
+      startDate = null;
+    }
     dto.setStartDate(startDate);
     if (health.isDone()) {
       Duration runtime = Duration.ofMinutes(json.path("runtime").asInt());
@@ -295,27 +307,48 @@ public class DefaultUltima extends RunProcessor {
 
     String runFolder = runFolderCache.get(runId);
     dto.setSequencerFolderPath(runFolder);
-    dto.setWorkflowRuns(
-        runFolder != null
-            ? List.of(buildWorkflowRun(runId, runFolder, json, uploadStatus))
-            : List.of());
+    if (runFolder != null) {
+      dto.addPipelineRun(createPipelineRun(runId, runFolder, json, uploadStatus));
+    }
 
     return dto;
   }
 
-  private UltimaWorkflowRun buildWorkflowRun(
+  /**
+   * Builds the pipeline run for this Ultima run. Any failure anywhere in the process (parsing the
+   * analysis start time, listing GCS folders/files, etc.) is caught here so it can't silently
+   * result in a pipeline run that looks COMPLETE but is actually missing data - instead the whole
+   * pipeline run is marked SCAN_ERROR.
+   */
+  private UltimaPipelineRun createPipelineRun(
       String runId, String runFolder, JsonNode json, UltimaProcessStatus uploadStatus) {
+    // Ultima only ever has one attempt per runId.
+    UltimaPipelineRun pipelineRun = new UltimaPipelineRun(1);
+    try {
+      UltimaWorkflowRun workflowRun = buildWorkflowRun(runFolder, json, uploadStatus);
+      pipelineRun.put(workflowRun);
+      pipelineRun.setPipelineStatus(
+          workflowRun.getWorkflowRunStatus() == WorkflowRunStatus.PENDING
+              ? PipelineStatus.INCOMPLETE
+              : PipelineStatus.COMPLETE);
+    } catch (DateTimeParseException | StorageException e) {
+      log.error("Failed to build pipeline run for Ultima run {}", runId, e);
+      pipelineRun.setPipelineStatus(PipelineStatus.SCAN_ERROR);
+    }
+    return pipelineRun;
+  }
+
+  private UltimaWorkflowRun buildWorkflowRun(
+      String runFolder, JsonNode json, UltimaProcessStatus uploadStatus) {
     UltimaWorkflowRun workflowRun = new UltimaWorkflowRun();
 
     // Analysis_Start_Time uses the same "yyyy-MM-dd HH:mm:ss" format as startdatetime
     String analysisStartStr = json.path("Analysis_Start_Time").asText("");
     if (!analysisStartStr.isBlank()) {
-      try {
-        LocalDateTime ldt = LocalDateTime.parse(analysisStartStr, NEXUS_DATE_FORMATTER);
-        workflowRun.setStartTime(extractTime(ldt, json.path("timezone").asText()));
-      } catch (Exception e) {
-        log.warn("Could not parse Analysis_Start_Time '{}' for run {}", analysisStartStr, runId);
-      }
+      // A malformed Analysis_Start_Time is a real data problem, so let it propagate and mark the
+      // pipeline run as SCAN_ERROR. An invalid timezone just means we can't compute a start time.
+      LocalDateTime ldt = LocalDateTime.parse(analysisStartStr, NEXUS_DATE_FORMATTER);
+      workflowRun.setStartTime(extractTime(ldt, json.path("timezone").asText()));
     }
     workflowRun.setSoftwareVersion(json.path("AnalysisRecipe").asText(null));
 
@@ -326,64 +359,54 @@ public class DefaultUltima extends RunProcessor {
       workflowRun.fail();
     }
 
-    workflowRun.setAnalysisOutputs(buildAnalysisUnits(runId, runFolder));
+    workflowRun.setAnalysisOutputs(buildAnalysisUnits(runFolder));
     return workflowRun;
   }
 
-  private List<UltimaAnalysisUnit> buildAnalysisUnits(String runId, String runFolder) {
+  private List<UltimaAnalysisUnit> buildAnalysisUnits(String runFolder) {
     List<UltimaAnalysisUnit> units = new ArrayList<>();
-    try {
-      for (Blob folder : googleBucketClient.ls(runFolder)) {
-        if (!folder.isDirectory()) continue; // no run level files are expected
-        String folderName = extractFolderName(folder.getName());
+    for (Blob folder : googleBucketClient.ls(runFolder)) {
+      if (!folder.isDirectory()) continue; // no run level files are expected
+      String folderName = extractFolderName(folder.getName());
 
-        // Folder name: {runId}-{library}-{barcode}
-        int underscoreIdx = folderName.indexOf('-');
-        if (underscoreIdx < 0) continue;
-        String libBarcode = folderName.substring(underscoreIdx + 1);
-        int lastDash = libBarcode.lastIndexOf('-');
-        if (lastDash < 0) continue;
-        String library = libBarcode.substring(0, lastDash);
-        String barcode = libBarcode.substring(lastDash + 1);
+      // Folder name: {runId}-{library}-{barcode}
+      // Split on the first and last '-', library names can contain dashes
+      int underscoreIdx = folderName.indexOf('-');
+      if (underscoreIdx < 0) continue;
+      String libBarcode = folderName.substring(underscoreIdx + 1);
+      int lastDash = libBarcode.lastIndexOf('-');
+      if (lastDash < 0) continue;
+      String library = libBarcode.substring(0, lastDash);
+      String barcode = libBarcode.substring(lastDash + 1);
 
-        String barcodeFolderPath = folder.getBucket() + "/" + folder.getName();
-        UltimaAnalysisUnit unit = new UltimaAnalysisUnit();
-        unit.setBarcode(barcode);
-        unit.setLibrary(library);
-        unit.setFiles(buildAnalysisFiles(barcodeFolderPath));
-        units.add(unit);
-      }
-    } catch (Exception e) {
-      log.warn("Failed to list barcode folders for run {} in GCS folder {}", runId, runFolder, e);
+      String barcodeFolderPath = folder.getBucket() + "/" + folder.getName();
+      UltimaAnalysisUnit unit = new UltimaAnalysisUnit();
+      unit.setBarcode(barcode);
+      unit.setLibrary(library);
+      unit.setFiles(buildAnalysisFiles(barcodeFolderPath));
+      units.add(unit);
     }
     return units;
   }
 
   private List<AnalysisFile> buildAnalysisFiles(String barcodeFolderPath) {
     List<AnalysisFile> files = new ArrayList<>();
-    try {
-      for (Blob blob : googleBucketClient.ls(barcodeFolderPath)) {
-        if (blob.isDirectory()) continue;
-        String blobName = blob.getName();
-        // Use CramAnalysisFile for .cram files; MetadataAnalysisFile for everything else
-        AnalysisFile file =
-            blobName.endsWith(".cram") ? new CramAnalysisFile() : new MetadataAnalysisFile();
-        // Path stored as "bucket/object"
-        // TODO do we want to be clear that it's GCS aka gs://bucket/object by including "gs://" in
-        // the path?
-        file.setPath(Path.of(blob.getBucket() + "/" + blobName));
-        file.setCrc32Checksum(blob.getCrc32c()); // base64
-        file.setSize(blob.getSize());
-        if (blob.getCreateTimeOffsetDateTime() != null) {
-          file.setCreatedTime(blob.getCreateTimeOffsetDateTime().toInstant());
-        }
-        if (blob.getUpdateTimeOffsetDateTime() != null) {
-          file.setModifiedTime(blob.getUpdateTimeOffsetDateTime().toInstant());
-        }
-        files.add(file);
+    for (Blob blob : googleBucketClient.ls(barcodeFolderPath)) {
+      if (blob.isDirectory()) continue;
+      String blobName = blob.getName();
+      // Use CramAnalysisFile for .cram files; MetadataAnalysisFile for everything else
+      AnalysisFile file =
+          blobName.endsWith(".cram") ? new CramAnalysisFile() : new MetadataAnalysisFile();
+      file.setPath(Path.of("gs:/", blob.getBucket() + "/" + blobName));
+      file.setCrc32Checksum(blob.getCrc32c()); // base64
+      file.setSize(blob.getSize());
+      if (blob.getCreateTimeOffsetDateTime() != null) {
+        file.setCreatedTime(blob.getCreateTimeOffsetDateTime().toInstant());
       }
-    } catch (Exception e) {
-      log.warn("Failed to list files in GCS barcode folder {}", barcodeFolderPath, e);
+      if (blob.getUpdateTimeOffsetDateTime() != null) {
+        file.setModifiedTime(blob.getUpdateTimeOffsetDateTime().toInstant());
+      }
+      files.add(file);
     }
     return files;
   }
@@ -402,13 +425,8 @@ public class DefaultUltima extends RunProcessor {
   }
 
   private Instant extractTime(LocalDateTime datetime, String timeZone) {
-    try {
-      ZoneId zone = TimeZone.getTimeZone(timeZone).toZoneId();
-      return datetime.atZone(zone).toInstant();
-    } catch (Exception e) {
-      log.error("Invalid timezone cannot determine start or completion time.");
-      return null;
-    }
+    ZoneId zone = TimeZone.getTimeZone(timeZone).toZoneId();
+    return datetime.atZone(zone).toInstant();
   }
 
   private String extractModel(String serialNumber) throws IOException {
@@ -481,7 +499,7 @@ public class DefaultUltima extends RunProcessor {
     return poolNames;
   }
 
-  private void populateRunFolderCache(String sequencerGcsPath) {
+  private void populateRunFolderCache(String sequencerGcsPath) throws IOException {
     try {
       List<Blob> entries = googleBucketClient.ls(sequencerGcsPath);
       for (Blob blob : entries) {
@@ -494,18 +512,16 @@ public class DefaultUltima extends RunProcessor {
         String runId = folderName.substring(0, dashIdx);
         runFolderCache.put(runId, blob.getBucket() + "/" + blob.getName());
       }
-    } catch (Exception e) {
-      log.warn("Failed to list run folders from GCS at {}", sequencerGcsPath, e);
+    } catch (StorageException e) {
+      throw new IOException("Failed to list run folders from GCS at + " + sequencerGcsPath, e);
     }
   }
 
   private static String extractFolderName(String blobName) {
     // GCS dir blobs have a trailing '/'. Strip it, then take everything after the last '/' to get
-    // the folder name
-    String stripped =
-        blobName.endsWith("/") ? blobName.substring(0, blobName.length() - 1) : blobName;
-    int lastSlash = stripped.lastIndexOf('/');
-    return lastSlash >= 0 ? stripped.substring(lastSlash + 1) : stripped;
+    // folder name
+    String[] blobNameParts = blobName.split("/");
+    return blobNameParts[blobNameParts.length - 1];
   }
 
   private double getControlQ30Bases(String runId) throws IOException {

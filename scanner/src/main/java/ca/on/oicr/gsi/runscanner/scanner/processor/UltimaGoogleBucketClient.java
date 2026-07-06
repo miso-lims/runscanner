@@ -33,11 +33,6 @@ public class UltimaGoogleBucketClient {
     String[] parts = parseGcsPath(gcsPath);
     String bucket = parts[0];
     String runPath = parts[1];
-    // GCS prefix-based listing treats a trailing '/' as a directory boundary. Without it, a prefix
-    // of "seq" would also match "seq2/", "seq-old/", etc.
-    if (!runPath.isEmpty() && !runPath.endsWith("/")) {
-      runPath = runPath + "/";
-    }
 
     List<Storage.BlobListOption> options = new ArrayList<>();
     if (!runPath.isEmpty()) {
@@ -56,11 +51,19 @@ public class UltimaGoogleBucketClient {
   }
 
   private static String[] parseGcsPath(String gcsPath) {
-    // Paths are passed as "bucket/runfolder". Split on the first '/' to separate the bucket name
+    // Paths are passed as "bucket", "bucket/runFolder/", or "bucket/runFolder/barcodeFolder/".
+    // Split on the first '/' to separate the bucket name from the rest of the path, if present.
     int slashIdx = gcsPath.indexOf('/');
     if (slashIdx < 0) {
       return new String[] {gcsPath, ""};
     }
-    return new String[] {gcsPath.substring(0, slashIdx), gcsPath.substring(slashIdx + 1)};
+    String bucket = gcsPath.substring(0, slashIdx);
+    String runPath = gcsPath.substring(slashIdx + 1);
+    // GCS prefix-based listing treats a trailing '/' as a directory boundary. Without it, a prefix
+    // of "seq" would also match "seq2/", "seq-old/", etc.
+    if (!runPath.isEmpty() && !runPath.endsWith("/")) {
+      runPath = runPath + "/";
+    }
+    return new String[] {bucket, runPath};
   }
 }
