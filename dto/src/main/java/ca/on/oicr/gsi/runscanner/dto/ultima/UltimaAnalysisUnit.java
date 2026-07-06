@@ -5,7 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
-// Corresponds to one Barcode Folder in GCS: {runId}-{library}-{barcode}/
+// Corresponds to one Barcode Folder: {runId}-{library}-{barcode}/
 public class UltimaAnalysisUnit {
 
   private String barcode;

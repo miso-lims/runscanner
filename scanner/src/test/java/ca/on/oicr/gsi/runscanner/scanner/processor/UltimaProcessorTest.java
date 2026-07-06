@@ -7,12 +7,15 @@ import static org.mockito.Mockito.when;
 
 import ca.on.oicr.gsi.runscanner.dto.AnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
+import ca.on.oicr.gsi.runscanner.dto.PipelineRun;
 import ca.on.oicr.gsi.runscanner.dto.UltimaNotificationDto;
+import ca.on.oicr.gsi.runscanner.dto.type.PipelineStatus;
 import ca.on.oicr.gsi.runscanner.dto.type.Platform;
 import ca.on.oicr.gsi.runscanner.dto.type.WorkflowRunStatus;
 import ca.on.oicr.gsi.runscanner.dto.ultima.CramAnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.ultima.MetadataAnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaAnalysisUnit;
+import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaPipelineRun;
 import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaWorkflowRun;
 import ca.on.oicr.gsi.runscanner.scanner.processor.RunProcessor.Builder;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -159,8 +162,16 @@ public class UltimaProcessorTest extends AbstractProcessorTest {
         (UltimaNotificationDto)
             processor.process(directory, TimeZone.getTimeZone("America/Toronto"));
 
-    // One workflow run per run folder
-    List<UltimaWorkflowRun> workflowRuns = result.getWorkflowRuns();
+    // One pipeline run per run folder
+    List<PipelineRun> pipelineRuns = result.getPipelineRuns();
+    assertEquals(1, pipelineRuns.size());
+
+    UltimaPipelineRun pipelineRun = (UltimaPipelineRun) pipelineRuns.get(0);
+    assertEquals(1, pipelineRun.getAttempt());
+    assertEquals(PipelineStatus.COMPLETE, pipelineRun.getPipelineStatus());
+
+    // One workflow run per pipeline run
+    List<UltimaWorkflowRun> workflowRuns = pipelineRun.getWorkflowRuns();
     assertEquals(1, workflowRuns.size());
 
     UltimaWorkflowRun workflowRun = workflowRuns.get(0);
@@ -186,7 +197,7 @@ public class UltimaProcessorTest extends AbstractProcessorTest {
     CramAnalysisFile cramFile =
         (CramAnalysisFile)
             files.stream().filter(f -> f instanceof CramAnalysisFile).findFirst().orElseThrow();
-    assertEquals(Path.of(bucket + "/" + cramBlobName), cramFile.getPath());
+    assertEquals(Path.of("gs:/", bucket + "/" + cramBlobName), cramFile.getPath());
     assertEquals("AAAAAA==", cramFile.getCrc32Checksum());
     assertEquals(1000L, cramFile.getSize());
     assertEquals(fixedTime.toInstant(), cramFile.getCreatedTime());
@@ -195,7 +206,7 @@ public class UltimaProcessorTest extends AbstractProcessorTest {
     MetadataAnalysisFile metaFile =
         (MetadataAnalysisFile)
             files.stream().filter(f -> f instanceof MetadataAnalysisFile).findFirst().orElseThrow();
-    assertEquals(Path.of(bucket + "/" + metaBlobName), metaFile.getPath());
+    assertEquals(Path.of("gs:/", bucket + "/" + metaBlobName), metaFile.getPath());
     assertEquals("AAAAAA==", metaFile.getCrc32Checksum());
     assertEquals(100L, metaFile.getSize());
     assertEquals(fixedTime.toInstant(), metaFile.getCreatedTime());

@@ -1,6 +1,11 @@
 # Unreleased
 
 Changes:
+* Add in support for Google Cloud Storage for Ultima
+  * only supported filesystem for Ultima
+* Pipeline Runs added to Ultima
+
+Changes:
 * Handle Ultima container model parsing according to their naming conventions
 * Scan sequencer directories round-robin (instead of finishing one before starting the next)
 
@@ -21,16 +26,12 @@ Fixes:
 # 2.6.0
 
 Changes:
-* Add in support for Google Cloud Storage for Ultima
-
-Changes:
 * Add Sample DB support for Ultima
 * Add consumables to Ultima Runs
 * Add "," to Ultima metrics (1000 -> 1,000) and reduce Total Beads to 6 decimal precision
 * Add "Control Sample Bases > Q30 %" Ultima metric
 * Update Illumina run directory scanning to be completed in reverse order by run directory name (approximately reverse chronological order)
 * Update Ultima run directory scanning to be completed in reverse order by run ID (approximately reverse chronological order)
-
 
 # 2.5.1
 

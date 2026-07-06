@@ -373,22 +373,15 @@ esp bc they might vary in meaning b/w PromION and MinION -->
     </tr>
     <tr>
         <td>analysisExpected</td>
-        <td>✓</td>
         <td></td>
+        <td>✓</td>
         <td></td>
         <td></td>
     </tr>
     <tr>
         <td>pipelineRuns</td>
+        <td></td>
         <td>✓</td>
-        <td></td>
-        <td></td>
-        <td></td>
-    </tr>
-    <tr>
-        <td>workflowRuns</td>
-        <td></td>
-        <td></td>
         <td></td>
         <td>✓</td>
     </tr>
