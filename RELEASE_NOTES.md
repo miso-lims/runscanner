@@ -1,7 +1,7 @@
 # Unreleased
 
 Changes:
-* Handle Ulima container model parsing according to their naming conventions
+* Handle Ultima container model parsing according to their naming conventions
 
 Fixes:
 * handle missing Ultima metrics without marking run as unreadable
