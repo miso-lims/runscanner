@@ -1,5 +1,8 @@
 # Unreleased
 
+Changes:
+* Handle Ulima container model parsing according to their naming conventions
+
 Fixes:
 * handle long values for Ultima Output Reads
 

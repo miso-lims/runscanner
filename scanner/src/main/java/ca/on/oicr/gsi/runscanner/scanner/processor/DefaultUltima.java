@@ -18,8 +18,6 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -293,12 +291,9 @@ public class DefaultUltima extends RunProcessor {
   }
 
   private String extractModel(String serialNumber) throws IOException {
-    // Example: FC12.2T0123456789 -> FTC12.2T
-    Pattern pattern = Pattern.compile("^(.{4}\\..{2})");
-    Matcher matcher = pattern.matcher(serialNumber);
-    if (matcher.find()) {
-      // Group 1 contains the extracted text
-      return matcher.group(1);
+    // the last 10 characters are always to be removed
+    if (!serialNumber.isBlank()) {
+      return serialNumber.substring(0, serialNumber.length() - 10);
     } else {
       throw new IOException("Cannot determine container model from serial number: " + serialNumber);
     }
