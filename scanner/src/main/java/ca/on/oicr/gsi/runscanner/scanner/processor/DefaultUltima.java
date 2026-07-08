@@ -291,7 +291,7 @@ public class DefaultUltima extends RunProcessor {
   }
 
   private String extractModel(String serialNumber) throws IOException {
-    // the last 10 characters are always to be removed
+    // as per conversation with Ultima, the last 10 characters are always to be removed
     if (!serialNumber.isBlank()) {
       return serialNumber.substring(0, serialNumber.length() - 10);
     } else {
