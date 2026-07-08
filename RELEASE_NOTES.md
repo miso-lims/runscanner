@@ -1,6 +1,11 @@
 # Unreleased
 
 Fixes:
+* handle long values for Ultima Output Reads
+
+# 2.6.2
+
+Fixes:
 * handle missing Ultima metrics without marking run as unreadable
 * return correct error response when deleting unreadable run
 
