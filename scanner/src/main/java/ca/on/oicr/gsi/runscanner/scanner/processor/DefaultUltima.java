@@ -173,7 +173,7 @@ public class DefaultUltima extends RunProcessor {
     values
         .addObject()
         .put("name", "Output Reads")
-        .put("value", String.format("%,d", json.path("pf_output_reads").asInt(0)));
+        .put("value", String.format("%,d", json.path("pf_output_reads").asLong(0)));
     values
         .addObject()
         .put("name", "Pass Filter %")
