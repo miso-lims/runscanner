@@ -175,7 +175,7 @@ public class UltimaProcessorTest extends AbstractProcessorTest {
     assertEquals(1, workflowRuns.size());
 
     UltimaWorkflowRun workflowRun = workflowRuns.get(0);
-    assertEquals("initialCramGeneration", workflowRun.getWorkflowName());
+    assertEquals("ultimaWorkflowRun", workflowRun.getWorkflowName());
     assertEquals(WorkflowRunStatus.COMPLETE, workflowRun.getWorkflowRunStatus());
     assertEquals("TestAnalysisRecipe", workflowRun.getSoftwareVersion());
     // "Eastern Standard Time" is not a valid Java timezone ID so TimeZone.getTimeZone() falls back

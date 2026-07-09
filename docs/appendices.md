@@ -107,8 +107,8 @@
                 <td>The location of a file containing a Sample DB Auth Token</td>
             </tr>
             <tr>
-                <td>googleServiceAccount (required)</td>
-                <td>The email address of the Google service account to impersonate when accessing the GCS bucket containing run output (Ex. runscanner@project.iam.gserviceaccount.com)</td>
+                <td>googleCredentialsFile (required)</td>
+                <td>The location of a Google service account JSON key file, used to authenticate when accessing the GCS bucket containing run output</td>
             </tr>
         </table></td>
     </tr>
