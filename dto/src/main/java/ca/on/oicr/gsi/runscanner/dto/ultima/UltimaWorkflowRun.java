@@ -10,7 +10,7 @@ public class UltimaWorkflowRun extends WorkflowRun {
   private List<UltimaAnalysisUnit> analysisOutputs = new LinkedList<>();
 
   public UltimaWorkflowRun() {
-    super("initialCramGeneration");
+    super("ultimaWorkflowRun");
   }
 
   public List<UltimaAnalysisUnit> getAnalysisOutputs() {

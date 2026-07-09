@@ -54,7 +54,7 @@ public class DefaultUltima extends RunProcessor {
           builder,
           fetchNexusApiUrl(parameters),
           fetchNexusApiTokenFile(parameters),
-          fetchGoogleServiceAccount(parameters),
+          fetchGoogleCredentialsFile(parameters),
           fetchOptionalParameter(parameters, "sampleDBApiAddress"),
           fetchOptionalParameter(parameters, "sampleDBApiTokenFile"));
     } catch (IOException e) {
@@ -67,14 +67,14 @@ public class DefaultUltima extends RunProcessor {
       Builder builder,
       String apiUrlNexus,
       String tokenPathNexus,
-      String googleServiceAccount,
+      String googleCredentialsFile,
       String apiUrlSampleDB,
       String tokenPathSampleDB)
       throws IOException {
     super(builder);
     this.apiClient =
         new UltimaApiClient(apiUrlNexus, tokenPathNexus, apiUrlSampleDB, tokenPathSampleDB);
-    this.googleBucketClient = new UltimaGoogleBucketClient(googleServiceAccount);
+    this.googleBucketClient = new UltimaGoogleBucketClient(googleCredentialsFile);
   }
 
   protected DefaultUltima(
@@ -112,14 +112,13 @@ public class DefaultUltima extends RunProcessor {
 
   /**
    * @param parameters ObjectNode
-   * @return String with base URL for the ULTIMA Nexus API
+   * @return String filename where the Google service account key is stored
    */
-  private static String fetchGoogleServiceAccount(ObjectNode parameters) {
-    if (parameters.hasNonNull("googleServiceAccount")) {
-      return parameters.get("googleServiceAccount").asText();
+  private static String fetchGoogleCredentialsFile(ObjectNode parameters) {
+    if (parameters.hasNonNull("googleCredentialsFile")) {
+      return parameters.get("googleCredentialsFile").asText();
     } else {
-      log.error(
-          "No Google Bucket Service Account configured for Ultima, this config should be invalid");
+      log.error("No Google credentials file configured for Ultima, this config should be invalid");
       return null;
     }
   }
@@ -307,6 +306,8 @@ public class DefaultUltima extends RunProcessor {
 
     String runFolder = runFolderCache.get(runId);
     dto.setSequencerFolderPath(runFolder);
+    // if runFolder is null we expect it either hasn't been uploaded yet (at sequencing step)
+    // or it's old and has been removed
     if (runFolder != null) {
       dto.addPipelineRun(createPipelineRun(runId, runFolder, json, uploadStatus));
     }
@@ -541,7 +542,7 @@ public class DefaultUltima extends RunProcessor {
         && !parameters.get("nexusApiAddress").asText().isBlank()
         && parameters.hasNonNull("nexusApiTokenFile")
         && new File(parameters.get("nexusApiTokenFile").asText()).canRead()
-        && parameters.hasNonNull("googleServiceAccount")
-        && !parameters.get("googleServiceAccount").asText().isBlank();
+        && parameters.hasNonNull("googleCredentialsFile")
+        && new File(parameters.get("googleCredentialsFile").asText()).canRead();
   }
 }

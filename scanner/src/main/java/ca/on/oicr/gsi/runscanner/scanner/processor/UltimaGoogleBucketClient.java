@@ -1,10 +1,10 @@
 package ca.on.oicr.gsi.runscanner.scanner.processor;
 
 import com.google.auth.oauth2.GoogleCredentials;
-import com.google.auth.oauth2.ImpersonatedCredentials;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,16 +19,15 @@ public class UltimaGoogleBucketClient {
 
   private final Storage storage;
 
-  public UltimaGoogleBucketClient(String googleServiceAccount) throws IOException {
-    GoogleCredentials sourceCredentials = GoogleCredentials.getApplicationDefault();
-    ImpersonatedCredentials impersonatedCredentials =
-        ImpersonatedCredentials.create(
-            sourceCredentials, googleServiceAccount, null, GCS_SCOPES, 300);
-    this.storage =
-        StorageOptions.newBuilder().setCredentials(impersonatedCredentials).build().getService();
+  public UltimaGoogleBucketClient(String googleCredentialsFile) throws IOException {
+    GoogleCredentials credentials;
+    try (FileInputStream keyStream = new FileInputStream(googleCredentialsFile)) {
+      credentials = GoogleCredentials.fromStream(keyStream).createScoped(GCS_SCOPES);
+    }
+    this.storage = StorageOptions.newBuilder().setCredentials(credentials).build().getService();
   }
 
-  /** Mimics: gcloud storage ls --impersonate-service-account {serviceAccount} {gcsPath} */
+  /** Mimics: gcloud storage ls {gcsPath} */
   public List<Blob> ls(String gcsPath) {
     String[] parts = parseGcsPath(gcsPath);
     String bucket = parts[0];
