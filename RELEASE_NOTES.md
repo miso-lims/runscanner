@@ -2,6 +2,7 @@
 
 Changes:
 * Handle Ultima container model parsing according to their naming conventions
+* Scan sequencer directories round-robin (instead of finishing one before starting the next)
 
 Fixes:
 * handle long values for Ultima Output Reads
@@ -26,6 +27,7 @@ Changes:
 * Add "Control Sample Bases > Q30 %" Ultima metric
 * Update Illumina run directory scanning to be completed in reverse order by run directory name (approximately reverse chronological order)
 * Update Ultima run directory scanning to be completed in reverse order by run ID (approximately reverse chronological order)
+
 
 # 2.5.1
 
