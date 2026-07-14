@@ -392,6 +392,27 @@ public class Scheduler {
         .anyMatch(Objects::nonNull);
   }
 
+  /**
+   * Merge several lists into one, taking one element from each list in turn (round-robin) rather
+   * than exhausting one list before moving to the next.
+   *
+   * <p>This is used so that, when there is a backlog of runs to process, no single sequencer's runs
+   * monopolize the processing queue ahead of another's.
+   */
+  protected static Stream<Pair<File, Configuration>> roundRobin(
+      List<List<Pair<File, Configuration>>> sequencerRuns) {
+    List<Pair<File, Configuration>> mergedRuns = new ArrayList<>();
+    int longestRunCount = sequencerRuns.stream().mapToInt(List::size).max().orElse(0);
+    for (int round = 0; round < longestRunCount; round++) {
+      for (List<Pair<File, Configuration>> runsForOneSequencer : sequencerRuns) {
+        if (round < runsForOneSequencer.size()) {
+          mergedRuns.add(runsForOneSequencer.get(round));
+        }
+      }
+    }
+    return mergedRuns.stream();
+  }
+
   private static boolean isSubDirectory(File baseDirectory, File subDirectory) {
     File parent = subDirectory.getParentFile();
     while (parent != null) {
@@ -560,9 +581,13 @@ public class Scheduler {
                     StreamCountSpy<Pair<File, Configuration>> accepted =
                         new StreamCountSpy<>(acceptedDirectories);
                     AutoCloseable timer = scanTime.start()) {
-                  roots.stream() //
-                      .filter(Configuration::isValid) //
-                      .flatMap(Configuration::getRuns) //
+                  roundRobin(
+                          roots.stream() //
+                              .filter(Configuration::isValid) //
+                              .map(
+                                  configuration ->
+                                      configuration.getRuns().collect(Collectors.toList())) //
+                              .collect(Collectors.toList())) //
                       .peek(attempted) //
                       .filter(
                           entry ->
