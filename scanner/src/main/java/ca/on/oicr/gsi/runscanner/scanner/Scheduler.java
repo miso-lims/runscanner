@@ -401,7 +401,7 @@ public class Scheduler {
    */
   protected static Stream<Pair<File, Configuration>> roundRobin(
       List<List<Pair<File, Configuration>>> sequencerRuns) {
-    List<Pair<File, Configuration>> mergedRuns = new ArrayList<>();
+    List<Pair<File, Configuration>> mergedRuns = new ArrayList<>(sequencerRuns.stream().mapToInt(List::size).sum());
     int longestRunCount = sequencerRuns.stream().mapToInt(List::size).max().orElse(0);
     for (int round = 0; round < longestRunCount; round++) {
       for (List<Pair<File, Configuration>> runsForOneSequencer : sequencerRuns) {
