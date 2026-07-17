@@ -13,7 +13,6 @@ import ca.on.oicr.gsi.runscanner.dto.type.PipelineStatus;
 import ca.on.oicr.gsi.runscanner.dto.type.Platform;
 import ca.on.oicr.gsi.runscanner.dto.type.WorkflowRunStatus;
 import ca.on.oicr.gsi.runscanner.dto.ultima.CramAnalysisFile;
-import ca.on.oicr.gsi.runscanner.dto.ultima.MetadataAnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaAnalysisUnit;
 import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaPipelineRun;
 import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaWorkflowRun;
@@ -175,7 +174,7 @@ public class UltimaProcessorTest extends AbstractProcessorTest {
     assertEquals(1, workflowRuns.size());
 
     UltimaWorkflowRun workflowRun = workflowRuns.get(0);
-    assertEquals("ultimaWorkflowRun", workflowRun.getWorkflowName());
+    assertEquals("CRAMGeneration", workflowRun.getWorkflowName());
     assertEquals(WorkflowRunStatus.COMPLETE, workflowRun.getWorkflowRunStatus());
     assertEquals("TestAnalysisRecipe", workflowRun.getSoftwareVersion());
     // "Eastern Standard Time" is not a valid Java timezone ID so TimeZone.getTimeZone() falls back
@@ -190,27 +189,16 @@ public class UltimaProcessorTest extends AbstractProcessorTest {
     assertEquals("TT", unit.getBarcode());
     assertEquals("lib1-lib2", unit.getLibrary());
 
-    // Two files: one CRAM, one metadata
+    // Only the CRAM file is included; the metadata file has no consumer yet and is excluded.
     List<AnalysisFile> files = unit.getFiles();
-    assertEquals(2, files.size());
+    assertEquals(1, files.size());
 
-    CramAnalysisFile cramFile =
-        (CramAnalysisFile)
-            files.stream().filter(f -> f instanceof CramAnalysisFile).findFirst().orElseThrow();
+    CramAnalysisFile cramFile = (CramAnalysisFile) files.get(0);
     assertEquals(Path.of("gs:/", bucket + "/" + cramBlobName), cramFile.getPath());
     assertEquals("AAAAAA==", cramFile.getCrc32Checksum());
     assertEquals(1000L, cramFile.getSize());
     assertEquals(fixedTime.toInstant(), cramFile.getCreatedTime());
     assertEquals(fixedTime.toInstant(), cramFile.getModifiedTime());
-
-    MetadataAnalysisFile metaFile =
-        (MetadataAnalysisFile)
-            files.stream().filter(f -> f instanceof MetadataAnalysisFile).findFirst().orElseThrow();
-    assertEquals(Path.of("gs:/", bucket + "/" + metaBlobName), metaFile.getPath());
-    assertEquals("AAAAAA==", metaFile.getCrc32Checksum());
-    assertEquals(100L, metaFile.getSize());
-    assertEquals(fixedTime.toInstant(), metaFile.getCreatedTime());
-    assertEquals(fixedTime.toInstant(), metaFile.getModifiedTime());
   }
 
   @Override

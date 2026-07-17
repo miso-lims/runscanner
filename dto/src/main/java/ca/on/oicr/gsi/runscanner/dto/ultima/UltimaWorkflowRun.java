@@ -1,6 +1,7 @@
 package ca.on.oicr.gsi.runscanner.dto.ultima;
 
 import ca.on.oicr.gsi.runscanner.dto.WorkflowRun;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -9,8 +10,8 @@ public class UltimaWorkflowRun extends WorkflowRun {
 
   private List<UltimaAnalysisUnit> analysisOutputs = new LinkedList<>();
 
-  public UltimaWorkflowRun() {
-    super("ultimaWorkflowRun");
+  public UltimaWorkflowRun(@JsonProperty("workflowName") String workflowName) {
+    super(workflowName);
   }
 
   public List<UltimaAnalysisUnit> getAnalysisOutputs() {
