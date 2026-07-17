@@ -9,7 +9,6 @@ import ca.on.oicr.gsi.runscanner.dto.type.PipelineStatus;
 import ca.on.oicr.gsi.runscanner.dto.type.UltimaProcessStatus;
 import ca.on.oicr.gsi.runscanner.dto.type.WorkflowRunStatus;
 import ca.on.oicr.gsi.runscanner.dto.ultima.CramAnalysisFile;
-import ca.on.oicr.gsi.runscanner.dto.ultima.MetadataAnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaAnalysisUnit;
 import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaPipelineRun;
 import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaWorkflowRun;
@@ -326,7 +325,7 @@ public class DefaultUltima extends RunProcessor {
     // Ultima only ever has one attempt per runId.
     UltimaPipelineRun pipelineRun = new UltimaPipelineRun(1);
     try {
-      UltimaWorkflowRun workflowRun = buildWorkflowRun(runFolder, json, uploadStatus);
+      UltimaWorkflowRun workflowRun = buildCramWorkflowRun(runFolder, json, uploadStatus);
       pipelineRun.put(workflowRun);
       pipelineRun.setPipelineStatus(
           workflowRun.getWorkflowRunStatus() == WorkflowRunStatus.PENDING
@@ -339,9 +338,9 @@ public class DefaultUltima extends RunProcessor {
     return pipelineRun;
   }
 
-  private UltimaWorkflowRun buildWorkflowRun(
+  private UltimaWorkflowRun buildCramWorkflowRun(
       String runFolder, JsonNode json, UltimaProcessStatus uploadStatus) {
-    UltimaWorkflowRun workflowRun = new UltimaWorkflowRun();
+    UltimaWorkflowRun workflowRun = new UltimaWorkflowRun("CRAMGeneration");
 
     // Analysis_Start_Time uses the same "yyyy-MM-dd HH:mm:ss" format as startdatetime
     String analysisStartStr = json.path("Analysis_Start_Time").asText("");
@@ -395,9 +394,10 @@ public class DefaultUltima extends RunProcessor {
     for (Blob blob : googleBucketClient.ls(barcodeFolderPath)) {
       if (blob.isDirectory()) continue;
       String blobName = blob.getName();
-      // Use CramAnalysisFile for .cram files; MetadataAnalysisFile for everything else
-      AnalysisFile file =
-          blobName.endsWith(".cram") ? new CramAnalysisFile() : new MetadataAnalysisFile();
+      // Only cram files are grouped into the CRAMGeneration workflow run for now; other file
+      // types have no consumer yet.
+      if (!blobName.endsWith(".cram")) continue;
+      AnalysisFile file = new CramAnalysisFile();
       file.setPath(Path.of("gs:/", blob.getBucket() + "/" + blobName));
       file.setCrc32Checksum(blob.getCrc32c()); // base64
       file.setSize(blob.getSize());

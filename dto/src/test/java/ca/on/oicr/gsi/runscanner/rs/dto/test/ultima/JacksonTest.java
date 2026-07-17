@@ -96,7 +96,7 @@ public class JacksonTest {
   }
 
   private UltimaWorkflowRun makeUltimaWorkflowRun() {
-    UltimaWorkflowRun workflowRun = new UltimaWorkflowRun();
+    UltimaWorkflowRun workflowRun = new UltimaWorkflowRun("CRAMGeneration");
     workflowRun.setStartTime(Instant.MIN);
     workflowRun.setSoftwareVersion("TestRecipe_1.0");
     workflowRun.complete();
