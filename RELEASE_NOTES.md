@@ -1,5 +1,9 @@
 # Unreleased
 
+
+
+# 2.7.0
+
 Changes:
 * Add in support for Google Cloud Storage for Ultima
   * only supported filesystem for Ultima
