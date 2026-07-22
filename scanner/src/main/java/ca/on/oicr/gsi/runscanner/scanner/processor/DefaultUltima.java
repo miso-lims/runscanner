@@ -48,12 +48,20 @@ public class DefaultUltima extends RunProcessor {
   private final UltimaGoogleBucketClient googleBucketClient;
 
   public static DefaultUltima create(Builder builder, ObjectNode parameters) {
+    String nexusApiUrl = fetchNexusApiUrl(parameters);
+    String nexusApiTokenFile = fetchNexusApiTokenFile(parameters);
+    String googleCredentialsFile = fetchGoogleCredentialsFile(parameters);
+    if (nexusApiUrl == null || nexusApiTokenFile == null || googleCredentialsFile == null) {
+      log.error("Could not create Ultima run processor: missing required configuration");
+      return null;
+    }
+
     try {
       return new DefaultUltima(
           builder,
-          fetchNexusApiUrl(parameters),
-          fetchNexusApiTokenFile(parameters),
-          fetchGoogleCredentialsFile(parameters),
+          nexusApiUrl,
+          nexusApiTokenFile,
+          googleCredentialsFile,
           fetchOptionalParameter(parameters, "sampleDBApiAddress"),
           fetchOptionalParameter(parameters, "sampleDBApiTokenFile"));
     } catch (IOException e) {
