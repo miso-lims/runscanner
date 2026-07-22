@@ -1,6 +1,7 @@
 # Unreleased
 
-
+Fixes:
+* handle missing configuration parameters for Ultima
 
 # 2.7.0
 
