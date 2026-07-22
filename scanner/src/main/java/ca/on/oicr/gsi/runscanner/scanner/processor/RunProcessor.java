@@ -2,6 +2,7 @@ package ca.on.oicr.gsi.runscanner.scanner.processor;
 
 import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.type.Platform;
+import ca.on.oicr.gsi.runscanner.scanner.processor.ultima.DefaultUltima;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
