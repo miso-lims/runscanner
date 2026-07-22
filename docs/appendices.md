@@ -107,7 +107,11 @@
                 <td>The location of a file containing a Sample DB Auth Token</td>
             </tr>
             <tr>
-                <td>googleCredentialsFile (required)</td>
+                <td>useGoogleBucket (optional, default true)</td>
+                <td>Whether the <code>path</code> (to sequencer output) above points to a Google Cloud Storage bucket (<code>true</code>, e.g. <code>bucket-name/some/prefix</code>) or a local filesystem directory (<code>false</code>, e.g. <code>/absolute/path/to/sequencer/output</code>). Run folder/barcode folder/file layout underneath is identical either way.</td>
+            </tr>
+            <tr>
+                <td>googleCredentialsFile (required when useGoogleBucket is true)</td>
                 <td>The location of a Google service account JSON key file, used to authenticate when accessing the GCS bucket containing run output</td>
             </tr>
         </table></td>

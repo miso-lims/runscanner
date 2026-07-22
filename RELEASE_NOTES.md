@@ -1,5 +1,8 @@
 # Unreleased
 
+Changes:
+* Add in optional support for local file storage for Ultima (specified by useGoogleBucket boolean)
+
 Fixes:
 * handle missing configuration parameters for Ultima
 

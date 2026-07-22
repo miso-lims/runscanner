@@ -1,4 +1,4 @@
-package ca.on.oicr.gsi.runscanner.scanner.processor;
+package ca.on.oicr.gsi.runscanner.scanner.processor.ultima;
 
 import ca.on.oicr.gsi.runscanner.scanner.LatencyHistogram;
 import com.fasterxml.jackson.databind.JsonNode;

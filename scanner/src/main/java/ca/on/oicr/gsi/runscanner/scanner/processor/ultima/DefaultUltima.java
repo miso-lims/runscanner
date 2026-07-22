@@ -1,4 +1,4 @@
-package ca.on.oicr.gsi.runscanner.scanner.processor;
+package ca.on.oicr.gsi.runscanner.scanner.processor.ultima;
 
 import ca.on.oicr.gsi.runscanner.dto.AnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.Consumable;
@@ -12,15 +12,14 @@ import ca.on.oicr.gsi.runscanner.dto.ultima.CramAnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaAnalysisUnit;
 import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaPipelineRun;
 import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaWorkflowRun;
+import ca.on.oicr.gsi.runscanner.scanner.processor.PathType;
+import ca.on.oicr.gsi.runscanner.scanner.processor.RunProcessor;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.cloud.storage.Blob;
-import com.google.cloud.storage.StorageException;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.time.DateTimeException;
 import java.time.Duration;
 import java.time.Instant;
@@ -45,7 +44,7 @@ public class DefaultUltima extends RunProcessor {
 
   private static final Logger log = LoggerFactory.getLogger(DefaultUltima.class);
   private final UltimaApiClient apiClient;
-  private final UltimaGoogleBucketClient googleBucketClient;
+  private final UltimaStorageClient storageClient;
 
   public static DefaultUltima create(Builder builder, ObjectNode parameters) {
     String nexusApiUrl = fetchNexusApiUrl(parameters);
@@ -57,11 +56,16 @@ public class DefaultUltima extends RunProcessor {
     }
 
     try {
+      boolean useGoogleBucket = fetchUseGoogleBucket(parameters);
+      UltimaStorageClient storageClient =
+          useGoogleBucket
+              ? new GoogleBucketStorageClient(googleCredentialsFile)
+              : new LocalStorageClient();
       return new DefaultUltima(
           builder,
           nexusApiUrl,
           nexusApiTokenFile,
-          googleCredentialsFile,
+          storageClient,
           fetchOptionalParameter(parameters, "sampleDBApiAddress"),
           fetchOptionalParameter(parameters, "sampleDBApiTokenFile"));
     } catch (IOException e) {
@@ -74,21 +78,21 @@ public class DefaultUltima extends RunProcessor {
       Builder builder,
       String apiUrlNexus,
       String tokenPathNexus,
-      String googleCredentialsFile,
+      UltimaStorageClient storageClient,
       String apiUrlSampleDB,
       String tokenPathSampleDB)
       throws IOException {
     super(builder);
     this.apiClient =
         new UltimaApiClient(apiUrlNexus, tokenPathNexus, apiUrlSampleDB, tokenPathSampleDB);
-    this.googleBucketClient = new UltimaGoogleBucketClient(googleCredentialsFile);
+    this.storageClient = storageClient;
   }
 
-  protected DefaultUltima(
-      Builder builder, UltimaApiClient apiClient, UltimaGoogleBucketClient googleBucketClient) {
+  public DefaultUltima(
+      Builder builder, UltimaApiClient apiClient, UltimaStorageClient storageClient) {
     super(builder);
     this.apiClient = apiClient;
-    this.googleBucketClient = googleBucketClient;
+    this.storageClient = storageClient;
   }
 
   /**
@@ -128,6 +132,15 @@ public class DefaultUltima extends RunProcessor {
       log.error("No Google credentials file configured for Ultima, this config should be invalid");
       return null;
     }
+  }
+
+  /**
+   * @param parameters ObjectNode
+   * @return true if run output should be read from a Google Cloud Storage bucket, false to read
+   *     from a local filesystem path. Defaults to true when unset
+   */
+  private static boolean fetchUseGoogleBucket(ObjectNode parameters) {
+    return parameters.path("useGoogleBucket").asBoolean(true);
   }
 
   /**
@@ -339,7 +352,7 @@ public class DefaultUltima extends RunProcessor {
           workflowRun.getWorkflowRunStatus() == WorkflowRunStatus.PENDING
               ? PipelineStatus.INCOMPLETE
               : PipelineStatus.COMPLETE);
-    } catch (DateTimeParseException | StorageException e) {
+    } catch (DateTimeParseException | IOException e) {
       log.error("Failed to build pipeline run for Ultima run {}", runId, e);
       pipelineRun.setPipelineStatus(PipelineStatus.SCAN_ERROR);
     }
@@ -347,7 +360,7 @@ public class DefaultUltima extends RunProcessor {
   }
 
   private UltimaWorkflowRun buildCramWorkflowRun(
-      String runFolder, JsonNode json, UltimaProcessStatus uploadStatus) {
+      String runFolder, JsonNode json, UltimaProcessStatus uploadStatus) throws IOException {
     UltimaWorkflowRun workflowRun = new UltimaWorkflowRun("CRAMGeneration");
 
     // Analysis_Start_Time uses the same "yyyy-MM-dd HH:mm:ss" format as startdatetime
@@ -371,11 +384,11 @@ public class DefaultUltima extends RunProcessor {
     return workflowRun;
   }
 
-  private List<UltimaAnalysisUnit> buildAnalysisUnits(String runFolder) {
+  private List<UltimaAnalysisUnit> buildAnalysisUnits(String runFolder) throws IOException {
     List<UltimaAnalysisUnit> units = new ArrayList<>();
-    for (Blob folder : googleBucketClient.ls(runFolder)) {
+    for (UltimaStorageEntry folder : storageClient.ls(runFolder)) {
       if (!folder.isDirectory()) continue; // no run level files are expected
-      String folderName = extractFolderName(folder.getName());
+      String folderName = folder.getName();
 
       // Folder name: {runId}-{library}-{barcode}
       // Split on the first and last '-', library names can contain dashes
@@ -387,34 +400,28 @@ public class DefaultUltima extends RunProcessor {
       String library = libBarcode.substring(0, lastDash);
       String barcode = libBarcode.substring(lastDash + 1);
 
-      String barcodeFolderPath = folder.getBucket() + "/" + folder.getName();
       UltimaAnalysisUnit unit = new UltimaAnalysisUnit();
       unit.setBarcode(barcode);
       unit.setLibrary(library);
-      unit.setFiles(buildAnalysisFiles(barcodeFolderPath));
+      unit.setFiles(buildAnalysisFiles(folder.getFullPath()));
       units.add(unit);
     }
     return units;
   }
 
-  private List<AnalysisFile> buildAnalysisFiles(String barcodeFolderPath) {
+  private List<AnalysisFile> buildAnalysisFiles(String barcodeFolderPath) throws IOException {
     List<AnalysisFile> files = new ArrayList<>();
-    for (Blob blob : googleBucketClient.ls(barcodeFolderPath)) {
-      if (blob.isDirectory()) continue;
-      String blobName = blob.getName();
+    for (UltimaStorageEntry entry : storageClient.ls(barcodeFolderPath)) {
+      if (entry.isDirectory()) continue;
       // Only cram files are grouped into the CRAMGeneration workflow run for now; other file
       // types have no consumer yet.
-      if (!blobName.endsWith(".cram")) continue;
+      if (!entry.getName().endsWith(".cram")) continue;
       AnalysisFile file = new CramAnalysisFile();
-      file.setPath(Path.of("gs:/", blob.getBucket() + "/" + blobName));
-      file.setCrc32Checksum(blob.getCrc32c()); // base64
-      file.setSize(blob.getSize());
-      if (blob.getCreateTimeOffsetDateTime() != null) {
-        file.setCreatedTime(blob.getCreateTimeOffsetDateTime().toInstant());
-      }
-      if (blob.getUpdateTimeOffsetDateTime() != null) {
-        file.setModifiedTime(blob.getUpdateTimeOffsetDateTime().toInstant());
-      }
+      file.setPath(entry.getPath());
+      file.setCrc32Checksum(entry.getCrc32Checksum()); // base64
+      file.setSize(entry.getSize());
+      file.setCreatedTime(entry.getCreatedTime());
+      file.setModifiedTime(entry.getModifiedTime());
       files.add(file);
     }
     return files;
@@ -508,29 +515,18 @@ public class DefaultUltima extends RunProcessor {
     return poolNames;
   }
 
-  private void populateRunFolderCache(String sequencerGcsPath) throws IOException {
-    try {
-      List<Blob> entries = googleBucketClient.ls(sequencerGcsPath);
-      for (Blob blob : entries) {
-        if (!blob.isDirectory()) continue;
-        String folderName = extractFolderName(blob.getName());
-        // Run folders are named {runId}-{YYYYMMDD}_{suffix}
-        int dashIdx = folderName.indexOf('-');
-        if (dashIdx < 0)
-          continue; // only include folders with run directory formatting used by the Ultima machine
-        String runId = folderName.substring(0, dashIdx);
-        runFolderCache.put(runId, blob.getBucket() + "/" + blob.getName());
-      }
-    } catch (StorageException e) {
-      throw new IOException("Failed to list run folders from GCS at + " + sequencerGcsPath, e);
+  private void populateRunFolderCache(String sequencerRootPath) throws IOException {
+    List<UltimaStorageEntry> entries = storageClient.ls(sequencerRootPath);
+    for (UltimaStorageEntry entry : entries) {
+      if (!entry.isDirectory()) continue;
+      String folderName = entry.getName();
+      // Run folders are named {runId}-{YYYYMMDD}_{suffix}
+      int dashIdx = folderName.indexOf('-');
+      if (dashIdx < 0)
+        continue; // only include folders with run directory formatting used by the Ultima machine
+      String runId = folderName.substring(0, dashIdx);
+      runFolderCache.put(runId, entry.getFullPath());
     }
-  }
-
-  private static String extractFolderName(String blobName) {
-    // GCS dir blobs have a trailing '/'. Strip it, then take everything after the last '/' to get
-    // folder name
-    String[] blobNameParts = blobName.split("/");
-    return blobNameParts[blobNameParts.length - 1];
   }
 
   private double getControlQ30Bases(String runId) throws IOException {
@@ -546,10 +542,15 @@ public class DefaultUltima extends RunProcessor {
 
   @Override
   public boolean validateParameters(ObjectNode parameters) {
-    return parameters.hasNonNull("nexusApiAddress")
-        && !parameters.get("nexusApiAddress").asText().isBlank()
-        && parameters.hasNonNull("nexusApiTokenFile")
-        && new File(parameters.get("nexusApiTokenFile").asText()).canRead()
+    boolean baseValid =
+        parameters.hasNonNull("nexusApiAddress")
+            && !parameters.get("nexusApiAddress").asText().isBlank()
+            && parameters.hasNonNull("nexusApiTokenFile")
+            && new File(parameters.get("nexusApiTokenFile").asText()).canRead();
+    if (!fetchUseGoogleBucket(parameters)) {
+      return baseValid;
+    }
+    return baseValid
         && parameters.hasNonNull("googleCredentialsFile")
         && new File(parameters.get("googleCredentialsFile").asText()).canRead();
   }
