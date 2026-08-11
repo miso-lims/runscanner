@@ -5,13 +5,12 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.type.HealthType;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import org.junit.Before;
 import org.junit.Test;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.json.JsonMapper;
 
 public abstract class AbstractNotificationDtoTest {
   private NotificationDto notificationDto;
@@ -31,8 +30,7 @@ public abstract class AbstractNotificationDtoTest {
         LocalDateTime.of(2017, 2, 23, 0, 0).atZone(ZoneId.of("America/Toronto")).toInstant());
     notificationDto.setHealthType(HealthType.RUNNING);
 
-    ObjectMapper mapper = new ObjectMapper();
-    mapper.registerModule(new JavaTimeModule()).enable(SerializationFeature.INDENT_OUTPUT);
+    JsonMapper mapper = makeJsonMapper();
     String serialized = mapper.writeValueAsString(notificationDto);
 
     NotificationDto deSerialized = mapper.readValue(serialized, NotificationDto.class);
@@ -42,12 +40,15 @@ public abstract class AbstractNotificationDtoTest {
   @Test
   public void testFullyPopulatedNotificationRoundTrip() throws Exception {
     fullyPopulatedNotificationDto("RUN_B");
-    ObjectMapper mapper = new ObjectMapper();
-    mapper.registerModule(new JavaTimeModule()).enable(SerializationFeature.INDENT_OUTPUT);
+    JsonMapper mapper = makeJsonMapper();
     String serialized = mapper.writeValueAsString(notificationDto);
 
     NotificationDto deSerialized = mapper.readValue(serialized, NotificationDto.class);
     assertThat("Round trip of", notificationDto, is(deSerialized));
+  }
+
+  private JsonMapper makeJsonMapper() {
+    return JsonMapper.builder().enable(SerializationFeature.INDENT_OUTPUT).build();
   }
 
   public abstract void fullyPopulatedNotificationDto(String sequencerName);

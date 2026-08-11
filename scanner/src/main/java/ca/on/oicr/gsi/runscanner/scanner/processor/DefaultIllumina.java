@@ -8,14 +8,6 @@ import ca.on.oicr.gsi.runscanner.dto.type.IlluminaChemistry;
 import ca.on.oicr.gsi.runscanner.dto.type.IndexSequencing;
 import ca.on.oicr.gsi.runscanner.scanner.LatencyHistogram;
 import ca.on.oicr.gsi.runscanner.scanner.processor.dragen.ProcessDragen;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.*;
-import com.fasterxml.jackson.databind.Module;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import io.prometheus.metrics.core.metrics.Counter;
@@ -60,6 +52,16 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.JacksonModule;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueDeserializer;
+import tools.jackson.databind.ValueSerializer;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.module.SimpleModule;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Scan an Illumina sequencer's output using the Illumina Interop C++ library.
@@ -307,33 +309,29 @@ public final class DefaultIllumina extends RunProcessor {
    * @param tz Time Zone to expect for datetime string
    * @return Module with custom Instant parsing
    */
-  private Module setUpCustomModule(TimeZone tz) {
+  private JacksonModule setUpCustomModule(TimeZone tz) {
     SimpleModule module = new SimpleModule("customInstantParsingModule");
 
     module.addSerializer(
         Instant.class,
-        new JsonSerializer<Instant>() {
+        new ValueSerializer<Instant>() {
           @Override
           public void serialize(
-              Instant instant, JsonGenerator jsonGenerator, SerializerProvider serializerProvider)
-              throws IOException {
+              Instant instant,
+              JsonGenerator jsonGenerator,
+              SerializationContext serializationContext) {
             jsonGenerator.writeString(instant.atZone(tz.toZoneId()).toString());
           }
         });
 
     module.addDeserializer(
         Instant.class,
-        new JsonDeserializer<Instant>() {
+        new ValueDeserializer<Instant>() {
           @Override
           public Instant deserialize(
-              JsonParser jsonParser, DeserializationContext deserializationContext)
-              throws IOException, JsonProcessingException {
-            String inststr = jsonParser.getText();
-            try {
-              return ZonedDateTime.parse(inststr).toInstant();
-            } catch (DateTimeParseException dtpe) {
-              throw new JsonParseException(jsonParser, "Failed to parse Instant", dtpe);
-            }
+              JsonParser jsonParser, DeserializationContext deserializationContext) {
+            String inststr = jsonParser.getString();
+            return ZonedDateTime.parse(inststr).toInstant();
           }
         });
 
@@ -358,8 +356,9 @@ public final class DefaultIllumina extends RunProcessor {
     try (InputStream output = process.getInputStream();
         OutputStream input = process.getOutputStream()) {
       dto =
-          new ObjectMapper()
-              .registerModule(setUpCustomModule(tz))
+          JsonMapper.builder()
+              .addModule(setUpCustomModule(tz))
+              .build()
               .readValue(output, IlluminaNotificationDto.class);
       dto.setSequencerFolderPath(runDirectory.getAbsolutePath());
     } finally {

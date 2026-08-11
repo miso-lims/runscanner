@@ -4,7 +4,6 @@ import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.PacBioNotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.PacBioNotificationDto.SMRTCellPosition;
 import ca.on.oicr.gsi.runscanner.dto.type.HealthType;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -35,6 +34,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
+import tools.jackson.databind.node.ObjectNode;
 
 /** Scan PacBio Revio and Vega runs from a directory. */
 public class V2PacBioProcessor extends RunProcessor {

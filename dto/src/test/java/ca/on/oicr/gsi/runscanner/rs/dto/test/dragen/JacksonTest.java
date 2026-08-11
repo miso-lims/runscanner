@@ -5,15 +5,14 @@ import ca.on.oicr.gsi.runscanner.dto.dragen.DragenAnalysisUnit;
 import ca.on.oicr.gsi.runscanner.dto.dragen.DragenPipelineRun;
 import ca.on.oicr.gsi.runscanner.dto.dragen.DragenWorkflowRun;
 import ca.on.oicr.gsi.runscanner.dto.dragen.FastqAnalysisFile;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.nio.file.Path;
 import java.time.Instant;
 import org.junit.Assert;
 import org.junit.Test;
+import tools.jackson.databind.json.JsonMapper;
 
 public class JacksonTest {
-  private final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
+  private final JsonMapper mapper = new JsonMapper();
 
   @Test
   public void testAnalysisFileSerializeDeserialize() throws Exception {

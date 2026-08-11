@@ -17,8 +17,6 @@ import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaAnalysisUnit;
 import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaPipelineRun;
 import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaWorkflowRun;
 import ca.on.oicr.gsi.runscanner.scanner.processor.RunProcessor.Builder;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.cloud.storage.Blob;
 import java.io.File;
 import java.io.IOException;
@@ -30,10 +28,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.TimeZone;
 import org.junit.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
 
-public class UltimaProcessorTest extends AbstractProcessorTest {
+public class UltimaProcessorTest extends AbstractProcessorTest<UltimaNotificationDto> {
 
-  private static final ObjectMapper mapper = new ObjectMapper();
+  private static final JsonMapper mapper = JsonMapper.builder().build();
 
   public UltimaProcessorTest() {
     super(UltimaNotificationDto.class);
@@ -50,8 +50,8 @@ public class UltimaProcessorTest extends AbstractProcessorTest {
     File mockTTMetricsFile = new File(directory, "ultima-api-TT-metric-response.json");
     JsonNode mockTTMetricsJson = mapper.readTree(mockTTMetricsFile);
 
-    String runId = mockRunsummaryJson.path("runid").asText("");
-    String samplePlate = mockRunsummaryJson.path("AMP_SamplePlate").asText("");
+    String runId = mockRunsummaryJson.path("runid").asString("");
+    String samplePlate = mockRunsummaryJson.path("AMP_SamplePlate").asString("");
 
     UltimaApiClient mockClient = mock(UltimaApiClient.class);
     when(mockClient.fetchAllRunSummaries())
@@ -89,8 +89,8 @@ public class UltimaProcessorTest extends AbstractProcessorTest {
     File mockTTMetricsFile = new File(directory, "ultima-api-TT-metric-response.json");
     JsonNode mockTTMetricsJson = mapper.readTree(mockTTMetricsFile);
 
-    String runId = mockRunsummaryJson.path("runid").asText("");
-    String samplePlate = mockRunsummaryJson.path("AMP_SamplePlate").asText("");
+    String runId = mockRunsummaryJson.path("runid").asString("");
+    String samplePlate = mockRunsummaryJson.path("AMP_SamplePlate").asString("");
 
     UltimaApiClient mockClient = mock(UltimaApiClient.class);
     when(mockClient.fetchAllRunSummaries())

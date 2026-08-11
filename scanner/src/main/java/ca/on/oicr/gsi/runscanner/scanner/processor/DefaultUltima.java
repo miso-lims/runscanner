@@ -12,10 +12,6 @@ import ca.on.oicr.gsi.runscanner.dto.ultima.CramAnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaAnalysisUnit;
 import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaPipelineRun;
 import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaWorkflowRun;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.StorageException;
 import java.io.File;
@@ -33,6 +29,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 public class DefaultUltima extends RunProcessor {
 
@@ -97,7 +97,7 @@ public class DefaultUltima extends RunProcessor {
    */
   private static String fetchNexusApiUrl(ObjectNode parameters) {
     if (parameters.hasNonNull("nexusApiAddress")) {
-      return parameters.get("nexusApiAddress").asText();
+      return parameters.get("nexusApiAddress").asString();
     } else {
       log.error("No Nexus API URL configured for Ultima, this config should be invalid");
       return null;
@@ -110,7 +110,7 @@ public class DefaultUltima extends RunProcessor {
    */
   private static String fetchNexusApiTokenFile(ObjectNode parameters) {
     if (parameters.hasNonNull("nexusApiTokenFile")) {
-      return parameters.get("nexusApiTokenFile").asText();
+      return parameters.get("nexusApiTokenFile").asString();
     } else {
       log.error("No Nexus API Token configured for Ultima, this config should be invalid");
       return null;
@@ -123,7 +123,7 @@ public class DefaultUltima extends RunProcessor {
    */
   private static String fetchGoogleCredentialsFile(ObjectNode parameters) {
     if (parameters.hasNonNull("googleCredentialsFile")) {
-      return parameters.get("googleCredentialsFile").asText();
+      return parameters.get("googleCredentialsFile").asString();
     } else {
       log.error("No Google credentials file configured for Ultima, this config should be invalid");
       return null;
@@ -137,7 +137,7 @@ public class DefaultUltima extends RunProcessor {
    */
   private static String fetchOptionalParameter(ObjectNode parameters, String parameterName) {
     if (parameters.hasNonNull(parameterName)) {
-      return parameters.get(parameterName).asText();
+      return parameters.get(parameterName).asString();
     } else {
       return null;
     }
@@ -158,11 +158,11 @@ public class DefaultUltima extends RunProcessor {
       // nexus orders the runs by increasing runId (newer Run Id = higher num)
       // we want runscanner to scan newer runs first
       return allRunInfo.stream()
-          .filter(n -> n.hasNonNull("runid") && !n.path("runid").asText().isBlank())
+          .filter(n -> n.hasNonNull("runid") && !n.path("runid").asString().isBlank())
           .sorted(Comparator.comparingLong((JsonNode n) -> n.path("runid").asLong()).reversed())
           .map(
               node -> {
-                String runId = node.path("runid").asText();
+                String runId = node.path("runid").asString();
                 runCache.put(runId, node);
                 return new File(root, runId);
               });
@@ -186,15 +186,15 @@ public class DefaultUltima extends RunProcessor {
     UltimaNotificationDto dto = new UltimaNotificationDto();
 
     dto.setRunAlias(runId);
-    dto.setSequencerName(json.path("sysid").asText());
-    dto.setSoftware(json.path("SequencingRecipe").asText());
+    dto.setSequencerName(json.path("sysid").asString());
+    dto.setSoftware(json.path("SequencingRecipe").asString());
 
     dto.setCompletedFlows(json.path("completedflownum").asInt());
     dto.setExpectedFlows(json.path("numflows").asInt());
     dto.setReadLength(json.path("rl").asDouble());
     dto.setWaferShelf(json.path("wafershelf").asInt());
 
-    ObjectMapper mapper = createObjectMapper();
+    JsonMapper mapper = createJsonMapper();
     List<ObjectNode> metrics = new ArrayList<>();
     ObjectNode chartNode = mapper.createObjectNode();
     chartNode.put("type", "chart");
@@ -220,7 +220,7 @@ public class DefaultUltima extends RunProcessor {
     values
         .addObject()
         .put("name", "Indel Rate TT %")
-        .put("value", json.path("indel_rate").asText());
+        .put("value", json.path("indel_rate").asString());
     values
         .addObject()
         .put("name", "Control Sample Bases > Q30 %")
@@ -228,20 +228,20 @@ public class DefaultUltima extends RunProcessor {
     metrics.add(chartNode);
     dto.setMetrics(mapper.writeValueAsString(metrics));
 
-    dto.setSequencerPosition(json.path("Chuck").asText());
+    dto.setSequencerPosition(json.path("Chuck").asString());
 
-    String wafer = json.path("wafer").asText();
+    String wafer = json.path("wafer").asString();
     dto.setContainerSerialNumber(wafer);
     dto.setContainerModel(extractModel(wafer));
 
     int pctCompleted = json.path("runstatus").asInt(); // Percentage 0-100
     int succeeded = json.path("isruncompleted").asInt(); // Successful run 0 or 1
-    String errmsg = json.path("errormsg").asText("");
+    String errmsg = json.path("errormsg").asString("");
 
     // the first and last digit are vestigial and should be ignored.
     // the second and third digit are the analysis and upload status respectively.
     // 0 is not started, 1 is in progress, 2 is complete, and 3+ is error
-    String analAndUpStatus = json.path("analysisstatus").asText("0000");
+    String analAndUpStatus = json.path("analysisstatus").asString("0000");
 
     UltimaProcessStatus analysisStatus =
         UltimaProcessStatus.fromCode(Character.getNumericValue(analAndUpStatus.charAt(1)));
@@ -257,9 +257,9 @@ public class DefaultUltima extends RunProcessor {
     HealthType health = translateStatus(sequencingStatus, analysisStatus, uploadStatus);
     dto.setHealthType(health);
 
-    String zoneString = json.path("timezone").asText();
+    String zoneString = json.path("timezone").asString();
     LocalDateTime ldt =
-        LocalDateTime.parse(json.path("startdatetime").asText(), NEXUS_DATE_FORMATTER);
+        LocalDateTime.parse(json.path("startdatetime").asString(), NEXUS_DATE_FORMATTER);
     Instant startDate;
     try {
       startDate = extractTime(ldt, zoneString);
@@ -278,36 +278,40 @@ public class DefaultUltima extends RunProcessor {
     // No paired ends
     dto.setPairedEndRun(false);
 
-    String ampSamplePlate = json.path("AMP_SamplePlate").asText("");
+    String ampSamplePlate = json.path("AMP_SamplePlate").asString("");
     dto.setPoolNames(getPoolsFromSampleDB(ampSamplePlate));
 
     List<Consumable> consumables = new ArrayList<>();
     consumables.add(new Consumable("Amplification Sample Plate Serial Number", ampSamplePlate));
     consumables.add(
         new Consumable(
-            "Amplification Chilled Rack Lot Number", json.path("AMP_ChilledRack").asText()));
+            "Amplification Chilled Rack Lot Number", json.path("AMP_ChilledRack").asString()));
     consumables.add(
-        new Consumable("Amplification RT Rack Lot Number", json.path("AMP_RTRack").asText()));
-    consumables.add(
-        new Consumable("Amplification Tube Array Lot Number", json.path("AMP_TubeArray").asText()));
+        new Consumable("Amplification RT Rack Lot Number", json.path("AMP_RTRack").asString()));
     consumables.add(
         new Consumable(
-            "Amplification Break Container Lot Number", json.path("AMP_BreakContainer").asText()));
-    consumables.add(
-        new Consumable("Amplification Wash 1 Lot Number", json.path("AMP_Wash1").asText()));
-    consumables.add(
-        new Consumable("Amplification Wash 2 Lot Number", json.path("AMP_Wash2").asText()));
+            "Amplification Tube Array Lot Number", json.path("AMP_TubeArray").asString()));
     consumables.add(
         new Consumable(
-            "Amplification Enrichment Bead Lot Number", json.path("AMP_EnrichmentBead").asText()));
-    consumables.add(new Consumable("Sequencing Rack Lot Number", json.path("SampleRack").asText()));
-    consumables.add(new Consumable("Sample Tube Lot Number", json.path("SampleTube").asText()));
+            "Amplification Break Container Lot Number",
+            json.path("AMP_BreakContainer").asString()));
+    consumables.add(
+        new Consumable("Amplification Wash 1 Lot Number", json.path("AMP_Wash1").asString()));
+    consumables.add(
+        new Consumable("Amplification Wash 2 Lot Number", json.path("AMP_Wash2").asString()));
     consumables.add(
         new Consumable(
-            "Sequencing Cartridge Lot Number", json.path("SequencingCartridge").asText()));
+            "Amplification Enrichment Bead Lot Number",
+            json.path("AMP_EnrichmentBead").asString()));
     consumables.add(
-        new Consumable("Wash Container Lot Number", json.path("WashContainer").asText()));
-    consumables.add(new Consumable("Wafer Serial Number", json.path("Wafer").asText()));
+        new Consumable("Sequencing Rack Lot Number", json.path("SampleRack").asString()));
+    consumables.add(new Consumable("Sample Tube Lot Number", json.path("SampleTube").asString()));
+    consumables.add(
+        new Consumable(
+            "Sequencing Cartridge Lot Number", json.path("SequencingCartridge").asString()));
+    consumables.add(
+        new Consumable("Wash Container Lot Number", json.path("WashContainer").asString()));
+    consumables.add(new Consumable("Wafer Serial Number", json.path("Wafer").asString()));
 
     dto.setConsumables(consumables);
 
@@ -351,14 +355,14 @@ public class DefaultUltima extends RunProcessor {
     UltimaWorkflowRun workflowRun = new UltimaWorkflowRun("CRAMGeneration");
 
     // Analysis_Start_Time uses the same "yyyy-MM-dd HH:mm:ss" format as startdatetime
-    String analysisStartStr = json.path("Analysis_Start_Time").asText("");
+    String analysisStartStr = json.path("Analysis_Start_Time").asString("");
     if (!analysisStartStr.isBlank()) {
       // A malformed Analysis_Start_Time is a real data problem, so let it propagate and mark the
       // pipeline run as SCAN_ERROR. An invalid timezone just means we can't compute a start time.
       LocalDateTime ldt = LocalDateTime.parse(analysisStartStr, NEXUS_DATE_FORMATTER);
-      workflowRun.setStartTime(extractTime(ldt, json.path("timezone").asText()));
+      workflowRun.setStartTime(extractTime(ldt, json.path("timezone").asString()));
     }
-    workflowRun.setSoftwareVersion(json.path("AnalysisRecipe").asText(null));
+    workflowRun.setSoftwareVersion(json.path("AnalysisRecipe").asString(null));
 
     // Mirror uploadStatus: only COMPLETE and FAILED have explicit terminal states
     if (uploadStatus == UltimaProcessStatus.COMPLETE) {
@@ -499,7 +503,7 @@ public class DefaultUltima extends RunProcessor {
       pools.forEach(
           node -> {
             if (node.has("libraryPool")) {
-              poolNames.add(node.path("libraryPool").asText());
+              poolNames.add(node.path("libraryPool").asString());
             }
           });
     } catch (IOException e) {
@@ -547,10 +551,10 @@ public class DefaultUltima extends RunProcessor {
   @Override
   public boolean validateParameters(ObjectNode parameters) {
     return parameters.hasNonNull("nexusApiAddress")
-        && !parameters.get("nexusApiAddress").asText().isBlank()
+        && !parameters.get("nexusApiAddress").asString().isBlank()
         && parameters.hasNonNull("nexusApiTokenFile")
-        && new File(parameters.get("nexusApiTokenFile").asText()).canRead()
+        && new File(parameters.get("nexusApiTokenFile").asString()).canRead()
         && parameters.hasNonNull("googleCredentialsFile")
-        && new File(parameters.get("googleCredentialsFile").asText()).canRead();
+        && new File(parameters.get("googleCredentialsFile").asString()).canRead();
   }
 }

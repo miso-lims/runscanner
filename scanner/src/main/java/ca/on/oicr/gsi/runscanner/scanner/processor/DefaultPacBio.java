@@ -5,10 +5,6 @@ import ca.on.oicr.gsi.runscanner.dto.PacBioNotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.type.HealthType;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -42,6 +38,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 import org.w3c.dom.Document;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /** Scan PacBio runs from a directory. The address */
 public class DefaultPacBio extends RunProcessor {
@@ -152,8 +152,8 @@ public class DefaultPacBio extends RunProcessor {
 
   public static DefaultPacBio create(Builder builder, ObjectNode parameters) {
     JsonNode address = parameters.get("address");
-    return address.isTextual()
-        ? new DefaultPacBio(builder, address.textValue().replaceAll("/+$", ""))
+    return address.isString()
+        ? new DefaultPacBio(builder, address.stringValue().replaceAll("/+$", ""))
         : null;
   }
 
@@ -315,7 +315,7 @@ public class DefaultPacBio extends RunProcessor {
                 .distinct()
                 .count());
 
-    ObjectMapper mapper = createObjectMapper();
+    JsonMapper mapper = createJsonMapper();
     ArrayNode metrics = mapper.createArrayNode();
 
     try {

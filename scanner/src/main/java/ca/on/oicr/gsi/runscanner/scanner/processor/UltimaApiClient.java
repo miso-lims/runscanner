@@ -1,9 +1,9 @@
 package ca.on.oicr.gsi.runscanner.scanner.processor;
 
 import ca.on.oicr.gsi.runscanner.scanner.LatencyHistogram;
-import com.fasterxml.jackson.databind.JsonNode;
 import io.prometheus.metrics.core.metrics.Counter;
 import java.io.IOException;
+import java.net.http.HttpClient;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.Duration;
@@ -12,14 +12,11 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.http.client.JdkClientHttpRequestFactory;
+import org.springframework.web.client.RestClient;
+import tools.jackson.databind.JsonNode;
 
 public class UltimaApiClient {
 
@@ -49,10 +46,8 @@ public class UltimaApiClient {
           .help("Number of exceptions thrown by the Ultima Sample DB API client.")
           .register();
 
-  private static final Logger log = LoggerFactory.getLogger(UltimaApiClient.class);
-
   private final String apiUrlNexus;
-  private final RestTemplate restTemplate;
+  private final RestClient restClient;
   private final HttpHeaders headersNexus;
   private final String apiUrlSampleDB;
   private final HttpHeaders headersSampleDB;
@@ -61,11 +56,11 @@ public class UltimaApiClient {
       String apiUrlNexus, String tokenPathNexus, String apiUrlSampleDB, String tokenPathSampleDB)
       throws IOException {
     this.apiUrlNexus = apiUrlNexus;
-    this.restTemplate =
-        new RestTemplateBuilder()
-            .setConnectTimeout(Duration.ofSeconds(5))
-            .setReadTimeout(Duration.ofSeconds(5))
-            .build();
+
+    HttpClient httpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build();
+    JdkClientHttpRequestFactory requestFactory = new JdkClientHttpRequestFactory(httpClient);
+    requestFactory.setReadTimeout(Duration.ofSeconds(5));
+    this.restClient = RestClient.builder().requestFactory(requestFactory).build();
 
     String token = Files.readString(Paths.get(tokenPathNexus)).trim();
     HttpHeaders headersNexus = new HttpHeaders();
@@ -87,18 +82,21 @@ public class UltimaApiClient {
   }
 
   public List<JsonNode> fetchAllRunSummaries() throws IOException {
-
     String datetimeRestrictions =
         "from=01-01-1970&to="
             + DateTimeFormatter.ofPattern("MM-dd-yyyy", Locale.ENGLISH)
                 .format(LocalDateTime.now().plusDays(1));
     String url = String.format("%s/api/data/runsummary?%s", apiUrlNexus, datetimeRestrictions);
 
-    HttpEntity<String> entity = new HttpEntity<>(headersNexus);
-
     ResponseEntity<JsonNode> response;
     try (AutoCloseable latency_nexus = all_run_api_fetch_time.start()) {
-      response = restTemplate.exchange(url, HttpMethod.GET, entity, JsonNode.class);
+      response =
+          restClient
+              .get()
+              .uri(url)
+              .headers(headers -> headers.addAll(headersNexus))
+              .retrieve()
+              .toEntity(JsonNode.class);
       if (!response.getStatusCode().is2xxSuccessful()) {
         api_nexus_fetch_failed.inc();
         throw new IllegalStateException(
@@ -126,14 +124,18 @@ public class UltimaApiClient {
   }
 
   public JsonNode fetchBarcodeMetrics(String runId, String barcode) throws IOException {
-
-    HttpEntity<String> entity = new HttpEntity<>(headersNexus);
     String url =
         String.format("%s/api/data/metrics/%s/%s?purpose=qtable", apiUrlNexus, runId, barcode);
 
     ResponseEntity<JsonNode> response;
     try (AutoCloseable latency_nexus_metric = nexus_control_metric_api_fetch_time.start()) {
-      response = restTemplate.exchange(url, HttpMethod.GET, entity, JsonNode.class);
+      response =
+          restClient
+              .get()
+              .uri(url)
+              .headers(headers -> headers.addAll(headersNexus))
+              .retrieve()
+              .toEntity(JsonNode.class);
       if (!response.getStatusCode().is2xxSuccessful()) {
         api_nexus_fetch_failed.inc();
         throw new IllegalStateException(
@@ -170,15 +172,18 @@ public class UltimaApiClient {
   }
 
   public JsonNode fetchSampleDB(String samplePlateId) throws IOException {
-
     String url =
         String.format("%s/api/v2/lib-pools?samplePlateId=%s", apiUrlSampleDB, samplePlateId);
 
-    HttpEntity<String> entity = new HttpEntity<>(headersSampleDB);
-
     ResponseEntity<JsonNode> response;
     try (AutoCloseable latency_sampledb = sample_db_fetch_time.start()) {
-      response = restTemplate.exchange(url, HttpMethod.GET, entity, JsonNode.class);
+      response =
+          restClient
+              .get()
+              .uri(url)
+              .headers(headers -> headers.addAll(headersSampleDB))
+              .retrieve()
+              .toEntity(JsonNode.class);
     } catch (Exception e) {
       api_sample_db_fetch_failed.inc();
       throw new IOException(e);

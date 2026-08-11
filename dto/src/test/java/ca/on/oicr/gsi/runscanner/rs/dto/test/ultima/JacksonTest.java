@@ -8,16 +8,15 @@ import ca.on.oicr.gsi.runscanner.dto.ultima.MetadataAnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaAnalysisUnit;
 import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaPipelineRun;
 import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaWorkflowRun;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
+import tools.jackson.databind.json.JsonMapper;
 
 public class JacksonTest {
-  private final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
+  private final JsonMapper mapper = new JsonMapper();
 
   @Test
   public void testCramAnalysisFileSerializeDeserialize() throws Exception {

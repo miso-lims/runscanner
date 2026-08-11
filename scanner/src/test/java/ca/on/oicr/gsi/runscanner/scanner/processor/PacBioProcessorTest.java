@@ -4,12 +4,12 @@ import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.PacBioNotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.type.Platform;
 import ca.on.oicr.gsi.runscanner.scanner.processor.DefaultPacBio.StatusResponse;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
+import tools.jackson.databind.json.JsonMapper;
 
 public class PacBioProcessorTest extends AbstractProcessorTest {
   private static class TestPacBio extends DefaultPacBio {
@@ -42,7 +42,7 @@ public class PacBioProcessorTest extends AbstractProcessorTest {
 
   @Override
   protected NotificationDto process(File directory) throws IOException {
-    ObjectMapper mapper = new ObjectMapper();
+    JsonMapper mapper = new JsonMapper();
     Map<String, StatusResponse> statusResponses =
         mapper.readValue(
             new File(directory, "webrequests-status.json"),

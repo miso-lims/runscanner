@@ -7,15 +7,13 @@ import ca.on.oicr.gsi.runscanner.dto.*;
 import ca.on.oicr.gsi.runscanner.dto.AnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.dragen.DragenAnalysisUnit;
 import ca.on.oicr.gsi.runscanner.dto.dragen.DragenWorkflowRun;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.Instant;
 import org.junit.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
 
 public abstract class AbstractProcessorTest<T extends NotificationDto> {
   private final Class<T> clazz;
@@ -29,9 +27,8 @@ public abstract class AbstractProcessorTest<T extends NotificationDto> {
     // No default behaviour, but called before assertEquals(reference, result)
   }
 
-  protected final void checkDirectory(String root)
-      throws JsonParseException, JsonMappingException, IOException {
-    ObjectMapper mapper = RunProcessor.createObjectMapper();
+  protected final void checkDirectory(String root) throws IOException {
+    JsonMapper mapper = RunProcessor.createJsonMapper();
     for (File directory : new File(this.getClass().getResource(root).getPath()).listFiles()) {
       NotificationDto result = process(directory);
       NotificationDto reference = mapper.readValue(new File(directory, "reference.json"), clazz);
@@ -45,9 +42,9 @@ public abstract class AbstractProcessorTest<T extends NotificationDto> {
       } else {
         // ensure metrics are equal
         // Load the metrics into a Jackson JsonNode to test for equality
-        ObjectMapper MapperTest = RunProcessor.createObjectMapper();
-        JsonNode jsonNodeResult = MapperTest.readTree(result.getMetrics());
-        JsonNode jsonNodeReference = MapperTest.readTree(reference.getMetrics());
+        JsonMapper mapperTest = RunProcessor.createJsonMapper();
+        JsonNode jsonNodeResult = mapperTest.readTree(result.getMetrics());
+        JsonNode jsonNodeReference = mapperTest.readTree(reference.getMetrics());
         assertEquals(jsonNodeReference, jsonNodeResult);
       }
 

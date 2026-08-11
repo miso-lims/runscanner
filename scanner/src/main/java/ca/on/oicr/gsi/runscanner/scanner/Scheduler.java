@@ -5,13 +5,10 @@ import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.type.Platform;
 import ca.on.oicr.gsi.runscanner.scanner.processor.PathType;
 import ca.on.oicr.gsi.runscanner.scanner.processor.RunProcessor;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.prometheus.metrics.core.metrics.Counter;
 import io.prometheus.metrics.core.metrics.Gauge;
 import io.prometheus.metrics.core.metrics.Histogram;
 import java.io.File;
-import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -38,6 +35,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 /** Periodically scan the run directories and cache the results. */
 @Service
@@ -516,7 +515,7 @@ public class Scheduler {
    * output, even if the timezone or processor is changed.
    */
   private void readConfiguration() {
-    ObjectMapper mapper = new ObjectMapper();
+    JsonMapper mapper = new JsonMapper();
     configurationLastRead = Instant.now();
     configurationTimestamp.set(configurationLastRead.getEpochSecond());
     try {
@@ -543,7 +542,7 @@ public class Scheduler {
               .collect(Collectors.toList());
       configurationEntries.set(roots.size());
       isConfigurationGood = !roots.isEmpty();
-    } catch (IOException e) {
+    } catch (Exception e) {
       log.error("Configuration is bad.", e);
       isConfigurationGood = false;
     }

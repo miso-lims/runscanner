@@ -3,16 +3,15 @@ package ca.on.oicr.gsi.runscanner.scanner;
 import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.type.Platform;
 import ca.on.oicr.gsi.runscanner.scanner.processor.RunProcessor;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.TimeZone;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Attempts to process run directories, provided on the command line, through a particular processor
@@ -44,8 +43,7 @@ public final class ProcessRun {
     } else {
       tz = TimeZone.getTimeZone(tzId);
     }
-    ObjectMapper mapper = new ObjectMapper();
-    mapper.registerModule(new JavaTimeModule());
+    JsonMapper mapper = JsonMapper.builder().enable(SerializationFeature.INDENT_OUTPUT).build();
 
     Platform pt = Platform.valueOf(platformName);
     String name = System.getProperty("name", "default");
@@ -79,13 +77,7 @@ public final class ProcessRun {
       }
     }
 
-    try {
-      mapper.enable(SerializationFeature.INDENT_OUTPUT);
-      mapper.writeValue(System.out, results);
-    } catch (IOException e) {
-      e.printStackTrace();
-      System.exit(1);
-    }
+    mapper.writeValue(System.out, results);
     System.exit(success ? 0 : 2);
   }
 }

@@ -1,7 +1,6 @@
 package ca.on.oicr.gsi.runscanner.scanner.processor;
 
 import ca.on.oicr.gsi.runscanner.dto.*;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -9,6 +8,7 @@ import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * This is a test run scanner for debugging an testing purposes.
@@ -47,7 +47,7 @@ public class Testing extends RunProcessor {
 
   @Override
   public NotificationDto process(File runDirectory, TimeZone tz) throws IOException {
-    ObjectMapper mapper = createObjectMapper();
+    JsonMapper mapper = createJsonMapper();
 
     Matcher m = INTEGER_TAIL.matcher(runDirectory.getName());
     if (m.matches()) {

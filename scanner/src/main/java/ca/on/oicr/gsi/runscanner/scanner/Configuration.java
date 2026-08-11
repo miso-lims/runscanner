@@ -3,12 +3,12 @@ package ca.on.oicr.gsi.runscanner.scanner;
 import ca.on.oicr.gsi.Pair;
 import ca.on.oicr.gsi.runscanner.scanner.processor.PathType;
 import ca.on.oicr.gsi.runscanner.scanner.processor.RunProcessor;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.stream.Stream;
+import tools.jackson.databind.node.ObjectNode;
 
 public class Configuration {
 

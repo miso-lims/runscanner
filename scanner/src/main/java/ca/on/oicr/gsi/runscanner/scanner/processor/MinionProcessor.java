@@ -2,10 +2,10 @@ package ca.on.oicr.gsi.runscanner.scanner.processor;
 
 import ca.on.oicr.gsi.runscanner.dto.OxfordNanoporeNotificationDto;
 import ch.systemsx.cisd.hdf5.IHDF5Reader;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.nio.file.Path;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
+import tools.jackson.databind.node.ObjectNode;
 
 public class MinionProcessor extends BaseOxfordNanoporeProcessor {
   private static final Pattern FAIL_DIR = Pattern.compile("/fail$");
