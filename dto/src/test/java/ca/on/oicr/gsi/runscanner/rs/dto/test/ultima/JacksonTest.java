@@ -10,7 +10,7 @@ import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaPipelineRun;
 import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaWorkflowRun;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import java.nio.file.Path;
+import java.net.URI;
 import java.time.Instant;
 import java.util.List;
 import org.junit.Assert;
@@ -69,7 +69,7 @@ public class JacksonTest {
 
   private AnalysisFile makeCramFile() {
     AnalysisFile file = new CramAnalysisFile();
-    file.setPath(Path.of("/", "test-bucket", "run", "barcode", "sample.cram"));
+    file.setPath(URI.create("file:///test-bucket/run/barcode/sample.cram"));
     file.setCrc32Checksum("AAAAAA==");
     file.setSize(1000L);
     file.setCreatedTime(Instant.EPOCH);
@@ -79,7 +79,7 @@ public class JacksonTest {
 
   private AnalysisFile makeMetadataFile() {
     AnalysisFile file = new MetadataAnalysisFile();
-    file.setPath(Path.of("/", "test-bucket", "run", "barcode", "sample.csv"));
+    file.setPath(URI.create("file:///test-bucket/run/barcode/sample.csv"));
     file.setCrc32Checksum("BBBBBB==");
     file.setSize(100L);
     file.setCreatedTime(Instant.EPOCH);

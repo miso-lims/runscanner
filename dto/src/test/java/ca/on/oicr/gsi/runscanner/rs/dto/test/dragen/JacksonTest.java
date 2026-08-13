@@ -55,7 +55,7 @@ public class JacksonTest {
 
   private AnalysisFile makeAnalysisFile() {
     AnalysisFile file = new FastqAnalysisFile();
-    file.setPath(Path.of("/", "path", "to", "file"));
+    file.setPath(Path.of("/", "path", "to", "file").toUri());
     file.setCrc32Checksum("abcdefg");
     file.setModifiedTime(Instant.EPOCH);
     file.setCreatedTime(Instant.EPOCH);

@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
@@ -132,7 +133,8 @@ public class UltimaProcessorTest extends AbstractProcessorTest {
     UltimaStorageEntry cramEntry = mock(UltimaStorageEntry.class);
     when(cramEntry.isDirectory()).thenReturn(false);
     when(cramEntry.getName()).thenReturn(cramFileName);
-    when(cramEntry.getPath()).thenReturn(Path.of("gs:/", barcodeFolderFullPath + cramFileName));
+    when(cramEntry.getPath())
+        .thenReturn(URI.create("gs://" + barcodeFolderFullPath + cramFileName));
     when(cramEntry.getCrc32Checksum()).thenReturn("AAAAAA==");
     when(cramEntry.getSize()).thenReturn(1000L);
     when(cramEntry.getCreatedTime()).thenReturn(fixedTime.toInstant());
@@ -142,7 +144,8 @@ public class UltimaProcessorTest extends AbstractProcessorTest {
     UltimaStorageEntry metaEntry = mock(UltimaStorageEntry.class);
     when(metaEntry.isDirectory()).thenReturn(false);
     when(metaEntry.getName()).thenReturn(metaFileName);
-    when(metaEntry.getPath()).thenReturn(Path.of("gs:/", barcodeFolderFullPath + metaFileName));
+    when(metaEntry.getPath())
+        .thenReturn(URI.create("gs://" + barcodeFolderFullPath + metaFileName));
     when(metaEntry.getCrc32Checksum()).thenReturn("AAAAAA==");
     when(metaEntry.getSize()).thenReturn(100L);
     when(metaEntry.getCreatedTime()).thenReturn(fixedTime.toInstant());
@@ -199,7 +202,7 @@ public class UltimaProcessorTest extends AbstractProcessorTest {
     assertEquals(1, files.size());
 
     CramAnalysisFile cramFile = (CramAnalysisFile) files.get(0);
-    assertEquals(Path.of("gs:/", barcodeFolderFullPath + cramFileName), cramFile.getPath());
+    assertEquals(URI.create("gs://" + barcodeFolderFullPath + cramFileName), cramFile.getPath());
     assertEquals("AAAAAA==", cramFile.getCrc32Checksum());
     assertEquals(1000L, cramFile.getSize());
     assertEquals(fixedTime.toInstant(), cramFile.getCreatedTime());
@@ -266,7 +269,7 @@ public class UltimaProcessorTest extends AbstractProcessorTest {
       assertEquals(1, files.size());
 
       CramAnalysisFile cramAnalysisFile = (CramAnalysisFile) files.get(0);
-      assertEquals(cramFile.toAbsolutePath(), cramAnalysisFile.getPath());
+      assertEquals(cramFile.toAbsolutePath().toUri(), cramAnalysisFile.getPath());
       assertEquals(1000L, cramAnalysisFile.getSize());
       // Local storage has no equivalent to GCS's CRC32C; a plain CRC32 is computed from disk.
       CRC32 expectedCrc32 = new CRC32();

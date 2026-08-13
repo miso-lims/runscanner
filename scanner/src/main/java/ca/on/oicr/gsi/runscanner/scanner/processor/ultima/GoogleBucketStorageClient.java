@@ -7,7 +7,8 @@ import com.google.cloud.storage.StorageException;
 import com.google.cloud.storage.StorageOptions;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.file.Path;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -104,8 +105,12 @@ public class GoogleBucketStorageClient implements UltimaStorageClient {
     }
 
     @Override
-    public Path getPath() {
-      return Path.of("gs:/", getFullPath());
+    public URI getPath() {
+      try {
+        return new URI("gs", blob.getBucket(), "/" + blob.getName(), null);
+      } catch (URISyntaxException e) {
+        throw new IllegalStateException(e);
+      }
     }
 
     @Override

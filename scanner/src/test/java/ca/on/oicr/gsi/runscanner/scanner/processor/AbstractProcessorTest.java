@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Instant;
 import org.junit.Test;
 
@@ -74,11 +75,11 @@ public abstract class AbstractProcessorTest<T extends NotificationDto> {
                     af.setModifiedTime(Instant.EPOCH);
 
                     // Strip away /home/user/workspace/etc from path to match reference
-                    Path pathToCut = af.getPath();
+                    Path pathToCut = Paths.get(af.getPath());
                     while (!pathToCut.getName(0).equals(Path.of("scanner"))) {
                       pathToCut = pathToCut.subpath(1, pathToCut.getNameCount());
                     }
-                    af.setPath(pathToCut);
+                    af.setPath(pathToCut.toUri());
                   }
                 }
               }

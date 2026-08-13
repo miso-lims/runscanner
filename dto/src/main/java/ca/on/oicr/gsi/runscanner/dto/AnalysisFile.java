@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
-import java.nio.file.Path;
+import java.net.URI;
 import java.time.Instant;
 import java.util.Objects;
 
@@ -20,7 +20,7 @@ import java.util.Objects;
   @Type(value = MetadataAnalysisFile.class, name = "metadata"), //
 }) //
 public abstract class AnalysisFile {
-  private Path path;
+  private URI path;
   private String crc32Checksum;
   private long size;
   private Instant createdTime;
@@ -34,7 +34,7 @@ public abstract class AnalysisFile {
     return modifiedTime;
   }
 
-  public Path getPath() {
+  public URI getPath() {
     return path;
   }
 
@@ -46,7 +46,7 @@ public abstract class AnalysisFile {
     this.modifiedTime = modifiedTime;
   }
 
-  public void setPath(Path p) {
+  public void setPath(URI p) {
     this.path = p;
   }
 

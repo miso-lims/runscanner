@@ -5,6 +5,7 @@ Changes:
 
 Fixes:
 * handle missing configuration parameters for Ultima
+* properly format Google Bucket "paths" in Ultima pipelineRuns
 
 # 2.7.0
 

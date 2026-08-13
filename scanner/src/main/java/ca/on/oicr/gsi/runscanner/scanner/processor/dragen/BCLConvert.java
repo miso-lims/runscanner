@@ -9,6 +9,7 @@ import ca.on.oicr.gsi.runscanner.scanner.processor.dragen.samplesheet.Sampleshee
 import ca.on.oicr.gsi.runscanner.scanner.processor.dragen.samplesheet.SamplesheetBCLConvertSection.SamplesheetBCLConvertDataEntry;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -105,7 +106,7 @@ public class BCLConvert {
                 .toList();
         for (String[] manifestLine : manifestLines) {
           // 0 = path, 1 = crc32 checksum
-          Path filename = new File(rootDir, manifestLine[0]).toPath();
+          URI filename = new File(rootDir, manifestLine[0]).toPath().toUri();
 
           // When this is null, it's often for an Undetermined read. We do not care.
           DragenAnalysisUnit dragenAnalysisUnit = bclConvertWorkflowRun.get(filename);
@@ -245,7 +246,7 @@ public class BCLConvert {
     }
     if (!Files.exists(fullPath)) return null;
     FastqAnalysisFile newFile = new FastqAnalysisFile();
-    newFile.setPath(fullPath);
+    newFile.setPath(fullPath.toUri());
     newFile.setSize(Files.size(fullPath));
     newFile.setCreatedTime(Files.getLastModifiedTime(fullPath).toInstant());
     newFile.setModifiedTime(
