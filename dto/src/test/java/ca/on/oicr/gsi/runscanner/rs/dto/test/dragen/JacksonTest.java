@@ -7,7 +7,7 @@ import ca.on.oicr.gsi.runscanner.dto.dragen.DragenWorkflowRun;
 import ca.on.oicr.gsi.runscanner.dto.dragen.FastqAnalysisFile;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import java.nio.file.Path;
+import java.net.URI;
 import java.time.Instant;
 import org.junit.Assert;
 import org.junit.Test;
@@ -55,7 +55,7 @@ public class JacksonTest {
 
   private AnalysisFile makeAnalysisFile() {
     AnalysisFile file = new FastqAnalysisFile();
-    file.setPath(Path.of("/", "path", "to", "file").toUri());
+    file.setPath(URI.create("file:/path/to/file"));
     file.setCrc32Checksum("abcdefg");
     file.setModifiedTime(Instant.EPOCH);
     file.setCreatedTime(Instant.EPOCH);

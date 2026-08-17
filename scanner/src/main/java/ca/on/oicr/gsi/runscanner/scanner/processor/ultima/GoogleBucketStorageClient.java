@@ -84,9 +84,15 @@ public class GoogleBucketStorageClient implements UltimaStorageClient {
 
   private static class GcsStorageEntry implements UltimaStorageEntry {
     private final Blob blob;
+    private final URI path;
 
     GcsStorageEntry(Blob blob) {
       this.blob = blob;
+      try {
+        this.path = new URI("gs", blob.getBucket(), "/" + blob.getName(), null);
+      } catch (URISyntaxException e) {
+        throw new IllegalStateException(e);
+      }
     }
 
     @Override
@@ -106,11 +112,7 @@ public class GoogleBucketStorageClient implements UltimaStorageClient {
 
     @Override
     public URI getPath() {
-      try {
-        return new URI("gs", blob.getBucket(), "/" + blob.getName(), null);
-      } catch (URISyntaxException e) {
-        throw new IllegalStateException(e);
-      }
+      return path;
     }
 
     @Override
