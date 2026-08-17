@@ -106,7 +106,7 @@ public class BCLConvert {
                 .toList();
         for (String[] manifestLine : manifestLines) {
           // 0 = path, 1 = crc32 checksum
-          URI filename = new File(rootDir, manifestLine[0]).toPath().toUri();
+          URI filename = new File(rootDir, manifestLine[0]).toURI();
 
           // When this is null, it's often for an Undetermined read. We do not care.
           DragenAnalysisUnit dragenAnalysisUnit = bclConvertWorkflowRun.get(filename);
