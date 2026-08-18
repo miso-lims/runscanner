@@ -295,32 +295,31 @@ public class DefaultUltima extends RunProcessor {
     dto.setPoolNames(getPoolsFromSampleDB(ampSamplePlate));
 
     List<Consumable> consumables = new ArrayList<>();
-    consumables.add(new Consumable("Amplification Sample Plate Serial Number", ampSamplePlate));
-    consumables.add(
-        new Consumable(
-            "Amplification Chilled Rack Lot Number", json.path("AMP_ChilledRack").asText()));
-    consumables.add(
-        new Consumable("Amplification RT Rack Lot Number", json.path("AMP_RTRack").asText()));
-    consumables.add(
-        new Consumable("Amplification Tube Array Lot Number", json.path("AMP_TubeArray").asText()));
-    consumables.add(
-        new Consumable(
-            "Amplification Break Container Lot Number", json.path("AMP_BreakContainer").asText()));
-    consumables.add(
-        new Consumable("Amplification Wash 1 Lot Number", json.path("AMP_Wash1").asText()));
-    consumables.add(
-        new Consumable("Amplification Wash 2 Lot Number", json.path("AMP_Wash2").asText()));
-    consumables.add(
-        new Consumable(
-            "Amplification Enrichment Bead Lot Number", json.path("AMP_EnrichmentBead").asText()));
-    consumables.add(new Consumable("Sequencing Rack Lot Number", json.path("SampleRack").asText()));
-    consumables.add(new Consumable("Sample Tube Lot Number", json.path("SampleTube").asText()));
-    consumables.add(
-        new Consumable(
-            "Sequencing Cartridge Lot Number", json.path("SequencingCartridge").asText()));
-    consumables.add(
-        new Consumable("Wash Container Lot Number", json.path("WashContainer").asText()));
-    consumables.add(new Consumable("Wafer Serial Number", json.path("Wafer").asText()));
+    addConsumable(consumables, "Amplification Sample Plate Serial Number", ampSamplePlate);
+    addConsumable(
+        consumables,
+        "Amplification Chilled Rack Lot Number",
+        json.path("AMP_ChilledRack").asText());
+    addConsumable(
+        consumables, "Amplification RT Rack Lot Number", json.path("AMP_RTRack").asText());
+    addConsumable(
+        consumables, "Amplification Tube Array Lot Number", json.path("AMP_TubeArray").asText());
+    addConsumable(
+        consumables,
+        "Amplification Break Container Lot Number",
+        json.path("AMP_BreakContainer").asText());
+    addConsumable(consumables, "Amplification Wash 1 Lot Number", json.path("AMP_Wash1").asText());
+    addConsumable(consumables, "Amplification Wash 2 Lot Number", json.path("AMP_Wash2").asText());
+    addConsumable(
+        consumables,
+        "Amplification Enrichment Bead Lot Number",
+        json.path("AMP_EnrichmentBead").asText());
+    addConsumable(consumables, "Sequencing Rack Lot Number", json.path("SampleRack").asText());
+    addConsumable(consumables, "Sample Tube Lot Number", json.path("SampleTube").asText());
+    addConsumable(
+        consumables, "Sequencing Cartridge Lot Number", json.path("SequencingCartridge").asText());
+    addConsumable(consumables, "Wash Container Lot Number", json.path("WashContainer").asText());
+    addConsumable(consumables, "Wafer Serial Number", json.path("Wafer").asText());
 
     dto.setConsumables(consumables);
 
@@ -333,6 +332,13 @@ public class DefaultUltima extends RunProcessor {
     }
 
     return dto;
+  }
+
+  /** Skips consumables with no meaningful lot number (missing, empty, or the literal "null"). */
+  private static void addConsumable(List<Consumable> consumables, String type, String lotNumber) {
+    if (lotNumber != null && !lotNumber.isEmpty() && !lotNumber.equalsIgnoreCase("null")) {
+      consumables.add(new Consumable(type, lotNumber));
+    }
   }
 
   /**
