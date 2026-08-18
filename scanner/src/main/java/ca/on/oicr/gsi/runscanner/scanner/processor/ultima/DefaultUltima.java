@@ -336,7 +336,7 @@ public class DefaultUltima extends RunProcessor {
 
   /** Skips consumables with no meaningful lot number (missing, empty, or the literal "null"). */
   private static void addConsumable(List<Consumable> consumables, String type, String lotNumber) {
-    if (lotNumber != null && !lotNumber.isEmpty() && !lotNumber.equalsIgnoreCase("null")) {
+    if (lotNumber != null && !lotNumber.isBlank() && !lotNumber.equalsIgnoreCase("null")) {
       consumables.add(new Consumable(type, lotNumber));
     }
   }
