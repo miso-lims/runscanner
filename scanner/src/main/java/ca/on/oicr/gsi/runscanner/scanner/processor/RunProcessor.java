@@ -206,8 +206,11 @@ public abstract class RunProcessor {
    * directory. In other platforms, they may be a subset of those directories or nested further
    * down. This method is to return the appropriate directories that are worth processing.
    *
+   * <p>Runs should be returned newest-first. The scheduler treats this ordering as a priority
+   * order, so that freshly-discovered runs are processed ahead of any backlog.
+   *
    * @param root The directory as specified by the user.
-   * @return a stream of directories to process
+   * @return a stream of directories to process, ordered newest-first
    */
   public abstract Stream<File> getRunsFromRoot(File root);
 
