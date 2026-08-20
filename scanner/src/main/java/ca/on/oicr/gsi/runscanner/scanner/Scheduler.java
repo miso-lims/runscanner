@@ -316,7 +316,12 @@ public class Scheduler {
   }
 
   final ThreadPoolExecutor workPool =
-      new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, new NewestFirstQueue());
+      new ThreadPoolExecutor(
+          Runtime.getRuntime().availableProcessors(),
+          Runtime.getRuntime().availableProcessors(),
+          0L,
+          TimeUnit.MILLISECONDS,
+          new NewestFirstQueue());
 
   // The paths that need to be processed (and the corresponding processor).
   private final Set<File> workToDo = new ConcurrentSkipListSet<>();
@@ -426,7 +431,8 @@ public class Scheduler {
   // per-submission offerFirst needs a batch submitted oldest-to-newest for the newest run to end
   // up at the head of the queue -- so reverse each sequencer's list before it is merged.
   private static List<Pair<File, Configuration>> oldestFirstRuns(Configuration configuration) {
-    List<Pair<File, Configuration>> runs = configuration.getRuns().collect(Collectors.toList());
+    List<Pair<File, Configuration>> runs =
+        configuration.getRuns().collect(Collectors.toCollection(ArrayList::new));
     Collections.reverse(runs);
     return runs;
   }

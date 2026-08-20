@@ -271,16 +271,31 @@ public class SchedulerTest {
     Scheduler scheduler = new Scheduler();
     schedulersToStop.add(scheduler);
 
-    // workPool always has exactly one worker thread, so occupying it guarantees
-    // the thread must finish recording item 1 before it can even ask for item 2.
+    int coreThreads = scheduler.workPool.getCorePoolSize();
+    // Occupy all-but-one worker thread permanently (torn down via stop()'s shutdownNow() in the
+    // @After teardown), and put the last one behind a separately releasable gate, so exactly one
+    // thread is ever free to drain the queue. This matters because dequeue order alone doesn't
+    // determine *recorded* completion order: if N>1 threads were released together, each would
+    // independently race to record its own item after dequeuing, so a correct, deterministic
+    // dequeue order could still show up scrambled in the recorded order purely from thread
+    // scheduling after the dequeue. With only one thread ever free, it must finish recording item
+    // 1 before it can even ask for item 2, so recorded order and dequeue order coincide.
+    CountDownLatch permanentGate = new CountDownLatch(1);
     CountDownLatch releaseGate = new CountDownLatch(1);
-    CountDownLatch workerStarted = new CountDownLatch(1);
+    CountDownLatch allWorkersStarted = new CountDownLatch(coreThreads);
+    for (int i = 0; i < coreThreads - 1; i++) {
+      scheduler.workPool.execute(
+          () -> {
+            allWorkersStarted.countDown();
+            awaitUninterruptibly(permanentGate);
+          });
+    }
     scheduler.workPool.execute(
         () -> {
-          workerStarted.countDown();
+          allWorkersStarted.countDown();
           awaitUninterruptibly(releaseGate);
         });
-    assertTrue(workerStarted.await(10, TimeUnit.SECONDS));
+    assertTrue(allWorkersStarted.await(10, TimeUnit.SECONDS));
 
     List<String> executionOrder = new CopyOnWriteArrayList<>();
     CountDownLatch allProcessed = new CountDownLatch(4); // 1 backlog run + 3 fresh runs
