@@ -1,5 +1,8 @@
 # Unreleased
 
+Changes:
+* When new runs are found they're added to the front of the queue
+
 # 2.9.0
 
 Changes:
@@ -16,7 +19,6 @@ Changes:
 
 Changes:
 * Add in optional support for local file storage for Ultima (specified by useGoogleBucket boolean)
-* Add in new Ultima Workflow type EmSeq
 
 Fixes:
 * handle missing configuration parameters for Ultima
