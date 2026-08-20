@@ -188,6 +188,8 @@ public class DefaultUltima extends RunProcessor {
   @Override
   public NotificationDto process(File runDirectory, TimeZone tz) throws IOException {
     String runId = runDirectory.getName();
+    // Can we use local LLMs within our IDE (plugin) specifically IntelliJ - Full Line Code
+    // Completion Model
 
     // Get the run information from the cached API call
     JsonNode json = runCache.get(runId);
