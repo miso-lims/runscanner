@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
@@ -75,11 +76,14 @@ public abstract class AbstractProcessorTest<T extends NotificationDto> {
                     af.setModifiedTime(Instant.EPOCH);
 
                     // Strip away /home/user/workspace/etc from path to match reference
+                    // Path.toUri() re-resolves a relative path against the JVM's working
+                    // directory, so build the URI from the trimmed path's string form instead
+                    // to keep it relative.
                     Path pathToCut = Paths.get(af.getPath());
                     while (!pathToCut.getName(0).equals(Path.of("scanner"))) {
                       pathToCut = pathToCut.subpath(1, pathToCut.getNameCount());
                     }
-                    af.setPath(pathToCut.toUri());
+                    af.setPath(URI.create(pathToCut.toString()));
                   }
                 }
               }
