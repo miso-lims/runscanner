@@ -6,6 +6,7 @@ Changes:
 Fixes:
 * handle missing configuration parameters for Ultima
 * properly format Google Bucket "paths" in Ultima pipelineRuns
+* don't show consumables where the lot number is missing
 
 # 2.7.0
 
