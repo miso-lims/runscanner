@@ -1,6 +1,6 @@
 package ca.on.oicr.gsi.runscanner.scanner.processor.ultima;
 
-import java.nio.file.Path;
+import java.net.URI;
 import java.time.Instant;
 
 /**
@@ -17,7 +17,7 @@ public interface UltimaStorageEntry {
   String getFullPath();
 
   /** The structured path to store on the resulting DTO. */
-  Path getPath();
+  URI getPath();
 
   long getSize();
 

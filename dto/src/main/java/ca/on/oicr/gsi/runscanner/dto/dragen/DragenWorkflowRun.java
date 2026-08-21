@@ -3,7 +3,7 @@ package ca.on.oicr.gsi.runscanner.dto.dragen;
 import ca.on.oicr.gsi.runscanner.dto.AnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.WorkflowRun;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.nio.file.Path;
+import java.net.URI;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -35,7 +35,7 @@ public class DragenWorkflowRun extends WorkflowRun {
         .orElse(null);
   }
 
-  public DragenAnalysisUnit get(Path filePath) {
+  public DragenAnalysisUnit get(URI filePath) {
     List<DragenAnalysisUnit> list =
         analysisOutputs.stream()
             .filter(a -> a.getFiles().stream().anyMatch(f -> f.getPath().equals(filePath)))

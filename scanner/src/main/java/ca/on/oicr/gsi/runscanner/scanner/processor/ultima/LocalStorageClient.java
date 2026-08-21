@@ -1,6 +1,7 @@
 package ca.on.oicr.gsi.runscanner.scanner.processor.ultima;
 
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -82,8 +83,8 @@ public class LocalStorageClient implements UltimaStorageClient {
     }
 
     @Override
-    public Path getPath() {
-      return path.toAbsolutePath();
+    public URI getPath() {
+      return path.toAbsolutePath().toUri();
     }
 
     @Override
