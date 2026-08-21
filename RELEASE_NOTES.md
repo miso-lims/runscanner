@@ -2,6 +2,7 @@
 
 Changes:
 * Add in optional support for local file storage for Ultima (specified by useGoogleBucket boolean)
+* When new runs are found they're added to the front of the queue
 
 Fixes:
 * handle missing configuration parameters for Ultima
