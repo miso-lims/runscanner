@@ -14,6 +14,7 @@ import ca.on.oicr.gsi.runscanner.dto.type.PipelineStatus;
 import ca.on.oicr.gsi.runscanner.dto.type.Platform;
 import ca.on.oicr.gsi.runscanner.dto.type.WorkflowRunStatus;
 import ca.on.oicr.gsi.runscanner.dto.ultima.CramAnalysisFile;
+import ca.on.oicr.gsi.runscanner.dto.ultima.MetadataAnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaAnalysisUnit;
 import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaPipelineRun;
 import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaWorkflowRun;
@@ -207,6 +208,153 @@ public class UltimaProcessorTest extends AbstractProcessorTest {
     assertEquals(1000L, cramFile.getSize());
     assertEquals(fixedTime.toInstant(), cramFile.getCreatedTime());
     assertEquals(fixedTime.toInstant(), cramFile.getModifiedTime());
+  }
+
+  /**
+   * Verifies that a barcode folder containing a "_mergeContext.csv" file (in addition to the CRAM
+   * file) produces a second "EmSeq" workflow run, alongside the unchanged "CRAMGeneration" one,
+   * while a barcode folder with only a CRAM file does not.
+   */
+  @Test
+  public void testEmSeqWorkflowRun() throws IOException {
+    File directory = new File(this.getClass().getResource("/ultima/123456").getPath());
+
+    File mockRunsummaryFile = new File(directory, "ultima-api-runsummary-response.json");
+    JsonNode mockRunsummaryJson = mapper.readTree(mockRunsummaryFile);
+    File mockSampleDBFile = new File(directory, "sampledb-api-response.json");
+    JsonNode mockSampleDBJson = mapper.readTree(mockSampleDBFile);
+    File mockTTMetricsFile = new File(directory, "ultima-api-TT-metric-response.json");
+    JsonNode mockTTMetricsJson = mapper.readTree(mockTTMetricsFile);
+
+    String runId = mockRunsummaryJson.path("runid").asText("");
+    String samplePlate = mockRunsummaryJson.path("AMP_SamplePlate").asText("");
+
+    UltimaApiClient mockClient = mock(UltimaApiClient.class);
+    when(mockClient.fetchAllRunSummaries())
+        .thenReturn(Collections.singletonList(mockRunsummaryJson));
+    when(mockClient.fetchSampleDB(samplePlate)).thenReturn(mockSampleDBJson);
+    when(mockClient.fetchBarcodeMetrics(runId, "TT")).thenReturn(mockTTMetricsJson);
+
+    String bucket = "test-bucket";
+    String runFolderName = "123456-20240507_1234";
+    String runFolderFullPath = bucket + "/" + runFolderName + "/";
+
+    // Barcode folder with both a CRAM file and a _mergeContext.csv file: expect an EmSeq unit.
+    String emSeqBarcodeFolderName = "123456-lib1-lib2-TT";
+    String emSeqBarcodeFolderFullPath = runFolderFullPath + emSeqBarcodeFolderName + "/";
+    String cramFileName = emSeqBarcodeFolderName + ".cram";
+    String mergeContextFileName = emSeqBarcodeFolderName + "_mergeContext.csv";
+
+    // Barcode folder with only a CRAM file: expect no EmSeq unit for it.
+    String cramOnlyBarcodeFolderName = "123456-lib3-lib4-AA";
+    String cramOnlyBarcodeFolderFullPath = runFolderFullPath + cramOnlyBarcodeFolderName + "/";
+    String cramOnlyFileName = cramOnlyBarcodeFolderName + ".cram";
+
+    OffsetDateTime fixedTime = OffsetDateTime.of(2024, 5, 7, 10, 0, 0, 0, ZoneOffset.UTC);
+
+    UltimaStorageEntry runFolderEntry = mock(UltimaStorageEntry.class);
+    when(runFolderEntry.isDirectory()).thenReturn(true);
+    when(runFolderEntry.getName()).thenReturn(runFolderName);
+    when(runFolderEntry.getFullPath()).thenReturn(runFolderFullPath);
+
+    UltimaStorageEntry emSeqBarcodeFolderEntry = mock(UltimaStorageEntry.class);
+    when(emSeqBarcodeFolderEntry.isDirectory()).thenReturn(true);
+    when(emSeqBarcodeFolderEntry.getName()).thenReturn(emSeqBarcodeFolderName);
+    when(emSeqBarcodeFolderEntry.getFullPath()).thenReturn(emSeqBarcodeFolderFullPath);
+
+    UltimaStorageEntry cramOnlyBarcodeFolderEntry = mock(UltimaStorageEntry.class);
+    when(cramOnlyBarcodeFolderEntry.isDirectory()).thenReturn(true);
+    when(cramOnlyBarcodeFolderEntry.getName()).thenReturn(cramOnlyBarcodeFolderName);
+    when(cramOnlyBarcodeFolderEntry.getFullPath()).thenReturn(cramOnlyBarcodeFolderFullPath);
+
+    UltimaStorageEntry cramEntry = mock(UltimaStorageEntry.class);
+    when(cramEntry.isDirectory()).thenReturn(false);
+    when(cramEntry.getName()).thenReturn(cramFileName);
+    when(cramEntry.getPath())
+        .thenReturn(URI.create("gs://" + emSeqBarcodeFolderFullPath + cramFileName));
+    when(cramEntry.getCrc32Checksum()).thenReturn("AAAAAA==");
+    when(cramEntry.getSize()).thenReturn(1000L);
+    when(cramEntry.getCreatedTime()).thenReturn(fixedTime.toInstant());
+    when(cramEntry.getModifiedTime()).thenReturn(fixedTime.toInstant());
+
+    UltimaStorageEntry mergeContextEntry = mock(UltimaStorageEntry.class);
+    when(mergeContextEntry.isDirectory()).thenReturn(false);
+    when(mergeContextEntry.getName()).thenReturn(mergeContextFileName);
+    when(mergeContextEntry.getPath())
+        .thenReturn(URI.create("gs://" + emSeqBarcodeFolderFullPath + mergeContextFileName));
+    when(mergeContextEntry.getCrc32Checksum()).thenReturn("BBBBBB==");
+    when(mergeContextEntry.getSize()).thenReturn(200L);
+    when(mergeContextEntry.getCreatedTime()).thenReturn(fixedTime.toInstant());
+    when(mergeContextEntry.getModifiedTime()).thenReturn(fixedTime.toInstant());
+
+    UltimaStorageEntry cramOnlyEntry = mock(UltimaStorageEntry.class);
+    when(cramOnlyEntry.isDirectory()).thenReturn(false);
+    when(cramOnlyEntry.getName()).thenReturn(cramOnlyFileName);
+    when(cramOnlyEntry.getPath())
+        .thenReturn(URI.create("gs://" + cramOnlyBarcodeFolderFullPath + cramOnlyFileName));
+    when(cramOnlyEntry.getCrc32Checksum()).thenReturn("CCCCCC==");
+    when(cramOnlyEntry.getSize()).thenReturn(1500L);
+    when(cramOnlyEntry.getCreatedTime()).thenReturn(fixedTime.toInstant());
+    when(cramOnlyEntry.getModifiedTime()).thenReturn(fixedTime.toInstant());
+
+    UltimaStorageClient mockStorageClient = mock(UltimaStorageClient.class);
+    when(mockStorageClient.ls(any())).thenReturn(Collections.emptyList());
+    when(mockStorageClient.ls(directory.getParentFile().getPath()))
+        .thenReturn(List.of(runFolderEntry));
+    when(mockStorageClient.ls(runFolderFullPath))
+        .thenReturn(List.of(emSeqBarcodeFolderEntry, cramOnlyBarcodeFolderEntry));
+    when(mockStorageClient.ls(emSeqBarcodeFolderFullPath))
+        .thenReturn(List.of(cramEntry, mergeContextEntry));
+    when(mockStorageClient.ls(cramOnlyBarcodeFolderFullPath)).thenReturn(List.of(cramOnlyEntry));
+
+    DefaultUltima processor =
+        new DefaultUltima(
+            new Builder(Platform.ULTIMA, "unittest", null), mockClient, mockStorageClient);
+    processor.getRunsFromRoot(directory.getParentFile()).count();
+    UltimaNotificationDto result =
+        (UltimaNotificationDto)
+            processor.process(directory, TimeZone.getTimeZone("America/Toronto"));
+
+    List<PipelineRun> pipelineRuns = result.getPipelineRuns();
+    assertEquals(1, pipelineRuns.size());
+    UltimaPipelineRun pipelineRun = (UltimaPipelineRun) pipelineRuns.get(0);
+    assertEquals(PipelineStatus.COMPLETE, pipelineRun.getPipelineStatus());
+
+    // Both CRAMGeneration (unchanged) and the new EmSeq workflow run are present.
+    List<UltimaWorkflowRun> workflowRuns = pipelineRun.getWorkflowRuns();
+    assertEquals(2, workflowRuns.size());
+
+    UltimaWorkflowRun cramWorkflowRun = pipelineRun.get("CRAMGeneration");
+    assertNotNull(cramWorkflowRun);
+    assertEquals(WorkflowRunStatus.COMPLETE, cramWorkflowRun.getWorkflowRunStatus());
+    // One CRAM analysis unit per barcode folder, regardless of EM-seq output.
+    assertEquals(2, cramWorkflowRun.getAnalysisOutputs().size());
+
+    UltimaWorkflowRun emSeqWorkflowRun = pipelineRun.get("EmSeq");
+    assertNotNull(emSeqWorkflowRun);
+    assertEquals(WorkflowRunStatus.COMPLETE, emSeqWorkflowRun.getWorkflowRunStatus());
+    assertEquals("TestAnalysisRecipe", emSeqWorkflowRun.getSoftwareVersion());
+    assertEquals(Instant.parse("2024-05-07T12:00:00Z"), emSeqWorkflowRun.getStartTime());
+
+    // Only the barcode folder with a _mergeContext.csv file gets an EmSeq analysis unit.
+    List<UltimaAnalysisUnit> emSeqUnits = emSeqWorkflowRun.getAnalysisOutputs();
+    assertEquals(1, emSeqUnits.size());
+
+    UltimaAnalysisUnit emSeqUnit = emSeqUnits.get(0);
+    assertEquals("TT", emSeqUnit.getBarcode());
+    assertEquals("lib1-lib2", emSeqUnit.getLibrary());
+
+    List<AnalysisFile> emSeqFiles = emSeqUnit.getFiles();
+    assertEquals(1, emSeqFiles.size());
+
+    MetadataAnalysisFile mergeContextFile = (MetadataAnalysisFile) emSeqFiles.get(0);
+    assertEquals(
+        URI.create("gs://" + emSeqBarcodeFolderFullPath + mergeContextFileName),
+        mergeContextFile.getPath());
+    assertEquals("BBBBBB==", mergeContextFile.getCrc32Checksum());
+    assertEquals(200L, mergeContextFile.getSize());
+    assertEquals(fixedTime.toInstant(), mergeContextFile.getCreatedTime());
+    assertEquals(fixedTime.toInstant(), mergeContextFile.getModifiedTime());
   }
 
   /**

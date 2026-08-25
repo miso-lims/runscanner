@@ -2,6 +2,7 @@
 
 Changes:
 * Add in optional support for local file storage for Ultima (specified by useGoogleBucket boolean)
+* Add in new Ultima Workflow type EmSeq
 
 Fixes:
 * handle missing configuration parameters for Ultima

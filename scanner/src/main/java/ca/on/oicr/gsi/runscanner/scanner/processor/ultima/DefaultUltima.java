@@ -9,6 +9,7 @@ import ca.on.oicr.gsi.runscanner.dto.type.PipelineStatus;
 import ca.on.oicr.gsi.runscanner.dto.type.UltimaProcessStatus;
 import ca.on.oicr.gsi.runscanner.dto.type.WorkflowRunStatus;
 import ca.on.oicr.gsi.runscanner.dto.ultima.CramAnalysisFile;
+import ca.on.oicr.gsi.runscanner.dto.ultima.MetadataAnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaAnalysisUnit;
 import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaPipelineRun;
 import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaWorkflowRun;
@@ -39,8 +40,10 @@ public class DefaultUltima extends RunProcessor {
   protected final Map<String, JsonNode> runCache = new ConcurrentHashMap<>();
   protected final Map<String, String> runFolderCache = new ConcurrentHashMap<>();
 
-  DateTimeFormatter NEXUS_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-  String CONTROL_BARCODE = "TT";
+  private static final DateTimeFormatter NEXUS_DATE_FORMATTER =
+      DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+  private static final String CONTROL_BARCODE = "TT";
+  private static final String EM_SEQ_MERGE_CONTEXT_SUFFIX = "_mergeContext.csv";
 
   private static final Logger log = LoggerFactory.getLogger(DefaultUltima.class);
   private final UltimaApiClient apiClient;
@@ -352,12 +355,20 @@ public class DefaultUltima extends RunProcessor {
     // Ultima only ever has one attempt per runId.
     UltimaPipelineRun pipelineRun = new UltimaPipelineRun(1);
     try {
-      UltimaWorkflowRun workflowRun = buildCramWorkflowRun(runFolder, json, uploadStatus);
-      pipelineRun.put(workflowRun);
+      AnalysisUnits analysisUnits = buildAnalysisUnits(runFolder);
+
+      UltimaWorkflowRun cramWorkflowRun =
+          buildCramWorkflowRun(json, uploadStatus, analysisUnits.cramUnits());
+      pipelineRun.put(cramWorkflowRun);
       pipelineRun.setPipelineStatus(
-          workflowRun.getWorkflowRunStatus() == WorkflowRunStatus.PENDING
+          cramWorkflowRun.getWorkflowRunStatus() == WorkflowRunStatus.PENDING
               ? PipelineStatus.INCOMPLETE
               : PipelineStatus.COMPLETE);
+
+      // EmSeq output is optional: only add the workflow run if a _mergeContext.csv file exists
+      if (!analysisUnits.emSeqUnits().isEmpty()) {
+        pipelineRun.put(buildEmSeqWorkflowRun(json, uploadStatus, analysisUnits.emSeqUnits()));
+      }
     } catch (DateTimeParseException | IOException e) {
       log.error("Failed to build pipeline run for Ultima run {}", runId, e);
       pipelineRun.setPipelineStatus(PipelineStatus.SCAN_ERROR);
@@ -366,8 +377,21 @@ public class DefaultUltima extends RunProcessor {
   }
 
   private UltimaWorkflowRun buildCramWorkflowRun(
-      String runFolder, JsonNode json, UltimaProcessStatus uploadStatus) throws IOException {
-    UltimaWorkflowRun workflowRun = new UltimaWorkflowRun("CRAMGeneration");
+      JsonNode json, UltimaProcessStatus uploadStatus, List<UltimaAnalysisUnit> cramUnits) {
+    return buildWorkflowRun("CRAMGeneration", json, uploadStatus, cramUnits);
+  }
+
+  private UltimaWorkflowRun buildEmSeqWorkflowRun(
+      JsonNode json, UltimaProcessStatus uploadStatus, List<UltimaAnalysisUnit> emSeqUnits) {
+    return buildWorkflowRun("EmSeq", json, uploadStatus, emSeqUnits);
+  }
+
+  private UltimaWorkflowRun buildWorkflowRun(
+      String workflowName,
+      JsonNode json,
+      UltimaProcessStatus uploadStatus,
+      List<UltimaAnalysisUnit> analysisOutputs) {
+    UltimaWorkflowRun workflowRun = new UltimaWorkflowRun(workflowName);
 
     // Analysis_Start_Time uses the same "yyyy-MM-dd HH:mm:ss" format as startdatetime
     String analysisStartStr = json.path("Analysis_Start_Time").asText("");
@@ -386,12 +410,17 @@ public class DefaultUltima extends RunProcessor {
       workflowRun.fail();
     }
 
-    workflowRun.setAnalysisOutputs(buildAnalysisUnits(runFolder));
+    workflowRun.setAnalysisOutputs(analysisOutputs);
     return workflowRun;
   }
 
-  private List<UltimaAnalysisUnit> buildAnalysisUnits(String runFolder) throws IOException {
-    List<UltimaAnalysisUnit> units = new ArrayList<>();
+  /** Groups the per-barcode-folder analysis units belonging to each workflow of a run. */
+  private record AnalysisUnits(
+      List<UltimaAnalysisUnit> cramUnits, List<UltimaAnalysisUnit> emSeqUnits) {}
+
+  private AnalysisUnits buildAnalysisUnits(String runFolder) throws IOException {
+    List<UltimaAnalysisUnit> cramUnits = new ArrayList<>();
+    List<UltimaAnalysisUnit> emSeqUnits = new ArrayList<>();
     for (UltimaStorageEntry folder : storageClient.ls(runFolder)) {
       if (!folder.isDirectory()) continue; // no run level files are expected
       String folderName = folder.getName();
@@ -406,31 +435,51 @@ public class DefaultUltima extends RunProcessor {
       String library = libBarcode.substring(0, lastDash);
       String barcode = libBarcode.substring(lastDash + 1);
 
-      UltimaAnalysisUnit unit = new UltimaAnalysisUnit();
-      unit.setBarcode(barcode);
-      unit.setLibrary(library);
-      unit.setFiles(buildAnalysisFiles(folder.getFullPath()));
-      units.add(unit);
+      AnalysisFiles barcodeFiles = buildAnalysisFiles(storageClient.ls(folder.getFullPath()));
+
+      UltimaAnalysisUnit cramUnit = new UltimaAnalysisUnit();
+      cramUnit.setBarcode(barcode);
+      cramUnit.setLibrary(library);
+      cramUnit.setFiles(barcodeFiles.cramFiles());
+      cramUnits.add(cramUnit);
+
+      // EmSeq units are only created when a _mergeContext.csv file is present
+      if (!barcodeFiles.mergeContextFiles().isEmpty()) {
+        UltimaAnalysisUnit emSeqUnit = new UltimaAnalysisUnit();
+        emSeqUnit.setBarcode(barcode);
+        emSeqUnit.setLibrary(library);
+        emSeqUnit.setFiles(barcodeFiles.mergeContextFiles());
+        emSeqUnits.add(emSeqUnit);
+      }
     }
-    return units;
+    return new AnalysisUnits(cramUnits, emSeqUnits);
   }
 
-  private List<AnalysisFile> buildAnalysisFiles(String barcodeFolderPath) throws IOException {
-    List<AnalysisFile> files = new ArrayList<>();
-    for (UltimaStorageEntry entry : storageClient.ls(barcodeFolderPath)) {
+  /** Create AnalysisFile for the CRAM and EmSeq analysis files found in a single barcode folder. */
+  private record AnalysisFiles(
+      List<AnalysisFile> cramFiles, List<AnalysisFile> mergeContextFiles) {}
+
+  private static AnalysisFiles buildAnalysisFiles(List<UltimaStorageEntry> entries) {
+    List<AnalysisFile> cramFiles = new ArrayList<>();
+    List<AnalysisFile> mergeContextFiles = new ArrayList<>();
+    for (UltimaStorageEntry entry : entries) {
       if (entry.isDirectory()) continue;
-      // Only cram files are grouped into the CRAMGeneration workflow run for now; other file
-      // types have no consumer yet.
-      if (!entry.getName().endsWith(".cram")) continue;
-      AnalysisFile file = new CramAnalysisFile();
-      file.setPath(entry.getPath());
-      file.setCrc32Checksum(entry.getCrc32Checksum()); // base64
-      file.setSize(entry.getSize());
-      file.setCreatedTime(entry.getCreatedTime());
-      file.setModifiedTime(entry.getModifiedTime());
-      files.add(file);
+      if (entry.getName().endsWith(".cram")) {
+        cramFiles.add(copyFields(new CramAnalysisFile(), entry));
+      } else if (entry.getName().endsWith(EM_SEQ_MERGE_CONTEXT_SUFFIX)) {
+        mergeContextFiles.add(copyFields(new MetadataAnalysisFile(), entry));
+      }
     }
-    return files;
+    return new AnalysisFiles(cramFiles, mergeContextFiles);
+  }
+
+  private static AnalysisFile copyFields(AnalysisFile file, UltimaStorageEntry entry) {
+    file.setPath(entry.getPath());
+    file.setCrc32Checksum(entry.getCrc32Checksum()); // base64
+    file.setSize(entry.getSize());
+    file.setCreatedTime(entry.getCreatedTime());
+    file.setModifiedTime(entry.getModifiedTime());
+    return file;
   }
 
   private UltimaProcessStatus sequencingComplete(int pctComplete, int succeeded, String errmsg) {
