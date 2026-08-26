@@ -355,20 +355,26 @@ public class DefaultUltima extends RunProcessor {
     // Ultima only ever has one attempt per runId.
     UltimaPipelineRun pipelineRun = new UltimaPipelineRun(1);
     try {
-      AnalysisUnits analysisUnits = buildAnalysisUnits(runFolder);
+      List<UltimaAnalysisUnit> cramUnits = new ArrayList<>();
+      List<UltimaAnalysisUnit> emSeqUnits = new ArrayList<>();
+      buildAnalysisUnits(runFolder, cramUnits, emSeqUnits);
 
-      UltimaWorkflowRun cramWorkflowRun =
-          buildCramWorkflowRun(json, uploadStatus, analysisUnits.cramUnits());
+      UltimaWorkflowRun cramWorkflowRun = buildCramWorkflowRun(json, uploadStatus, cramUnits);
       pipelineRun.put(cramWorkflowRun);
-      pipelineRun.setPipelineStatus(
-          cramWorkflowRun.getWorkflowRunStatus() == WorkflowRunStatus.PENDING
-              ? PipelineStatus.INCOMPLETE
-              : PipelineStatus.COMPLETE);
+
+      boolean anyPending = cramWorkflowRun.getWorkflowRunStatus() == WorkflowRunStatus.PENDING;
 
       // EmSeq output is optional: only add the workflow run if a _mergeContext.csv file exists
-      if (!analysisUnits.emSeqUnits().isEmpty()) {
-        pipelineRun.put(buildEmSeqWorkflowRun(json, uploadStatus, analysisUnits.emSeqUnits()));
+      if (!emSeqUnits.isEmpty()) {
+        UltimaWorkflowRun emSeqWorkflowRun = buildEmSeqWorkflowRun(json, uploadStatus, emSeqUnits);
+        pipelineRun.put(emSeqWorkflowRun);
+        if (emSeqWorkflowRun.getWorkflowRunStatus() == WorkflowRunStatus.PENDING) {
+          anyPending = true;
+        }
       }
+
+      pipelineRun.setPipelineStatus(
+          anyPending ? PipelineStatus.INCOMPLETE : PipelineStatus.COMPLETE);
     } catch (DateTimeParseException | IOException e) {
       log.error("Failed to build pipeline run for Ultima run {}", runId, e);
       pipelineRun.setPipelineStatus(PipelineStatus.SCAN_ERROR);
@@ -414,13 +420,9 @@ public class DefaultUltima extends RunProcessor {
     return workflowRun;
   }
 
-  /** Groups the per-barcode-folder analysis units belonging to each workflow of a run. */
-  private record AnalysisUnits(
-      List<UltimaAnalysisUnit> cramUnits, List<UltimaAnalysisUnit> emSeqUnits) {}
-
-  private AnalysisUnits buildAnalysisUnits(String runFolder) throws IOException {
-    List<UltimaAnalysisUnit> cramUnits = new ArrayList<>();
-    List<UltimaAnalysisUnit> emSeqUnits = new ArrayList<>();
+  private void buildAnalysisUnits(
+      String runFolder, List<UltimaAnalysisUnit> cramUnits, List<UltimaAnalysisUnit> emSeqUnits)
+      throws IOException {
     for (UltimaStorageEntry folder : storageClient.ls(runFolder)) {
       if (!folder.isDirectory()) continue; // no run level files are expected
       String folderName = folder.getName();
@@ -452,7 +454,6 @@ public class DefaultUltima extends RunProcessor {
         emSeqUnits.add(emSeqUnit);
       }
     }
-    return new AnalysisUnits(cramUnits, emSeqUnits);
   }
 
   /** Create AnalysisFile for the CRAM and EmSeq analysis files found in a single barcode folder. */
