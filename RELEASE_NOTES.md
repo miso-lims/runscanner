@@ -1,6 +1,11 @@
 # Unreleased
 
 Changes:
+
+
+# 2.8.0
+
+Changes:
 * Add in optional support for local file storage for Ultima (specified by useGoogleBucket boolean)
 * Add in new Ultima Workflow type EmSeq
 
