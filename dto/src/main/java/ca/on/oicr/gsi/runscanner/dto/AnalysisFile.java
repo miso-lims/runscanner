@@ -1,8 +1,10 @@
 package ca.on.oicr.gsi.runscanner.dto;
 
 import ca.on.oicr.gsi.runscanner.dto.dragen.FastqAnalysisFile;
+import ca.on.oicr.gsi.runscanner.dto.type.AnalysisFileFormat;
 import ca.on.oicr.gsi.runscanner.dto.ultima.CramAnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.ultima.MetadataAnalysisFile;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -25,6 +27,14 @@ public abstract class AnalysisFile {
   private long size;
   private Instant createdTime;
   private Instant modifiedTime;
+
+  /**
+   * The format of this file. Jackson consumes the serialized "format" property as the type
+   * discriminator, so this accessor is what lets consumers read the format back off a deserialized
+   * AnalysisFile. It is ignored on the wire to avoid writing the format twice.
+   */
+  @JsonIgnore
+  public abstract AnalysisFileFormat getFormatType();
 
   public Instant getCreatedTime() {
     return createdTime;

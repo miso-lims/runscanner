@@ -1,6 +1,9 @@
 # Unreleased
 
 Changes:
+* Add AnalysisFile.getFormatType(), returning the new AnalysisFileFormat enum, so consumers can read
+  a file's format directly from a deserialized AnalysisFile instead of inspecting the JSON. The
+  serialized form is unchanged.
 
 
 # 2.8.0

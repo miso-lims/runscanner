@@ -112,6 +112,7 @@ public class JacksonTest {
   }
 
   private static void assertAnalysisFileEqual(AnalysisFile one, AnalysisFile two) {
+    Assert.assertEquals(one.getFormatType(), two.getFormatType());
     Assert.assertEquals(one.getPath(), two.getPath());
     Assert.assertEquals(one.getCrc32Checksum(), two.getCrc32Checksum());
     Assert.assertEquals(one.getSize(), two.getSize());
