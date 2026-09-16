@@ -198,6 +198,7 @@ public final class DefaultIllumina extends RunProcessor {
   private static boolean calculateScanDragen(ObjectNode parameters) {
     return parameters.hasNonNull("scanDragen") && parameters.get("scanDragen").asBoolean();
   }
+
   /**
    * Calculates whether or not to check output based on parameter.
    *
