@@ -5,6 +5,7 @@ import ca.on.oicr.gsi.runscanner.dto.type.AnalysisFileFormat;
 import ca.on.oicr.gsi.runscanner.dto.ultima.CramAnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.ultima.MetadataAnalysisFile;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -15,11 +16,17 @@ import java.time.Instant;
 import java.util.Objects;
 
 // Represents one file output by a sequencing workflow
-@JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "format")
+@JsonTypeInfo(
+    use = Id.NAME,
+    include = As.PROPERTY,
+    property = "format",
+    visible = true,
+    defaultImpl = UnknownAnalysisFile.class)
 @JsonSubTypes({ //
   @Type(value = FastqAnalysisFile.class, name = "fastq"), //
   @Type(value = CramAnalysisFile.class, name = "cram"), //
   @Type(value = MetadataAnalysisFile.class, name = "metadata"), //
+  @Type(value = UnknownAnalysisFile.class, name = "unknown"), //
 }) //
 public abstract class AnalysisFile {
   private URI path;
@@ -27,6 +34,7 @@ public abstract class AnalysisFile {
   private long size;
   private Instant createdTime;
   private Instant modifiedTime;
+  private String rawFormat;
 
   /**
    * The format of this file. Jackson consumes the serialized "format" property as the type
@@ -35,6 +43,32 @@ public abstract class AnalysisFile {
    */
   @JsonIgnore
   public abstract AnalysisFileFormat getFormatType();
+
+  /**
+   * The "format" discriminator exactly as it appeared in the JSON this object was deserialized
+   * from, or null if this object was built in code rather than read off the wire.
+   *
+   * <p>For a recognised format this is just {@code getFormatType().getFormat()}. It earns its keep
+   * on an {@link UnknownAnalysisFile}, where it is the only record of what the producer actually
+   * called the format; the enum can say no more than {@link AnalysisFileFormat#UNKNOWN}.
+   *
+   * <p>Deliberately excluded from equals/hashCode: it describes how this object was obtained, not
+   * which file it denotes, and including it would make a file built by the scanner unequal to the
+   * deserialized copy of itself.
+   */
+  @JsonIgnore
+  public String getRawFormat() {
+    return rawFormat;
+  }
+
+  /**
+   * Populated by Jackson from the type discriminator, thanks to {@code visible = true}. Not
+   * serialized — Jackson's type serializer is solely responsible for writing "format".
+   */
+  @JsonProperty("format")
+  public void setRawFormat(String rawFormat) {
+    this.rawFormat = rawFormat;
+  }
 
   public Instant getCreatedTime() {
     return createdTime;
@@ -77,7 +111,11 @@ public abstract class AnalysisFile {
   }
 
   public String toString() {
-    return "AnalysisFile [path="
+    return "AnalysisFile [format="
+        + getFormatType()
+        + ", rawFormat="
+        + rawFormat
+        + ", path="
         + path
         + ", crc32Checksum="
         + crc32Checksum

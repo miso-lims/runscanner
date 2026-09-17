@@ -10,7 +10,12 @@ package ca.on.oicr.gsi.runscanner.dto.type;
 public enum AnalysisFileFormat {
   FASTQ("fastq"), //
   CRAM("cram"), //
-  METADATA("metadata");
+  METADATA("metadata"), //
+  /**
+   * The format was absent from the JSON, or names a format this version of the DTOs does not know
+   * about. See {@code UnknownAnalysisFile}.
+   */
+  UNKNOWN("unknown");
 
   private final String format;
 

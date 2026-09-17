@@ -4,6 +4,13 @@ Changes:
 * Add AnalysisFile.getFormatType(), returning the new AnalysisFileFormat enum, so consumers can read
   a file's format directly from a deserialized AnalysisFile instead of inspecting the JSON. The
   serialized form is unchanged.
+* An AnalysisFile whose "format" is absent or unrecognised now deserializes to the new
+  UnknownAnalysisFile (AnalysisFileFormat.UNKNOWN) instead of throwing InvalidTypeIdException.
+  Previously a single unrecognised format aborted the read of the entire notification, taking every
+  well-formed file with it; now only that file is affected. Note that re-serializing an
+  UnknownAnalysisFile writes "format":"unknown", not the format it was read with. The discriminator
+  that was read is preserved on AnalysisFile.getRawFormat(). Consumers switching over
+  AnalysisFileFormat need a case for UNKNOWN.
 
 
 # 2.8.0
