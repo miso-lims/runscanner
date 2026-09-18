@@ -7,12 +7,22 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import java.io.File;
+import java.lang.reflect.Modifier;
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -48,6 +58,61 @@ public class AnalysisFileFormatTest {
             .map(AnalysisFileFormat::getFormat)
             .collect(Collectors.toSet());
     Assert.assertEquals(known, registered);
+  }
+
+  /**
+   * The other two invariant tests enumerate {@code @JsonSubTypes}, so a subclass that was never
+   * registered there is invisible to them. Jackson does not complain either: serializing an
+   * unregistered subtype silently falls back to writing the simple class name as the discriminator,
+   * so a forgotten {@code @Type} ships as {@code "format":"BamAnalysisFile"} and every consumer
+   * reads it as an UnknownAnalysisFile. This walks the compiled DTO classes instead, so the check
+   * starts from what exists rather than from what was remembered.
+   */
+  @Test
+  public void testEverySubclassIsRegistered() throws Exception {
+    Set<Class<?>> registered =
+        Arrays.stream(subTypes()).map(JsonSubTypes.Type::value).collect(Collectors.toSet());
+
+    Set<Class<?>> unregistered = new TreeSet<>(Comparator.comparing(Class::getName));
+    for (Class<?> candidate : compiledDtoClasses()) {
+      if (AnalysisFile.class.isAssignableFrom(candidate)
+          && !candidate.equals(AnalysisFile.class)
+          // An abstract intermediate class is never instantiated by Jackson, so it needs no name.
+          && !Modifier.isAbstract(candidate.getModifiers())
+          && !registered.contains(candidate)) {
+        unregistered.add(candidate);
+      }
+    }
+
+    Assert.assertEquals(
+        "AnalysisFile subclasses missing from @JsonSubTypes. Add a @Type(value = ..., name = ...)"
+            + " for each, and a matching AnalysisFileFormat constant.",
+        Collections.emptySet(),
+        unregistered);
+  }
+
+  /** Every class compiled into the module that declares {@link AnalysisFile}. */
+  private static List<Class<?>> compiledDtoClasses() throws Exception {
+    Path root =
+        Paths.get(AnalysisFile.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+    Assert.assertTrue(
+        "Expected the DTO classes to be an exploded directory, but found " + root,
+        Files.isDirectory(root));
+
+    List<Class<?>> classes = new ArrayList<>();
+    try (Stream<Path> files = Files.walk(root)) {
+      for (Path file : files.filter(p -> p.toString().endsWith(".class")).toList()) {
+        String name =
+            root.relativize(file)
+                .toString()
+                .replace(File.separatorChar, '.')
+                .replaceAll("\\.class$", "");
+        // Initializing is unnecessary and would run static blocks just to read the hierarchy.
+        classes.add(Class.forName(name, false, AnalysisFile.class.getClassLoader()));
+      }
+    }
+    Assert.assertFalse("Found no compiled classes under " + root, classes.isEmpty());
+    return classes;
   }
 
   @Test
