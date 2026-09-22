@@ -7,6 +7,7 @@ Changes:
   UnknownAnalysisFile. Note that re-serializing an UnknownAnalysisFile writes
   "format":"unknown", not the format it was read with. The discriminator that was read is
   preserved on AnalysisFile.getRawFormat().
+* Add in index files as part of the Ultima Cram Generation Workflow
 
 
 # 2.8.0
