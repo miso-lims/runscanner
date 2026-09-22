@@ -8,11 +8,7 @@ import ca.on.oicr.gsi.runscanner.dto.type.HealthType;
 import ca.on.oicr.gsi.runscanner.dto.type.PipelineStatus;
 import ca.on.oicr.gsi.runscanner.dto.type.UltimaProcessStatus;
 import ca.on.oicr.gsi.runscanner.dto.type.WorkflowRunStatus;
-import ca.on.oicr.gsi.runscanner.dto.ultima.CramAnalysisFile;
-import ca.on.oicr.gsi.runscanner.dto.ultima.MetadataAnalysisFile;
-import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaAnalysisUnit;
-import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaPipelineRun;
-import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaWorkflowRun;
+import ca.on.oicr.gsi.runscanner.dto.ultima.*;
 import ca.on.oicr.gsi.runscanner.scanner.processor.PathType;
 import ca.on.oicr.gsi.runscanner.scanner.processor.RunProcessor;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -467,6 +463,8 @@ public class DefaultUltima extends RunProcessor {
       if (entry.isDirectory()) continue;
       if (entry.getName().endsWith(".cram")) {
         cramFiles.add(copyFields(new CramAnalysisFile(), entry));
+      } else if (entry.getName().endsWith(".crai")) {
+        cramFiles.add(copyFields(new IndexAnalysisFile(), entry));
       } else if (entry.getName().endsWith(EM_SEQ_MERGE_CONTEXT_SUFFIX)) {
         mergeContextFiles.add(copyFields(new MetadataAnalysisFile(), entry));
       }
