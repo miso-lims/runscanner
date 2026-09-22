@@ -427,16 +427,6 @@ public class Scheduler {
     return mergedRuns.stream();
   }
 
-  // RunProcessor#getRunsFromRoot returns runs newest-first, but NewestFirstQueue's
-  // per-submission offerFirst needs a batch submitted oldest-to-newest for the newest run to end
-  // up at the head of the queue -- so reverse each sequencer's list before it is merged.
-  private static List<Pair<File, Configuration>> oldestFirstRuns(Configuration configuration) {
-    List<Pair<File, Configuration>> runs =
-        configuration.getRuns().collect(Collectors.toCollection(ArrayList::new));
-    Collections.reverse(runs);
-    return runs;
-  }
-
   private static boolean isSubDirectory(File baseDirectory, File subDirectory) {
     File parent = subDirectory.getParentFile();
     while (parent != null) {
@@ -605,10 +595,14 @@ public class Scheduler {
                     StreamCountSpy<Pair<File, Configuration>> accepted =
                         new StreamCountSpy<>(acceptedDirectories);
                     AutoCloseable timer = scanTime.start()) {
+                  // RunProcessor#getRunsFromRoot returns runs oldest-first then
+                  // the newest run in each batch end up at the head of the queue
                   roundRobin(
                           roots.stream() //
                               .filter(Configuration::isValid) //
-                              .map(Scheduler::oldestFirstRuns) //
+                              .map(
+                                  configuration ->
+                                      configuration.getRuns().collect(Collectors.toList())) //
                               .collect(Collectors.toList())) //
                       .peek(attempted) //
                       .filter(

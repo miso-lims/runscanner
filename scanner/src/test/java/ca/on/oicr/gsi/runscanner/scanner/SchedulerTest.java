@@ -312,9 +312,9 @@ public class SchedulerTest {
         backlogConfig.getProcessor(),
         backlogConfig.getTimeZone());
 
-    // DefaultIllumina/DefaultUltima return runs newest-first; Scheduler.start() reverses each
-    // sequencer's list back to oldest-first (see Scheduler#oldestFirstRuns) before submitting via
-    // forEach -- so feed queueDirectory in that same oldest-first order here.
+    // DefaultIllumina/DefaultUltima return runs oldest-first, and Scheduler.start() submits each
+    // sequencer's list via forEach in that same order -- so feed queueDirectory oldest-first here
+    // too, matching what start() would submit.
     for (Pair<File, Configuration> entry :
         runsFor(freshConfig, "freshRunOldest", "freshRunMiddle", "freshRunNewest")) {
       scheduler.queueDirectory(
