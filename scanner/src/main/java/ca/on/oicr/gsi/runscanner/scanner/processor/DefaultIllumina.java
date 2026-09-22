@@ -251,9 +251,9 @@ public final class DefaultIllumina extends RunProcessor {
   public Stream<File> getRunsFromRoot(File root) {
     return Arrays.stream(
             root.listFiles(f -> f.isDirectory() && !f.getName().equals("Instrument"))) //
-        // illumina runs start with yymmdd or yyyymmdd for newer instruments,
-        // we want runscanner to scan newer runs first
-        .sorted(Comparator.comparing(File::getName).reversed());
+        // illumina run directory names start with yymmdd or yyyymmdd for newer instruments, so
+        // sorting names ascending sorts runs oldest-first.
+        .sorted(Comparator.comparing(File::getName));
   }
 
   private boolean isLaneComplete(Path laneDir, IlluminaNotificationDto dto) {

@@ -158,7 +158,7 @@ public class DefaultUltima extends RunProcessor {
 
   /**
    * Instead of scanning disk, we fetch the list of Run IDs from the API. We return "Virtual" File
-   * objects representing each Run ID.
+   * objects representing each Run ID, ordered oldest-first by Run ID.
    */
   @Override
   public Stream<File> getRunsFromRoot(File root) {
@@ -168,11 +168,11 @@ public class DefaultUltima extends RunProcessor {
 
       populateRunFolderCache(root.getPath());
 
-      // nexus orders the runs by increasing runId (newer Run Id = higher num)
-      // we want runscanner to scan newer runs first
+      // Nexus already returns runs ordered by increasing runId (newer Run Id = higher num)
+      // this sort on runId puts the oldest run first.
       return allRunInfo.stream()
           .filter(n -> n.hasNonNull("runid") && !n.path("runid").asText().isBlank())
-          .sorted(Comparator.comparingLong((JsonNode n) -> n.path("runid").asLong()).reversed())
+          .sorted(Comparator.comparingLong((JsonNode n) -> n.path("runid").asLong()))
           .map(
               node -> {
                 String runId = node.path("runid").asText();
