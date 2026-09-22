@@ -3,6 +3,7 @@ package ca.on.oicr.gsi.runscanner.dto;
 import ca.on.oicr.gsi.runscanner.dto.dragen.FastqAnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.type.AnalysisFileFormat;
 import ca.on.oicr.gsi.runscanner.dto.ultima.CramAnalysisFile;
+import ca.on.oicr.gsi.runscanner.dto.ultima.IndexAnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.ultima.MetadataAnalysisFile;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -25,6 +26,7 @@ import java.util.Objects;
 @JsonSubTypes({ //
   @Type(value = FastqAnalysisFile.class, name = "fastq"), //
   @Type(value = CramAnalysisFile.class, name = "cram"), //
+  @Type(value = IndexAnalysisFile.class, name = "index"), //
   @Type(value = MetadataAnalysisFile.class, name = "metadata"), //
   @Type(value = UnknownAnalysisFile.class, name = "unknown"), //
 }) //
