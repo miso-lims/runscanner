@@ -1,9 +1,9 @@
 package ca.on.oicr.gsi.runscanner.rs.dto.test.ultima;
 
 import ca.on.oicr.gsi.runscanner.dto.AnalysisFile;
+import ca.on.oicr.gsi.runscanner.dto.CramAnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.type.PipelineStatus;
 import ca.on.oicr.gsi.runscanner.dto.type.WorkflowRunStatus;
-import ca.on.oicr.gsi.runscanner.dto.ultima.CramAnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.ultima.MetadataAnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaAnalysisUnit;
 import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaPipelineRun;
