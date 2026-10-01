@@ -1,5 +1,7 @@
 # Unreleased
 
+# 2.9.0
+
 Changes:
 * Add AnalysisFile.getFormatType(), returning the new AnalysisFileFormat enum. The
   serialized form is unchanged.
