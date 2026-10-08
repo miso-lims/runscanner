@@ -206,6 +206,8 @@ public abstract class RunProcessor {
    * directory. In other platforms, they may be a subset of those directories or nested further
    * down. This method is to return the appropriate directories that are worth processing.
    *
+   * <p>Runs should be returned oldest-first when that information is known.
+   *
    * @param root The directory as specified by the user.
    * @return a stream of directories to process
    */

@@ -25,10 +25,11 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
@@ -305,10 +306,22 @@ public class Scheduler {
 
   private UnreadableDirectories unreadableDirectories;
 
-  // Executors.newFixedThreadPool uses a LinkedBlockingQueue by default for its work pool, which
-  // results in scanning jobs being executed in order of submission
-  private final ExecutorService workPool =
-      Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+  // Queue for {@link #workPool} that always inserts new tasks at the head rather than the tail,
+  // so a newly-discovered run always runs ahead of whatever backlog is still queued
+  static final class NewestFirstQueue extends LinkedBlockingDeque<Runnable> {
+    @Override
+    public boolean offer(Runnable task) {
+      return offerFirst(task);
+    }
+  }
+
+  final ThreadPoolExecutor workPool =
+      new ThreadPoolExecutor(
+          Runtime.getRuntime().availableProcessors(),
+          Runtime.getRuntime().availableProcessors(),
+          0L,
+          TimeUnit.MILLISECONDS,
+          new NewestFirstQueue());
 
   // The paths that need to be processed (and the corresponding processor).
   private final Set<File> workToDo = new ConcurrentSkipListSet<>();
@@ -464,7 +477,7 @@ public class Scheduler {
   }
 
   /** Push a run directory into the processing queue. */
-  private void queueDirectory(
+  protected void queueDirectory(
       final File directory, final RunProcessor processor, final TimeZone tz) {
     workToDo.add(directory);
     waitingRuns.labelValues(processor.getPlatformType().name()).inc();
@@ -582,6 +595,8 @@ public class Scheduler {
                     StreamCountSpy<Pair<File, Configuration>> accepted =
                         new StreamCountSpy<>(acceptedDirectories);
                     AutoCloseable timer = scanTime.start()) {
+                  // RunProcessor#getRunsFromRoot returns runs oldest-first then
+                  // the newest run in each batch end up at the head of the queue
                   roundRobin(
                           roots.stream() //
                               .filter(Configuration::isValid) //
