@@ -62,14 +62,17 @@ groups:
 - name: runscanner.rules
   rules:
   - alert: GcsFailing
-    expr: runscanner_gcs_consecutive_failures >= 5 unless time() - runscanner_gcs_last_success_timestamp_seconds > 60 * 60
+    expr: rate(runscanner_gcs_failed_request_total[20m]) > 0 or runscanner_gcs_consecutive_failures > 0
     annotations:
-      description: Run Scanner {{$labels.instance}} has failed {{$value}} consecutive
-        Google Cloud Storage requests to bucket {{$labels.bucket}} and has not had a successful one in over an hour.
+      description: Run Scanner {{$labels.instance}} is failing Google Cloud Storage
+        requests to bucket {{$labels.bucket}} and has not successfully reconnected.
       summary: Google Cloud Storage bucket {{$labels.bucket}} is failing on {{$labels.instance}}
 ```
 
-`GcsFailing` will fire when Run Scanner has repeatedly failed to list run output in Google Cloud Storage for an extended period.
+`GcsFailing` will fire as soon as Run Scanner fails to list run output in
+Google Cloud Storage. It continues firing until a request succeeds, and for
+twenty minutes after any further failure, so intermittent failures are also
+reported.
 
 If using [MISO](https://github.com/miso-lims/miso-lims) to collect runs from
 Run Scanner, we suggest the following alert:
