@@ -27,6 +27,7 @@ public class GoogleBucketStorageClient implements UltimaStorageClient {
       Counter.builder()
           .name("runscanner_gcs_failed_request")
           .help("Number of failed requests made by the Google Cloud Storage client.")
+          .labelNames("bucket")
           .register();
 
   private static final Gauge gcs_consecutive_failures =
@@ -34,13 +35,14 @@ public class GoogleBucketStorageClient implements UltimaStorageClient {
           .name("runscanner_gcs_consecutive_failures")
           .help(
               "Number of Google Cloud Storage requests that have failed since the last successful request.")
+          .labelNames("bucket")
           .register();
 
   private static final Gauge gcs_last_success_time =
       Gauge.builder()
           .name("runscanner_gcs_last_success_timestamp_seconds")
-          .help(
-              "The epoch time of the last successful Google Cloud Storage request, or 0 if none has succeeded.")
+          .help("The epoch time of the last successful Google Cloud Storage request.")
+          .labelNames("bucket")
           .register();
 
   private final Storage storage;
@@ -75,12 +77,12 @@ public class GoogleBucketStorageClient implements UltimaStorageClient {
           .iterateAll()
           .forEach(blob -> entries.add(new GcsStorageEntry(blob)));
     } catch (StorageException e) {
-      gcs_request_failed.inc();
-      gcs_consecutive_failures.inc();
+      gcs_request_failed.labelValues(bucket).inc();
+      gcs_consecutive_failures.labelValues(bucket).inc();
       throw new IOException("Failed to list GCS path: " + gcsPath, e);
     }
-    gcs_consecutive_failures.set(0);
-    gcs_last_success_time.set(Instant.now().getEpochSecond());
+    gcs_consecutive_failures.labelValues(bucket).set(0);
+    gcs_last_success_time.labelValues(bucket).set(Instant.now().getEpochSecond());
     return entries;
   }
 

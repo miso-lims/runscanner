@@ -62,11 +62,11 @@ groups:
 - name: runscanner.rules
   rules:
   - alert: GcsFailing
-    expr: runscanner_gcs_consecutive_failures >= 5 and time() - runscanner_gcs_last_success_timestamp_seconds > 60 * 60
+    expr: runscanner_gcs_consecutive_failures >= 5 unless time() - runscanner_gcs_last_success_timestamp_seconds > 60 * 60
     annotations:
       description: Run Scanner {{$labels.instance}} has failed {{$value}} consecutive
-        Google Cloud Storage requests and has not had a successful one in over an hour.
-      summary: Google Cloud Storage access is failing on {{$labels.instance}}
+        Google Cloud Storage requests to bucket {{$labels.bucket}} and has not had a successful one in over an hour.
+      summary: Google Cloud Storage bucket {{$labels.bucket}} is failing on {{$labels.instance}}
 ```
 
 `GcsFailing` will fire when Run Scanner has repeatedly failed to list run output in Google Cloud Storage for an extended period.
