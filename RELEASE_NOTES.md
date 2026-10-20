@@ -2,6 +2,7 @@
 
 Changes:
 * When new runs are found they're added to the front of the queue
+* Add Prometheus metrics for Ultima Google Cloud Storage request failures
 
 # 2.9.0
 

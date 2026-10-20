@@ -54,6 +54,23 @@ an `AutoInhibit` alert firing and wait until later. This alert should not be
 sent to humans. There is no action to be taken when firing.
 
 
+If scanning Ultima runs stored in Google Cloud Storage, we suggest the
+following alert:
+
+```
+groups:
+- name: runscanner.rules
+  rules:
+  - alert: GcsFailing
+    expr: runscanner_gcs_consecutive_failures >= 5 and time() - runscanner_gcs_last_success_timestamp_seconds > 60 * 60
+    annotations:
+      description: Run Scanner {{$labels.instance}} has failed {{$value}} consecutive
+        Google Cloud Storage requests and has not had a successful one in over an hour.
+      summary: Google Cloud Storage access is failing on {{$labels.instance}}
+```
+
+`GcsFailing` will fire when Run Scanner has repeatedly failed to list run output in Google Cloud Storage for an extended period.
+
 If using [MISO](https://github.com/miso-lims/miso-lims) to collect runs from
 Run Scanner, we suggest the following alert:
 
