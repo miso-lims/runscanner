@@ -62,7 +62,7 @@ groups:
 - name: runscanner.rules
   rules:
   - alert: GcsFailing
-    expr: rate(runscanner_gcs_failed_request_total[20m]) > 0 or runscanner_gcs_consecutive_failures > 0
+    expr: runscanner_gcs_consecutive_failures > 1
     annotations:
       description: Run Scanner {{$labels.instance}} is failing Google Cloud Storage
         requests to bucket {{$labels.bucket}} and has not successfully reconnected.
