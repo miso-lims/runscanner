@@ -479,7 +479,7 @@ public class DefaultUltima extends RunProcessor {
 
   private static AnalysisFile copyFields(AnalysisFile file, UltimaStorageEntry entry) {
     file.setPath(entry.getPath());
-    file.setCrc32Checksum(entry.getCrc32Checksum()); // base64
+    file.setCrc32cBase64Checksum(entry.getCrc32cBase64Checksum());
     file.setSize(entry.getSize());
     file.setCreatedTime(entry.getCreatedTime());
     file.setModifiedTime(entry.getModifiedTime());
