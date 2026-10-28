@@ -8,6 +8,7 @@ import ca.on.oicr.gsi.runscanner.dto.ultima.MetadataAnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaAnalysisUnit;
 import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaPipelineRun;
 import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaWorkflowRun;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.net.URI;
@@ -27,6 +28,13 @@ public class JacksonTest {
     AnalysisFile deserialized = mapper.readerFor(CramAnalysisFile.class).readValue(serialized);
     Assert.assertTrue(deserialized instanceof CramAnalysisFile);
     assertAnalysisFileEqual(file, deserialized);
+  }
+
+  @Test
+  public void testChecksumFieldName() throws Exception {
+    JsonNode node = mapper.valueToTree(makeCramFile());
+    Assert.assertEquals("AAAAAA==", node.get("crc32cBase64Checksum").asText());
+    Assert.assertFalse(node.has("crc32Checksum"));
   }
 
   @Test
@@ -70,7 +78,7 @@ public class JacksonTest {
   private AnalysisFile makeCramFile() {
     AnalysisFile file = new CramAnalysisFile();
     file.setPath(URI.create("file:///test-bucket/run/barcode/sample.cram"));
-    file.setCrc32Checksum("AAAAAA==");
+    file.setCrc32cBase64Checksum("AAAAAA==");
     file.setSize(1000L);
     file.setCreatedTime(Instant.EPOCH);
     file.setModifiedTime(Instant.EPOCH);
@@ -80,7 +88,7 @@ public class JacksonTest {
   private AnalysisFile makeMetadataFile() {
     AnalysisFile file = new MetadataAnalysisFile();
     file.setPath(URI.create("file:///test-bucket/run/barcode/sample.csv"));
-    file.setCrc32Checksum("BBBBBB==");
+    file.setCrc32cBase64Checksum("BBBBBB==");
     file.setSize(100L);
     file.setCreatedTime(Instant.EPOCH);
     file.setModifiedTime(Instant.EPOCH);
@@ -114,7 +122,7 @@ public class JacksonTest {
   private static void assertAnalysisFileEqual(AnalysisFile one, AnalysisFile two) {
     Assert.assertEquals(one.getFormatType(), two.getFormatType());
     Assert.assertEquals(one.getPath(), two.getPath());
-    Assert.assertEquals(one.getCrc32Checksum(), two.getCrc32Checksum());
+    Assert.assertEquals(one.getCrc32cBase64Checksum(), two.getCrc32cBase64Checksum());
     Assert.assertEquals(one.getSize(), two.getSize());
     Assert.assertEquals(one.getCreatedTime(), two.getCreatedTime());
     Assert.assertEquals(one.getModifiedTime(), two.getModifiedTime());

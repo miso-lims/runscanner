@@ -22,7 +22,7 @@ public interface UltimaStorageEntry {
   long getSize();
 
   /** Base64 CRC32C checksum, or null if unavailable */
-  String getCrc32Checksum();
+  String getCrc32cBase64Checksum();
 
   Instant getCreatedTime();
 

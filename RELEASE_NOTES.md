@@ -4,6 +4,11 @@ Changes:
 * Update clang to use version compatible with CI system (not locked version)
 * Set CMAKE minimum version to 3.5
   * Add CMAKE flag -ffp-contract=off
+* Ultima analysis file checksums are now served as `crc32cBase64Checksum` instead of
+    `crc32Checksum`, since they are base64-encoded CRC32C values (as reported by Google Cloud
+    Storage), not CRC32.
+* Ultima runs using local storage now compute the same base64 CRC32C checksum as Google Cloud
+  Storage, rather than a plain CRC32
 
 # 2.10.0
 

@@ -4,6 +4,8 @@ import ca.on.oicr.gsi.runscanner.dto.dragen.FastqAnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.type.AnalysisFileFormat;
 import ca.on.oicr.gsi.runscanner.dto.ultima.MetadataAnalysisFile;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
@@ -31,6 +33,7 @@ import java.util.Objects;
 public abstract class AnalysisFile {
   private URI path;
   private String crc32Checksum;
+  private String crc32cBase64Checksum;
   private long size;
   private Instant createdTime;
   private Instant modifiedTime;
@@ -94,12 +97,25 @@ public abstract class AnalysisFile {
     this.path = p;
   }
 
+  // Plain CRC32 checksum as hex (e.g. from a BCLConvert manifest)
+  @JsonInclude(Include.NON_NULL)
   public String getCrc32Checksum() {
     return crc32Checksum;
   }
 
   public void setCrc32Checksum(String s) {
     this.crc32Checksum = s;
+  }
+
+  // CRC32C checksum as base64 of its 4 big-endian byte (the format reported by Google Cloud
+  // Storage)
+  @JsonInclude(Include.NON_NULL)
+  public String getCrc32cBase64Checksum() {
+    return crc32cBase64Checksum;
+  }
+
+  public void setCrc32cBase64Checksum(String s) {
+    this.crc32cBase64Checksum = s;
   }
 
   public long getSize() {
@@ -119,6 +135,8 @@ public abstract class AnalysisFile {
         + path
         + ", crc32Checksum="
         + crc32Checksum
+        + ", crc32cBase64Checksum="
+        + crc32cBase64Checksum
         + ", size="
         + size
         + ", createdTime="
@@ -136,12 +154,13 @@ public abstract class AnalysisFile {
 
     return Objects.equals(path, ao.getPath())
         && Objects.equals(crc32Checksum, ao.getCrc32Checksum())
+        && Objects.equals(crc32cBase64Checksum, ao.getCrc32cBase64Checksum())
         && Objects.equals(size, ao.getSize())
         && Objects.equals(createdTime, ao.getCreatedTime())
         && Objects.equals(modifiedTime, ao.getModifiedTime());
   }
 
   public int hashCode() {
-    return Objects.hash(path, crc32Checksum, size, createdTime, modifiedTime);
+    return Objects.hash(path, crc32Checksum, crc32cBase64Checksum, size, createdTime, modifiedTime);
   }
 }
