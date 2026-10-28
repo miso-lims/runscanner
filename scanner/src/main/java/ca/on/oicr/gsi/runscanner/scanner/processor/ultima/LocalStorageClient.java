@@ -1,16 +1,19 @@
 package ca.on.oicr.gsi.runscanner.scanner.processor.ultima;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
+import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.stream.Stream;
-import java.util.zip.CRC32;
+import java.util.zip.CRC32C;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +43,7 @@ public class LocalStorageClient implements UltimaStorageClient {
     private final long size;
     private final Instant createdTime;
     private final Instant modifiedTime;
-    private final String crc32Checksum;
+    private final String crc32cBase64Checksum;
 
     LocalStorageEntry(Path path) throws IOException {
       this.path = path;
@@ -49,22 +52,28 @@ public class LocalStorageClient implements UltimaStorageClient {
         this.size = 0;
         this.createdTime = null;
         this.modifiedTime = null;
-        this.crc32Checksum = null;
+        this.crc32cBase64Checksum = null;
       } else {
         BasicFileAttributes attributes = Files.readAttributes(path, BasicFileAttributes.class);
         this.size = attributes.size();
         this.modifiedTime = attributes.lastModifiedTime().toInstant();
         this.createdTime = attributes.creationTime().toInstant();
-        this.crc32Checksum = computeCrc32Checksum(path);
+        this.crc32cBase64Checksum = computeCrc32cBase64Checksum(path);
       }
     }
 
-    private static String computeCrc32Checksum(Path path) throws IOException {
-      // Note: this is a plain CRC32, different from GCS's CRC32C.
-      byte[] data = Files.readAllBytes(path);
-      CRC32 crc32 = new CRC32();
-      crc32.update(data);
-      return Long.toString(crc32.getValue());
+    private static String computeCrc32cBase64Checksum(Path path) throws IOException {
+      // Same format GCS reports: base64 of the CRC32C as 4 big-endian bytes
+      CRC32C crc32c = new CRC32C();
+      byte[] buffer = new byte[8192];
+      try (InputStream in = Files.newInputStream(path)) {
+        int read;
+        while ((read = in.read(buffer)) != -1) {
+          crc32c.update(buffer, 0, read);
+        }
+      }
+      byte[] checksum = ByteBuffer.allocate(4).putInt((int) crc32c.getValue()).array();
+      return Base64.getEncoder().encodeToString(checksum);
     }
 
     @Override
@@ -93,8 +102,8 @@ public class LocalStorageClient implements UltimaStorageClient {
     }
 
     @Override
-    public String getCrc32Checksum() {
-      return crc32Checksum;
+    public String getCrc32cBase64Checksum() {
+      return crc32cBase64Checksum;
     }
 
     @Override

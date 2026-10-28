@@ -2,6 +2,11 @@
 
 Changes:
 * When new runs are found they're added to the front of the queue
+* Ultima analysis file checksums are now served as `crc32cBase64Checksum` instead of
+  `crc32Checksum`, since they are base64-encoded CRC32C values (as reported by Google Cloud
+  Storage), not CRC32. 
+* Ultima runs using local storage now compute the same base64 CRC32C checksum as Google Cloud
+  Storage, rather than a plain CRC32
 
 # 2.9.0
 

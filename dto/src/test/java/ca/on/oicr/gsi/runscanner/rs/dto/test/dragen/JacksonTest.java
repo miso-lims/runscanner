@@ -5,6 +5,7 @@ import ca.on.oicr.gsi.runscanner.dto.dragen.DragenAnalysisUnit;
 import ca.on.oicr.gsi.runscanner.dto.dragen.DragenPipelineRun;
 import ca.on.oicr.gsi.runscanner.dto.dragen.DragenWorkflowRun;
 import ca.on.oicr.gsi.runscanner.dto.dragen.FastqAnalysisFile;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.net.URI;
@@ -21,6 +22,13 @@ public class JacksonTest {
     String serialized = mapper.writeValueAsString(file);
     AnalysisFile deserialized = mapper.readerFor(FastqAnalysisFile.class).readValue(serialized);
     assertAnalysisFileEqual(file, deserialized);
+  }
+
+  @Test
+  public void testChecksumFieldName() throws Exception {
+    JsonNode node = mapper.valueToTree(makeAnalysisFile());
+    Assert.assertEquals("abcdefg", node.get("crc32Checksum").asText());
+    Assert.assertFalse(node.has("crc32cBase64Checksum"));
   }
 
   @Test

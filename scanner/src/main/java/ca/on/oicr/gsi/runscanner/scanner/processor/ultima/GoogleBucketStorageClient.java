@@ -121,7 +121,7 @@ public class GoogleBucketStorageClient implements UltimaStorageClient {
     }
 
     @Override
-    public String getCrc32Checksum() {
+    public String getCrc32cBase64Checksum() {
       return blob.getCrc32c();
     }
 
