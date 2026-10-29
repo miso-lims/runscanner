@@ -43,7 +43,6 @@ public class LocalStorageClient implements UltimaStorageClient {
     private final long size;
     private final Instant createdTime;
     private final Instant modifiedTime;
-    private final String crc32cBase64Checksum;
 
     LocalStorageEntry(Path path) throws IOException {
       this.path = path;
@@ -52,13 +51,11 @@ public class LocalStorageClient implements UltimaStorageClient {
         this.size = 0;
         this.createdTime = null;
         this.modifiedTime = null;
-        this.crc32cBase64Checksum = null;
       } else {
         BasicFileAttributes attributes = Files.readAttributes(path, BasicFileAttributes.class);
         this.size = attributes.size();
         this.modifiedTime = attributes.lastModifiedTime().toInstant();
         this.createdTime = attributes.creationTime().toInstant();
-        this.crc32cBase64Checksum = computeCrc32cBase64Checksum(path);
       }
     }
 
@@ -102,8 +99,10 @@ public class LocalStorageClient implements UltimaStorageClient {
     }
 
     @Override
-    public String getCrc32cBase64Checksum() {
-      return crc32cBase64Checksum;
+    public String getCrc32cBase64Checksum() throws IOException {
+      // Computed on demand: ls() also lists folders whose files are never used, and reading every
+      // file (e.g. multi-GB CRAMs) on each scan would be expensive
+      return directory ? null : computeCrc32cBase64Checksum(path);
     }
 
     @Override

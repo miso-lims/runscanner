@@ -75,8 +75,8 @@ public class JacksonTest {
     assertPipelineRunEqual(pipelineRun, deserialized);
   }
 
-  private AnalysisFile makeCramFile() {
-    AnalysisFile file = new CramAnalysisFile();
+  private CramAnalysisFile makeCramFile() {
+    CramAnalysisFile file = new CramAnalysisFile();
     file.setPath(URI.create("file:///test-bucket/run/barcode/sample.cram"));
     file.setCrc32cBase64Checksum("AAAAAA==");
     file.setSize(1000L);
@@ -85,8 +85,8 @@ public class JacksonTest {
     return file;
   }
 
-  private AnalysisFile makeMetadataFile() {
-    AnalysisFile file = new MetadataAnalysisFile();
+  private MetadataAnalysisFile makeMetadataFile() {
+    MetadataAnalysisFile file = new MetadataAnalysisFile();
     file.setPath(URI.create("file:///test-bucket/run/barcode/sample.csv"));
     file.setCrc32cBase64Checksum("BBBBBB==");
     file.setSize(100L);
@@ -122,7 +122,8 @@ public class JacksonTest {
   private static void assertAnalysisFileEqual(AnalysisFile one, AnalysisFile two) {
     Assert.assertEquals(one.getFormatType(), two.getFormatType());
     Assert.assertEquals(one.getPath(), two.getPath());
-    Assert.assertEquals(one.getCrc32cBase64Checksum(), two.getCrc32cBase64Checksum());
+    // Format-specific fields (e.g. the checksum) are covered by each subclass's equals
+    Assert.assertEquals(one, two);
     Assert.assertEquals(one.getSize(), two.getSize());
     Assert.assertEquals(one.getCreatedTime(), two.getCreatedTime());
     Assert.assertEquals(one.getModifiedTime(), two.getModifiedTime());

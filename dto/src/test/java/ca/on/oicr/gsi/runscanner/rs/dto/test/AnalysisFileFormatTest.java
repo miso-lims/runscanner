@@ -1,6 +1,7 @@
 package ca.on.oicr.gsi.runscanner.rs.dto.test;
 
 import ca.on.oicr.gsi.runscanner.dto.AnalysisFile;
+import ca.on.oicr.gsi.runscanner.dto.CramAnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.UnknownAnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.type.AnalysisFileFormat;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
@@ -120,7 +121,6 @@ public class AnalysisFileFormatTest {
     for (JsonSubTypes.Type subType : subTypes()) {
       AnalysisFile file = newInstance(subType);
       file.setPath(URI.create("file:/path/to/file"));
-      file.setCrc32Checksum("abcdefg");
       file.setSize(1000L);
       file.setCreatedTime(Instant.EPOCH);
       file.setModifiedTime(Instant.EPOCH);
@@ -156,6 +156,38 @@ public class AnalysisFileFormatTest {
     Assert.assertEquals("bam", file.getRawFormat());
     Assert.assertEquals(URI.create("file:/path/to/file"), file.getPath());
     Assert.assertEquals(1000L, file.getSize());
+  }
+
+  /**
+   * Checksums and other format-specific fields live on the subclasses, so an unrecognised format's
+   * extra properties must not make it fail to deserialize.
+   */
+  @Test
+  public void testUnrecognisedFormatIgnoresFormatSpecificProperties() throws Exception {
+    AnalysisFile file =
+        mapper.readValue(
+            "{\"format\":\"bam\",\"path\":\"file:/path/to/file\",\"size\":1000,"
+                + "\"crc32cBase64Checksum\":\"AAAAAA==\",\"readCount\":5}",
+            AnalysisFile.class);
+    Assert.assertEquals(UnknownAnalysisFile.class, file.getClass());
+    Assert.assertEquals("bam", file.getRawFormat());
+    Assert.assertEquals(URI.create("file:/path/to/file"), file.getPath());
+  }
+
+  /**
+   * A known format carrying a checksum key from another DTO version (e.g. a cram served with the
+   * old "crc32Checksum") must still deserialize rather than sink the enclosing notification.
+   */
+  @Test
+  public void testKnownFormatIgnoresForeignChecksum() throws Exception {
+    AnalysisFile file =
+        mapper.readValue(
+            "{\"format\":\"cram\",\"path\":\"file:/path/to/file\",\"size\":1000,"
+                + "\"crc32Checksum\":\"abcdefg\"}",
+            AnalysisFile.class);
+    Assert.assertEquals(CramAnalysisFile.class, file.getClass());
+    Assert.assertNull(((CramAnalysisFile) file).getCrc32cBase64Checksum());
+    Assert.assertEquals(URI.create("file:/path/to/file"), file.getPath());
   }
 
   @Test

@@ -115,7 +115,7 @@ public class BCLConvert {
           } else {
             for (AnalysisFile file : dragenAnalysisUnit.getFiles()) {
               if (file.getPath().equals(filename)) {
-                file.setCrc32Checksum(manifestLine[1]);
+                ((FastqAnalysisFile) file).setCrc32Checksum(manifestLine[1]);
                 break;
               }
             }
@@ -214,8 +214,8 @@ public class BCLConvert {
         for (AnalysisFile itemFile : dragenAnalysisUnitItem.getFiles()) {
           if (itemFile.getPath() == null
               || itemFile.getPath().toString().isBlank()
-              || itemFile.getCrc32Checksum() == null
-              || itemFile.getCrc32Checksum().isBlank()
+              || ((FastqAnalysisFile) itemFile).getCrc32Checksum() == null
+              || ((FastqAnalysisFile) itemFile).getCrc32Checksum().isBlank()
               || ((FastqAnalysisFile) itemFile).getReadCount() == null
               || ((FastqAnalysisFile) itemFile).getReadNumber() == null) {
             isOk = false;

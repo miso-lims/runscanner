@@ -461,17 +461,24 @@ public class DefaultUltima extends RunProcessor {
   private record AnalysisFiles(
       List<AnalysisFile> cramFiles, List<AnalysisFile> mergeContextFiles) {}
 
-  private static AnalysisFiles buildAnalysisFiles(List<UltimaStorageEntry> entries) {
+  private static AnalysisFiles buildAnalysisFiles(List<UltimaStorageEntry> entries)
+      throws IOException {
     List<AnalysisFile> cramFiles = new ArrayList<>();
     List<AnalysisFile> mergeContextFiles = new ArrayList<>();
     for (UltimaStorageEntry entry : entries) {
       if (entry.isDirectory()) continue;
       if (entry.getName().endsWith(".cram")) {
-        cramFiles.add(copyFields(new CramAnalysisFile(), entry));
+        CramAnalysisFile file = new CramAnalysisFile();
+        file.setCrc32cBase64Checksum(entry.getCrc32cBase64Checksum());
+        cramFiles.add(copyFields(file, entry));
       } else if (entry.getName().endsWith(".crai")) {
-        cramFiles.add(copyFields(new IndexAnalysisFile(), entry));
+        IndexAnalysisFile file = new IndexAnalysisFile();
+        file.setCrc32cBase64Checksum(entry.getCrc32cBase64Checksum());
+        cramFiles.add(copyFields(file, entry));
       } else if (entry.getName().endsWith(EM_SEQ_MERGE_CONTEXT_SUFFIX)) {
-        mergeContextFiles.add(copyFields(new MetadataAnalysisFile(), entry));
+        MetadataAnalysisFile file = new MetadataAnalysisFile();
+        file.setCrc32cBase64Checksum(entry.getCrc32cBase64Checksum());
+        mergeContextFiles.add(copyFields(file, entry));
       }
     }
     return new AnalysisFiles(cramFiles, mergeContextFiles);
@@ -479,7 +486,6 @@ public class DefaultUltima extends RunProcessor {
 
   private static AnalysisFile copyFields(AnalysisFile file, UltimaStorageEntry entry) {
     file.setPath(entry.getPath());
-    file.setCrc32cBase64Checksum(entry.getCrc32cBase64Checksum());
     file.setSize(entry.getSize());
     file.setCreatedTime(entry.getCreatedTime());
     file.setModifiedTime(entry.getModifiedTime());
