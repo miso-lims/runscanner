@@ -88,7 +88,7 @@ The BCLConvert workflow is parsed and served in units of:
 Each unit has two fastq `files`, one per read, consisting of:
  * Format (fastq)
  * Filesystem path
- * crc32 Checksum
+ * `crc32Checksum`: CRC32 as hex (from the BCLConvert manifest)
  * File size in bytes
  * Creation and modification times (Currently these will always be the same time)
  * Read count
@@ -98,3 +98,14 @@ Each unit has two fastq `files`, one per read, consisting of:
 DRAGEN workflows have an option to remove BCLConvert's fastq files once completed. Run Scanner 
 is not compatible with this option, and BCLConvert will be marked as `FAILED` if this option
 is enabled.
+
+## Ultima 
+
+Ultima workflow runs are served in units of barcode folders. Each unit has `files` (CRAM, CRAM
+index, or metadata files such as the EmSeq `_mergeContext.csv`), consisting of:
+ * Format (`cram`, `index` or `metadata`)
+ * Path (a `gs://` URI for Google Cloud Storage, or a `file:` URI for local storage)
+ * `crc32cBase64Checksum`: CRC32C as base64 of its 4 big-endian bytes, as reported by
+   Google Cloud Storage. Run Scanner computes the same value for local storage.
+ * File size in bytes
+ * Creation and modification times

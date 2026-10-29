@@ -1,5 +1,6 @@
 package ca.on.oicr.gsi.runscanner.scanner.processor.ultima;
 
+import java.io.IOException;
 import java.net.URI;
 import java.time.Instant;
 
@@ -21,8 +22,11 @@ public interface UltimaStorageEntry {
 
   long getSize();
 
-  /** Base64 CRC32C checksum, or null if unavailable */
-  String getCrc32cBase64Checksum();
+  /**
+   * Base64 CRC32C checksum, or null if unavailable. May read the whole file, so only call it for
+   * entries that are actually used.
+   */
+  String getCrc32cBase64Checksum() throws IOException;
 
   Instant getCreatedTime();
 

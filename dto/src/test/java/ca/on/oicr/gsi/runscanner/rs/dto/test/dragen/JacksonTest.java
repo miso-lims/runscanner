@@ -61,8 +61,8 @@ public class JacksonTest {
     assertDragenAnalysisEqual(dpr, deserialized);
   }
 
-  private AnalysisFile makeAnalysisFile() {
-    AnalysisFile file = new FastqAnalysisFile();
+  private FastqAnalysisFile makeAnalysisFile() {
+    FastqAnalysisFile file = new FastqAnalysisFile();
     file.setPath(URI.create("file:/path/to/file"));
     file.setCrc32Checksum("abcdefg");
     file.setModifiedTime(Instant.EPOCH);
@@ -98,7 +98,8 @@ public class JacksonTest {
   private static void assertAnalysisFileEqual(AnalysisFile one, AnalysisFile two) {
     Assert.assertEquals(one.getFormatType(), two.getFormatType());
     Assert.assertEquals(one.getPath(), two.getPath());
-    Assert.assertEquals(one.getCrc32Checksum(), two.getCrc32Checksum());
+    Assert.assertEquals(
+        ((FastqAnalysisFile) one).getCrc32Checksum(), ((FastqAnalysisFile) two).getCrc32Checksum());
     Assert.assertEquals(one.getModifiedTime(), two.getModifiedTime());
     Assert.assertEquals(one.getCreatedTime(), two.getCreatedTime());
     Assert.assertEquals(one.getSize(), two.getSize());
