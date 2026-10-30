@@ -1,16 +1,16 @@
 package ca.on.oicr.gsi.runscanner.scanner.processor.ultima;
 
-import ca.on.oicr.gsi.runscanner.dto.AnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.Consumable;
-import ca.on.oicr.gsi.runscanner.dto.CramAnalysisFile;
-import ca.on.oicr.gsi.runscanner.dto.IndexAnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.UltimaNotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.type.HealthType;
 import ca.on.oicr.gsi.runscanner.dto.type.PipelineStatus;
 import ca.on.oicr.gsi.runscanner.dto.type.UltimaProcessStatus;
 import ca.on.oicr.gsi.runscanner.dto.type.WorkflowRunStatus;
+import ca.on.oicr.gsi.runscanner.dto.ultima.CramAnalysisFile;
+import ca.on.oicr.gsi.runscanner.dto.ultima.IndexAnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.ultima.MetadataAnalysisFile;
+import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaAnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaAnalysisUnit;
 import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaPipelineRun;
 import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaWorkflowRun;
@@ -459,33 +459,29 @@ public class DefaultUltima extends RunProcessor {
 
   /** Create AnalysisFile for the CRAM and EmSeq analysis files found in a single barcode folder. */
   private record AnalysisFiles(
-      List<AnalysisFile> cramFiles, List<AnalysisFile> mergeContextFiles) {}
+      List<UltimaAnalysisFile> cramFiles, List<UltimaAnalysisFile> mergeContextFiles) {}
 
   private static AnalysisFiles buildAnalysisFiles(List<UltimaStorageEntry> entries)
       throws IOException {
-    List<AnalysisFile> cramFiles = new ArrayList<>();
-    List<AnalysisFile> mergeContextFiles = new ArrayList<>();
+    List<UltimaAnalysisFile> cramFiles = new ArrayList<>();
+    List<UltimaAnalysisFile> mergeContextFiles = new ArrayList<>();
     for (UltimaStorageEntry entry : entries) {
       if (entry.isDirectory()) continue;
       if (entry.getName().endsWith(".cram")) {
-        CramAnalysisFile file = new CramAnalysisFile();
-        file.setCrc32cBase64Checksum(entry.getCrc32cBase64Checksum());
-        cramFiles.add(copyFields(file, entry));
+        cramFiles.add(copyFields(new CramAnalysisFile(), entry));
       } else if (entry.getName().endsWith(".crai")) {
-        IndexAnalysisFile file = new IndexAnalysisFile();
-        file.setCrc32cBase64Checksum(entry.getCrc32cBase64Checksum());
-        cramFiles.add(copyFields(file, entry));
+        cramFiles.add(copyFields(new IndexAnalysisFile(), entry));
       } else if (entry.getName().endsWith(EM_SEQ_MERGE_CONTEXT_SUFFIX)) {
-        MetadataAnalysisFile file = new MetadataAnalysisFile();
-        file.setCrc32cBase64Checksum(entry.getCrc32cBase64Checksum());
-        mergeContextFiles.add(copyFields(file, entry));
+        mergeContextFiles.add(copyFields(new MetadataAnalysisFile(), entry));
       }
     }
     return new AnalysisFiles(cramFiles, mergeContextFiles);
   }
 
-  private static AnalysisFile copyFields(AnalysisFile file, UltimaStorageEntry entry) {
+  private static UltimaAnalysisFile copyFields(UltimaAnalysisFile file, UltimaStorageEntry entry)
+      throws IOException {
     file.setPath(entry.getPath());
+    file.setCrc32cBase64Checksum(entry.getCrc32cBase64Checksum());
     file.setSize(entry.getSize());
     file.setCreatedTime(entry.getCreatedTime());
     file.setModifiedTime(entry.getModifiedTime());

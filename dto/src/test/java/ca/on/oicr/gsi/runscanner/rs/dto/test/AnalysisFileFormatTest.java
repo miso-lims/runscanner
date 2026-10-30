@@ -1,10 +1,12 @@
 package ca.on.oicr.gsi.runscanner.rs.dto.test;
 
 import ca.on.oicr.gsi.runscanner.dto.AnalysisFile;
-import ca.on.oicr.gsi.runscanner.dto.CramAnalysisFile;
-import ca.on.oicr.gsi.runscanner.dto.UnknownAnalysisFile;
+import ca.on.oicr.gsi.runscanner.dto.dragen.DragenAnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.type.AnalysisFileFormat;
+import ca.on.oicr.gsi.runscanner.dto.ultima.CramAnalysisFile;
+import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaAnalysisFile;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -19,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -31,9 +34,16 @@ import org.junit.Test;
  * Guards the contract that consuming projects rely on: the "format" discriminator written into an
  * AnalysisFile's JSON is exactly what getFormatType() reports, so a consumer never has to inspect
  * the raw JSON to find out what kind of file it has.
+ *
+ * <p>Each analysis suite declares its own discriminator and subtypes, so every check runs once per
+ * suite base class.
  */
 public class AnalysisFileFormatTest {
   private final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
+
+  /** Every suite's base class. A new analysis suite must be added here. */
+  private static final List<Class<? extends AnalysisFile>> SUITES =
+      List.of(DragenAnalysisFile.class, UltimaAnalysisFile.class);
 
   /**
    * The subtype name and the format returned by the instance are declared in two different places,
@@ -41,19 +51,29 @@ public class AnalysisFileFormatTest {
    */
   @Test
   public void testFormatTypeMatchesRegisteredSubTypeName() throws Exception {
-    for (JsonSubTypes.Type subType : subTypes()) {
-      AnalysisFile file = newInstance(subType);
-      Assert.assertEquals(
-          "getFormatType() disagrees with @JsonSubTypes for " + subType.value().getSimpleName(),
-          subType.name(),
-          file.getFormatType().getFormat());
+    for (Class<? extends AnalysisFile> suite : SUITES) {
+      for (JsonSubTypes.Type subType : subTypes(suite)) {
+        AnalysisFile file = newInstance(subType);
+        Assert.assertEquals(
+            "getFormatType() disagrees with @JsonSubTypes for " + subType.value().getName(),
+            subType.name(),
+            file.getFormatType().getFormat());
+      }
     }
   }
 
+  /** Each format must be produced by some suite, and every suite must handle "unknown". */
   @Test
   public void testEveryFormatHasARegisteredSubType() {
-    Set<String> registered =
-        Arrays.stream(subTypes()).map(JsonSubTypes.Type::name).collect(Collectors.toSet());
+    Set<String> registered = new HashSet<>();
+    for (Class<? extends AnalysisFile> suite : SUITES) {
+      Set<String> suiteNames =
+          Arrays.stream(subTypes(suite)).map(JsonSubTypes.Type::name).collect(Collectors.toSet());
+      Assert.assertTrue(
+          suite.getSimpleName() + " does not register \"unknown\"",
+          suiteNames.contains(AnalysisFileFormat.UNKNOWN.getFormat()));
+      registered.addAll(suiteNames);
+    }
     Set<String> known =
         Arrays.stream(AnalysisFileFormat.values())
             .map(AnalysisFileFormat::getFormat)
@@ -62,7 +82,7 @@ public class AnalysisFileFormatTest {
   }
 
   /**
-   * The other two invariant tests enumerate {@code @JsonSubTypes}, so a subclass that was never
+   * The other invariant tests enumerate {@code @JsonSubTypes}, so a subclass that was never
    * registered there is invisible to them. Jackson does not complain either: serializing an
    * unregistered subtype silently falls back to writing the simple class name as the discriminator,
    * so a forgotten {@code @Type} ships as {@code "format":"BamAnalysisFile"} and every consumer
@@ -71,23 +91,27 @@ public class AnalysisFileFormatTest {
    */
   @Test
   public void testEverySubclassIsRegistered() throws Exception {
-    Set<Class<?>> registered =
-        Arrays.stream(subTypes()).map(JsonSubTypes.Type::value).collect(Collectors.toSet());
-
     Set<Class<?>> unregistered = new TreeSet<>(Comparator.comparing(Class::getName));
     for (Class<?> candidate : compiledDtoClasses()) {
-      if (AnalysisFile.class.isAssignableFrom(candidate)
-          && !candidate.equals(AnalysisFile.class)
-          // An abstract intermediate class is never instantiated by Jackson, so it needs no name.
-          && !Modifier.isAbstract(candidate.getModifiers())
-          && !registered.contains(candidate)) {
+      // An abstract intermediate class is never instantiated by Jackson, so it needs no name.
+      if (!AnalysisFile.class.isAssignableFrom(candidate)
+          || Modifier.isAbstract(candidate.getModifiers())) {
+        continue;
+      }
+      Class<?> suite =
+          SUITES.stream().filter(s -> s.isAssignableFrom(candidate)).findFirst().orElse(null);
+      if (suite == null
+          || Arrays.stream(subTypes(suite))
+              .map(JsonSubTypes.Type::value)
+              .noneMatch(candidate::equals)) {
         unregistered.add(candidate);
       }
     }
 
     Assert.assertEquals(
-        "AnalysisFile subclasses missing from @JsonSubTypes. Add a @Type(value = ..., name = ...)"
-            + " for each, and a matching AnalysisFileFormat constant.",
+        "AnalysisFile subclasses that don't extend a suite base class, or are missing from its"
+            + " @JsonSubTypes. Add a @Type(value = ..., name = ...) for each, and a matching"
+            + " AnalysisFileFormat constant.",
         Collections.emptySet(),
         unregistered);
   }
@@ -118,25 +142,41 @@ public class AnalysisFileFormatTest {
 
   @Test
   public void testFormatSurvivesRoundTrip() throws Exception {
-    for (JsonSubTypes.Type subType : subTypes()) {
-      AnalysisFile file = newInstance(subType);
-      file.setPath(URI.create("file:/path/to/file"));
-      file.setSize(1000L);
-      file.setCreatedTime(Instant.EPOCH);
-      file.setModifiedTime(Instant.EPOCH);
+    for (Class<? extends AnalysisFile> suite : SUITES) {
+      for (JsonSubTypes.Type subType : subTypes(suite)) {
+        AnalysisFile file = newInstance(subType);
+        file.setPath(URI.create("file:/path/to/file"));
+        file.setSize(1000L);
+        file.setCreatedTime(Instant.EPOCH);
+        file.setModifiedTime(Instant.EPOCH);
 
-      String serialized = mapper.writeValueAsString(file);
-      // Jackson is solely responsible for writing the discriminator. Two copies would mean the DTO
-      // is writing it as well, which not every parser on the consuming end will accept.
-      Assert.assertEquals(serialized, 1, countOccurrences(serialized, "\"format\""));
-      Assert.assertTrue(serialized, serialized.contains("\"format\":\"" + subType.name() + "\""));
+        String serialized = mapper.writeValueAsString(file);
+        // Jackson is solely responsible for writing the discriminator. Two copies would mean the
+        // DTO is writing it as well, which not every parser on the consuming end will accept.
+        Assert.assertEquals(serialized, 1, countOccurrences(serialized, "\"format\""));
+        Assert.assertTrue(serialized, serialized.contains("\"format\":\"" + subType.name() + "\""));
 
-      // Reading through the base type is how consumers deserialize a list of files.
-      AnalysisFile deserialized = mapper.readValue(serialized, AnalysisFile.class);
-      Assert.assertEquals(subType.value(), deserialized.getClass());
-      Assert.assertEquals(file.getFormatType(), deserialized.getFormatType());
-      Assert.assertEquals(subType.name(), deserialized.getRawFormat());
+        // Reading through the suite base type is how consumers deserialize a list of files.
+        AnalysisFile deserialized = mapper.readValue(serialized, suite);
+        Assert.assertEquals(subType.value(), deserialized.getClass());
+        Assert.assertEquals(file.getFormatType(), deserialized.getFormatType());
+        Assert.assertEquals(subType.name(), deserialized.getRawFormat());
+      }
     }
+  }
+
+  /**
+   * The same format name can mean a different class in each suite, so it is only ever resolved
+   * against the suite being read. DRAGEN registers no CRAM, so there "cram" is unrecognised.
+   */
+  @Test
+  public void testFormatResolvesWithinItsSuite() throws Exception {
+    String json = "{\"format\":\"cram\",\"path\":\"file:/path/to/file\"}";
+    Assert.assertEquals(
+        CramAnalysisFile.class, mapper.readValue(json, UltimaAnalysisFile.class).getClass());
+    Assert.assertEquals(
+        unknownType(DragenAnalysisFile.class),
+        mapper.readValue(json, DragenAnalysisFile.class).getClass());
   }
 
   /**
@@ -145,17 +185,18 @@ public class AnalysisFileFormatTest {
    */
   @Test
   public void testUnrecognisedFormatDeserializesToUnknownAnalysisFile() throws Exception {
-    AnalysisFile file =
-        mapper.readValue(
-            "{\"format\":\"bam\",\"path\":\"file:/path/to/file\",\"size\":1000}",
-            AnalysisFile.class);
-    Assert.assertEquals(UnknownAnalysisFile.class, file.getClass());
-    Assert.assertEquals(AnalysisFileFormat.UNKNOWN, file.getFormatType());
-    // The enum cannot say more than UNKNOWN, so the raw discriminator is the only record of what
-    // the producer actually called this format.
-    Assert.assertEquals("bam", file.getRawFormat());
-    Assert.assertEquals(URI.create("file:/path/to/file"), file.getPath());
-    Assert.assertEquals(1000L, file.getSize());
+    for (Class<? extends AnalysisFile> suite : SUITES) {
+      AnalysisFile file =
+          mapper.readValue(
+              "{\"format\":\"bam\",\"path\":\"file:/path/to/file\",\"size\":1000}", suite);
+      Assert.assertEquals(unknownType(suite), file.getClass());
+      Assert.assertEquals(AnalysisFileFormat.UNKNOWN, file.getFormatType());
+      // The enum cannot say more than UNKNOWN, so the raw discriminator is the only record of what
+      // the producer actually called this format.
+      Assert.assertEquals("bam", file.getRawFormat());
+      Assert.assertEquals(URI.create("file:/path/to/file"), file.getPath());
+      Assert.assertEquals(1000L, file.getSize());
+    }
   }
 
   /**
@@ -164,14 +205,16 @@ public class AnalysisFileFormatTest {
    */
   @Test
   public void testUnrecognisedFormatIgnoresFormatSpecificProperties() throws Exception {
-    AnalysisFile file =
-        mapper.readValue(
-            "{\"format\":\"bam\",\"path\":\"file:/path/to/file\",\"size\":1000,"
-                + "\"crc32cBase64Checksum\":\"AAAAAA==\",\"readCount\":5}",
-            AnalysisFile.class);
-    Assert.assertEquals(UnknownAnalysisFile.class, file.getClass());
-    Assert.assertEquals("bam", file.getRawFormat());
-    Assert.assertEquals(URI.create("file:/path/to/file"), file.getPath());
+    for (Class<? extends AnalysisFile> suite : SUITES) {
+      AnalysisFile file =
+          mapper.readValue(
+              "{\"format\":\"bam\",\"path\":\"file:/path/to/file\",\"size\":1000,"
+                  + "\"crc32cBase64Checksum\":\"AAAAAA==\",\"readCount\":5}",
+              suite);
+      Assert.assertEquals(unknownType(suite), file.getClass());
+      Assert.assertEquals("bam", file.getRawFormat());
+      Assert.assertEquals(URI.create("file:/path/to/file"), file.getPath());
+    }
   }
 
   /**
@@ -180,25 +223,27 @@ public class AnalysisFileFormatTest {
    */
   @Test
   public void testKnownFormatIgnoresForeignChecksum() throws Exception {
-    AnalysisFile file =
+    UltimaAnalysisFile file =
         mapper.readValue(
             "{\"format\":\"cram\",\"path\":\"file:/path/to/file\",\"size\":1000,"
                 + "\"crc32Checksum\":\"abcdefg\"}",
-            AnalysisFile.class);
+            UltimaAnalysisFile.class);
     Assert.assertEquals(CramAnalysisFile.class, file.getClass());
-    Assert.assertNull(((CramAnalysisFile) file).getCrc32cBase64Checksum());
+    Assert.assertNull(file.getCrc32cBase64Checksum());
     Assert.assertEquals(URI.create("file:/path/to/file"), file.getPath());
   }
 
   @Test
   public void testMissingFormatDeserializesToUnknownAnalysisFile() throws Exception {
-    AnalysisFile file =
-        mapper.readValue("{\"path\":\"file:/path/to/file\",\"size\":1000}", AnalysisFile.class);
-    Assert.assertEquals(UnknownAnalysisFile.class, file.getClass());
-    Assert.assertEquals(AnalysisFileFormat.UNKNOWN, file.getFormatType());
-    // There was no discriminator to preserve.
-    Assert.assertNull(file.getRawFormat());
-    Assert.assertEquals(URI.create("file:/path/to/file"), file.getPath());
+    for (Class<? extends AnalysisFile> suite : SUITES) {
+      AnalysisFile file =
+          mapper.readValue("{\"path\":\"file:/path/to/file\",\"size\":1000}", suite);
+      Assert.assertEquals(unknownType(suite), file.getClass());
+      Assert.assertEquals(AnalysisFileFormat.UNKNOWN, file.getFormatType());
+      // There was no discriminator to preserve.
+      Assert.assertNull(file.getRawFormat());
+      Assert.assertEquals(URI.create("file:/path/to/file"), file.getPath());
+    }
   }
 
   /**
@@ -207,12 +252,12 @@ public class AnalysisFileFormatTest {
    */
   @Test
   public void testUnrecognisedFormatDoesNotSinkItsSiblings() throws Exception {
-    List<AnalysisFile> files =
+    List<UltimaAnalysisFile> files =
         mapper.readValue(
             "[{\"format\":\"cram\",\"path\":\"file:/a\"},"
                 + "{\"format\":\"bam\",\"path\":\"file:/b\"},"
                 + "{\"format\":\"metadata\",\"path\":\"file:/c\"}]",
-            new TypeReference<List<AnalysisFile>>() {});
+            new TypeReference<List<UltimaAnalysisFile>>() {});
 
     Assert.assertEquals(3, files.size());
     Assert.assertEquals(AnalysisFileFormat.CRAM, files.get(0).getFormatType());
@@ -228,18 +273,26 @@ public class AnalysisFileFormatTest {
    */
   @Test
   public void testUnknownAnalysisFileSerializesAsUnknown() throws Exception {
-    AnalysisFile file =
-        mapper.readValue("{\"format\":\"bam\",\"path\":\"file:/b\"}", AnalysisFile.class);
-    String serialized = mapper.writeValueAsString(file);
-    Assert.assertEquals(serialized, 1, countOccurrences(serialized, "\"format\""));
-    Assert.assertTrue(serialized, serialized.contains("\"format\":\"unknown\""));
-    Assert.assertEquals("bam", file.getRawFormat());
+    for (Class<? extends AnalysisFile> suite : SUITES) {
+      AnalysisFile file = mapper.readValue("{\"format\":\"bam\",\"path\":\"file:/b\"}", suite);
+      String serialized = mapper.writeValueAsString(file);
+      Assert.assertEquals(serialized, 1, countOccurrences(serialized, "\"format\""));
+      Assert.assertTrue(serialized, serialized.contains("\"format\":\"unknown\""));
+      Assert.assertEquals("bam", file.getRawFormat());
+    }
   }
 
-  private static JsonSubTypes.Type[] subTypes() {
-    JsonSubTypes annotation = AnalysisFile.class.getAnnotation(JsonSubTypes.class);
-    Assert.assertNotNull("AnalysisFile is missing @JsonSubTypes", annotation);
+  private static JsonSubTypes.Type[] subTypes(Class<?> suite) {
+    JsonSubTypes annotation = suite.getAnnotation(JsonSubTypes.class);
+    Assert.assertNotNull(suite.getSimpleName() + " is missing @JsonSubTypes", annotation);
     return annotation.value();
+  }
+
+  /** The suite's {@code UnknownAnalysisFile}, i.e. the defaultImpl of its discriminator. */
+  private static Class<?> unknownType(Class<?> suite) {
+    JsonTypeInfo annotation = suite.getAnnotation(JsonTypeInfo.class);
+    Assert.assertNotNull(suite.getSimpleName() + " is missing @JsonTypeInfo", annotation);
+    return annotation.defaultImpl();
   }
 
   private static AnalysisFile newInstance(JsonSubTypes.Type subType) throws Exception {

@@ -1,6 +1,5 @@
 package ca.on.oicr.gsi.runscanner.dto.ultima;
 
-import ca.on.oicr.gsi.runscanner.dto.AnalysisFile;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -10,7 +9,7 @@ public class UltimaAnalysisUnit {
 
   private String barcode;
   private String library;
-  private List<AnalysisFile> files = new LinkedList<>();
+  private List<UltimaAnalysisFile> files = new LinkedList<>();
 
   public String getBarcode() {
     return barcode;
@@ -28,11 +27,11 @@ public class UltimaAnalysisUnit {
     this.library = library;
   }
 
-  public List<AnalysisFile> getFiles() {
+  public List<UltimaAnalysisFile> getFiles() {
     return files;
   }
 
-  public void setFiles(List<AnalysisFile> files) {
+  public void setFiles(List<UltimaAnalysisFile> files) {
     this.files = files;
   }
 

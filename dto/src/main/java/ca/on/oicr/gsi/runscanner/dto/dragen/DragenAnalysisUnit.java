@@ -1,6 +1,5 @@
 package ca.on.oicr.gsi.runscanner.dto.dragen;
 
-import ca.on.oicr.gsi.runscanner.dto.AnalysisFile;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.LinkedList;
 import java.util.List;
@@ -11,7 +10,7 @@ import java.util.Objects;
 public class DragenAnalysisUnit {
   private String sample, index1, index2, overrideCycles;
   private int lane;
-  private List<AnalysisFile> files = new LinkedList<>();
+  private List<DragenAnalysisFile> files = new LinkedList<>();
 
   public String getIndex1() {
     return index1;
@@ -33,7 +32,7 @@ public class DragenAnalysisUnit {
     return overrideCycles;
   }
 
-  public List<AnalysisFile> getFiles() {
+  public List<DragenAnalysisFile> getFiles() {
     return files;
   }
 
@@ -57,7 +56,7 @@ public class DragenAnalysisUnit {
     this.overrideCycles = overrideCycles;
   }
 
-  public void addFile(AnalysisFile file) {
+  public void addFile(DragenAnalysisFile file) {
     files.add(file);
   }
 
