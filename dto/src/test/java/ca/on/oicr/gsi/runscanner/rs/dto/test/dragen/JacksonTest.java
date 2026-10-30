@@ -1,6 +1,7 @@
 package ca.on.oicr.gsi.runscanner.rs.dto.test.dragen;
 
 import ca.on.oicr.gsi.runscanner.dto.AnalysisFile;
+import ca.on.oicr.gsi.runscanner.dto.dragen.DragenAnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.dragen.DragenAnalysisUnit;
 import ca.on.oicr.gsi.runscanner.dto.dragen.DragenPipelineRun;
 import ca.on.oicr.gsi.runscanner.dto.dragen.DragenWorkflowRun;
@@ -20,7 +21,9 @@ public class JacksonTest {
   public void testAnalysisFileSerializeDeserialize() throws Exception {
     AnalysisFile file = makeAnalysisFile();
     String serialized = mapper.writeValueAsString(file);
-    AnalysisFile deserialized = mapper.readerFor(FastqAnalysisFile.class).readValue(serialized);
+    // Deserialize via the suite base type to exercise the "format" discriminator
+    AnalysisFile deserialized = mapper.readerFor(DragenAnalysisFile.class).readValue(serialized);
+    Assert.assertTrue(deserialized instanceof FastqAnalysisFile);
     assertAnalysisFileEqual(file, deserialized);
   }
 

@@ -6,15 +6,15 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import ca.on.oicr.gsi.runscanner.dto.AnalysisFile;
-import ca.on.oicr.gsi.runscanner.dto.CramAnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.PipelineRun;
 import ca.on.oicr.gsi.runscanner.dto.UltimaNotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.type.PipelineStatus;
 import ca.on.oicr.gsi.runscanner.dto.type.Platform;
 import ca.on.oicr.gsi.runscanner.dto.type.WorkflowRunStatus;
+import ca.on.oicr.gsi.runscanner.dto.ultima.CramAnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.ultima.MetadataAnalysisFile;
+import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaAnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaAnalysisUnit;
 import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaPipelineRun;
 import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaWorkflowRun;
@@ -201,7 +201,7 @@ public class UltimaProcessorTest extends AbstractProcessorTest {
     assertEquals("lib1-lib2", unit.getLibrary());
 
     // Only the CRAM file is included; the metadata file has no consumer yet and is excluded.
-    List<AnalysisFile> files = unit.getFiles();
+    List<UltimaAnalysisFile> files = unit.getFiles();
     assertEquals(1, files.size());
 
     CramAnalysisFile cramFile = (CramAnalysisFile) files.get(0);
@@ -346,7 +346,7 @@ public class UltimaProcessorTest extends AbstractProcessorTest {
     assertEquals("TT", emSeqUnit.getBarcode());
     assertEquals("lib1-lib2", emSeqUnit.getLibrary());
 
-    List<AnalysisFile> emSeqFiles = emSeqUnit.getFiles();
+    List<UltimaAnalysisFile> emSeqFiles = emSeqUnit.getFiles();
     assertEquals(1, emSeqFiles.size());
 
     MetadataAnalysisFile mergeContextFile = (MetadataAnalysisFile) emSeqFiles.get(0);
@@ -415,7 +415,7 @@ public class UltimaProcessorTest extends AbstractProcessorTest {
       assertEquals("lib1-lib2", unit.getLibrary());
 
       // Only the CRAM file is included; the metadata file has no consumer yet and is excluded.
-      List<AnalysisFile> files = unit.getFiles();
+      List<UltimaAnalysisFile> files = unit.getFiles();
       assertEquals(1, files.size());
 
       CramAnalysisFile cramAnalysisFile = (CramAnalysisFile) files.get(0);

@@ -1,10 +1,11 @@
 package ca.on.oicr.gsi.runscanner.rs.dto.test.ultima;
 
 import ca.on.oicr.gsi.runscanner.dto.AnalysisFile;
-import ca.on.oicr.gsi.runscanner.dto.CramAnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.type.PipelineStatus;
 import ca.on.oicr.gsi.runscanner.dto.type.WorkflowRunStatus;
+import ca.on.oicr.gsi.runscanner.dto.ultima.CramAnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.ultima.MetadataAnalysisFile;
+import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaAnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaAnalysisUnit;
 import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaPipelineRun;
 import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaWorkflowRun;
@@ -25,7 +26,7 @@ public class JacksonTest {
     AnalysisFile file = makeCramFile();
     String serialized = mapper.writeValueAsString(file);
     // Deserialize via the base type to exercise the "format" discriminator
-    AnalysisFile deserialized = mapper.readerFor(CramAnalysisFile.class).readValue(serialized);
+    AnalysisFile deserialized = mapper.readerFor(UltimaAnalysisFile.class).readValue(serialized);
     Assert.assertTrue(deserialized instanceof CramAnalysisFile);
     assertAnalysisFileEqual(file, deserialized);
   }
@@ -41,7 +42,7 @@ public class JacksonTest {
   public void testMetadataAnalysisFileSerializeDeserialize() throws Exception {
     AnalysisFile file = makeMetadataFile();
     String serialized = mapper.writeValueAsString(file);
-    AnalysisFile deserialized = mapper.readerFor(MetadataAnalysisFile.class).readValue(serialized);
+    AnalysisFile deserialized = mapper.readerFor(UltimaAnalysisFile.class).readValue(serialized);
     Assert.assertTrue(deserialized instanceof MetadataAnalysisFile);
     assertAnalysisFileEqual(file, deserialized);
   }

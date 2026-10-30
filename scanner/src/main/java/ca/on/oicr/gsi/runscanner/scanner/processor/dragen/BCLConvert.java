@@ -1,6 +1,6 @@
 package ca.on.oicr.gsi.runscanner.scanner.processor.dragen;
 
-import ca.on.oicr.gsi.runscanner.dto.AnalysisFile;
+import ca.on.oicr.gsi.runscanner.dto.dragen.DragenAnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.dragen.DragenAnalysisUnit;
 import ca.on.oicr.gsi.runscanner.dto.dragen.DragenWorkflowRun;
 import ca.on.oicr.gsi.runscanner.dto.dragen.FastqAnalysisFile;
@@ -86,7 +86,7 @@ public class BCLConvert {
         dragenAnalysisUnit.setIndex2(index2);
 
         // TODO: what's it look like when there's only 1 read?
-        AnalysisFile file1 = fastqFromFilename(rootDir, fastq[4], 1),
+        FastqAnalysisFile file1 = fastqFromFilename(rootDir, fastq[4], 1),
             file2 = fastqFromFilename(rootDir, fastq[5], 2);
 
         if (file1 != null) dragenAnalysisUnit.addFile(file1);
@@ -113,9 +113,9 @@ public class BCLConvert {
           if (dragenAnalysisUnit == null) {
             log.info("Unable to map {} to an Analysis object", filename);
           } else {
-            for (AnalysisFile file : dragenAnalysisUnit.getFiles()) {
+            for (DragenAnalysisFile file : dragenAnalysisUnit.getFiles()) {
               if (file.getPath().equals(filename)) {
-                ((FastqAnalysisFile) file).setCrc32Checksum(manifestLine[1]);
+                file.setCrc32Checksum(manifestLine[1]);
                 break;
               }
             }
@@ -211,11 +211,11 @@ public class BCLConvert {
       } else {
         // Unfortunately there is no better source for OverrideCycles
         dragenAnalysisUnitItem.setOverrideCycles(item.getOverrideCycles());
-        for (AnalysisFile itemFile : dragenAnalysisUnitItem.getFiles()) {
+        for (DragenAnalysisFile itemFile : dragenAnalysisUnitItem.getFiles()) {
           if (itemFile.getPath() == null
               || itemFile.getPath().toString().isBlank()
-              || ((FastqAnalysisFile) itemFile).getCrc32Checksum() == null
-              || ((FastqAnalysisFile) itemFile).getCrc32Checksum().isBlank()
+              || itemFile.getCrc32Checksum() == null
+              || itemFile.getCrc32Checksum().isBlank()
               || ((FastqAnalysisFile) itemFile).getReadCount() == null
               || ((FastqAnalysisFile) itemFile).getReadNumber() == null) {
             isOk = false;
@@ -228,7 +228,7 @@ public class BCLConvert {
     return bclConvertWorkflowRun;
   }
 
-  private static AnalysisFile fastqFromFilename(File rootDir, String fileName, int readNumber)
+  private static FastqAnalysisFile fastqFromFilename(File rootDir, String fileName, int readNumber)
       throws IOException {
     if (fileName == null || fileName.isBlank()) {
       return null;
