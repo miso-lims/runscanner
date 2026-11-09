@@ -21,10 +21,11 @@ runscanner_illumina_SOURCES = \
 # - C++11
 # - debugging symbols to be included
 # - optimisation level 2
+# - no fused multiply-add, so metrics are bit-identical across compilers/CPUs
 # - to search the interop directory for #include headers
 # - whatever junk jsoncpp wants
 runscanner_illumina_CPPFLAGS = \
-	-std=c++11 -g -O2 \
+	-std=c++11 -g -O2 -ffp-contract=off \
 	-I interop \
 	-I interop-build/include \
 	$(JSON_CFLAGS) \
