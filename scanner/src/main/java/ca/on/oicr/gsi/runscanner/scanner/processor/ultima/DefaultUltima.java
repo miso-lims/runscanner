@@ -32,6 +32,7 @@ import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
+import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,6 +46,7 @@ public class DefaultUltima extends RunProcessor {
       DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
   private static final String CONTROL_BARCODE = "TT";
   private static final String EM_SEQ_MERGE_CONTEXT_SUFFIX = "_mergeContext.csv";
+  private static final String CRAM_STATS_READ_COUNT_METRIC = "PF_Barcode_reads";
 
   private static final Logger log = LoggerFactory.getLogger(DefaultUltima.class);
   private final UltimaApiClient apiClient;
@@ -385,19 +387,30 @@ public class DefaultUltima extends RunProcessor {
 
   private UltimaWorkflowRun buildCramWorkflowRun(
       JsonNode json, UltimaProcessStatus uploadStatus, List<UltimaAnalysisUnit> cramUnits) {
-    return buildWorkflowRun("CRAMGeneration", json, uploadStatus, cramUnits);
+    // The workflow run is only complete once every CRAM has a read count
+    boolean allReadCountsPresent =
+        cramUnits.stream()
+            .flatMap(unit -> unit.getFiles().stream())
+            .filter(CramAnalysisFile.class::isInstance)
+            .allMatch(file -> ((CramAnalysisFile) file).getReadCount() != null);
+    return buildWorkflowRun("CRAMGeneration", json, uploadStatus, cramUnits, allReadCountsPresent);
   }
 
   private UltimaWorkflowRun buildEmSeqWorkflowRun(
       JsonNode json, UltimaProcessStatus uploadStatus, List<UltimaAnalysisUnit> emSeqUnits) {
-    return buildWorkflowRun("EmSeq", json, uploadStatus, emSeqUnits);
+    return buildWorkflowRun("EmSeq", json, uploadStatus, emSeqUnits, true);
   }
 
+  /**
+   * @param outputsComplete whether all expected data for the analysis outputs has been found. If
+   *     false, the workflow run is never marked complete, even if the upload has finished.
+   */
   private UltimaWorkflowRun buildWorkflowRun(
       String workflowName,
       JsonNode json,
       UltimaProcessStatus uploadStatus,
-      List<UltimaAnalysisUnit> analysisOutputs) {
+      List<UltimaAnalysisUnit> analysisOutputs,
+      boolean outputsComplete) {
     UltimaWorkflowRun workflowRun = new UltimaWorkflowRun(workflowName);
 
     // Analysis_Start_Time uses the same "yyyy-MM-dd HH:mm:ss" format as startdatetime
@@ -411,7 +424,7 @@ public class DefaultUltima extends RunProcessor {
     workflowRun.setSoftwareVersion(json.path("AnalysisRecipe").asText(null));
 
     // Mirror uploadStatus: only COMPLETE and FAILED have explicit terminal states
-    if (uploadStatus == UltimaProcessStatus.COMPLETE) {
+    if ((uploadStatus == UltimaProcessStatus.COMPLETE) && outputsComplete) {
       workflowRun.complete();
     } else if (uploadStatus == UltimaProcessStatus.FAILED) {
       workflowRun.fail();
@@ -461,14 +474,19 @@ public class DefaultUltima extends RunProcessor {
   private record AnalysisFiles(
       List<UltimaAnalysisFile> cramFiles, List<UltimaAnalysisFile> mergeContextFiles) {}
 
-  private static AnalysisFiles buildAnalysisFiles(List<UltimaStorageEntry> entries)
-      throws IOException {
-    List<UltimaAnalysisFile> cramFiles = new ArrayList<>();
-    List<UltimaAnalysisFile> mergeContextFiles = new ArrayList<>();
+  private static AnalysisFiles buildAnalysisFiles(List<UltimaStorageEntry> entries) throws IOException {
+    List<AnalysisFile> cramFiles = new ArrayList<>();
+    List<AnalysisFile> mergeContextFiles = new ArrayList<>();
+    Map<String, UltimaStorageEntry> entriesByName = new HashMap<>();
+    for (UltimaStorageEntry entry : entries) {
+      if (!entry.isDirectory()) entriesByName.put(entry.getName(), entry);
+    }
     for (UltimaStorageEntry entry : entries) {
       if (entry.isDirectory()) continue;
       if (entry.getName().endsWith(".cram")) {
-        cramFiles.add(copyFields(new CramAnalysisFile(), entry));
+        CramAnalysisFile cramFile = (CramAnalysisFile) copyFields(new CramAnalysisFile(), entry);
+        cramFile.setReadCount(readCramReadCount(entry, entriesByName));
+        cramFiles.add(cramFile);
       } else if (entry.getName().endsWith(".crai")) {
         cramFiles.add(copyFields(new IndexAnalysisFile(), entry));
       } else if (entry.getName().endsWith(EM_SEQ_MERGE_CONTEXT_SUFFIX)) {
@@ -480,6 +498,41 @@ public class DefaultUltima extends RunProcessor {
 
   private static UltimaAnalysisFile copyFields(UltimaAnalysisFile file, UltimaStorageEntry entry)
       throws IOException {
+  // Get the read count for a CRAM from the stats CSV associated with it ({name}.cram -> {name}.csv)
+  private Long readCramReadCount(
+      UltimaStorageEntry cramEntry, Map<String, UltimaStorageEntry> entriesByName)
+      throws IOException {
+    String cramName = cramEntry.getName();
+    String statsName = FilenameUtils.removeExtension(cramName) + ".csv";
+    UltimaStorageEntry statsEntry = entriesByName.get(statsName);
+    if (statsEntry == null) {
+      log.info("No {} for {}", statsName, cramEntry.getFullPath());
+      return null;
+    }
+
+    String content = storageClient.readFile(statsEntry.getFullPath());
+    for (String line : content.split("\\R")) {
+      String[] metricRowArray = line.split(",");
+      if (metricRowArray.length >= 2
+          && metricRowArray[0]
+              .trim()
+              .equals(CRAM_STATS_READ_COUNT_METRIC)) { // blank lines split to [""]
+        try {
+          return Long.parseLong(metricRowArray[1].trim());
+        } catch (NumberFormatException e) {
+          throw new IOException(
+              String.format(
+                  "Invalid %s value '%s' in %s",
+                  CRAM_STATS_READ_COUNT_METRIC, metricRowArray[1], statsEntry.getFullPath()),
+              e);
+        }
+      }
+    }
+    log.info("No {} in {}", CRAM_STATS_READ_COUNT_METRIC, statsEntry.getFullPath());
+    return null;
+  }
+
+  private static AnalysisFile copyFields(AnalysisFile file, UltimaStorageEntry entry) {
     file.setPath(entry.getPath());
     file.setCrc32cBase64Checksum(entry.getCrc32cBase64Checksum());
     file.setSize(entry.getSize());

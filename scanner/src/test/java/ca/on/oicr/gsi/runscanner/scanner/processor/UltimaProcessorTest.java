@@ -2,6 +2,7 @@ package ca.on.oicr.gsi.runscanner.scanner.processor;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -42,6 +43,10 @@ import org.junit.Test;
 public class UltimaProcessorTest extends AbstractProcessorTest {
 
   private static final ObjectMapper mapper = new ObjectMapper();
+
+  /** An abbreviated CRAM stats CSV, in the same format Ultima writes beside each CRAM. */
+  private static final String CRAM_STATS_CSV =
+      "PF_Barcode_reads,1111\nPCT_PF_aligned,0\nPCT_PF_Q20_bases,90.44\nMean_quality,33.17\n";
 
   public UltimaProcessorTest() {
     super(UltimaNotificationDto.class);
@@ -143,10 +148,11 @@ public class UltimaProcessorTest extends AbstractProcessorTest {
     when(cramEntry.getCreatedTime()).thenReturn(fixedTime.toInstant());
     when(cramEntry.getModifiedTime()).thenReturn(fixedTime.toInstant());
 
-    // Metadata (index) file entry
+    // CRAM stats file entry, holding the read count for the CRAM
     UltimaStorageEntry metaEntry = mock(UltimaStorageEntry.class);
     when(metaEntry.isDirectory()).thenReturn(false);
     when(metaEntry.getName()).thenReturn(metaFileName);
+    when(metaEntry.getFullPath()).thenReturn(barcodeFolderFullPath + metaFileName);
     when(metaEntry.getPath())
         .thenReturn(URI.create("gs://" + barcodeFolderFullPath + metaFileName));
     when(metaEntry.getCrc32cBase64Checksum()).thenReturn("AAAAAA==");
@@ -163,6 +169,8 @@ public class UltimaProcessorTest extends AbstractProcessorTest {
     when(mockStorageClient.ls(runFolderFullPath)).thenReturn(List.of(barcodeFolderEntry));
     // Listing the barcode folder returns the CRAM and metadata files
     when(mockStorageClient.ls(barcodeFolderFullPath)).thenReturn(List.of(cramEntry, metaEntry));
+    when(mockStorageClient.readFile(barcodeFolderFullPath + metaFileName))
+        .thenReturn(CRAM_STATS_CSV);
 
     DefaultUltima processor =
         new DefaultUltima(
@@ -210,6 +218,78 @@ public class UltimaProcessorTest extends AbstractProcessorTest {
     assertEquals(1000L, cramFile.getSize());
     assertEquals(fixedTime.toInstant(), cramFile.getCreatedTime());
     assertEquals(fixedTime.toInstant(), cramFile.getModifiedTime());
+    assertEquals(Long.valueOf(1111L), cramFile.getReadCount());
+  }
+
+  /**
+   * Verifies that, as with BCLConvert, a CRAM with no stats CSV has no read count and holds the
+   * CRAMGeneration workflow run (and so the pipeline run) back from completing.
+   */
+  @Test
+  public void testMissingCramStatsCsv() throws IOException {
+    File directory = new File(this.getClass().getResource("/ultima/123456").getPath());
+
+    JsonNode mockRunsummaryJson =
+        mapper.readTree(new File(directory, "ultima-api-runsummary-response.json"));
+    JsonNode mockSampleDBJson = mapper.readTree(new File(directory, "sampledb-api-response.json"));
+    JsonNode mockTTMetricsJson =
+        mapper.readTree(new File(directory, "ultima-api-TT-metric-response.json"));
+    String runId = mockRunsummaryJson.path("runid").asText("");
+    String samplePlate = mockRunsummaryJson.path("AMP_SamplePlate").asText("");
+
+    UltimaApiClient mockClient = mock(UltimaApiClient.class);
+    when(mockClient.fetchAllRunSummaries())
+        .thenReturn(Collections.singletonList(mockRunsummaryJson));
+    when(mockClient.fetchSampleDB(samplePlate)).thenReturn(mockSampleDBJson);
+    when(mockClient.fetchBarcodeMetrics(runId, "TT")).thenReturn(mockTTMetricsJson);
+
+    String runFolderName = "123456-20240507_1234";
+    String runFolderFullPath = "test-bucket/" + runFolderName + "/";
+    String barcodeFolderName = "123456-lib1-lib2-TT";
+    String barcodeFolderFullPath = runFolderFullPath + barcodeFolderName + "/";
+    String cramFileName = barcodeFolderName + ".cram";
+
+    UltimaStorageEntry runFolderEntry = mock(UltimaStorageEntry.class);
+    when(runFolderEntry.isDirectory()).thenReturn(true);
+    when(runFolderEntry.getName()).thenReturn(runFolderName);
+    when(runFolderEntry.getFullPath()).thenReturn(runFolderFullPath);
+
+    UltimaStorageEntry barcodeFolderEntry = mock(UltimaStorageEntry.class);
+    when(barcodeFolderEntry.isDirectory()).thenReturn(true);
+    when(barcodeFolderEntry.getName()).thenReturn(barcodeFolderName);
+    when(barcodeFolderEntry.getFullPath()).thenReturn(barcodeFolderFullPath);
+
+    UltimaStorageEntry cramEntry = mock(UltimaStorageEntry.class);
+    when(cramEntry.isDirectory()).thenReturn(false);
+    when(cramEntry.getName()).thenReturn(cramFileName);
+    when(cramEntry.getFullPath()).thenReturn(barcodeFolderFullPath + cramFileName);
+    when(cramEntry.getPath())
+        .thenReturn(URI.create("gs://" + barcodeFolderFullPath + cramFileName));
+
+    UltimaStorageClient mockStorageClient = mock(UltimaStorageClient.class);
+    when(mockStorageClient.ls(any())).thenReturn(Collections.emptyList());
+    when(mockStorageClient.ls(directory.getParentFile().getPath()))
+        .thenReturn(List.of(runFolderEntry));
+    when(mockStorageClient.ls(runFolderFullPath)).thenReturn(List.of(barcodeFolderEntry));
+    when(mockStorageClient.ls(barcodeFolderFullPath)).thenReturn(List.of(cramEntry));
+
+    DefaultUltima processor =
+        new DefaultUltima(
+            new Builder(Platform.ULTIMA, "unittest", null), mockClient, mockStorageClient);
+    processor.getRunsFromRoot(directory.getParentFile()).count();
+    UltimaNotificationDto result =
+        (UltimaNotificationDto)
+            processor.process(directory, TimeZone.getTimeZone("America/Toronto"));
+
+    UltimaPipelineRun pipelineRun = (UltimaPipelineRun) result.getPipelineRuns().get(0);
+    assertEquals(PipelineStatus.INCOMPLETE, pipelineRun.getPipelineStatus());
+
+    UltimaWorkflowRun workflowRun = pipelineRun.get("CRAMGeneration");
+    assertEquals(WorkflowRunStatus.PENDING, workflowRun.getWorkflowRunStatus());
+
+    CramAnalysisFile cramFile =
+        (CramAnalysisFile) workflowRun.getAnalysisOutputs().get(0).getFiles().get(0);
+    assertNull(cramFile.getReadCount());
   }
 
   /**
@@ -299,15 +379,23 @@ public class UltimaProcessorTest extends AbstractProcessorTest {
     when(cramOnlyEntry.getCreatedTime()).thenReturn(fixedTime.toInstant());
     when(cramOnlyEntry.getModifiedTime()).thenReturn(fixedTime.toInstant());
 
+    // Each CRAM has a stats CSV beside it with its read count
+    UltimaStorageEntry cramStatsEntry =
+        mockStatsEntry(emSeqBarcodeFolderFullPath, emSeqBarcodeFolderName + ".csv");
+    UltimaStorageEntry cramOnlyStatsEntry =
+        mockStatsEntry(cramOnlyBarcodeFolderFullPath, cramOnlyBarcodeFolderName + ".csv");
+
     UltimaStorageClient mockStorageClient = mock(UltimaStorageClient.class);
     when(mockStorageClient.ls(any())).thenReturn(Collections.emptyList());
+    when(mockStorageClient.readFile(any())).thenReturn(CRAM_STATS_CSV);
     when(mockStorageClient.ls(directory.getParentFile().getPath()))
         .thenReturn(List.of(runFolderEntry));
     when(mockStorageClient.ls(runFolderFullPath))
         .thenReturn(List.of(emSeqBarcodeFolderEntry, cramOnlyBarcodeFolderEntry));
     when(mockStorageClient.ls(emSeqBarcodeFolderFullPath))
-        .thenReturn(List.of(cramEntry, mergeContextEntry));
-    when(mockStorageClient.ls(cramOnlyBarcodeFolderFullPath)).thenReturn(List.of(cramOnlyEntry));
+        .thenReturn(List.of(cramEntry, cramStatsEntry, mergeContextEntry));
+    when(mockStorageClient.ls(cramOnlyBarcodeFolderFullPath))
+        .thenReturn(List.of(cramOnlyEntry, cramOnlyStatsEntry));
 
     DefaultUltima processor =
         new DefaultUltima(
@@ -359,6 +447,15 @@ public class UltimaProcessorTest extends AbstractProcessorTest {
     assertEquals(fixedTime.toInstant(), mergeContextFile.getModifiedTime());
   }
 
+  private static UltimaStorageEntry mockStatsEntry(String folderFullPath, String fileName) {
+    UltimaStorageEntry entry = mock(UltimaStorageEntry.class);
+    when(entry.isDirectory()).thenReturn(false);
+    when(entry.getName()).thenReturn(fileName);
+    when(entry.getFullPath()).thenReturn(folderFullPath + fileName);
+    when(entry.getPath()).thenReturn(URI.create("gs://" + folderFullPath + fileName));
+    return entry;
+  }
+
   /**
    * Verifies that the same run folder/barcode folder/CRAM layout is correctly mapped when served by
    * a real local filesystem directory via {@link LocalStorageClient}, instead of a mocked GCS
@@ -392,7 +489,7 @@ public class UltimaProcessorTest extends AbstractProcessorTest {
       Path barcodeFolder = Files.createDirectory(runFolder.resolve("123456-lib1-lib2-TT"));
       Path cramFile = Files.createFile(barcodeFolder.resolve("123456-lib1-lib2-TT.cram"));
       Files.write(cramFile, new byte[1000]);
-      Files.createFile(barcodeFolder.resolve("123456-lib1-lib2-TT.csv"));
+      Files.writeString(barcodeFolder.resolve("123456-lib1-lib2-TT.csv"), CRAM_STATS_CSV);
 
       DefaultUltima processor =
           new DefaultUltima(
@@ -431,6 +528,7 @@ public class UltimaProcessorTest extends AbstractProcessorTest {
       assertEquals(expectedChecksum, cramAnalysisFile.getCrc32cBase64Checksum());
       assertNotNull(cramAnalysisFile.getCreatedTime());
       assertNotNull(cramAnalysisFile.getModifiedTime());
+      assertEquals(Long.valueOf(1111L), cramAnalysisFile.getReadCount());
     } finally {
       FileUtils.deleteDirectory(sequencerRoot.toFile());
     }
