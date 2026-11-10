@@ -1,7 +1,9 @@
 # Unreleased
 
 Changes:
-
+* Update clang to use version compatible with CI system (not locked version)
+* Set CMAKE minimum version to 3.5
+  * Add CMAKE flag -ffp-contract=off
 
 # 2.10.0
 

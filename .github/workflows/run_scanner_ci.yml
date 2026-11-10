@@ -2,7 +2,11 @@ name: CI
 on: [push, pull_request]
 jobs:
   CI:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, ubuntu-24.04]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -13,13 +17,13 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
+          key: ${{ matrix.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ matrix.os }}-m2
       - name: Install Dependencies
         run: |
           sudo apt-get update \
           && sudo apt-get install pkg-config cmake libjsoncpp-dev autoconf \
-          libtool build-essential clang-14
+          libtool build-essential clang
       - name: Build Illumina Interop
         run: |
           pushd runscanner-illumina \
