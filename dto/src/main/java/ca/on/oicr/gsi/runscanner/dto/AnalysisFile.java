@@ -1,36 +1,27 @@
 package ca.on.oicr.gsi.runscanner.dto;
 
-import ca.on.oicr.gsi.runscanner.dto.dragen.FastqAnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.type.AnalysisFileFormat;
-import ca.on.oicr.gsi.runscanner.dto.ultima.MetadataAnalysisFile;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
-import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import java.net.URI;
 import java.time.Instant;
 import java.util.Objects;
 
-// Represents one file output by a sequencing workflow
-@JsonTypeInfo(
-    use = Id.NAME,
-    include = As.PROPERTY,
-    property = "format",
-    visible = true,
-    defaultImpl = UnknownAnalysisFile.class)
-@JsonSubTypes({ //
-  @Type(value = FastqAnalysisFile.class, name = "fastq"), //
-  @Type(value = CramAnalysisFile.class, name = "cram"), //
-  @Type(value = IndexAnalysisFile.class, name = "index"), //
-  @Type(value = MetadataAnalysisFile.class, name = "metadata"), //
-  @Type(value = UnknownAnalysisFile.class, name = "unknown"), //
-}) //
+/**
+ * Represents one file output by a sequencing workflow: the fields common to every analysis suite.
+ *
+ * <p>Each analysis suite has its own abstract subclass ({@code DragenAnalysisFile}, {@code
+ * UltimaAnalysisFile}) holding its checksum and declaring the "format" discriminator and its
+ * subtypes. Declaring them per suite lets the same format (e.g. "cram") map to a different class in
+ * each suite, so files must be deserialized through a suite type rather than through this class.
+ *
+ * <p>Unknown properties are ignored so that format-specific fields (e.g. checksums) added or
+ * renamed in another version don't fail the read.
+ */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class AnalysisFile {
   private URI path;
-  private String crc32Checksum;
   private long size;
   private Instant createdTime;
   private Instant modifiedTime;
@@ -49,8 +40,8 @@ public abstract class AnalysisFile {
    * from, or null if this object was built in code rather than read off the wire.
    *
    * <p>For a recognised format this is just {@code getFormatType().getFormat()}. It earns its keep
-   * on an {@link UnknownAnalysisFile}, where it is the only record of what the producer actually
-   * called the format; the enum can say no more than {@link AnalysisFileFormat#UNKNOWN}.
+   * on a suite's {@code UnknownAnalysisFile}, where it is the only record of what the producer
+   * actually called the format; the enum can say no more than {@link AnalysisFileFormat#UNKNOWN}.
    *
    * <p>Deliberately excluded from equals/hashCode: it describes how this object was obtained, not
    * which file it denotes, and including it would make a file built by the scanner unequal to the
@@ -94,14 +85,6 @@ public abstract class AnalysisFile {
     this.path = p;
   }
 
-  public String getCrc32Checksum() {
-    return crc32Checksum;
-  }
-
-  public void setCrc32Checksum(String s) {
-    this.crc32Checksum = s;
-  }
-
   public long getSize() {
     return size;
   }
@@ -117,8 +100,6 @@ public abstract class AnalysisFile {
         + rawFormat
         + ", path="
         + path
-        + ", crc32Checksum="
-        + crc32Checksum
         + ", size="
         + size
         + ", createdTime="
@@ -135,13 +116,12 @@ public abstract class AnalysisFile {
     AnalysisFile ao = (AnalysisFile) o;
 
     return Objects.equals(path, ao.getPath())
-        && Objects.equals(crc32Checksum, ao.getCrc32Checksum())
         && Objects.equals(size, ao.getSize())
         && Objects.equals(createdTime, ao.getCreatedTime())
         && Objects.equals(modifiedTime, ao.getModifiedTime());
   }
 
   public int hashCode() {
-    return Objects.hash(path, crc32Checksum, size, createdTime, modifiedTime);
+    return Objects.hash(path, size, createdTime, modifiedTime);
   }
 }

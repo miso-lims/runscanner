@@ -98,3 +98,13 @@ Each unit has two fastq `files`, one per read, consisting of:
 DRAGEN workflows have an option to remove BCLConvert's fastq files once completed. Run Scanner 
 is not compatible with this option, and BCLConvert will be marked as `FAILED` if this option
 is enabled.
+
+## Ultima 
+
+Ultima workflow runs are served in units of barcode folders. Each unit has `files` (CRAM, CRAM
+index, or metadata files such as the EmSeq `_mergeContext.csv`), consisting of:
+ * Format (`cram`, `index` or `metadata`)
+ * Path (a `gs://` URI for Google Cloud Storage, or a `file://` URI for local storage)
+ * crc32c Base64 Checksum
+ * File size in bytes
+ * Creation and modification times

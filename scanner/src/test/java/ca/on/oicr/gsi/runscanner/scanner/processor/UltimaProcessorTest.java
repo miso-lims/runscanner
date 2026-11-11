@@ -6,15 +6,15 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import ca.on.oicr.gsi.runscanner.dto.AnalysisFile;
-import ca.on.oicr.gsi.runscanner.dto.CramAnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.PipelineRun;
 import ca.on.oicr.gsi.runscanner.dto.UltimaNotificationDto;
 import ca.on.oicr.gsi.runscanner.dto.type.PipelineStatus;
 import ca.on.oicr.gsi.runscanner.dto.type.Platform;
 import ca.on.oicr.gsi.runscanner.dto.type.WorkflowRunStatus;
+import ca.on.oicr.gsi.runscanner.dto.ultima.CramAnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.ultima.MetadataAnalysisFile;
+import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaAnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaAnalysisUnit;
 import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaPipelineRun;
 import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaWorkflowRun;
@@ -25,15 +25,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.TimeZone;
-import java.util.zip.CRC32;
+import java.util.zip.CRC32C;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 
@@ -136,7 +138,7 @@ public class UltimaProcessorTest extends AbstractProcessorTest {
     when(cramEntry.getName()).thenReturn(cramFileName);
     when(cramEntry.getPath())
         .thenReturn(URI.create("gs://" + barcodeFolderFullPath + cramFileName));
-    when(cramEntry.getCrc32Checksum()).thenReturn("AAAAAA==");
+    when(cramEntry.getCrc32cBase64Checksum()).thenReturn("AAAAAA==");
     when(cramEntry.getSize()).thenReturn(1000L);
     when(cramEntry.getCreatedTime()).thenReturn(fixedTime.toInstant());
     when(cramEntry.getModifiedTime()).thenReturn(fixedTime.toInstant());
@@ -147,7 +149,7 @@ public class UltimaProcessorTest extends AbstractProcessorTest {
     when(metaEntry.getName()).thenReturn(metaFileName);
     when(metaEntry.getPath())
         .thenReturn(URI.create("gs://" + barcodeFolderFullPath + metaFileName));
-    when(metaEntry.getCrc32Checksum()).thenReturn("AAAAAA==");
+    when(metaEntry.getCrc32cBase64Checksum()).thenReturn("AAAAAA==");
     when(metaEntry.getSize()).thenReturn(100L);
     when(metaEntry.getCreatedTime()).thenReturn(fixedTime.toInstant());
     when(metaEntry.getModifiedTime()).thenReturn(fixedTime.toInstant());
@@ -199,12 +201,12 @@ public class UltimaProcessorTest extends AbstractProcessorTest {
     assertEquals("lib1-lib2", unit.getLibrary());
 
     // Only the CRAM file is included; the metadata file has no consumer yet and is excluded.
-    List<AnalysisFile> files = unit.getFiles();
+    List<UltimaAnalysisFile> files = unit.getFiles();
     assertEquals(1, files.size());
 
     CramAnalysisFile cramFile = (CramAnalysisFile) files.get(0);
     assertEquals(URI.create("gs://" + barcodeFolderFullPath + cramFileName), cramFile.getPath());
-    assertEquals("AAAAAA==", cramFile.getCrc32Checksum());
+    assertEquals("AAAAAA==", cramFile.getCrc32cBase64Checksum());
     assertEquals(1000L, cramFile.getSize());
     assertEquals(fixedTime.toInstant(), cramFile.getCreatedTime());
     assertEquals(fixedTime.toInstant(), cramFile.getModifiedTime());
@@ -272,7 +274,7 @@ public class UltimaProcessorTest extends AbstractProcessorTest {
     when(cramEntry.getName()).thenReturn(cramFileName);
     when(cramEntry.getPath())
         .thenReturn(URI.create("gs://" + emSeqBarcodeFolderFullPath + cramFileName));
-    when(cramEntry.getCrc32Checksum()).thenReturn("AAAAAA==");
+    when(cramEntry.getCrc32cBase64Checksum()).thenReturn("AAAAAA==");
     when(cramEntry.getSize()).thenReturn(1000L);
     when(cramEntry.getCreatedTime()).thenReturn(fixedTime.toInstant());
     when(cramEntry.getModifiedTime()).thenReturn(fixedTime.toInstant());
@@ -282,7 +284,7 @@ public class UltimaProcessorTest extends AbstractProcessorTest {
     when(mergeContextEntry.getName()).thenReturn(mergeContextFileName);
     when(mergeContextEntry.getPath())
         .thenReturn(URI.create("gs://" + emSeqBarcodeFolderFullPath + mergeContextFileName));
-    when(mergeContextEntry.getCrc32Checksum()).thenReturn("BBBBBB==");
+    when(mergeContextEntry.getCrc32cBase64Checksum()).thenReturn("BBBBBB==");
     when(mergeContextEntry.getSize()).thenReturn(200L);
     when(mergeContextEntry.getCreatedTime()).thenReturn(fixedTime.toInstant());
     when(mergeContextEntry.getModifiedTime()).thenReturn(fixedTime.toInstant());
@@ -292,7 +294,7 @@ public class UltimaProcessorTest extends AbstractProcessorTest {
     when(cramOnlyEntry.getName()).thenReturn(cramOnlyFileName);
     when(cramOnlyEntry.getPath())
         .thenReturn(URI.create("gs://" + cramOnlyBarcodeFolderFullPath + cramOnlyFileName));
-    when(cramOnlyEntry.getCrc32Checksum()).thenReturn("CCCCCC==");
+    when(cramOnlyEntry.getCrc32cBase64Checksum()).thenReturn("CCCCCC==");
     when(cramOnlyEntry.getSize()).thenReturn(1500L);
     when(cramOnlyEntry.getCreatedTime()).thenReturn(fixedTime.toInstant());
     when(cramOnlyEntry.getModifiedTime()).thenReturn(fixedTime.toInstant());
@@ -344,14 +346,14 @@ public class UltimaProcessorTest extends AbstractProcessorTest {
     assertEquals("TT", emSeqUnit.getBarcode());
     assertEquals("lib1-lib2", emSeqUnit.getLibrary());
 
-    List<AnalysisFile> emSeqFiles = emSeqUnit.getFiles();
+    List<UltimaAnalysisFile> emSeqFiles = emSeqUnit.getFiles();
     assertEquals(1, emSeqFiles.size());
 
     MetadataAnalysisFile mergeContextFile = (MetadataAnalysisFile) emSeqFiles.get(0);
     assertEquals(
         URI.create("gs://" + emSeqBarcodeFolderFullPath + mergeContextFileName),
         mergeContextFile.getPath());
-    assertEquals("BBBBBB==", mergeContextFile.getCrc32Checksum());
+    assertEquals("BBBBBB==", mergeContextFile.getCrc32cBase64Checksum());
     assertEquals(200L, mergeContextFile.getSize());
     assertEquals(fixedTime.toInstant(), mergeContextFile.getCreatedTime());
     assertEquals(fixedTime.toInstant(), mergeContextFile.getModifiedTime());
@@ -413,16 +415,20 @@ public class UltimaProcessorTest extends AbstractProcessorTest {
       assertEquals("lib1-lib2", unit.getLibrary());
 
       // Only the CRAM file is included; the metadata file has no consumer yet and is excluded.
-      List<AnalysisFile> files = unit.getFiles();
+      List<UltimaAnalysisFile> files = unit.getFiles();
       assertEquals(1, files.size());
 
       CramAnalysisFile cramAnalysisFile = (CramAnalysisFile) files.get(0);
       assertEquals(cramFile.toAbsolutePath().toUri(), cramAnalysisFile.getPath());
       assertEquals(1000L, cramAnalysisFile.getSize());
-      // Local storage has no equivalent to GCS's CRC32C; a plain CRC32 is computed from disk.
-      CRC32 expectedCrc32 = new CRC32();
-      expectedCrc32.update(Files.readAllBytes(cramFile));
-      assertEquals(Long.toString(expectedCrc32.getValue()), cramAnalysisFile.getCrc32Checksum());
+      // Local storage computes the CRC32C itself, in the same base64 format GCS reports
+      CRC32C expectedCrc32c = new CRC32C();
+      expectedCrc32c.update(Files.readAllBytes(cramFile));
+      String expectedChecksum =
+          Base64.getEncoder()
+              .encodeToString(
+                  ByteBuffer.allocate(4).putInt((int) expectedCrc32c.getValue()).array());
+      assertEquals(expectedChecksum, cramAnalysisFile.getCrc32cBase64Checksum());
       assertNotNull(cramAnalysisFile.getCreatedTime());
       assertNotNull(cramAnalysisFile.getModifiedTime());
     } finally {

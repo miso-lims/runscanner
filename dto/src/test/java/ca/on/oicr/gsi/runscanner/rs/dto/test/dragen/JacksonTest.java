@@ -1,10 +1,12 @@
 package ca.on.oicr.gsi.runscanner.rs.dto.test.dragen;
 
 import ca.on.oicr.gsi.runscanner.dto.AnalysisFile;
+import ca.on.oicr.gsi.runscanner.dto.dragen.DragenAnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.dragen.DragenAnalysisUnit;
 import ca.on.oicr.gsi.runscanner.dto.dragen.DragenPipelineRun;
 import ca.on.oicr.gsi.runscanner.dto.dragen.DragenWorkflowRun;
 import ca.on.oicr.gsi.runscanner.dto.dragen.FastqAnalysisFile;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.net.URI;
@@ -19,8 +21,17 @@ public class JacksonTest {
   public void testAnalysisFileSerializeDeserialize() throws Exception {
     AnalysisFile file = makeAnalysisFile();
     String serialized = mapper.writeValueAsString(file);
-    AnalysisFile deserialized = mapper.readerFor(FastqAnalysisFile.class).readValue(serialized);
+    // Deserialize via the suite base type to exercise the "format" discriminator
+    AnalysisFile deserialized = mapper.readerFor(DragenAnalysisFile.class).readValue(serialized);
+    Assert.assertTrue(deserialized instanceof FastqAnalysisFile);
     assertAnalysisFileEqual(file, deserialized);
+  }
+
+  @Test
+  public void testChecksumFieldName() throws Exception {
+    JsonNode node = mapper.valueToTree(makeAnalysisFile());
+    Assert.assertEquals("abcdefg", node.get("crc32Checksum").asText());
+    Assert.assertFalse(node.has("crc32cBase64Checksum"));
   }
 
   @Test
@@ -53,8 +64,8 @@ public class JacksonTest {
     assertDragenAnalysisEqual(dpr, deserialized);
   }
 
-  private AnalysisFile makeAnalysisFile() {
-    AnalysisFile file = new FastqAnalysisFile();
+  private FastqAnalysisFile makeAnalysisFile() {
+    FastqAnalysisFile file = new FastqAnalysisFile();
     file.setPath(URI.create("file:/path/to/file"));
     file.setCrc32Checksum("abcdefg");
     file.setModifiedTime(Instant.EPOCH);
@@ -90,7 +101,8 @@ public class JacksonTest {
   private static void assertAnalysisFileEqual(AnalysisFile one, AnalysisFile two) {
     Assert.assertEquals(one.getFormatType(), two.getFormatType());
     Assert.assertEquals(one.getPath(), two.getPath());
-    Assert.assertEquals(one.getCrc32Checksum(), two.getCrc32Checksum());
+    Assert.assertEquals(
+        ((FastqAnalysisFile) one).getCrc32Checksum(), ((FastqAnalysisFile) two).getCrc32Checksum());
     Assert.assertEquals(one.getModifiedTime(), two.getModifiedTime());
     Assert.assertEquals(one.getCreatedTime(), two.getCreatedTime());
     Assert.assertEquals(one.getSize(), two.getSize());

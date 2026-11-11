@@ -4,8 +4,9 @@ package ca.on.oicr.gsi.runscanner.dto.type;
  * Enum representing the formats of file that a sequencing workflow can output.
  *
  * <p>Each constant's {@link #getFormat()} value must match the name under which the corresponding
- * subclass is registered in {@code AnalysisFile}'s {@code @JsonSubTypes}, since that is the
- * discriminator written when an AnalysisFile is serialized.
+ * subclass is registered in its analysis suite's {@code @JsonSubTypes} (e.g. {@code
+ * DragenAnalysisFile}, {@code UltimaAnalysisFile}), since that is the discriminator written when an
+ * AnalysisFile is serialized. The same format may be registered by more than one suite.
  */
 public enum AnalysisFileFormat {
   FASTQ("fastq"), //
@@ -14,7 +15,7 @@ public enum AnalysisFileFormat {
   METADATA("metadata"), //
   /**
    * The format was absent from the JSON, or names a format this version of the DTOs does not know
-   * about. See {@code UnknownAnalysisFile}.
+   * about. See each suite's {@code UnknownAnalysisFile}.
    */
   UNKNOWN("unknown");
 

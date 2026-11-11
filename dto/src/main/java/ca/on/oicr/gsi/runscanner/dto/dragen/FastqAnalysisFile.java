@@ -1,10 +1,9 @@
 package ca.on.oicr.gsi.runscanner.dto.dragen;
 
-import ca.on.oicr.gsi.runscanner.dto.AnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.type.AnalysisFileFormat;
 import java.util.Objects;
 
-public class FastqAnalysisFile extends AnalysisFile {
+public class FastqAnalysisFile extends DragenAnalysisFile {
   private Integer readCount, readNumber;
 
   public Integer getReadCount() {

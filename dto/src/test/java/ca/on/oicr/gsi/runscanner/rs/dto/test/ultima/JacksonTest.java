@@ -1,13 +1,15 @@
 package ca.on.oicr.gsi.runscanner.rs.dto.test.ultima;
 
 import ca.on.oicr.gsi.runscanner.dto.AnalysisFile;
-import ca.on.oicr.gsi.runscanner.dto.CramAnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.type.PipelineStatus;
 import ca.on.oicr.gsi.runscanner.dto.type.WorkflowRunStatus;
+import ca.on.oicr.gsi.runscanner.dto.ultima.CramAnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.ultima.MetadataAnalysisFile;
+import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaAnalysisFile;
 import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaAnalysisUnit;
 import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaPipelineRun;
 import ca.on.oicr.gsi.runscanner.dto.ultima.UltimaWorkflowRun;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.net.URI;
@@ -24,16 +26,23 @@ public class JacksonTest {
     AnalysisFile file = makeCramFile();
     String serialized = mapper.writeValueAsString(file);
     // Deserialize via the base type to exercise the "format" discriminator
-    AnalysisFile deserialized = mapper.readerFor(CramAnalysisFile.class).readValue(serialized);
+    AnalysisFile deserialized = mapper.readerFor(UltimaAnalysisFile.class).readValue(serialized);
     Assert.assertTrue(deserialized instanceof CramAnalysisFile);
     assertAnalysisFileEqual(file, deserialized);
+  }
+
+  @Test
+  public void testChecksumFieldName() throws Exception {
+    JsonNode node = mapper.valueToTree(makeCramFile());
+    Assert.assertEquals("AAAAAA==", node.get("crc32cBase64Checksum").asText());
+    Assert.assertFalse(node.has("crc32Checksum"));
   }
 
   @Test
   public void testMetadataAnalysisFileSerializeDeserialize() throws Exception {
     AnalysisFile file = makeMetadataFile();
     String serialized = mapper.writeValueAsString(file);
-    AnalysisFile deserialized = mapper.readerFor(MetadataAnalysisFile.class).readValue(serialized);
+    AnalysisFile deserialized = mapper.readerFor(UltimaAnalysisFile.class).readValue(serialized);
     Assert.assertTrue(deserialized instanceof MetadataAnalysisFile);
     assertAnalysisFileEqual(file, deserialized);
   }
@@ -67,20 +76,20 @@ public class JacksonTest {
     assertPipelineRunEqual(pipelineRun, deserialized);
   }
 
-  private AnalysisFile makeCramFile() {
-    AnalysisFile file = new CramAnalysisFile();
+  private CramAnalysisFile makeCramFile() {
+    CramAnalysisFile file = new CramAnalysisFile();
     file.setPath(URI.create("file:///test-bucket/run/barcode/sample.cram"));
-    file.setCrc32Checksum("AAAAAA==");
+    file.setCrc32cBase64Checksum("AAAAAA==");
     file.setSize(1000L);
     file.setCreatedTime(Instant.EPOCH);
     file.setModifiedTime(Instant.EPOCH);
     return file;
   }
 
-  private AnalysisFile makeMetadataFile() {
-    AnalysisFile file = new MetadataAnalysisFile();
+  private MetadataAnalysisFile makeMetadataFile() {
+    MetadataAnalysisFile file = new MetadataAnalysisFile();
     file.setPath(URI.create("file:///test-bucket/run/barcode/sample.csv"));
-    file.setCrc32Checksum("BBBBBB==");
+    file.setCrc32cBase64Checksum("BBBBBB==");
     file.setSize(100L);
     file.setCreatedTime(Instant.EPOCH);
     file.setModifiedTime(Instant.EPOCH);
@@ -114,7 +123,8 @@ public class JacksonTest {
   private static void assertAnalysisFileEqual(AnalysisFile one, AnalysisFile two) {
     Assert.assertEquals(one.getFormatType(), two.getFormatType());
     Assert.assertEquals(one.getPath(), two.getPath());
-    Assert.assertEquals(one.getCrc32Checksum(), two.getCrc32Checksum());
+    // Format-specific fields (e.g. the checksum) are covered by each subclass's equals
+    Assert.assertEquals(one, two);
     Assert.assertEquals(one.getSize(), two.getSize());
     Assert.assertEquals(one.getCreatedTime(), two.getCreatedTime());
     Assert.assertEquals(one.getModifiedTime(), two.getModifiedTime());
