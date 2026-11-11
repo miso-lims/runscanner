@@ -506,7 +506,7 @@ public class DefaultUltima extends RunProcessor {
     String statsName = FilenameUtils.removeExtension(cramName) + ".csv";
     UltimaStorageEntry statsEntry = entriesByName.get(statsName);
     if (statsEntry == null) {
-      log.info("No {} for {}", statsName, cramEntry.getFullPath());
+      log.debug("No {} for {}", statsName, cramEntry.getFullPath());
       return null;
     }
 
