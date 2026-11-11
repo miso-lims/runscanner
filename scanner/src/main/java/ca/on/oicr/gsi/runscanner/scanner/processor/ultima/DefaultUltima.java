@@ -528,7 +528,7 @@ public class DefaultUltima extends RunProcessor {
         }
       }
     }
-    log.info("No {} in {}", CRAM_STATS_READ_COUNT_METRIC, statsEntry.getFullPath());
+    log.debug("No {} in {}", CRAM_STATS_READ_COUNT_METRIC, statsEntry.getFullPath());
     return null;
   }
 
