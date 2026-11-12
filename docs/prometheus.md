@@ -74,11 +74,6 @@ Google Cloud Storage. It continues firing until a request succeeds, and for
 twenty minutes after any further failure, so intermittent failures are also
 reported.
 
-`runscanner_gcs_failed_file_read` counts individual files in Google Cloud
-Storage (currently the Ultima CRAM stats CSVs) that were listed but could not be
-read. These do not affect `GcsFailing`. The affected run is reported with a
-scan error and retried on the next scan.
-
 If using [MISO](https://github.com/miso-lims/miso-lims) to collect runs from
 Run Scanner, we suggest the following alert:
 
