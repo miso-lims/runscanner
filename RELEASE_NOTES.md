@@ -10,7 +10,8 @@ Changes:
 * Ultima runs using local storage now compute the same base64 CRC32C checksum as Google Cloud
   Storage, rather than a plain CRC32
 * Add readCount to Ultima CRAM files, read from PF_Barcode_reads in the stats CSV
-  * The CRAMGeneration workflow run is not complete until every CRAM has a read count.
+  * Stats CSVs are only read once the Nexus API reports the upload as complete. A missing read count
+    is left null and does not hold the run back from completing.
 * Add Prometheus counter `runscanner_gcs_failed_file_read` for Ultima files in Google Cloud Storage that couldn't be read
 
 

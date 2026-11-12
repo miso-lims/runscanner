@@ -387,18 +387,12 @@ public class DefaultUltima extends RunProcessor {
 
   private UltimaWorkflowRun buildCramWorkflowRun(
       JsonNode json, UltimaProcessStatus uploadStatus, List<UltimaAnalysisUnit> cramUnits) {
-    // The workflow run is only complete once every CRAM has a read count
-    boolean allReadCountsPresent =
-        cramUnits.stream()
-            .flatMap(unit -> unit.getFiles().stream())
-            .filter(CramAnalysisFile.class::isInstance)
-            .allMatch(file -> ((CramAnalysisFile) file).getReadCount() != null);
-    return buildWorkflowRun("CRAMGeneration", json, uploadStatus, cramUnits, allReadCountsPresent);
+    return buildWorkflowRun("CRAMGeneration", json, uploadStatus, cramUnits);
   }
 
   private UltimaWorkflowRun buildEmSeqWorkflowRun(
       JsonNode json, UltimaProcessStatus uploadStatus, List<UltimaAnalysisUnit> emSeqUnits) {
-    return buildWorkflowRun("EmSeq", json, uploadStatus, emSeqUnits, true);
+    return buildWorkflowRun("EmSeq", json, uploadStatus, emSeqUnits);
   }
 
   /**
@@ -409,8 +403,7 @@ public class DefaultUltima extends RunProcessor {
       String workflowName,
       JsonNode json,
       UltimaProcessStatus uploadStatus,
-      List<UltimaAnalysisUnit> analysisOutputs,
-      boolean outputsComplete) {
+      List<UltimaAnalysisUnit> analysisOutputs) {
     UltimaWorkflowRun workflowRun = new UltimaWorkflowRun(workflowName);
 
     // Analysis_Start_Time uses the same "yyyy-MM-dd HH:mm:ss" format as startdatetime
@@ -424,7 +417,7 @@ public class DefaultUltima extends RunProcessor {
     workflowRun.setSoftwareVersion(json.path("AnalysisRecipe").asText(null));
 
     // Mirror uploadStatus: only COMPLETE and FAILED have explicit terminal states
-    if ((uploadStatus == UltimaProcessStatus.COMPLETE) && outputsComplete) {
+    if (uploadStatus == UltimaProcessStatus.COMPLETE) {
       workflowRun.complete();
     } else if (uploadStatus == UltimaProcessStatus.FAILED) {
       workflowRun.fail();
@@ -435,7 +428,10 @@ public class DefaultUltima extends RunProcessor {
   }
 
   private void buildAnalysisUnits(
-      String runFolder, List<UltimaAnalysisUnit> cramUnits, List<UltimaAnalysisUnit> emSeqUnits)
+      String runFolder,
+      List<UltimaAnalysisUnit> cramUnits,
+      List<UltimaAnalysisUnit> emSeqUnits,
+      boolean readCramStats)
       throws IOException {
     for (UltimaStorageEntry folder : storageClient.ls(runFolder)) {
       if (!folder.isDirectory()) continue; // no run level files are expected
@@ -451,7 +447,8 @@ public class DefaultUltima extends RunProcessor {
       String library = libBarcode.substring(0, lastDash);
       String barcode = libBarcode.substring(lastDash + 1);
 
-      AnalysisFiles barcodeFiles = buildAnalysisFiles(storageClient.ls(folder.getFullPath()));
+      AnalysisFiles barcodeFiles =
+          buildAnalysisFiles(storageClient.ls(folder.getFullPath()), readCramStats);
 
       UltimaAnalysisUnit cramUnit = new UltimaAnalysisUnit();
       cramUnit.setBarcode(barcode);
@@ -474,7 +471,12 @@ public class DefaultUltima extends RunProcessor {
   private record AnalysisFiles(
       List<UltimaAnalysisFile> cramFiles, List<UltimaAnalysisFile> mergeContextFiles) {}
 
-  private static AnalysisFiles buildAnalysisFiles(List<UltimaStorageEntry> entries) throws IOException {
+  /**
+   * @param readCramStats whether to read each CRAM's stats CSV for its read count. If false, read
+   *     counts are left null.
+   */
+  private static AnalysisFiles buildAnalysisFiles(List<UltimaStorageEntry> entries, boolean readCramStats)
+      throws IOException {
     List<AnalysisFile> cramFiles = new ArrayList<>();
     List<AnalysisFile> mergeContextFiles = new ArrayList<>();
     Map<String, UltimaStorageEntry> entriesByName = new HashMap<>();
@@ -485,7 +487,9 @@ public class DefaultUltima extends RunProcessor {
       if (entry.isDirectory()) continue;
       if (entry.getName().endsWith(".cram")) {
         CramAnalysisFile cramFile = (CramAnalysisFile) copyFields(new CramAnalysisFile(), entry);
-        cramFile.setReadCount(readCramReadCount(entry, entriesByName));
+        if (readCramStats) {
+          cramFile.setReadCount(readCramReadCount(entry, entriesByName));
+        }
         cramFiles.add(cramFile);
       } else if (entry.getName().endsWith(".crai")) {
         cramFiles.add(copyFields(new IndexAnalysisFile(), entry));

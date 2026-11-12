@@ -5,6 +5,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import ca.on.oicr.gsi.runscanner.dto.NotificationDto;
@@ -23,6 +25,7 @@ import ca.on.oicr.gsi.runscanner.scanner.processor.RunProcessor.Builder;
 import ca.on.oicr.gsi.runscanner.scanner.processor.ultima.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -222,15 +225,57 @@ public class UltimaProcessorTest extends AbstractProcessorTest {
   }
 
   /**
-   * Verifies that, as with BCLConvert, a CRAM with no stats CSV has no read count and holds the
-   * CRAMGeneration workflow run (and so the pipeline run) back from completing.
+   * Verifies that a CRAM with no stats CSV has no read count, but does not hold the CRAMGeneration
+   * workflow run (or the pipeline run) back from completing once the upload is complete.
    */
   @Test
   public void testMissingCramStatsCsv() throws IOException {
+    UltimaStorageClient mockStorageClient = mock(UltimaStorageClient.class);
+    UltimaPipelineRun pipelineRun = processSingleCramRun(mockStorageClient, "0220", false);
+
+    assertEquals(PipelineStatus.COMPLETE, pipelineRun.getPipelineStatus());
+    UltimaWorkflowRun workflowRun = pipelineRun.get("CRAMGeneration");
+    assertEquals(WorkflowRunStatus.COMPLETE, workflowRun.getWorkflowRunStatus());
+    CramAnalysisFile cramFile =
+        (CramAnalysisFile) workflowRun.getAnalysisOutputs().get(0).getFiles().get(0);
+    assertNull(cramFile.getReadCount());
+  }
+
+  /**
+   * Verifies that CRAM stats CSVs are not read until the Nexus API reports the upload as complete,
+   * so read counts stay null while the upload is in progress.
+   */
+  @Test
+  public void testCramStatsNotReadBeforeUploadComplete() throws IOException {
+    UltimaStorageClient mockStorageClient = mock(UltimaStorageClient.class);
+    when(mockStorageClient.readFile(any())).thenReturn(CRAM_STATS_CSV);
+    // Analysis complete, upload in progress
+    UltimaPipelineRun pipelineRun = processSingleCramRun(mockStorageClient, "0210", true);
+
+    verify(mockStorageClient, never()).readFile(any());
+    assertEquals(PipelineStatus.INCOMPLETE, pipelineRun.getPipelineStatus());
+    UltimaWorkflowRun workflowRun = pipelineRun.get("CRAMGeneration");
+    assertEquals(WorkflowRunStatus.PENDING, workflowRun.getWorkflowRunStatus());
+    CramAnalysisFile cramFile =
+        (CramAnalysisFile) workflowRun.getAnalysisOutputs().get(0).getFiles().get(0);
+    assertNull(cramFile.getReadCount());
+  }
+
+  /**
+   * Processes the test run with a single barcode folder containing one CRAM, and optionally its
+   * stats CSV.
+   *
+   * @param mockStorageClient a mock storage client; its directory listings are set up here
+   * @param analysisStatus the Nexus "analysisstatus" value to use for the run
+   */
+  private UltimaPipelineRun processSingleCramRun(
+      UltimaStorageClient mockStorageClient, String analysisStatus, boolean includeStatsCsv)
+      throws IOException {
     File directory = new File(this.getClass().getResource("/ultima/123456").getPath());
 
-    JsonNode mockRunsummaryJson =
-        mapper.readTree(new File(directory, "ultima-api-runsummary-response.json"));
+    ObjectNode mockRunsummaryJson =
+        (ObjectNode) mapper.readTree(new File(directory, "ultima-api-runsummary-response.json"));
+    mockRunsummaryJson.put("analysisstatus", analysisStatus);
     JsonNode mockSampleDBJson = mapper.readTree(new File(directory, "sampledb-api-response.json"));
     JsonNode mockTTMetricsJson =
         mapper.readTree(new File(directory, "ultima-api-TT-metric-response.json"));
@@ -266,12 +311,16 @@ public class UltimaProcessorTest extends AbstractProcessorTest {
     when(cramEntry.getPath())
         .thenReturn(URI.create("gs://" + barcodeFolderFullPath + cramFileName));
 
-    UltimaStorageClient mockStorageClient = mock(UltimaStorageClient.class);
+    List<UltimaStorageEntry> barcodeFolderContents =
+        includeStatsCsv
+            ? List.of(cramEntry, mockStatsEntry(barcodeFolderFullPath, barcodeFolderName + ".csv"))
+            : List.of(cramEntry);
+
     when(mockStorageClient.ls(any())).thenReturn(Collections.emptyList());
     when(mockStorageClient.ls(directory.getParentFile().getPath()))
         .thenReturn(List.of(runFolderEntry));
     when(mockStorageClient.ls(runFolderFullPath)).thenReturn(List.of(barcodeFolderEntry));
-    when(mockStorageClient.ls(barcodeFolderFullPath)).thenReturn(List.of(cramEntry));
+    when(mockStorageClient.ls(barcodeFolderFullPath)).thenReturn(barcodeFolderContents);
 
     DefaultUltima processor =
         new DefaultUltima(
@@ -280,16 +329,7 @@ public class UltimaProcessorTest extends AbstractProcessorTest {
     UltimaNotificationDto result =
         (UltimaNotificationDto)
             processor.process(directory, TimeZone.getTimeZone("America/Toronto"));
-
-    UltimaPipelineRun pipelineRun = (UltimaPipelineRun) result.getPipelineRuns().get(0);
-    assertEquals(PipelineStatus.INCOMPLETE, pipelineRun.getPipelineStatus());
-
-    UltimaWorkflowRun workflowRun = pipelineRun.get("CRAMGeneration");
-    assertEquals(WorkflowRunStatus.PENDING, workflowRun.getWorkflowRunStatus());
-
-    CramAnalysisFile cramFile =
-        (CramAnalysisFile) workflowRun.getAnalysisOutputs().get(0).getFiles().get(0);
-    assertNull(cramFile.getReadCount());
+    return (UltimaPipelineRun) result.getPipelineRuns().get(0);
   }
 
   /**
