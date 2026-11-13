@@ -2,6 +2,7 @@ package ca.on.oicr.gsi.runscanner.scanner.processor.ultima;
 
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.storage.Blob;
+import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageException;
 import com.google.cloud.storage.StorageOptions;
@@ -11,6 +12,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,6 +44,13 @@ public class GoogleBucketStorageClient implements UltimaStorageClient {
       Gauge.builder()
           .name("runscanner_gcs_last_success_timestamp_seconds")
           .help("The epoch time of the last successful Google Cloud Storage request.")
+          .labelNames("bucket")
+          .register();
+
+  private static final Counter gcs_file_read_failed =
+      Counter.builder()
+          .name("runscanner_gcs_failed_file_read")
+          .help("Number of Google Cloud Storage files that could not be read.")
           .labelNames("bucket")
           .register();
 
@@ -84,6 +93,27 @@ public class GoogleBucketStorageClient implements UltimaStorageClient {
     gcs_consecutive_failures.labelValues(bucket).set(0);
     gcs_last_success_time.labelValues(bucket).set(Instant.now().getEpochSecond());
     return entries;
+  }
+
+  /** Mimics: gcloud storage cat {gcsPath} */
+  @Override
+  public String readFile(String gcsPath) throws IOException {
+    // gcsPath is "bucket/path/to/file" as returned by GcsStorageEntry.getFullPath()
+    int slashIdx = gcsPath.indexOf('/');
+    if (slashIdx < 0 || slashIdx == gcsPath.length() - 1) {
+      throw new IOException("Not a GCS file path: " + gcsPath);
+    }
+    String bucket = gcsPath.substring(0, slashIdx);
+    String blobName = gcsPath.substring(slashIdx + 1);
+
+    byte[] content;
+    try {
+      content = storage.readAllBytes(BlobId.of(bucket, blobName));
+    } catch (StorageException e) {
+      gcs_file_read_failed.labelValues(bucket).inc();
+      throw new IOException("Failed to read GCS file: " + gcsPath, e);
+    }
+    return new String(content, StandardCharsets.UTF_8);
   }
 
   private static String[] parseGcsPath(String gcsPath) {

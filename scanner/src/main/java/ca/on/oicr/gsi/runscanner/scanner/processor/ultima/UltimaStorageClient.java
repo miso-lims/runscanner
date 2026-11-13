@@ -10,4 +10,11 @@ import java.util.List;
 public interface UltimaStorageClient {
 
   List<UltimaStorageEntry> ls(String path) throws IOException;
+
+  /**
+   * Reads the full contents of a file as UTF-8 text.
+   *
+   * @param path the file's full path, as returned by {@link UltimaStorageEntry#getFullPath()}
+   */
+  String readFile(String path) throws IOException;
 }

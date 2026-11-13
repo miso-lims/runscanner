@@ -37,6 +37,11 @@ public class LocalStorageClient implements UltimaStorageClient {
     return entries;
   }
 
+  @Override
+  public String readFile(String path) throws IOException {
+    return Files.readString(Paths.get(path));
+  }
+
   private static class LocalStorageEntry implements UltimaStorageEntry {
     private final Path path;
     private final boolean directory;

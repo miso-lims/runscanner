@@ -32,6 +32,7 @@ import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
+import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,6 +46,7 @@ public class DefaultUltima extends RunProcessor {
       DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
   private static final String CONTROL_BARCODE = "TT";
   private static final String EM_SEQ_MERGE_CONTEXT_SUFFIX = "_mergeContext.csv";
+  private static final String CRAM_STATS_READ_COUNT_METRIC = "PF_Barcode_reads";
 
   private static final Logger log = LoggerFactory.getLogger(DefaultUltima.class);
   private final UltimaApiClient apiClient;
@@ -358,7 +360,10 @@ public class DefaultUltima extends RunProcessor {
     try {
       List<UltimaAnalysisUnit> cramUnits = new ArrayList<>();
       List<UltimaAnalysisUnit> emSeqUnits = new ArrayList<>();
-      buildAnalysisUnits(runFolder, cramUnits, emSeqUnits);
+      // CRAM stats CSVs are only available once the upload is complete, so don't read them before
+      // then
+      boolean readCramStats = uploadStatus == UltimaProcessStatus.COMPLETE;
+      buildAnalysisUnits(runFolder, cramUnits, emSeqUnits, readCramStats);
 
       UltimaWorkflowRun cramWorkflowRun = buildCramWorkflowRun(json, uploadStatus, cramUnits);
       pipelineRun.put(cramWorkflowRun);
@@ -422,7 +427,10 @@ public class DefaultUltima extends RunProcessor {
   }
 
   private void buildAnalysisUnits(
-      String runFolder, List<UltimaAnalysisUnit> cramUnits, List<UltimaAnalysisUnit> emSeqUnits)
+      String runFolder,
+      List<UltimaAnalysisUnit> cramUnits,
+      List<UltimaAnalysisUnit> emSeqUnits,
+      boolean readCramStats)
       throws IOException {
     for (UltimaStorageEntry folder : storageClient.ls(runFolder)) {
       if (!folder.isDirectory()) continue; // no run level files are expected
@@ -438,7 +446,8 @@ public class DefaultUltima extends RunProcessor {
       String library = libBarcode.substring(0, lastDash);
       String barcode = libBarcode.substring(lastDash + 1);
 
-      AnalysisFiles barcodeFiles = buildAnalysisFiles(storageClient.ls(folder.getFullPath()));
+      AnalysisFiles barcodeFiles =
+          buildAnalysisFiles(storageClient.ls(folder.getFullPath()), readCramStats);
 
       UltimaAnalysisUnit cramUnit = new UltimaAnalysisUnit();
       cramUnit.setBarcode(barcode);
@@ -461,14 +470,26 @@ public class DefaultUltima extends RunProcessor {
   private record AnalysisFiles(
       List<UltimaAnalysisFile> cramFiles, List<UltimaAnalysisFile> mergeContextFiles) {}
 
-  private static AnalysisFiles buildAnalysisFiles(List<UltimaStorageEntry> entries)
+  /**
+   * @param readCramStats whether to read each CRAM's stats CSV for its read count. If false, read
+   *     counts are left null.
+   */
+  private AnalysisFiles buildAnalysisFiles(List<UltimaStorageEntry> entries, boolean readCramStats)
       throws IOException {
     List<UltimaAnalysisFile> cramFiles = new ArrayList<>();
     List<UltimaAnalysisFile> mergeContextFiles = new ArrayList<>();
+    Map<String, UltimaStorageEntry> entriesByName = new HashMap<>();
+    for (UltimaStorageEntry entry : entries) {
+      if (!entry.isDirectory()) entriesByName.put(entry.getName(), entry);
+    }
     for (UltimaStorageEntry entry : entries) {
       if (entry.isDirectory()) continue;
       if (entry.getName().endsWith(".cram")) {
-        cramFiles.add(copyFields(new CramAnalysisFile(), entry));
+        CramAnalysisFile cramFile = (CramAnalysisFile) copyFields(new CramAnalysisFile(), entry);
+        if (readCramStats) {
+          cramFile.setReadCount(readCramReadCount(entry, entriesByName));
+        }
+        cramFiles.add(cramFile);
       } else if (entry.getName().endsWith(".crai")) {
         cramFiles.add(copyFields(new IndexAnalysisFile(), entry));
       } else if (entry.getName().endsWith(EM_SEQ_MERGE_CONTEXT_SUFFIX)) {
@@ -476,6 +497,40 @@ public class DefaultUltima extends RunProcessor {
       }
     }
     return new AnalysisFiles(cramFiles, mergeContextFiles);
+  }
+
+  // Get the read count for a CRAM from the stats CSV associated with it ({name}.cram -> {name}.csv)
+  private Long readCramReadCount(
+      UltimaStorageEntry cramEntry, Map<String, UltimaStorageEntry> entriesByName)
+      throws IOException {
+    String cramName = cramEntry.getName();
+    String statsName = FilenameUtils.removeExtension(cramName) + ".csv";
+    UltimaStorageEntry statsEntry = entriesByName.get(statsName);
+    if (statsEntry == null) {
+      log.debug("No {} for {}", statsName, cramEntry.getFullPath());
+      return null;
+    }
+
+    String content = storageClient.readFile(statsEntry.getFullPath());
+    for (String line : content.split("\\R")) {
+      String[] metricRowArray = line.split(",");
+      if (metricRowArray.length >= 2
+          && metricRowArray[0]
+              .trim()
+              .equals(CRAM_STATS_READ_COUNT_METRIC)) { // blank lines split to [""]
+        try {
+          return Long.parseLong(metricRowArray[1].trim());
+        } catch (NumberFormatException e) {
+          throw new IOException(
+              String.format(
+                  "Invalid %s value '%s' in %s",
+                  CRAM_STATS_READ_COUNT_METRIC, metricRowArray[1], statsEntry.getFullPath()),
+              e);
+        }
+      }
+    }
+    log.debug("No {} in {}", CRAM_STATS_READ_COUNT_METRIC, statsEntry.getFullPath());
+    return null;
   }
 
   private static UltimaAnalysisFile copyFields(UltimaAnalysisFile file, UltimaStorageEntry entry)

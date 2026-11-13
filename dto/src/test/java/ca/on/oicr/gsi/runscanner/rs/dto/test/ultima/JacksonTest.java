@@ -29,6 +29,8 @@ public class JacksonTest {
     AnalysisFile deserialized = mapper.readerFor(UltimaAnalysisFile.class).readValue(serialized);
     Assert.assertTrue(deserialized instanceof CramAnalysisFile);
     assertAnalysisFileEqual(file, deserialized);
+    Assert.assertEquals(Long.valueOf(1111L), ((CramAnalysisFile) deserialized).getReadCount());
+    Assert.assertEquals(file, deserialized);
   }
 
   @Test
@@ -78,6 +80,7 @@ public class JacksonTest {
 
   private CramAnalysisFile makeCramFile() {
     CramAnalysisFile file = new CramAnalysisFile();
+    file.setReadCount(1111L);
     file.setPath(URI.create("file:///test-bucket/run/barcode/sample.cram"));
     file.setCrc32cBase64Checksum("AAAAAA==");
     file.setSize(1000L);
