@@ -360,7 +360,10 @@ public class DefaultUltima extends RunProcessor {
     try {
       List<UltimaAnalysisUnit> cramUnits = new ArrayList<>();
       List<UltimaAnalysisUnit> emSeqUnits = new ArrayList<>();
-      buildAnalysisUnits(runFolder, cramUnits, emSeqUnits);
+      // CRAM stats CSVs are only available once the upload is complete, so don't read them before
+      // then
+      boolean readCramStats = uploadStatus == UltimaProcessStatus.COMPLETE;
+      buildAnalysisUnits(runFolder, cramUnits, emSeqUnits, readCramStats);
 
       UltimaWorkflowRun cramWorkflowRun = buildCramWorkflowRun(json, uploadStatus, cramUnits);
       pipelineRun.put(cramWorkflowRun);
@@ -395,10 +398,6 @@ public class DefaultUltima extends RunProcessor {
     return buildWorkflowRun("EmSeq", json, uploadStatus, emSeqUnits);
   }
 
-  /**
-   * @param outputsComplete whether all expected data for the analysis outputs has been found. If
-   *     false, the workflow run is never marked complete, even if the upload has finished.
-   */
   private UltimaWorkflowRun buildWorkflowRun(
       String workflowName,
       JsonNode json,
@@ -475,10 +474,10 @@ public class DefaultUltima extends RunProcessor {
    * @param readCramStats whether to read each CRAM's stats CSV for its read count. If false, read
    *     counts are left null.
    */
-  private static AnalysisFiles buildAnalysisFiles(List<UltimaStorageEntry> entries, boolean readCramStats)
+  private AnalysisFiles buildAnalysisFiles(List<UltimaStorageEntry> entries, boolean readCramStats)
       throws IOException {
-    List<AnalysisFile> cramFiles = new ArrayList<>();
-    List<AnalysisFile> mergeContextFiles = new ArrayList<>();
+    List<UltimaAnalysisFile> cramFiles = new ArrayList<>();
+    List<UltimaAnalysisFile> mergeContextFiles = new ArrayList<>();
     Map<String, UltimaStorageEntry> entriesByName = new HashMap<>();
     for (UltimaStorageEntry entry : entries) {
       if (!entry.isDirectory()) entriesByName.put(entry.getName(), entry);
@@ -500,8 +499,6 @@ public class DefaultUltima extends RunProcessor {
     return new AnalysisFiles(cramFiles, mergeContextFiles);
   }
 
-  private static UltimaAnalysisFile copyFields(UltimaAnalysisFile file, UltimaStorageEntry entry)
-      throws IOException {
   // Get the read count for a CRAM from the stats CSV associated with it ({name}.cram -> {name}.csv)
   private Long readCramReadCount(
       UltimaStorageEntry cramEntry, Map<String, UltimaStorageEntry> entriesByName)
@@ -536,7 +533,8 @@ public class DefaultUltima extends RunProcessor {
     return null;
   }
 
-  private static AnalysisFile copyFields(AnalysisFile file, UltimaStorageEntry entry) {
+  private static UltimaAnalysisFile copyFields(UltimaAnalysisFile file, UltimaStorageEntry entry)
+      throws IOException {
     file.setPath(entry.getPath());
     file.setCrc32cBase64Checksum(entry.getCrc32cBase64Checksum());
     file.setSize(entry.getSize());

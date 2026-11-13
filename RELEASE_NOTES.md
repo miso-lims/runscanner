@@ -14,7 +14,6 @@ Changes:
     is left null and does not hold the run back from completing.
 * Add Prometheus counter `runscanner_gcs_failed_file_read` for Ultima files in Google Cloud Storage that couldn't be read
 
-
 # 2.10.0
 
 Changes:
