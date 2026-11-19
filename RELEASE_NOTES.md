@@ -1,5 +1,9 @@
 # Unreleased
 
+
+
+# 2.11.0
+
 Changes:
 * Update clang to use version compatible with CI system (not locked version)
 * Set CMAKE minimum version to 3.5
